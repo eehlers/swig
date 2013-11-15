@@ -1,0 +1,4 @@
+_mymodule.so
+example_wrap.cxx
+example_wrap.o
+mymodule.pyc
