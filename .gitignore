@@ -4,6 +4,7 @@
 
 # Editor files and various other junk
 *.sw?
+!Lib/objecthandler/objecthandler.swg
 *.bak
 
 # Local PCRE
