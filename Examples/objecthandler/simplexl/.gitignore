@@ -1,5 +1,7 @@
-*.so
-mainSimple
-mainSimpleAddin
-mainSimpleAddinTest
-SimpleAddin.?pp
+SimpleAddinXL.cpp
+*.ncb
+Release
+Debug
+*.xll
+*.suo
+*.user
