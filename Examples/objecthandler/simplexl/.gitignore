@@ -5,3 +5,4 @@ Debug
 *.xll
 *.suo
 *.user
+!XLCALL32.LIB
