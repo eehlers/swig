@@ -28,6 +28,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "simpleAddinTest", "simple\s
 		{BDCFB44D-8FCB-4082-8443-745BA009E73C} = {BDCFB44D-8FCB-4082-8443-745BA009E73C}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "empty", "simplexl\empty.vcproj", "{C7AC3C53-14BF-40A9-A1C1-BB3CDFB29077}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "empty2", "simplexl\empty2.vcproj", "{787D7F33-3BC9-428B-9C5D-0A2A087BEA0C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -58,6 +62,14 @@ Global
 		{BCFD7218-1CAD-499C-BEB9-F84E98E26F83}.Debug|Win32.Build.0 = Debug|Win32
 		{BCFD7218-1CAD-499C-BEB9-F84E98E26F83}.Release|Win32.ActiveCfg = Release|Win32
 		{BCFD7218-1CAD-499C-BEB9-F84E98E26F83}.Release|Win32.Build.0 = Release|Win32
+		{C7AC3C53-14BF-40A9-A1C1-BB3CDFB29077}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C7AC3C53-14BF-40A9-A1C1-BB3CDFB29077}.Debug|Win32.Build.0 = Debug|Win32
+		{C7AC3C53-14BF-40A9-A1C1-BB3CDFB29077}.Release|Win32.ActiveCfg = Release|Win32
+		{C7AC3C53-14BF-40A9-A1C1-BB3CDFB29077}.Release|Win32.Build.0 = Release|Win32
+		{787D7F33-3BC9-428B-9C5D-0A2A087BEA0C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{787D7F33-3BC9-428B-9C5D-0A2A087BEA0C}.Debug|Win32.Build.0 = Debug|Win32
+		{787D7F33-3BC9-428B-9C5D-0A2A087BEA0C}.Release|Win32.ActiveCfg = Release|Win32
+		{787D7F33-3BC9-428B-9C5D-0A2A087BEA0C}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
