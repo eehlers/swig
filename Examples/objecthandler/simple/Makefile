@@ -19,6 +19,8 @@ mainSimpleAddinTest: mainSimpleAddinTest.cpp libSimpleAddinTest.so
 SimpleAddin.cpp: simple.i libsimple.so ../../../swig
 	$(SWIG) -prefix oh -c++ -objecthandler simple.i
 
+SimpleAddinXL.cpp: SimpleAddin.cpp
+
 libSimpleAddin.so: SimpleAddin.cpp SimpleAddin.hpp
 	g++ -shared -fPIC -g -Wall -o libSimpleAddin.so SimpleAddin.cpp -L. -lsimple -I$(IDIR)/include -L$(IDIR)/lib -lObjectHandler
 
@@ -26,5 +28,5 @@ mainSimpleAddin: mainSimpleAddin.cpp libSimpleAddin.so
 	g++ -fPIC mainSimpleAddin.cpp -o mainSimpleAddin -L. -lsimple -lSimpleAddin
 
 clean:
-	rm -f *.so mainSimple mainSimpleAddin mainSimpleAddinTest SimpleAddin.?pp
+	rm -f *.so mainSimple mainSimpleAddin mainSimpleAddinTest SimpleAddin.?pp SimpleAddinXL.cpp
 

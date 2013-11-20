@@ -2,5 +2,5 @@
 mainSimple
 mainSimpleAddin
 mainSimpleAddinTest
-SimpleAddin.?pp
+SimpleAddin*.?pp
 *.user

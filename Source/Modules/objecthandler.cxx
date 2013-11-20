@@ -12,6 +12,8 @@ protected:
    File *f_wrappers;
    File *f_init;
    File *f_test;
+   File *f_excel_wrappers;
+   File *f_excel_file;
    String *module;
     Wrapper *w;
     Wrapper *w2;
@@ -53,14 +55,8 @@ virtual int top(Node *n) {
    /* Get the module name */
    /*String **/module = Getattr(n,"name");
 
-   /* Get the output file name */
-   //String *outfile = Getattr(n,"outfile");
-   String *outfile = NewStringf("%s.cpp", module);
-
-    w = NewWrapper();
-    w2 = NewWrapper();
-
    /* Initialize I/O */
+   String *outfile = NewStringf("%s.cpp", module);
    f_begin = NewFile(outfile, "w", SWIG_output_files());
    if (!f_begin) {
       FileErrorDisplay(outfile);
@@ -76,6 +72,13 @@ virtual int top(Node *n) {
       FileErrorDisplay(testfile);
       SWIG_exit(EXIT_FAILURE);
    }
+   String *excelfile = NewStringf("%sXL.cpp", module);
+   f_excel_file = NewFile(excelfile, "w", SWIG_output_files());
+   if (!f_excel_file) {
+      FileErrorDisplay(excelfile);
+      SWIG_exit(EXIT_FAILURE);
+   }
+   f_excel_wrappers = NewString("");
 
    /* Register file targets with the SWIG file handler */
    Swig_register_filebyname("begin", f_begin);
@@ -84,6 +87,11 @@ virtual int top(Node *n) {
    Swig_register_filebyname("runtime", f_runtime);
    Swig_register_filebyname("init", f_init);
    Swig_register_filebyname("test", f_test);
+   Swig_register_filebyname("excel_wrappers", f_excel_wrappers);
+   Swig_register_filebyname("excel_file", f_excel_file);
+
+    w = NewWrapper();
+    w2 = NewWrapper();
 
    /* Output module initialization code */
    //Swig_banner(f_begin);
@@ -92,10 +100,50 @@ virtual int top(Node *n) {
     Printf(f_header,"#include \"%s.hpp\"\n", module);
     Printf(f_header,"#include <oh/objecthandler.hpp>\n");
     Printf(f_init, "static ObjectHandler::Repository repository;\n");
-Printf(w2->code,"namespace %s {\n", module);
+    Printf(w2->code,"namespace %s {\n", module);
+
+    Printf(f_excel_wrappers, "#include <windows.h>\n");
+    Printf(f_excel_wrappers, "#include \"xlcall.h\"\n");
+    Printf(f_excel_wrappers, "#include \"framewrk.hpp\"\n");
+    Printf(f_excel_wrappers, "#include <fstream>\n");
+    Printf(f_excel_wrappers, "using namespace std;\n");
+    Printf(f_excel_wrappers, "\n");
+    Printf(f_excel_wrappers, "#define g_rgWorksheetFuncsRows 2\n");
+    Printf(f_excel_wrappers, "#define g_rgWorksheetFuncsCols 10\n");
+    Printf(f_excel_wrappers, "\n");
+    Printf(f_excel_wrappers, "static LPSTR g_rgWorksheetFuncs[g_rgWorksheetFuncsRows][g_rgWorksheetFuncsCols] =\n");
+    Printf(f_excel_wrappers, "{\n");
+    Printf(f_excel_wrappers, "{\" Junk2\", \" EPP\", \" Junk2\", \" Arg 1, Arg 2\", \" 1\", \" Generic Add-In\", \" \", \" \", \" Returns the product of the numbers\", \" \"},\n");
+    Printf(f_excel_wrappers, "{\" Junk3\", \" A\"  , \" Junk3\", \" \",             \" 2\", \" Generic Add-In\", \" \", \" \", \" Returns the product of the numbers\", \" \"},\n");
+    Printf(f_excel_wrappers, "};\n");
+    Printf(f_excel_wrappers, "\n");
+    Printf(f_excel_wrappers, "__declspec(dllexport) int WINAPI xlAutoOpen(void) {\n");
+    Printf(f_excel_wrappers, "  static XLOPER xDLL;\n");
+    Printf(f_excel_wrappers, "  Excel(xlGetName, &xDLL, 0);\n");
+    Printf(f_excel_wrappers, "  for (int i=0; i<g_rgWorksheetFuncsRows; i++) {\n");
+    Printf(f_excel_wrappers, "		Excel(xlfRegister, 0, 1+ g_rgWorksheetFuncsCols,\n");
+    Printf(f_excel_wrappers, "	    	(LPXLOPER) &xDLL,\n");
+    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][0]),\n");
+    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][1]),\n");
+    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][2]),\n");
+    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][3]),\n");
+    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][4]),\n");
+    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][5]),\n");
+    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][6]),\n");
+    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][7]),\n");
+    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][8]),\n");
+    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][9]));\n");
+    Printf(f_excel_wrappers, "    }\n");
+    Printf(f_excel_wrappers, "  return 1;\n");
+    Printf(f_excel_wrappers, "}\n");
+    Printf(f_excel_wrappers, "\n");
+    Printf(f_excel_wrappers, "__declspec(dllexport) int WINAPI xlAutoClose(void){\n");
+    Printf(f_excel_wrappers, "    return 1;\n");
+    Printf(f_excel_wrappers, "}\n");
+
    /* Emit code for children */
    Language::top(n);
-Printf(w2->code,"}\n");
+   Printf(w2->code,"}\n");
 
     Wrapper_print(w, f_wrappers);
     DelWrapper(w);
@@ -108,6 +156,8 @@ Printf(w2->code,"}\n");
    Dump(f_wrappers, f_begin);
    Wrapper_pretty_print(f_init, f_begin);
 
+   Dump(f_excel_wrappers, f_excel_file);
+
    /* Cleanup files */
    Delete(f_runtime);
    Delete(f_header);
@@ -116,6 +166,8 @@ Printf(w2->code,"}\n");
    //Close(f_begin);
    Delete(f_begin);
    Delete(f_test);
+   Delete(f_excel_wrappers);
+   Delete(f_excel_file);
 
    return SWIG_OK;
   }
@@ -339,6 +391,16 @@ void printCtor(Node *n) {
     Append(w->code,"            objectID, object, false, valueObject);\n");
     Append(w->code,"    return returnValue;\n");
     Append(w->code,"}\n");
+
+    Printf(f_excel_wrappers, "char* __stdcall %s(\n", name);
+    Printf(f_excel_wrappers, "    char *ObjectId");
+    for (Parm *p = parms; p; p = nextSibling(p)) {
+        Append(buf,",\n");
+        String *name  = Getattr(p,"name");
+        Printf(buf, "OPER *%s", name);
+    }
+    Printf(f_excel_wrappers, ") {\n");
+    Printf(f_excel_wrappers, "}\n");
 }
 
 void printNode(Node *n) {
