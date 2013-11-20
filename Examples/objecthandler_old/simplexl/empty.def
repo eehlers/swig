@@ -1,0 +1,7 @@
+LIBRARY EMPTY
+
+EXPORTS
+	xlAutoOpen
+	xlAutoClose
+	Junk2
+	Junk3

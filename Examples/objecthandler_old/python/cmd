@@ -1,0 +1,2 @@
+export LD_LIBRARY_PATH=/home/erik/swig/install/lib
+/home/erik/swig/install/bin/swig -c++ -python -I/home/erik/swig/example example.i

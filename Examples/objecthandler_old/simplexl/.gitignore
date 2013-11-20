@@ -1,0 +1,8 @@
+SimpleAddinXL.cpp
+*.ncb
+Release
+Debug
+*.xll
+*.suo
+*.user
+!XLCALL32.LIB
