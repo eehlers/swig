@@ -2,9 +2,11 @@
 #ifndef simplelib_hpp
 #define simplelib_hpp
 
+#include <string>
+
 namespace SimpleLib {
 
-    void func();
+    std::string func();
 
     class Adder {
     private:

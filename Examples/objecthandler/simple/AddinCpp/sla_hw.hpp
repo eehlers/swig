@@ -5,7 +5,7 @@
 #include <string>
 
 namespace SimpleLibAddin {
-    void slFunc();
+    std::string slFunc();
     std::string slAdder(const std::string &objectID, int x);
     int slAdderAdd(const std::string &objectID, int y);
 }

@@ -7,8 +7,8 @@
 
 static ObjectHandler::Repository repository;
 
-void SimpleLibAddin::slFunc() {
-    SimpleLib::func();
+std::string SimpleLibAddin::slFunc() {
+    return SimpleLib::func();
 }
 
 std::string SimpleLibAddin::slAdder(const std::string &objectID, int x) {

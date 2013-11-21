@@ -2,8 +2,8 @@
 #include "simplelib.hpp"
 #include <iostream>
 
-void SimpleLib::func() {
-    std::cout << "f()" << std::endl;
+std::string SimpleLib::func() {
+    return "f()";
 }
 
 SimpleLib::Adder::Adder(int x) : x_(x) {}
