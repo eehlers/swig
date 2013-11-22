@@ -6,17 +6,23 @@ String *prefix = 0;
 class OBJECTHANDLER : public Language {
 protected:
    /* General DOH objects used for holding the strings */
-   File *f_begin;
+   File *b_cpp_cpp;
+   File *f_cpp_cpp;
+   File *b_cpp_hpp;
+   File *f_cpp_hpp;
+   File *b_obj_cpp;
+   File *f_obj_cpp;
+   File *b_obj_hpp;
+   File *f_obj_hpp;
+   File *b_val_cpp;
+   File *f_val_cpp;
+   File *b_val_hpp;
+   File *f_val_hpp;
+
    File *f_runtime;
-   File *f_header;
-   File *f_wrappers;
-   File *f_init;
-   File *f_test;
-   File *f_excel_wrappers;
-   File *f_excel_file;
+
    String *module;
-    Wrapper *w;
-    Wrapper *w2;
+
 public:
 
   virtual void main(int argc, char *argv[]) {
@@ -49,145 +55,189 @@ public:
     }
   }
 
+File *initFile(const char *filename) {
+   String *outfile = NewStringf(filename);
+   File *f = NewFile(outfile, "w", SWIG_output_files());
+   if (!f) {
+      FileErrorDisplay(outfile);
+      SWIG_exit(EXIT_FAILURE);
+   }
+    return f;
+}
+
 virtual int top(Node *n) {
     printf("Generating code.\n");
 
    /* Get the module name */
-   /*String **/module = Getattr(n,"name");
+   module = Getattr(n,"name");
 
    /* Initialize I/O */
-   String *outfile = NewStringf("%s.cpp", module);
-   f_begin = NewFile(outfile, "w", SWIG_output_files());
-   if (!f_begin) {
-      FileErrorDisplay(outfile);
-      SWIG_exit(EXIT_FAILURE);
-   }
-   f_runtime = NewString("");
-   f_init = NewString("");
-   f_header = NewString("");
-   f_wrappers = NewString("");
-   String *testfile = NewStringf("%s.hpp", module);
-   f_test = NewFile(testfile, "w", SWIG_output_files());
-   if (!f_test) {
-      FileErrorDisplay(testfile);
-      SWIG_exit(EXIT_FAILURE);
-   }
-   String *excelfile = NewStringf("%sXL.cpp", module);
-   f_excel_file = NewFile(excelfile, "w", SWIG_output_files());
-   if (!f_excel_file) {
-      FileErrorDisplay(excelfile);
-      SWIG_exit(EXIT_FAILURE);
-   }
-   f_excel_wrappers = NewString("");
+    f_cpp_cpp = initFile("AddinCpp/sla.cpp");
+    f_cpp_hpp = initFile("AddinCpp/sla.hpp");
+    f_obj_cpp = initFile("AddinObjects/obj.cpp");
+    f_obj_hpp = initFile("AddinObjects/obj.hpp");
+    f_val_cpp = initFile("ValueObjects/vo.cpp");
+    f_val_hpp = initFile("ValueObjects/vo.hpp");
+
+    b_cpp_cpp = NewString("");
+    b_cpp_hpp = NewString("");
+    b_obj_cpp = NewString("");
+    b_obj_hpp = NewString("");
+    b_val_cpp = NewString("");
+    b_val_hpp = NewString("");
+
+    f_runtime = NewString("");
 
    /* Register file targets with the SWIG file handler */
-   Swig_register_filebyname("begin", f_begin);
-   Swig_register_filebyname("header", f_header);
-   Swig_register_filebyname("wrapper", f_wrappers);
-   Swig_register_filebyname("runtime", f_runtime);
-   Swig_register_filebyname("init", f_init);
-   Swig_register_filebyname("test", f_test);
-   Swig_register_filebyname("excel_wrappers", f_excel_wrappers);
-   Swig_register_filebyname("excel_file", f_excel_file);
+   Swig_register_filebyname("b_cpp_cpp", b_cpp_cpp);
+   Swig_register_filebyname("f_cpp_cpp", f_cpp_cpp);
+   Swig_register_filebyname("b_cpp_hpp", b_cpp_hpp);
+   Swig_register_filebyname("f_cpp_hpp", f_cpp_hpp);
+   Swig_register_filebyname("b_obj_cpp", b_obj_cpp);
+   Swig_register_filebyname("f_obj_cpp", f_obj_cpp);
+   Swig_register_filebyname("b_obj_hpp", b_obj_hpp);
+   Swig_register_filebyname("f_obj_hpp", f_obj_hpp);
+   Swig_register_filebyname("b_val_cpp", b_val_cpp);
+   Swig_register_filebyname("f_val_cpp", f_val_cpp);
+   Swig_register_filebyname("b_val_hpp", b_val_hpp);
+   Swig_register_filebyname("f_val_hpp", f_val_hpp);
 
-    w = NewWrapper();
-    w2 = NewWrapper();
+    Swig_register_filebyname("runtime", f_runtime);
 
    /* Output module initialization code */
    //Swig_banner(f_begin);
 
-    Printf(f_test,"#include <string>\n");
-    Printf(f_header,"#include \"%s.hpp\"\n", module);
-    Printf(f_header,"#include <oh/objecthandler.hpp>\n");
-    Printf(f_init, "static ObjectHandler::Repository repository;\n");
-    Printf(w2->code,"namespace %s {\n", module);
+    Printf(b_val_hpp, "\n");
+    Printf(b_val_hpp, "#ifndef vo_hpp\n");
+    Printf(b_val_hpp, "#define vo_hpp\n");
+    Printf(b_val_hpp, "\n");
+    Printf(b_val_hpp, "#include <string>\n");
+    Printf(b_val_hpp, "#include <set>\n");
+    Printf(b_val_hpp, "#include <oh/valueobject.hpp>\n");
+    Printf(b_val_hpp, "\n");
+    Printf(b_val_hpp,"namespace %s {\n", module);
+    Printf(b_val_hpp, "\n");
+    Printf(b_val_hpp, "namespace ValueObjects {\n");
+    Printf(b_val_hpp, "\n");
 
-    Printf(f_excel_wrappers, "#include <windows.h>\n");
-    Printf(f_excel_wrappers, "#include \"xlcall.h\"\n");
-    Printf(f_excel_wrappers, "#include \"framewrk.hpp\"\n");
-    Printf(f_excel_wrappers, "#include <fstream>\n");
-    Printf(f_excel_wrappers, "using namespace std;\n");
-    Printf(f_excel_wrappers, "\n");
-    Printf(f_excel_wrappers, "#define g_rgWorksheetFuncsRows 2\n");
-    Printf(f_excel_wrappers, "#define g_rgWorksheetFuncsCols 10\n");
-    Printf(f_excel_wrappers, "\n");
-    Printf(f_excel_wrappers, "static LPSTR g_rgWorksheetFuncs[g_rgWorksheetFuncsRows][g_rgWorksheetFuncsCols] =\n");
-    Printf(f_excel_wrappers, "{\n");
-    Printf(f_excel_wrappers, "{\" Junk2\", \" EPP\", \" Junk2\", \" Arg 1, Arg 2\", \" 1\", \" Generic Add-In\", \" \", \" \", \" Returns the product of the numbers\", \" \"},\n");
-    Printf(f_excel_wrappers, "{\" Junk3\", \" A\"  , \" Junk3\", \" \",             \" 2\", \" Generic Add-In\", \" \", \" \", \" Returns the product of the numbers\", \" \"},\n");
-    Printf(f_excel_wrappers, "};\n");
-    Printf(f_excel_wrappers, "\n");
-    Printf(f_excel_wrappers, "__declspec(dllexport) int WINAPI xlAutoOpen(void) {\n");
-    Printf(f_excel_wrappers, "  static XLOPER xDLL;\n");
-    Printf(f_excel_wrappers, "  Excel(xlGetName, &xDLL, 0);\n");
-    Printf(f_excel_wrappers, "  for (int i=0; i<g_rgWorksheetFuncsRows; i++) {\n");
-    Printf(f_excel_wrappers, "		Excel(xlfRegister, 0, 1+ g_rgWorksheetFuncsCols,\n");
-    Printf(f_excel_wrappers, "	    	(LPXLOPER) &xDLL,\n");
-    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][0]),\n");
-    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][1]),\n");
-    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][2]),\n");
-    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][3]),\n");
-    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][4]),\n");
-    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][5]),\n");
-    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][6]),\n");
-    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][7]),\n");
-    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][8]),\n");
-    Printf(f_excel_wrappers, "	    	(LPXLOPER) TempStrNoSize(g_rgWorksheetFuncs[i][9]));\n");
-    Printf(f_excel_wrappers, "    }\n");
-    Printf(f_excel_wrappers, "  return 1;\n");
-    Printf(f_excel_wrappers, "}\n");
-    Printf(f_excel_wrappers, "\n");
-    Printf(f_excel_wrappers, "__declspec(dllexport) int WINAPI xlAutoClose(void){\n");
-    Printf(f_excel_wrappers, "    return 1;\n");
-    Printf(f_excel_wrappers, "}\n");
+    Printf(b_val_cpp, "\n");
+    Printf(b_val_cpp, "#include \"vo.hpp\"\n");
+    Printf(b_val_cpp, "#include <boost/algorithm/string/case_conv.hpp>\n");
+    Printf(b_val_cpp, "\n");
+    Printf(b_val_cpp,"namespace %s {\n", module);
+    Printf(b_val_cpp, "\n");
+    Printf(b_val_cpp, "namespace ValueObjects {\n");
+    Printf(b_val_cpp, "\n");
+
+    Printf(b_obj_hpp, "\n");
+    Printf(b_obj_hpp, "#ifndef obj_hpp\n");
+    Printf(b_obj_hpp, "#define obj_hpp\n");
+    Printf(b_obj_hpp, "\n");
+    Printf(b_obj_hpp, "#include <string>\n");
+    Printf(b_obj_hpp, "#include <oh/libraryobject.hpp>\n");
+    Printf(b_obj_hpp, "#include <oh/valueobject.hpp>\n");
+    Printf(b_obj_hpp, "#include <boost/shared_ptr.hpp>\n");
+    Printf(b_obj_hpp, "#include <Library/simplelib.hpp>\n");
+    Printf(b_obj_hpp, "\n");
+    Printf(b_obj_hpp,"namespace %s {\n", module);
+    Printf(b_obj_hpp, "\n");
+
+    Printf(b_obj_cpp, "\n");
+    Printf(b_obj_cpp, "#include \"obj.hpp\"\n");
+    Printf(b_obj_cpp, "\n");
+
+    Printf(b_cpp_hpp, "#ifndef sla_hpp\n");
+    Printf(b_cpp_hpp, "#define sla_hpp\n");
+    Printf(b_cpp_hpp, "\n");
+    Printf(b_cpp_hpp, "#include <string>\n");
+    Printf(b_cpp_hpp, "\n");
+    Printf(b_cpp_hpp, "namespace SimpleLibAddin {\n");
+    Printf(b_cpp_hpp, "\n");
+
+    Printf(b_cpp_cpp, "#include \"sla.hpp\"\n");
+    Printf(b_cpp_cpp, "#include \"ValueObjects/vo.hpp\"\n");
+    Printf(b_cpp_cpp, "#include \"AddinObjects/obj.hpp\"\n");
+    Printf(b_cpp_cpp, "#include <boost/shared_ptr.hpp>\n");
+    Printf(b_cpp_cpp, "#include <oh/repository.hpp>\n");
+    Printf(b_cpp_cpp, "\n");
+    Printf(b_cpp_cpp, "static ObjectHandler::Repository repository;\n");
 
    /* Emit code for children */
    Language::top(n);
-   Printf(w2->code,"}\n");
 
-    Wrapper_print(w, f_wrappers);
-    DelWrapper(w);
-    Wrapper_print(w2, f_test);
-    DelWrapper(w2);
+    Printf(b_val_hpp, "} // namespace SimpleAddin\n");
+    Printf(b_val_hpp, "\n");
+    Printf(b_val_hpp, "} // namespace ValueObjects\n");
+    Printf(b_val_hpp, "\n");
+    Printf(b_val_hpp, "#endif\n");
+    Printf(b_val_hpp, "\n");
+
+    Printf(b_val_cpp, "} // namespace SimpleAddin\n");
+    Printf(b_val_cpp, "\n");
+    Printf(b_val_cpp, "\n");
+    Printf(b_val_cpp, "} // namespace ValueObjects\n");
+    Printf(b_val_cpp, "\n");
+
+    Printf(b_obj_hpp, "} // namespace %s\n", module);
+    Printf(b_obj_hpp, "\n");
+    Printf(b_obj_hpp, "#endif\n");
+    Printf(b_obj_hpp, "\n");
+
+    Printf(b_cpp_hpp, "\n");
+    Printf(b_cpp_hpp, "} // namespace SimpleAddin\n");
+    Printf(b_cpp_hpp, "\n");
+    Printf(b_cpp_hpp, "#endif\n");
+    Printf(b_cpp_hpp, "\n");
 
    /* Write all to the file */
    //Dump(f_runtime, f_begin);
-   Dump(f_header, f_begin);
-   Dump(f_wrappers, f_begin);
-   Wrapper_pretty_print(f_init, f_begin);
-
-   Dump(f_excel_wrappers, f_excel_file);
+    Dump(b_cpp_cpp, f_cpp_cpp);
+    Dump(b_cpp_hpp, f_cpp_hpp);
+    Dump(b_obj_cpp, f_obj_cpp);
+    Dump(b_obj_hpp, f_obj_hpp);
+    Dump(b_val_cpp, f_val_cpp);
+    Dump(b_val_hpp, f_val_hpp);
+   //Wrapper_pretty_print(f_init, f_begin);
 
    /* Cleanup files */
-   Delete(f_runtime);
-   Delete(f_header);
-   Delete(f_wrappers);
-   Delete(f_init);
-   //Close(f_begin);
-   Delete(f_begin);
-   Delete(f_test);
-   Delete(f_excel_wrappers);
-   Delete(f_excel_file);
+    Delete(b_cpp_cpp);
+    Delete(b_cpp_hpp);
+    Delete(b_obj_cpp);
+    Delete(b_obj_hpp);
+    Delete(b_val_cpp);
+    Delete(b_val_hpp);
 
+   //Close(f_begin);
+    Delete(f_cpp_cpp);
+    Delete(f_cpp_hpp);
+    Delete(f_obj_cpp);
+    Delete(f_obj_hpp);
+    Delete(f_val_cpp);
+    Delete(f_val_hpp);
+
+    Delete(f_runtime);
    return SWIG_OK;
   }
 
-String *printList2(Node *n) {
-  String   *s = NewString("");
-    //bool first = true;
-    while (n) {
-        Append(s, Getattr(n,"type"));
-        Append(s, " ");
-        Append(s, Getattr(n,"name"));
-        Append(s, " ");
-        n = Getattr(n,"nextSibling");
-    }
-    return s;
-}
+//String *printList2(Node *n) {
+//  String   *s = NewString("");
+//    while (n) {
+//        Append(s, Getattr(n,"type"));
+//        Append(s, " ");
+//        Append(s, Getattr(n,"name"));
+//        Append(s, " ");
+//        n = Getattr(n,"nextSibling");
+//    }
+//    return s;
+//}
 
 // "double d, string s"
-void emitParmList(ParmList *parms, String *buf, bool first = true) {
+void emitParmList(ParmList *parms, File *buf, bool first = true, bool skipFirst = false) {
     for (Parm *p = parms; p; p = nextSibling(p)) {
+        if (skipFirst) {
+            skipFirst = false;
+            continue;
+        }
         if (first) {
             first = false;
         } else {
@@ -203,8 +253,12 @@ void emitParmList(ParmList *parms, String *buf, bool first = true) {
 }
 
 // "d, s"
-void emitParmList2(ParmList *parms, String *buf, bool first = true) {
+void emitParmList2(ParmList *parms, File *buf, bool first = true, bool skipFirst = false) {
     for (Parm *p = parms; p; p = nextSibling(p)) {
+        if (skipFirst) {
+            skipFirst = false;
+            continue;
+        }
         if (first) {
             first = false;
         } else {
@@ -216,53 +270,59 @@ void emitParmList2(ParmList *parms, String *buf, bool first = true) {
 }
 
 void printFunc(Node *n) {
-    Append(w->code,"//****FUNC*****\n");
+    Printf(b_cpp_cpp,"//****FUNC*****\n");
     String   *name   = Getattr(n,"name");
     SwigType *type   = Getattr(n,"type");
     ParmList *parms  = Getattr(n,"parms");
-    //String   *parmstr= ParmList_str_defaultargs(parms); // to string
     String   *symname   = Getattr(n,"sym:name");
-    //String   *func   = SwigType_str(type, NewStringf("%s(%s)", name, parmstr));
-    String   *action = Getattr(n,"wrap:action");
+    //String   *action = Getattr(n,"wrap:action");
 
-    Printf(w2->code,"    %s %s(", type, symname);
-    emitParmList(parms, w2->code);
-    Append(w2->code,");\n");
+    Printf(b_cpp_hpp,"    %s %s(", type, symname);
+    emitParmList(parms, b_cpp_hpp);
+    Printf(b_cpp_hpp,");\n");
 
-    Printf(w->code,"%s %s::%s(", type, module, symname);
-    emitParmList(parms, w->code);
-    Append(w->code,") {\n");
+    Printf(b_cpp_cpp,"%s %s::%s(", type, module, symname);
+    emitParmList(parms, b_cpp_cpp);
+    Printf(b_cpp_cpp,") {\n");
 
-    Printf(w->code,"    return %s(", name);
-    emitParmList2(parms, w->code);
-    Append(w->code,");\n");
-    Append(w->code,"}\n");
+    Printf(b_cpp_cpp,"    return %s(", name);
+    emitParmList2(parms, b_cpp_cpp);
+    Printf(b_cpp_cpp,");\n");
+    Printf(b_cpp_cpp,"}\n");
 }
 
 void printMemb(Node *n) {
-    Append(w->code,"//****MEMB*****\n");
+    Printf(b_cpp_cpp,"//****MEMB*****\n");
     String   *name   = Getattr(n,"name");
     SwigType *type   = Getattr(n,"type");
-    //ParmList *parms  = Getattr(n,"parms");
-    //String   *parmstr= ParmList_str_defaultargs(parms); // to string
-    //String   *func   = SwigType_str(type, NewStringf("%s(%s)", name, parmstr));
     Node *p = Getattr(n,"parentNode");
     String   *cls   = Getattr(p,"sym:name");
     String   *pname   = Getattr(p,"name");
+    ParmList *parms  = Getattr(n,"parms");
 
     while (SwigType *t = SwigType_typedef_resolve(type)) {
         type = t;
     }
-    Printf(w2->code,"    %s %s%s%s(const std::string &objectID);\n", type, prefix, cls, name);
+    Printf(b_cpp_hpp,"    %s %s%s%s(const std::string &objectID", type, prefix, cls, name);
+    emitParmList(parms, b_cpp_hpp, false, true);
+    Printf(b_cpp_hpp,");\n");
 
-    Printf(w->code,"%s %s::%s%s%s(const std::string &objectID) {\n", type, module, prefix, cls, name);
-    Printf(w->code,"    OH_GET_REFERENCE(x, objectID, %s::%s, %s);\n", module, cls, pname);
-    Printf(w->code,"    return x->%s();\n", name);
-    Append(w->code,"}\n");
+
+    Printf(b_cpp_cpp,"%s %s::%s%s%s(const std::string &objectID\n", type, module, prefix, cls, name);
+    emitParmList(parms, b_cpp_cpp, false, true);
+    Printf(b_cpp_cpp,") {\n");
+
+    Printf(b_cpp_cpp,"    OH_GET_REFERENCE(x, objectID, %s::%s, %s);\n", module, cls, pname);
+
+    Printf(b_cpp_cpp,"    return x->%s(", name);
+    emitParmList2(parms, b_cpp_cpp, true, true);
+    Printf(b_cpp_cpp,");\n", name);
+
+    Printf(b_cpp_cpp,"}\n");
 }
 
 void printCtor(Node *n) {
-    Append(w->code,"//****CTOR*****\n");
+    Printf(b_cpp_cpp,"//****CTOR*****\n");
     String   *name   = Getattr(n,"name");
     SwigType *type   = Getattr(n,"type");
     ParmList *parms  = Getattr(n,"parms");
@@ -272,166 +332,148 @@ void printCtor(Node *n) {
     while (SwigType *t = SwigType_typedef_resolve(type)) {
         type = t;
     }
-    Printf(w2->code,"    std::string %s%s(const std::string &objectID", prefix, name);
-    emitParmList(parms, w2->code, false);
-    Append(w2->code,");\n");
 
-    Printf(w->def,"namespace %s {\n", module);
-    Append(w->def,"\n");
-    Printf(w->def,"    class %s : \n", name);
-    Printf(w->def,"        public ObjectHandler::LibraryObject<%s> {\n", pname);
-    Append(w->def,"    public:\n");
-    Printf(w->def,"        %s(\n", name);
-    Append(w->def,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties\n");
-    emitParmList(parms, w->def, false);
-    Append(w->def,"            ,bool permanent)\n");
-    Printf(w->def,"        : ObjectHandler::LibraryObject<%s>(properties, permanent) {\n", pname);
-    Printf(w->def,"            libraryObject_ = boost::shared_ptr<%s>(new %s(", pname, pname);
-    emitParmList2(parms, w->def);
-    Append(w->def,"));\n");
-    Append(w->def,"        }\n");
-    Append(w->def,"    };\n");
-    Append(w->def,"\n");
-    Append(w->def,"    namespace ValueObjects {\n");
-    Append(w->def,"\n");
-    Printf(w->def,"        class %s%s : public ObjectHandler::ValueObject {\n", prefix, name);
-    Append(w->def,"            friend class boost::serialization::access;\n");
-    Append(w->def,"        public:\n");
-    Printf(w->def,"            %s%s() {}\n", prefix, name);
-    Printf(w->def,"            %s%s(\n", prefix, name);
-    Append(w->def,"                const std::string& ObjectId,\n");
-    Append(w->def,"                bool Permanent);\n");
-    Append(w->def,"\n");
-    Append(w->def,"            const std::set<std::string>& getSystemPropertyNames() const;\n");
-    Append(w->def,"            std::vector<std::string> getPropertyNamesVector() const;\n");
-    Append(w->def,"            ObjectHandler::property_t getSystemProperty(const std::string&) const;\n");
-    Append(w->def,"            void setSystemProperty(const std::string& name, const ObjectHandler::property_t& value);\n");
-    Append(w->def,"\n");
-    Append(w->def,"        protected:\n");
-    Append(w->def,"            static const char* mPropertyNames[];\n");
-    Append(w->def,"            static std::set<std::string> mSystemPropertyNames;\n");
-    Append(w->def,"            bool Permanent_;\n");
-    Append(w->def,"\n");
-    Append(w->def,"            template<class Archive>\n");
-    Append(w->def,"            void serialize(Archive& ar, const unsigned int) {\n");
-    Printf(w->def,"            boost::serialization::void_cast_register<%s%s, ObjectHandler::ValueObject>(this, this);\n", prefix, name);
-    Append(w->def,"                ar  & boost::serialization::make_nvp(\"ObjectId\", objectId_)\n");
-    Append(w->def,"                    & boost::serialization::make_nvp(\"Permanent\", Permanent_)\n");
-    Append(w->def,"                    & boost::serialization::make_nvp(\"UserProperties\", userProperties);\n");
-    Append(w->def,"            }\n");
-    Append(w->def,"        };\n");
-    Append(w->def,"\n");
-    Printf(w->def,"        const char* %s%s::mPropertyNames[] = {\n", prefix, name);
-    Append(w->def,"            \"Permanent\"\n");
-    Append(w->def,"        };\n");
-    Append(w->def,"\n");
-    Printf(w->def,"        std::set<std::string> %s%s::mSystemPropertyNames(\n", prefix, name);
-    Append(w->def,"            mPropertyNames, mPropertyNames + sizeof(mPropertyNames) / sizeof(const char*));\n");
-    Append(w->def,"\n");
-    Printf(w->def,"        const std::set<std::string>& %s%s::getSystemPropertyNames() const {\n", prefix, name);
-    Append(w->def,"            return mSystemPropertyNames;\n");
-    Append(w->def,"        }\n");
-    Append(w->def,"\n");
-    Printf(w->def,"        std::vector<std::string> %s%s::getPropertyNamesVector() const {\n", prefix, name);
-    Append(w->def,"            std::vector<std::string> ret(\n");
-    Append(w->def,"                mPropertyNames, mPropertyNames + sizeof(mPropertyNames) / sizeof(const char*));\n");
-    Append(w->def,"            for (std::map<std::string, ObjectHandler::property_t>::const_iterator i = userProperties.begin();\n");
-    Append(w->def,"                i != userProperties.end(); ++i)\n");
-    Append(w->def,"                ret.push_back(i->first);\n");
-    Append(w->def,"            return ret;\n");
-    Append(w->def,"        }\n");
-    Append(w->def,"\n");
-    Printf(w->def,"        ObjectHandler::property_t %s%s::getSystemProperty(const std::string& name) const {\n", prefix, name);
-    Append(w->def,"            std::string nameUpper = boost::algorithm::to_upper_copy(name);\n");
-    Append(w->def,"            if(strcmp(nameUpper.c_str(), \"OBJECTID\")==0)\n");
-    Append(w->def,"                return objectId_;\n");
-    Append(w->def,"            else if(strcmp(nameUpper.c_str(), \"CLASSNAME\")==0)\n");
-    Append(w->def,"                return className_;\n");
-    Append(w->def,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
-    Append(w->def,"                return Permanent_;\n");
-    Append(w->def,"            else\n");
-    Append(w->def,"                OH_FAIL(\"Error: attempt to retrieve non-existent Property: '\" + name + \"'\");\n");
-    Append(w->def,"        }\n");
-    Append(w->def,"\n");
-    Printf(w->def,"        void %s%s::setSystemProperty(const std::string& name, const ObjectHandler::property_t& value) {\n", prefix, name);
-    Append(w->def,"            std::string nameUpper = boost::algorithm::to_upper_copy(name);\n");
-    Append(w->def,"            if(strcmp(nameUpper.c_str(), \"OBJECTID\")==0)\n");
-    Append(w->def,"                objectId_ = boost::get<std::string>(value);\n");
-    Append(w->def,"            else if(strcmp(nameUpper.c_str(), \"CLASSNAME\")==0)\n");
-    Append(w->def,"                className_ = boost::get<std::string>(value);\n");
-    Append(w->def,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
-    Append(w->def,"                Permanent_ = ObjectHandler::convert2<bool>(value);\n");
-    Append(w->def,"            else\n");
-    Append(w->def,"                OH_FAIL(\"Error: attempt to set non-existent Property: '\" + name + \"'\");\n");
-    Append(w->def,"        }\n");
-    Append(w->def,"\n");
-    Printf(w->def,"        %s%s::%s%s(\n", prefix, name, prefix, name);
-    Append(w->def,"                const std::string& ObjectId,\n");
-    Append(w->def,"                bool Permanent) :\n");
-    Printf(w->def,"            ObjectHandler::ValueObject(ObjectId, \"%s%s\", Permanent),\n", prefix, name);
-    Append(w->def,"            Permanent_(Permanent) {\n");
-    Append(w->def,"        }\n");
-    Append(w->def,"    }\n");
-    Append(w->def,"}\n");
+    Printf(b_val_hpp,"        class %s%s : public ObjectHandler::ValueObject {\n", prefix, name);
+    Printf(b_val_hpp,"            friend class boost::serialization::access;\n");
+    Printf(b_val_hpp,"        public:\n");
+    Printf(b_val_hpp,"            %s%s() {}\n", prefix, name);
+    Printf(b_val_hpp,"            %s%s(\n", prefix, name);
+    Printf(b_val_hpp,"                const std::string& ObjectId,\n");
+    Printf(b_val_hpp,"                bool Permanent);\n");
+    Printf(b_val_hpp,"\n");
+    Printf(b_val_hpp,"            const std::set<std::string>& getSystemPropertyNames() const;\n");
+    Printf(b_val_hpp,"            std::vector<std::string> getPropertyNamesVector() const;\n");
+    Printf(b_val_hpp,"            ObjectHandler::property_t getSystemProperty(const std::string&) const;\n");
+    Printf(b_val_hpp,"            void setSystemProperty(const std::string& name, const ObjectHandler::property_t& value);\n");
+    Printf(b_val_hpp,"\n");
+    Printf(b_val_hpp,"        protected:\n");
+    Printf(b_val_hpp,"            static const char* mPropertyNames[];\n");
+    Printf(b_val_hpp,"            static std::set<std::string> mSystemPropertyNames;\n");
+    Printf(b_val_hpp,"            bool Permanent_;\n");
+    Printf(b_val_hpp,"\n");
+    Printf(b_val_hpp,"            template<class Archive>\n");
+    Printf(b_val_hpp,"            void serialize(Archive& ar, const unsigned int) {\n");
+    Printf(b_val_hpp,"            boost::serialization::void_cast_register<%s%s, ObjectHandler::ValueObject>(this, this);\n", prefix, name);
+    Printf(b_val_hpp,"                ar  & boost::serialization::make_nvp(\"ObjectId\", objectId_)\n");
+    Printf(b_val_hpp,"                    & boost::serialization::make_nvp(\"Permanent\", Permanent_)\n");
+    Printf(b_val_hpp,"                    & boost::serialization::make_nvp(\"UserProperties\", userProperties);\n");
+    Printf(b_val_hpp,"            }\n");
+    Printf(b_val_hpp,"        };\n");
+    Printf(b_val_hpp,"\n");
 
-    Printf(w->code,"std::string %s::%s%s(const std::string &objectID", module, prefix, name);
-    emitParmList(parms, w->code, false);
-    Append(w->code,") {\n");
+    Printf(b_val_cpp,"        const char* %s%s::mPropertyNames[] = {\n", prefix, name);
+    Printf(b_val_cpp,"            \"Permanent\"\n");
+    Printf(b_val_cpp,"        };\n");
+    Printf(b_val_cpp,"\n");
+    Printf(b_val_cpp,"        std::set<std::string> %s%s::mSystemPropertyNames(\n", prefix, name);
+    Printf(b_val_cpp,"            mPropertyNames, mPropertyNames + sizeof(mPropertyNames) / sizeof(const char*));\n");
+    Printf(b_val_cpp,"\n");
+    Printf(b_val_cpp,"        const std::set<std::string>& %s%s::getSystemPropertyNames() const {\n", prefix, name);
+    Printf(b_val_cpp,"            return mSystemPropertyNames;\n");
+    Printf(b_val_cpp,"        }\n");
+    Printf(b_val_cpp,"\n");
+    Printf(b_val_cpp,"        std::vector<std::string> %s%s::getPropertyNamesVector() const {\n", prefix, name);
+    Printf(b_val_cpp,"            std::vector<std::string> ret(\n");
+    Printf(b_val_cpp,"                mPropertyNames, mPropertyNames + sizeof(mPropertyNames) / sizeof(const char*));\n");
+    Printf(b_val_cpp,"            for (std::map<std::string, ObjectHandler::property_t>::const_iterator i = userProperties.begin();\n");
+    Printf(b_val_cpp,"                i != userProperties.end(); ++i)\n");
+    Printf(b_val_cpp,"                ret.push_back(i->first);\n");
+    Printf(b_val_cpp,"            return ret;\n");
+    Printf(b_val_cpp,"        }\n");
+    Printf(b_val_cpp,"\n");
+    Printf(b_val_cpp,"        ObjectHandler::property_t %s%s::getSystemProperty(const std::string& name) const {\n", prefix, name);
+    Printf(b_val_cpp,"            std::string nameUpper = boost::algorithm::to_upper_copy(name);\n");
+    Printf(b_val_cpp,"            if(strcmp(nameUpper.c_str(), \"OBJECTID\")==0)\n");
+    Printf(b_val_cpp,"                return objectId_;\n");
+    Printf(b_val_cpp,"            else if(strcmp(nameUpper.c_str(), \"CLASSNAME\")==0)\n");
+    Printf(b_val_cpp,"                return className_;\n");
+    Printf(b_val_cpp,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
+    Printf(b_val_cpp,"                return Permanent_;\n");
+    Printf(b_val_cpp,"            else\n");
+    Printf(b_val_cpp,"                OH_FAIL(\"Error: attempt to retrieve non-existent Property: '\" + name + \"'\");\n");
+    Printf(b_val_cpp,"        }\n");
+    Printf(b_val_cpp,"\n");
+    Printf(b_val_cpp,"        void %s%s::setSystemProperty(const std::string& name, const ObjectHandler::property_t& value) {\n", prefix, name);
+    Printf(b_val_cpp,"            std::string nameUpper = boost::algorithm::to_upper_copy(name);\n");
+    Printf(b_val_cpp,"            if(strcmp(nameUpper.c_str(), \"OBJECTID\")==0)\n");
+    Printf(b_val_cpp,"                objectId_ = boost::get<std::string>(value);\n");
+    Printf(b_val_cpp,"            else if(strcmp(nameUpper.c_str(), \"CLASSNAME\")==0)\n");
+    Printf(b_val_cpp,"                className_ = boost::get<std::string>(value);\n");
+    Printf(b_val_cpp,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
+    Printf(b_val_cpp,"                Permanent_ = ObjectHandler::convert2<bool>(value);\n");
+    Printf(b_val_cpp,"            else\n");
+    Printf(b_val_cpp,"                OH_FAIL(\"Error: attempt to set non-existent Property: '\" + name + \"'\");\n");
+    Printf(b_val_cpp,"        }\n");
+    Printf(b_val_cpp,"\n");
+    Printf(b_val_cpp,"        %s%s::%s%s(\n", prefix, name, prefix, name);
+    Printf(b_val_cpp,"                const std::string& ObjectId,\n");
+    Printf(b_val_cpp,"                bool Permanent) :\n");
+    Printf(b_val_cpp,"            ObjectHandler::ValueObject(ObjectId, \"%s%s\", Permanent),\n", prefix, name);
+    Printf(b_val_cpp,"            Permanent_(Permanent) {\n");
+    Printf(b_val_cpp,"        }\n");
 
-    Append(w->code,"    boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
-    Printf(w->code,"        new %s::ValueObjects::%s%s(\n", module, prefix, name);
-    Append(w->code,"            objectID, false));\n");
-    Append(w->code,"    boost::shared_ptr<ObjectHandler::Object> object(\n");
-    Printf(w->code,"        new %s::%s(\n", module, name);
-    Append(w->code,"            valueObject");
-    emitParmList2(parms, w->code, false);
-    Append(w->code,", false));\n");
-    Append(w->code,"    std::string returnValue =\n");
-    Append(w->code,"        ObjectHandler::Repository::instance().storeObject(\n");
-    Append(w->code,"            objectID, object, false, valueObject);\n");
-    Append(w->code,"    return returnValue;\n");
-    Append(w->code,"}\n");
+    Printf(b_obj_hpp,"\n");
+    Printf(b_obj_hpp,"    class %s : \n", name);
+    Printf(b_obj_hpp,"        public ObjectHandler::LibraryObject<%s> {\n", pname);
+    Printf(b_obj_hpp,"    public:\n");
+    Printf(b_obj_hpp,"        %s(\n", name);
+    Printf(b_obj_hpp,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties\n");
+    emitParmList(parms, b_obj_hpp, false);
+    Printf(b_obj_hpp,"            ,bool permanent)\n");
+    Printf(b_obj_hpp,"        : ObjectHandler::LibraryObject<%s>(properties, permanent) {\n", pname);
+    Printf(b_obj_hpp,"            libraryObject_ = boost::shared_ptr<%s>(new %s(", pname, pname);
+    emitParmList2(parms, b_obj_hpp);
+    Printf(b_obj_hpp,"));\n");
+    Printf(b_obj_hpp,"        }\n");
+    Printf(b_obj_hpp,"    };\n");
+    Printf(b_obj_hpp,"\n");
 
-    Printf(f_excel_wrappers, "char* __stdcall %s(\n", name);
-    Printf(f_excel_wrappers, "    char *ObjectId");
-    for (Parm *p = parms; p; p = nextSibling(p)) {
-        Append(buf,",\n");
-        String *name  = Getattr(p,"name");
-        Printf(buf, "OPER *%s", name);
-    }
-    Printf(f_excel_wrappers, ") {\n");
-    Printf(f_excel_wrappers, "}\n");
+    Printf(b_cpp_hpp,"    std::string %s%s(const std::string &objectID", prefix, name);
+    emitParmList(parms, b_cpp_hpp, false);
+    Printf(b_cpp_hpp,");\n");
+
+    Printf(b_cpp_cpp,"std::string %s::%s%s(const std::string &objectID", module, prefix, name);
+    emitParmList(parms, b_cpp_cpp, false);
+    Printf(b_cpp_cpp,") {\n");
+    Printf(b_cpp_cpp,"    boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
+    Printf(b_cpp_cpp,"        new %s::ValueObjects::%s%s(\n", module, prefix, name);
+    Printf(b_cpp_cpp,"            objectID, false));\n");
+    Printf(b_cpp_cpp,"    boost::shared_ptr<ObjectHandler::Object> object(\n");
+    Printf(b_cpp_cpp,"        new %s::%s(\n", module, name);
+    Printf(b_cpp_cpp,"            valueObject");
+    emitParmList2(parms, b_cpp_cpp, false);
+    Printf(b_cpp_cpp,", false));\n");
+    Printf(b_cpp_cpp,"    std::string returnValue =\n");
+    Printf(b_cpp_cpp,"        ObjectHandler::Repository::instance().storeObject(\n");
+    Printf(b_cpp_cpp,"            objectID, object, false, valueObject);\n");
+    Printf(b_cpp_cpp,"    return returnValue;\n");
+    Printf(b_cpp_cpp,"}\n");
 }
 
-void printNode(Node *n) {
-    List *list1 = Keys(n);
-    for(int i=0; i<Len(list1); ++i) {
-        String *key = Getitem(list1, i);
-        Printf(f_wrappers,"/* %d %s %s */\n", i, key, Getattr(n, key));
-    }
-}
-
-void printList(Node *n) {
-    while (n) {
-        printNode(n);
-        n = Getattr(n,"nextSibling");
-    }
-}
+//void printNode(Node *n) {
+//    List *list1 = Keys(n);
+//    for(int i=0; i<Len(list1); ++i) {
+//        String *key = Getitem(list1, i);
+//        Printf(f_wrappers,"/* %d %s %s */\n", i, key, Getattr(n, key));
+//    }
+//}
+//
+//void printList(Node *n) {
+//    while (n) {
+//        printNode(n);
+//        n = Getattr(n,"nextSibling");
+//    }
+//}
 
 int functionWrapper(Node *n) {
-  String   *name   = Getattr(n,"name");
+    //String   *name   = Getattr(n,"name");
 
-    Printf(f_runtime,"//f_runtime name=%s\n", name);
-    Printf(f_header,"//f_header name=%s\n", name);
-    Printf(f_init,"//f_init name=%s\n", name);
-    Printf(f_begin,"//f_begin name=%s\n", name);
+    //Printf(f_wrappers,"//module=%s\n", module);
+    //Printf(f_wrappers,"//XXX***functionWrapper*******\n");
+    //printNode(n);
+    //printList(Getattr(n, "parms"));
 
-    Printf(f_wrappers,"//module=%s\n", module);
-    Printf(f_wrappers,"//XXX***functionWrapper*******\n");
-    printNode(n);
-    printList(Getattr(n, "parms"));
-
-    Printf(f_wrappers,"//*************\n");
+    //Printf(f_wrappers,"//*************\n");
 
   String   *nodeType   = Getattr(n,"nodeType");
     if (0 == Strcmp("cdecl", nodeType)) {

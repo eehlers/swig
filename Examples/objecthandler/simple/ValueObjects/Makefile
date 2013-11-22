@@ -1,12 +1,17 @@
 
-LIB = ../lib/libValueObjectsHw.so
 IDIR = ../../../../../install/include
 
-all: $(LIB)
+LIBHW = ../lib/libValueObjectsHw.so
+LIB = ../lib/libValueObjects.so
 
-$(LIB): vo_hw.cpp vo_hw.hpp
-	g++ -shared -fPIC -g -Wall -o $(LIB) -I$(IDIR) vo_hw.cpp
+all: $(LIBHW) $(LIB)
+
+$(LIBHW): vo_hw.cpp vo_hw.hpp
+	g++ -shared -fPIC -g -Wall -o $(LIBHW) -I$(IDIR) vo_hw.cpp
+
+$(LIB): vo.cpp vo.hpp
+	g++ -shared -fPIC -g -Wall -o $(LIB) -I$(IDIR) vo.cpp
 
 clean:
-	rm -f $(LIB)
+	rm -f $(LIBHW) $(LIB)
 

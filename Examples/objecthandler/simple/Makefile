@@ -1,5 +1,10 @@
 
-all: Library ValueObjects AddinObjects AddinCpp Main
+SWIG = ../../../preinst-swig
+
+all: SimpleAddin.cpp Library ValueObjects AddinObjects AddinCpp Main
+
+SimpleAddin.cpp: simple.i ../../../swig
+	$(SWIG) -prefix sl -c++ -objecthandler simple.i
 
 .PHONY: Library
 Library:

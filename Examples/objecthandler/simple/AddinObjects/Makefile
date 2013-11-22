@@ -1,12 +1,17 @@
 
-LIB = ../lib/libAddinObjectsHw.so
 IDIR = ../../../../../install/include
 
-all: $(LIB)
+LIBHW = ../lib/libAddinObjectsHw.so
+LIB = ../lib/libAddinObjects.so
 
-$(LIB): obj_hw.cpp obj_hw.hpp
-	g++ -shared -fPIC -g -Wall -o $(LIB) -I. -I.. -I$(IDIR) obj_hw.cpp
+all: $(LIBHW) $(LIB)
+
+$(LIBHW): obj_hw.cpp obj_hw.hpp
+	g++ -shared -fPIC -g -Wall -o $(LIBHW) -I. -I.. -I$(IDIR) obj_hw.cpp
+
+$(LIB): obj.cpp obj_hw.hpp
+	g++ -shared -fPIC -g -Wall -o $(LIB) -I. -I.. -I$(IDIR) obj.cpp
 
 clean:
-	rm -f $(LIB)
+	rm -f $(LIBHW) $(LIB)
 

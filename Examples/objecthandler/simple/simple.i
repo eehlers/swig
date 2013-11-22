@@ -1,14 +1,10 @@
 
-%module SimpleAddin
-%{
-//wazoo
-#include "simple.hpp"
-%}
-namespace Simple {
-void f2();
-    class Foo {
-        public:
-            void f();
-            Foo();
+%module SimpleLibAddin
+namespace SimpleLib {
+    std::string func();
+    class Adder {
+    public:
+        Adder(int x);
+        int add(int y);
     };
 }

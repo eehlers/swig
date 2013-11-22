@@ -1,17 +1,17 @@
 
 IDIR = ../../../../../install
 
-all: mainSimpleLib mainSimpleAddinHw
+all: mainSimpleLib mainSimpleAddinHw mainSimpleAddin
 
 mainSimpleLib: mainSimpleLib.cpp ../lib/libSimpleLib.so
 	g++ -g -Wall -o mainSimpleLib mainSimpleLib.cpp -I.. -L../lib -lSimpleLib
 
-mainSimpleAddinHw: mainSimpleAddinHw.cpp ../lib/libAddinObjects.so
-	g++ -fPIC mainSimpleAddinHw.cpp -o mainSimpleAddinHw -I.. -L../lib -lAddinCpp -L$(IDIR)/lib -lObjectHandler -lboost_regex -lboost_serialization -lboost_system -lboost_filesystem
+mainSimpleAddinHw: mainSimpleAddinHw.cpp ../lib/libAddinObjectsHw.so
+	g++ -fPIC mainSimpleAddinHw.cpp -o mainSimpleAddinHw -I.. -L../lib -lAddinCppHw -L$(IDIR)/lib -lObjectHandler -lboost_regex -lboost_serialization -lboost_system -lboost_filesystem
 
-#mainSimpleAddin: mainSimpleAddin.cpp libSimpleAddin.so
-#	g++ -fPIC mainSimpleAddin.cpp -o mainSimpleAddin -L. -lsimple -lSimpleAddin
+mainSimpleAddin: mainSimpleAddin.cpp ../lib/libAddinObjects.so
+	g++ -fPIC mainSimpleAddin.cpp -o mainSimpleAddin -I.. -L../lib -lAddinCpp -L$(IDIR)/lib -lObjectHandler -lboost_regex -lboost_serialization -lboost_system -lboost_filesystem
 
 clean:
-	rm -f mainSimpleLib mainSimpleAddinHw
+	rm -f mainSimpleLib mainSimpleAddinHw mainSimpleAddin
 
