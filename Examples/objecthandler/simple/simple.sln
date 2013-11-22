@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "simplelib", "Library\SimpleLib.vcproj", "{99110FBD-D532-4984-AB3B-1C07515B3667}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Simplelib", "Library\SimpleLib.vcproj", "{99110FBD-D532-4984-AB3B-1C07515B3667}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MainSimpleLib", "Main\mainSimpleLib.vcproj", "{1923CB1D-3A8E-42C0-90E1-77307DA5BBAE}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MainSimpleAddinHw", "Main\M
 		{99110FBD-D532-4984-AB3B-1C07515B3667} = {99110FBD-D532-4984-AB3B-1C07515B3667}
 		{FEA31ACF-F0DB-41F0-8012-093C1618CEC2} = {FEA31ACF-F0DB-41F0-8012-093C1618CEC2}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "empty", "AddinXl\empty.vcproj", "{C7AC3C53-14BF-40A9-A1C1-BB3CDFB29077}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,6 +54,10 @@ Global
 		{82793131-FE80-422E-B2FE-6387F7851612}.Debug|Win32.Build.0 = Debug|Win32
 		{82793131-FE80-422E-B2FE-6387F7851612}.Release|Win32.ActiveCfg = Release|Win32
 		{82793131-FE80-422E-B2FE-6387F7851612}.Release|Win32.Build.0 = Release|Win32
+		{C7AC3C53-14BF-40A9-A1C1-BB3CDFB29077}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C7AC3C53-14BF-40A9-A1C1-BB3CDFB29077}.Debug|Win32.Build.0 = Debug|Win32
+		{C7AC3C53-14BF-40A9-A1C1-BB3CDFB29077}.Release|Win32.ActiveCfg = Release|Win32
+		{C7AC3C53-14BF-40A9-A1C1-BB3CDFB29077}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
