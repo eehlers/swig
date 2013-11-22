@@ -1,5 +1,5 @@
 
-LIB = ../lib/libAddinObjects.so
+LIB = ../lib/libAddinObjectsHw.so
 IDIR = ../../../../../install/include
 
 all: $(LIB)
