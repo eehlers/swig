@@ -4,7 +4,7 @@ IDIR = ../../../../../install
 all: mainSimpleLib mainSimpleAddinHw
 
 mainSimpleLib: mainSimpleLib.cpp ../lib/libSimpleLib.so
-	g++ -g -Wall -o mainSimpleLib mainSimpleLib.cpp -I../Library -L../lib -lSimpleLib
+	g++ -g -Wall -o mainSimpleLib mainSimpleLib.cpp -I.. -L../lib -lSimpleLib
 
 mainSimpleAddinHw: mainSimpleAddinHw.cpp ../lib/libAddinObjects.so
 	g++ -fPIC mainSimpleAddinHw.cpp -o mainSimpleAddinHw -I.. -L../lib -lAddinCpp -L$(IDIR)/lib -lObjectHandler -lboost_regex -lboost_serialization -lboost_system -lboost_filesystem

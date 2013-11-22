@@ -1,6 +1,6 @@
 
 #include <iostream>
-#include "simplelib.hpp"
+#include "Library/simplelib.hpp"
 
 int main() {
     std::cout << "hi" << std::endl;

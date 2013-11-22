@@ -1,5 +1,5 @@
 
-LIB = ../lib/libValueObjects.so
+LIB = ../lib/libValueObjectsHw.so
 IDIR = ../../../../../install/include
 
 all: $(LIB)
