@@ -14,12 +14,10 @@
  FOR A PARTICULAR PURPOSE.  See the license for more details.
 */
 
-//#include <oh/enumerations/typefactory.hpp>
 #include <ohxl/objecthandlerxl.hpp>
 #include <ohxl/register/register_all.hpp>
 #include <ohxl/functions/export.hpp>
 #include <ohxl/utilities/xlutilities.hpp>
-//#include <ExampleObjects/accountexample.hpp>
 #include <ohxl/objectwrapperxl.hpp>
 #include "ValueObjects/vo_hw.hpp"
 #include "AddinObjects/obj_hw.hpp"
@@ -38,16 +36,6 @@ DLLEXPORT int xlAutoOpen() {
 
     // Instantiate the ObjectHandler Repository
     static ObjectHandler::RepositoryXL repositoryXL;
-    // Instantiate the Enumerated Type Registry
-    //static ObjectHandler::EnumTypeRegistry enumTypeRegistry;
-    // Instantiate the Enumerated Class Registry
-    //static ObjectHandler::EnumClassRegistry enumClassRegistry;
-    // Instantiate the Enumerated Pair Registry
-    //static ObjectHandler::EnumPairRegistry enumPairRegistry;
-	//Instantiate the Processor Factory
-	//static ObjectHandler::ProcessorFactory processorFactory;
-    // Instantiate the Serialization Factory
-    //static AccountExample::SerializationFactory factory;
 
     static XLOPER xDll;
 
@@ -58,7 +46,6 @@ DLLEXPORT int xlAutoOpen() {
         ObjectHandler::Configuration::instance().init();
 
         registerOhFunctions(xDll);
-        //AccountExample::registerEnumeratedTypes();
 
         Excel(xlfRegister, 0, 7, &xDll,
             TempStrNoSize("\x07""slAdder"),             // function code name
