@@ -4,29 +4,44 @@
 String *prefix = 0;
 
 class OBJECTHANDLER : public Language {
-protected:
-   /* General DOH objects used for holding the strings */
-   File *b_cpp_cpp;
-   File *f_cpp_cpp;
-   File *b_cpp_hpp;
-   File *f_cpp_hpp;
-   File *b_obj_cpp;
-   File *f_obj_cpp;
-   File *b_obj_hpp;
-   File *f_obj_hpp;
-   File *b_val_cpp;
-   File *f_val_cpp;
-   File *b_val_hpp;
-   File *f_val_hpp;
 
-   File *f_runtime;
+protected:
+
+    // SWIG buffers
+    File *b_begin;
+    File *b_runtime;
+    File *b_header;
+    File *b_wrappers;
+    File *b_director;
+    File *b_director_h;
+    File *b_init;
+
+    // SWIG output files
+    File *f_test;
+
+    // OH buffers
+   File *b_cpp_cpp;
+   File *b_cpp_hpp;
+   File *b_obj_cpp;
+   File *b_obj_hpp0;
+   File *b_obj_hpp1;
+   File *b_val_cpp;
+   File *b_val_hpp;
+
+    // OH output files
+   File *f_cpp_cpp;
+   File *f_cpp_hpp;
+   File *f_obj_cpp;
+   File *f_obj_hpp;
+   File *f_val_cpp;
+   File *f_val_hpp;
 
    String *module;
 
 public:
 
   virtual void main(int argc, char *argv[]) {
-    printf("I'm the Reposit module.\n");
+    printf("I'm the ObjectHandler module.\n");
 
 /* Set language-specific subdirectory in SWIG library */
    SWIG_library_directory("objecthandler");
@@ -72,40 +87,33 @@ virtual int top(Node *n) {
    module = Getattr(n,"name");
 
    /* Initialize I/O */
-    f_cpp_cpp = initFile("AddinCpp/sla.cpp");
-    f_cpp_hpp = initFile("AddinCpp/sla.hpp");
-    f_obj_cpp = initFile("AddinObjects/obj.cpp");
-    f_obj_hpp = initFile("AddinObjects/obj.hpp");
-    f_val_cpp = initFile("ValueObjects/vo.cpp");
-    f_val_hpp = initFile("ValueObjects/vo.hpp");
+    b_runtime = NewString("");
+    b_init = NewString("");
+    b_header = NewString("");
+    b_wrappers = NewString("");
+    b_director_h = NewString("");
+    b_director = NewString("");
+    b_begin = NewString("");
+
+   /* Register file targets with the SWIG file handler */
+    Swig_register_filebyname("header", b_header);
+    Swig_register_filebyname("wrapper", b_wrappers);
+    Swig_register_filebyname("begin", b_begin);
+    Swig_register_filebyname("runtime", b_runtime);
+    Swig_register_filebyname("init", b_init);
+    Swig_register_filebyname("director", b_director);
+    Swig_register_filebyname("director_h", b_director_h);
 
     b_cpp_cpp = NewString("");
     b_cpp_hpp = NewString("");
     b_obj_cpp = NewString("");
-    b_obj_hpp = NewString("");
+    b_obj_hpp0 = NewString("");
+    b_obj_hpp1 = NewString("");
     b_val_cpp = NewString("");
     b_val_hpp = NewString("");
 
-    f_runtime = NewString("");
-
-   /* Register file targets with the SWIG file handler */
-   Swig_register_filebyname("b_cpp_cpp", b_cpp_cpp);
-   Swig_register_filebyname("f_cpp_cpp", f_cpp_cpp);
-   Swig_register_filebyname("b_cpp_hpp", b_cpp_hpp);
-   Swig_register_filebyname("f_cpp_hpp", f_cpp_hpp);
-   Swig_register_filebyname("b_obj_cpp", b_obj_cpp);
-   Swig_register_filebyname("f_obj_cpp", f_obj_cpp);
-   Swig_register_filebyname("b_obj_hpp", b_obj_hpp);
-   Swig_register_filebyname("f_obj_hpp", f_obj_hpp);
-   Swig_register_filebyname("b_val_cpp", b_val_cpp);
-   Swig_register_filebyname("f_val_cpp", f_val_cpp);
-   Swig_register_filebyname("b_val_hpp", b_val_hpp);
-   Swig_register_filebyname("f_val_hpp", f_val_hpp);
-
-    Swig_register_filebyname("runtime", f_runtime);
-
    /* Output module initialization code */
-   //Swig_banner(f_begin);
+   Swig_banner(b_begin);
 
     Printf(b_val_hpp, "\n");
     Printf(b_val_hpp, "#ifndef vo_hpp\n");
@@ -129,18 +137,17 @@ virtual int top(Node *n) {
     Printf(b_val_cpp, "namespace ValueObjects {\n");
     Printf(b_val_cpp, "\n");
 
-    Printf(b_obj_hpp, "\n");
-    Printf(b_obj_hpp, "#ifndef obj_hpp\n");
-    Printf(b_obj_hpp, "#define obj_hpp\n");
-    Printf(b_obj_hpp, "\n");
-    Printf(b_obj_hpp, "#include <string>\n");
-    Printf(b_obj_hpp, "#include <oh/libraryobject.hpp>\n");
-    Printf(b_obj_hpp, "#include <oh/valueobject.hpp>\n");
-    Printf(b_obj_hpp, "#include <boost/shared_ptr.hpp>\n");
-    Printf(b_obj_hpp, "#include <Library/simplelib.hpp>\n");
-    Printf(b_obj_hpp, "\n");
-    Printf(b_obj_hpp,"namespace %s {\n", module);
-    Printf(b_obj_hpp, "\n");
+    Printf(b_obj_hpp0, "\n");
+    Printf(b_obj_hpp0, "#ifndef obj_hpp\n");
+    Printf(b_obj_hpp0, "#define obj_hpp\n");
+    Printf(b_obj_hpp0, "\n");
+    Printf(b_obj_hpp0, "#include <string>\n");
+    Printf(b_obj_hpp0, "#include <oh/libraryobject.hpp>\n");
+    Printf(b_obj_hpp0, "#include <oh/valueobject.hpp>\n");
+    Printf(b_obj_hpp0, "#include <boost/shared_ptr.hpp>\n");
+
+    Printf(b_obj_hpp1,"namespace %s {\n", module);
+    Printf(b_obj_hpp1, "\n");
 
     Printf(b_obj_cpp, "\n");
     Printf(b_obj_cpp, "#include \"obj.hpp\"\n");
@@ -151,7 +158,7 @@ virtual int top(Node *n) {
     Printf(b_cpp_hpp, "\n");
     Printf(b_cpp_hpp, "#include <string>\n");
     Printf(b_cpp_hpp, "\n");
-    Printf(b_cpp_hpp, "namespace SimpleLibAddin {\n");
+    Printf(b_cpp_hpp, "namespace %s {\n", module);
     Printf(b_cpp_hpp, "\n");
 
     Printf(b_cpp_cpp, "#include \"sla.hpp\"\n");
@@ -165,49 +172,98 @@ virtual int top(Node *n) {
    /* Emit code for children */
    Language::top(n);
 
-    Printf(b_val_hpp, "} // namespace SimpleAddin\n");
+    Printf(b_val_hpp, "} // namespace %s\n", module);
     Printf(b_val_hpp, "\n");
     Printf(b_val_hpp, "} // namespace ValueObjects\n");
     Printf(b_val_hpp, "\n");
     Printf(b_val_hpp, "#endif\n");
     Printf(b_val_hpp, "\n");
 
-    Printf(b_val_cpp, "} // namespace SimpleAddin\n");
+    Printf(b_val_cpp, "} // namespace %s\n", module);
     Printf(b_val_cpp, "\n");
     Printf(b_val_cpp, "\n");
     Printf(b_val_cpp, "} // namespace ValueObjects\n");
     Printf(b_val_cpp, "\n");
 
-    Printf(b_obj_hpp, "} // namespace %s\n", module);
-    Printf(b_obj_hpp, "\n");
-    Printf(b_obj_hpp, "#endif\n");
-    Printf(b_obj_hpp, "\n");
+    Printf(b_obj_hpp1, "} // namespace %s\n", module);
+    Printf(b_obj_hpp1, "\n");
+    Printf(b_obj_hpp1, "#endif\n");
+    Printf(b_obj_hpp1, "\n");
 
     Printf(b_cpp_hpp, "\n");
-    Printf(b_cpp_hpp, "} // namespace SimpleAddin\n");
+    Printf(b_cpp_hpp, "} // namespace %s\n", module);
     Printf(b_cpp_hpp, "\n");
     Printf(b_cpp_hpp, "#endif\n");
     Printf(b_cpp_hpp, "\n");
 
+    // To help with troubleshooting, create an output file to which all of the
+    // SWIG buffers will be written.  We are not going to compile this file but
+    // we give it a cpp extension so that the editor will apply syntax
+    // highlighting.
+    f_test = initFile("test.cpp");
+
+    // Write all of the SWIG buffers to the dummy output file.
+    Printf(f_test, "//**********begin b_begin\n");
+    Dump(b_begin, f_test);
+    Printf(f_test, "//**********end b_begin\n");
+    Printf(f_test, "//**********begin b_runtime\n");
+    Dump(b_runtime, f_test);
+    Printf(f_test, "//**********end b_runtime\n");
+    Printf(f_test, "//**********begin b_header\n");
+    Dump(b_header, f_test);
+    Printf(f_test, "//**********end b_header\n");
+    Printf(f_test, "//**********begin b_wrappers\n");
+    Dump(b_wrappers, f_test);
+    Printf(f_test, "//**********end b_wrappers\n");
+    Printf(f_test, "//**********begin b_director\n");
+    Dump(b_director, f_test);
+    Printf(f_test, "//**********end b_director\n");
+    Printf(f_test, "//**********begin b_director_h\n");
+    Dump(b_director_h, f_test);
+    Printf(f_test, "//**********end b_director_h\n");
+    Printf(f_test, "//**********begin b_init\n");
+    Dump(b_init, f_test);
+    Printf(f_test, "//**********end b_init\n");
+
+    // OH output files
+    f_cpp_cpp = initFile("AddinCpp/sla.cpp");
+    f_cpp_hpp = initFile("AddinCpp/sla.hpp");
+    f_obj_cpp = initFile("AddinObjects/obj.cpp");
+    f_obj_hpp = initFile("AddinObjects/obj.hpp");
+    f_val_cpp = initFile("ValueObjects/vo.cpp");
+    f_val_hpp = initFile("ValueObjects/vo.hpp");
+
    /* Write all to the file */
-   //Dump(f_runtime, f_begin);
+   //Dump(b_runtime, b_begin);
     Dump(b_cpp_cpp, f_cpp_cpp);
     Dump(b_cpp_hpp, f_cpp_hpp);
     Dump(b_obj_cpp, f_obj_cpp);
-    Dump(b_obj_hpp, f_obj_hpp);
+    Dump(b_obj_hpp0, f_obj_hpp);    // OH #includes
+    Dump(b_header, f_obj_hpp);      // SWIG #includes from the .i file
+    Dump(b_obj_hpp1, f_obj_hpp);    // The rest of the file
     Dump(b_val_cpp, f_val_cpp);
     Dump(b_val_hpp, f_val_hpp);
-   //Wrapper_pretty_print(f_init, f_begin);
+   //Wrapper_pretty_print(b_init, b_begin);
 
    /* Cleanup files */
+    Delete(b_header);
+    Delete(b_wrappers);
+    Delete(b_init);
+    Delete(b_director);
+    Delete(b_director_h);
+    Delete(b_runtime);
+    Delete(b_begin);
+    //Close(f_test);
+    Delete(f_test);
+
     Delete(b_cpp_cpp);
     Delete(b_cpp_hpp);
     Delete(b_obj_cpp);
-    Delete(b_obj_hpp);
+    Delete(b_obj_hpp0);
+    Delete(b_obj_hpp1);
     Delete(b_val_cpp);
     Delete(b_val_hpp);
 
-   //Close(f_begin);
     Delete(f_cpp_cpp);
     Delete(f_cpp_hpp);
     Delete(f_obj_cpp);
@@ -215,7 +271,6 @@ virtual int top(Node *n) {
     Delete(f_val_cpp);
     Delete(f_val_hpp);
 
-    Delete(f_runtime);
    return SWIG_OK;
   }
 
@@ -412,21 +467,21 @@ void printCtor(Node *n) {
     Printf(b_val_cpp,"            Permanent_(Permanent) {\n");
     Printf(b_val_cpp,"        }\n");
 
-    Printf(b_obj_hpp,"\n");
-    Printf(b_obj_hpp,"    class %s : \n", name);
-    Printf(b_obj_hpp,"        public ObjectHandler::LibraryObject<%s> {\n", pname);
-    Printf(b_obj_hpp,"    public:\n");
-    Printf(b_obj_hpp,"        %s(\n", name);
-    Printf(b_obj_hpp,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties\n");
-    emitParmList(parms, b_obj_hpp, false);
-    Printf(b_obj_hpp,"            ,bool permanent)\n");
-    Printf(b_obj_hpp,"        : ObjectHandler::LibraryObject<%s>(properties, permanent) {\n", pname);
-    Printf(b_obj_hpp,"            libraryObject_ = boost::shared_ptr<%s>(new %s(", pname, pname);
-    emitParmList2(parms, b_obj_hpp);
-    Printf(b_obj_hpp,"));\n");
-    Printf(b_obj_hpp,"        }\n");
-    Printf(b_obj_hpp,"    };\n");
-    Printf(b_obj_hpp,"\n");
+    Printf(b_obj_hpp1,"\n");
+    Printf(b_obj_hpp1,"    class %s : \n", name);
+    Printf(b_obj_hpp1,"        public ObjectHandler::LibraryObject<%s> {\n", pname);
+    Printf(b_obj_hpp1,"    public:\n");
+    Printf(b_obj_hpp1,"        %s(\n", name);
+    Printf(b_obj_hpp1,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties\n");
+    emitParmList(parms, b_obj_hpp1, false);
+    Printf(b_obj_hpp1,"            ,bool permanent)\n");
+    Printf(b_obj_hpp1,"        : ObjectHandler::LibraryObject<%s>(properties, permanent) {\n", pname);
+    Printf(b_obj_hpp1,"            libraryObject_ = boost::shared_ptr<%s>(new %s(", pname, pname);
+    emitParmList2(parms, b_obj_hpp1);
+    Printf(b_obj_hpp1,"));\n");
+    Printf(b_obj_hpp1,"        }\n");
+    Printf(b_obj_hpp1,"    };\n");
+    Printf(b_obj_hpp1,"\n");
 
     Printf(b_cpp_hpp,"    std::string %s%s(const std::string &objectID", prefix, name);
     emitParmList(parms, b_cpp_hpp, false);
@@ -454,7 +509,7 @@ void printCtor(Node *n) {
 //    List *list1 = Keys(n);
 //    for(int i=0; i<Len(list1); ++i) {
 //        String *key = Getitem(list1, i);
-//        Printf(f_wrappers,"/* %d %s %s */\n", i, key, Getattr(n, key));
+//        Printf(b_wrappers,"/* %d %s %s */\n", i, key, Getattr(n, key));
 //    }
 //}
 //
@@ -468,12 +523,12 @@ void printCtor(Node *n) {
 int functionWrapper(Node *n) {
     //String   *name   = Getattr(n,"name");
 
-    //Printf(f_wrappers,"//module=%s\n", module);
-    //Printf(f_wrappers,"//XXX***functionWrapper*******\n");
+    //Printf(b_wrappers,"//module=%s\n", module);
+    //Printf(b_wrappers,"//XXX***functionWrapper*******\n");
     //printNode(n);
     //printList(Getattr(n, "parms"));
 
-    //Printf(f_wrappers,"//*************\n");
+    //Printf(b_wrappers,"//*************\n");
 
   String   *nodeType   = Getattr(n,"nodeType");
     if (0 == Strcmp("cdecl", nodeType)) {

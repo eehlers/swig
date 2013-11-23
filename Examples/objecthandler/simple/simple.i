@@ -1,5 +1,8 @@
 
 %module SimpleLibAddin
+%{
+#include <Library/simplelib.hpp>
+%}
 namespace SimpleLib {
     std::string func();
     class Adder {
