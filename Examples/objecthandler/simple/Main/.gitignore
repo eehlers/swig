@@ -3,3 +3,4 @@ mainSimpleAddinHw
 mainSimpleAddin
 Release
 *.user
+!Makefile

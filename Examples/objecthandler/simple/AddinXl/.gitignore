@@ -1,3 +1,4 @@
 *.user
 Release
 *.xll
+!Makefile

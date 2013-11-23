@@ -2,3 +2,4 @@
 *.suo
 Release
 test.cpp
+!Makefile
