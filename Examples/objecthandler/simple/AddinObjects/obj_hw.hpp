@@ -10,6 +10,8 @@
 
 namespace SimpleLibAddin {
 
+    std::string func();
+
     class Adder : public ObjectHandler::LibraryObject<SimpleLib::Adder> {
     public:
         Adder(

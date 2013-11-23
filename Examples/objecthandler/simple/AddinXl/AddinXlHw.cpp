@@ -48,6 +48,14 @@ DLLEXPORT int xlAutoOpen() {
         registerOhFunctions(xDll);
 
         Excel(xlfRegister, 0, 7, &xDll,
+            TempStrNoSize("\x06""slFunc"),              // function code name
+            TempStrNoSize("\x02""C#"),                  // parameter codes
+            TempStrNoSize("\x06""slFunc"),              // function display name
+            TempStrNoSize("\x00"""),                    // comma-delimited list of parameters
+            TempStrNoSize("\x01""1"),                   // function type (0 = hidden function, 1 = worksheet function, 2 = command macro)
+            TempStrNoSize("\x07""Example"));            // function category
+
+        Excel(xlfRegister, 0, 7, &xDll,
             TempStrNoSize("\x07""slAdder"),             // function code name
             TempStrNoSize("\x04""CCN#"),                // parameter codes
             TempStrNoSize("\x07""slAdder"),             // function display name
@@ -119,35 +127,29 @@ DLLEXPORT void xlAutoFree(XLOPER *px) {
 
 }
 
-//DLLEXPORT char *slFunc() {
-//
-//    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;
-//
-//    try {
-//
-//        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>
-//            (new ObjectHandler::FunctionCall("ohCustomer"));
-//
-//        boost::shared_ptr<ObjectHandler::ValueObject> valueObject(
-//            new AccountExample::CustomerValueObject(objectID, name, *age, *permanent));
-//
-//        boost::shared_ptr<ObjectHandler::Object> object(
-//            new AccountExample::CustomerObject(valueObject, name, *age, *permanent));
-//
-//        std::string returnValue = 
-//            ObjectHandler::RepositoryXL::instance().storeObject(objectID, object);
-//
-//        static char ret[XL_MAX_STR_LEN];
-//        ObjectHandler::stringToChar(returnValue, ret);
-//        return ret;
-//
-//    } catch (const std::exception &e) {
-//
-//        ObjectHandler::RepositoryXL::instance().logError(e.what(), functionCall);
-//        return 0;
-//
-//    }
-//}
+DLLEXPORT char *slFunc() {
+
+    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;
+
+    try {
+
+        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>
+            (new ObjectHandler::FunctionCall("slFunc"));
+
+        std::string returnValue = 
+            SimpleLibAddin::func();
+
+        static char ret[XL_MAX_STR_LEN];
+        ObjectHandler::stringToChar(returnValue, ret);
+        return ret;
+
+    } catch (const std::exception &e) {
+
+        ObjectHandler::RepositoryXL::instance().logError(e.what(), functionCall);
+        return 0;
+
+    }
+}
 
 DLLEXPORT char *slAdder(
         char *objectID,
