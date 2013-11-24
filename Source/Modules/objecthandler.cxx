@@ -422,7 +422,7 @@ void emitParmList(ParmList *parms, File *buf, bool first = true, bool skipFirst 
 }
 
 // "d, s"
-void emitParmList2(ParmList *parms, File *buf, bool first = true, bool skipFirst = false) {
+void emitParmList2(ParmList *parms, File *buf, bool first = true, bool skipFirst = false, bool deref = false) {
     for (Parm *p = parms; p; p = nextSibling(p)) {
         if (skipFirst) {
             skipFirst = false;
@@ -434,7 +434,10 @@ void emitParmList2(ParmList *parms, File *buf, bool first = true, bool skipFirst
             Append(buf,", ");
         }
         String *name  = Getattr(p,"name");
-        Printf(buf, "%s", name);
+        if (deref)
+            Printf(buf, "*%s", name);
+        else
+            Printf(buf, "%s", name);
     }
 }
 
@@ -450,7 +453,12 @@ String *f2(Node *n, SwigType *type, ParmList *parms, int ftype) {
         Append(s, "C");
     } else {
         String *tm = Swig_typemap_lookup("excel", n, type, 0);
-        Append(s, tm);
+        if (tm) {
+            Append(s, tm);
+        } else {
+            printf("No \"excel\" typemap for type \"%s\".\n", Char(SwigType_str(type, 0)));
+            SWIG_exit(EXIT_FAILURE);
+        }
     }
     if (0 == ftype || 1 == ftype)
         Append(s, "C");
@@ -464,7 +472,12 @@ String *f2(Node *n, SwigType *type, ParmList *parms, int ftype) {
         }
         SwigType *t  = Getattr(p, "type");
         String *tm = Swig_typemap_lookup("excel", p, t, 0);
-        Append(s, tm);
+        if (tm) {
+            Append(s, tm);
+        } else {
+            printf("No \"excel\" typemap for type \"%s\".\n", Char(SwigType_str(type, 0)));
+            SWIG_exit(EXIT_FAILURE);
+        }
     }
     Append(s, "#");
     return s;
@@ -496,15 +509,16 @@ String *f3(ParmList *parms, int ftype) {
 }
 
 void f4(Node *n, String *symname, SwigType *type, ParmList *parms, int ftype) {
+    String *funcName = NewStringf("%s%s", prefix, Char(symname));
     Printf(b_xll_cpp1, "\n");
     Printf(b_xll_cpp1, "        Excel(xlfRegister, 0, 7, &xDll,\n");
     Printf(b_xll_cpp1, "            // function code name\n");
-    Printf(b_xll_cpp1, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(symname).c_str(), symname);
+    Printf(b_xll_cpp1, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(funcName).c_str(), funcName);
     Printf(b_xll_cpp1, "            // parameter codes\n");
     String *x = f2(n, type, parms, ftype);
     Printf(b_xll_cpp1, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(x).c_str(), x);
     Printf(b_xll_cpp1, "            // function display name\n");
-    Printf(b_xll_cpp1, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(symname).c_str(), symname);
+    Printf(b_xll_cpp1, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(funcName).c_str(), funcName);
     Printf(b_xll_cpp1, "            // comma-delimited list of parameters\n");
     String *x2 = f3(parms, ftype);
     Printf(b_xll_cpp1, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(x2).c_str(), x2);
@@ -550,21 +564,30 @@ void printFunc(Node *n) {
     f4(n, symname, type, parms, 2);
 
     Printf(b_xll_cpp3, "\n");
-    Printf(b_xll_cpp3, "DLLEXPORT char *%s() {\n", symname);
+    Printf(b_xll_cpp3, "DLLEXPORT %s *%s%s(", type, prefix, symname);
+    emitParmList(parms, b_xll_cpp3, true, false, true);
+    Printf(b_xll_cpp3, ") {\n");
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "    try {\n");
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
-    Printf(b_xll_cpp3, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", symname);
+    Printf(b_xll_cpp3, "            (new ObjectHandler::FunctionCall(\"%s%s\"));\n", prefix, symname);
     Printf(b_xll_cpp3, "\n");
-    Printf(b_xll_cpp3, "        std::string returnValue = \n");
-    Printf(b_xll_cpp3, "            %s::%s();\n", module, symname);
-    Printf(b_xll_cpp3, "\n");
-    Printf(b_xll_cpp3, "        static char ret[XL_MAX_STR_LEN];\n");
-    Printf(b_xll_cpp3, "        ObjectHandler::stringToChar(returnValue, ret);\n");
-    Printf(b_xll_cpp3, "        return ret;\n");
+    Printf(b_xll_cpp3, "        %s returnValue =\n", type);
+    Printf(b_xll_cpp3, "            %s::%s(", module, symname);
+    emitParmList2(parms, b_xll_cpp3, true, false, true);
+    Printf(b_xll_cpp3, ");\n");
+
+    String *tm = Swig_typemap_lookup("ohxl_ret", n, type, 0);
+    if (tm) {
+        Printf(b_xll_cpp3, Char(tm));
+    } else {
+        printf("No \"ohxl_ret\" typemap for type \"%s\".\n", Char(SwigType_str(type, 0)));
+        SWIG_exit(EXIT_FAILURE);
+    }
+
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "    } catch (const std::exception &e) {\n");
     Printf(b_xll_cpp3, "\n");
@@ -610,7 +633,7 @@ void printMemb(Node *n) {
     f4(n, s, type, parms, 1);
 
     Printf(b_xll_cpp3, "\n");
-    Printf(b_xll_cpp3, "DLLEXPORT %s *%s%s(char *objectID", type, cls, name);
+    Printf(b_xll_cpp3, "DLLEXPORT %s *%s%s%s(char *objectID", type, prefix, cls, name);
     emitParmList(parms, b_xll_cpp3, false, true, true);
     Printf(b_xll_cpp3, ") {\n");
     Printf(b_xll_cpp3, "\n");
@@ -619,13 +642,13 @@ void printMemb(Node *n) {
     Printf(b_xll_cpp3, "    try {\n");
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
-    Printf(b_xll_cpp3, "            (new ObjectHandler::FunctionCall(\"%s%s\"));\n", cls, name);
+    Printf(b_xll_cpp3, "            (new ObjectHandler::FunctionCall(\"%s%s%s\"));\n", prefix, cls, name);
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        OH_GET_REFERENCE(x, objectID, %s::%s, %s);\n", module, cls, pname);
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        static %s ret;\n", type);
-    Printf(b_xll_cpp3, "        ret = x->%s(*", name);
-    emitParmList2(parms, b_xll_cpp3, true, true);
+    Printf(b_xll_cpp3, "        ret = x->%s(", name);
+    emitParmList2(parms, b_xll_cpp3, true, true, true);
     Printf(b_xll_cpp3, ");\n");
     Printf(b_xll_cpp3, "        return &ret;\n");
     Printf(b_xll_cpp3, "\n");
@@ -769,7 +792,7 @@ void printCtor(Node *n) {
     f4(n, name, 0, parms, 0);
 
     Printf(b_xll_cpp3, "\n");
-    Printf(b_xll_cpp3, "DLLEXPORT char *%s(char *objectID", name);
+    Printf(b_xll_cpp3, "DLLEXPORT char *%s%s(char *objectID", prefix, name);
     emitParmList(parms, b_xll_cpp3, false, false, true);
     Printf(b_xll_cpp3, ") {\n");
     Printf(b_xll_cpp3, "\n");
@@ -778,13 +801,15 @@ void printCtor(Node *n) {
     Printf(b_xll_cpp3, "    try {\n");
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
-    Printf(b_xll_cpp3, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", name);
+    Printf(b_xll_cpp3, "            (new ObjectHandler::FunctionCall(\"%s%s\"));\n", prefix, name);
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
     Printf(b_xll_cpp3, "            new %s::ValueObjects::%s%s(objectID, false));\n", module, prefix, name);
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        boost::shared_ptr<ObjectHandler::Object> object(\n");
-    Printf(b_xll_cpp3, "            new %s::%s(valueObject, *x, false));\n", module, name);
+    Printf(b_xll_cpp3, "            new %s::%s(valueObject,", module, name);
+    emitParmList2(parms, b_xll_cpp3, true, false, true);
+    Printf(b_xll_cpp3, ", false));\n");
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        std::string returnValue =\n");
     Printf(b_xll_cpp3, "            ObjectHandler::RepositoryXL::instance().storeObject(objectID, object, true);\n");
