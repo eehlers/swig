@@ -610,7 +610,7 @@ void printMemb(Node *n) {
     f4(n, s, type, parms, 1);
 
     Printf(b_xll_cpp3, "\n");
-    Printf(b_xll_cpp3, "DLLEXPORT %s *%s%s(char *ObjectID", type, cls, name);
+    Printf(b_xll_cpp3, "DLLEXPORT %s *%s%s(char *objectID", type, cls, name);
     emitParmList(parms, b_xll_cpp3, false, true, true);
     Printf(b_xll_cpp3, ") {\n");
     Printf(b_xll_cpp3, "\n");
