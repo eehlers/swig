@@ -160,7 +160,6 @@ virtual int top(Node *n) {
     Printf(b_obj_hpp0, "#include <boost/shared_ptr.hpp>\n");
 
     Printf(b_obj_hpp1,"namespace %s {\n", module);
-    Printf(b_obj_hpp1, "\n");
 
     Printf(b_obj_cpp, "\n");
     Printf(b_obj_cpp, "#include \"obj.hpp\"\n");
@@ -520,14 +519,26 @@ void printFunc(Node *n) {
     String   *symname   = Getattr(n,"sym:name");
     //String   *action = Getattr(n,"wrap:action");
 
-    Printf(b_cpp_hpp,"    %s %s(", type, symname);
+    Printf(b_obj_hpp1,"\n");
+    Printf(b_obj_hpp1,"    %s %s(", type, symname);
+    emitParmList(parms, b_obj_hpp1);
+    Printf(b_obj_hpp1,");\n");
+
+    Printf(b_obj_cpp,"%s %s::%s(", type, module, symname);
+    emitParmList(parms, b_obj_cpp);
+    Printf(b_obj_cpp,") {\n");
+    Printf(b_obj_cpp,"    return %s(", name);
+    emitParmList2(parms, b_obj_cpp);
+    Printf(b_obj_cpp,");\n");
+    Printf(b_obj_cpp,"}\n");
+
+    Printf(b_cpp_hpp,"    %s %s%s(", type, prefix, symname);
     emitParmList(parms, b_cpp_hpp);
     Printf(b_cpp_hpp,");\n");
 
-    Printf(b_cpp_cpp,"%s %s::%s(", type, module, symname);
+    Printf(b_cpp_cpp,"%s %s::%s%s(", type, module, prefix, symname);
     emitParmList(parms, b_cpp_cpp);
     Printf(b_cpp_cpp,") {\n");
-
     Printf(b_cpp_cpp,"    return %s(", name);
     emitParmList2(parms, b_cpp_cpp);
     Printf(b_cpp_cpp,");\n");
