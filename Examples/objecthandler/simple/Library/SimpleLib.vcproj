@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="Simplelib"
+	Name="SimpleLib"
 	ProjectGUID="{99110FBD-D532-4984-AB3B-1C07515B3667}"
-	RootNamespace="Simplelib"
+	RootNamespace="SimpleLib"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
