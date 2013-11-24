@@ -7,7 +7,7 @@ namespace SimpleLib {
     std::string func();
     class Adder {
     public:
-        Adder(int x);
-        int add(int y);
+        Adder(long x);
+        long add(long y);
     };
 }

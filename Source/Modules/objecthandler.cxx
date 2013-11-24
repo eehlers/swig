@@ -187,8 +187,8 @@ virtual int top(Node *n) {
     Printf(b_xll_cpp0, "#include <ohxl/functions/export.hpp>\n");
     Printf(b_xll_cpp0, "#include <ohxl/utilities/xlutilities.hpp>\n");
     Printf(b_xll_cpp0, "#include <ohxl/objectwrapperxl.hpp>\n");
-    Printf(b_xll_cpp0, "#include \"ValueObjects/vo_hw.hpp\"\n");
-    Printf(b_xll_cpp0, "#include \"AddinObjects/obj_hw.hpp\"\n");
+    Printf(b_xll_cpp0, "#include \"ValueObjects/vo.hpp\"\n");
+    Printf(b_xll_cpp0, "#include \"AddinObjects/obj.hpp\"\n");
     Printf(b_xll_cpp0, "\n");
     Printf(b_xll_cpp0, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
     Printf(b_xll_cpp0, "   for example) also #define _MSC_VER\n");
@@ -398,7 +398,7 @@ virtual int top(Node *n) {
 //}
 
 // "double d, string s"
-void emitParmList(ParmList *parms, File *buf, bool first = true, bool skipFirst = false) {
+void emitParmList(ParmList *parms, File *buf, bool first = true, bool skipFirst = false, bool deref = false) {
     for (Parm *p = parms; p; p = nextSibling(p)) {
         if (skipFirst) {
             skipFirst = false;
@@ -414,7 +414,10 @@ void emitParmList(ParmList *parms, File *buf, bool first = true, bool skipFirst 
         while (SwigType *t = SwigType_typedef_resolve(type)) {
             type = t;
         }
-        Printf(buf, "%s %s", type, name);
+        if (deref)
+            Printf(buf, "%s *%s", type, name);
+        else
+            Printf(buf, "%s %s", type, name);
     }
 }
 
@@ -601,11 +604,14 @@ void printMemb(Node *n) {
 
     Printf(b_cpp_cpp,"}\n");
 
-    f4(n, name, type, parms, 1);
+    String *s = NewString("");
+    Append(s, cls);
+    Append(s, name);
+    f4(n, s, type, parms, 1);
 
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "DLLEXPORT %s *%s%s(char *ObjectID", type, cls, name);
-    emitParmList(parms, b_xll_cpp3, false, true);
+    emitParmList(parms, b_xll_cpp3, false, true, true);
     Printf(b_xll_cpp3, ") {\n");
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
@@ -615,11 +621,11 @@ void printMemb(Node *n) {
     Printf(b_xll_cpp3, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
     Printf(b_xll_cpp3, "            (new ObjectHandler::FunctionCall(\"%s%s\"));\n", cls, name);
     Printf(b_xll_cpp3, "\n");
-    Printf(b_xll_cpp3, "        OH_GET_REFERENCE(x, objectID, %s::%s, %s::%s);\n", module, cls, module, cls);
+    Printf(b_xll_cpp3, "        OH_GET_REFERENCE(x, objectID, %s::%s, %s);\n", module, cls, pname);
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        static %s ret;\n", type);
     Printf(b_xll_cpp3, "        ret = x->%s(*", name);
-    emitParmList(parms, b_xll_cpp3, false, true);
+    emitParmList2(parms, b_xll_cpp3, true, true);
     Printf(b_xll_cpp3, ");\n");
     Printf(b_xll_cpp3, "        return &ret;\n");
     Printf(b_xll_cpp3, "\n");
@@ -764,7 +770,7 @@ void printCtor(Node *n) {
 
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "DLLEXPORT char *%s(char *objectID", name);
-    emitParmList(parms, b_xll_cpp3, false);
+    emitParmList(parms, b_xll_cpp3, false, false, true);
     Printf(b_xll_cpp3, ") {\n");
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
@@ -775,10 +781,10 @@ void printCtor(Node *n) {
     Printf(b_xll_cpp3, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", name);
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
-    Printf(b_xll_cpp3, "            new ValueObjects::%s(objectID, false, *x));\n", name);
+    Printf(b_xll_cpp3, "            new %s::ValueObjects::%s%s(objectID, false));\n", module, prefix, name);
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        boost::shared_ptr<ObjectHandler::Object> object(\n");
-    Printf(b_xll_cpp3, "            new %s::%s(valueObject, false, *x));\n", module, name);
+    Printf(b_xll_cpp3, "            new %s::%s(valueObject, *x, false));\n", module, name);
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        std::string returnValue =\n");
     Printf(b_xll_cpp3, "            ObjectHandler::RepositoryXL::instance().storeObject(objectID, object, true);\n");

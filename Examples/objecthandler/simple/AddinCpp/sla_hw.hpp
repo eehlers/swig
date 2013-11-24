@@ -6,8 +6,8 @@
 
 namespace SimpleLibAddin {
     std::string slFunc();
-    std::string slAdder(const std::string &objectID, int x);
-    int slAdderAdd(const std::string &objectID, int y);
+    std::string slAdder(const std::string &objectID, long x);
+    long slAdderAdd(const std::string &objectID, long y);
 }
 
 #endif

@@ -11,7 +11,7 @@ std::string SimpleLibAddin::slFunc() {
     return SimpleLibAddin::func();
 }
 
-std::string SimpleLibAddin::slAdder(const std::string &objectID, int x) {
+std::string SimpleLibAddin::slAdder(const std::string &objectID, long x) {
     boost::shared_ptr<ObjectHandler::ValueObject> valueObject(
         new ValueObjects::slAdder(
             objectID, false, x));
@@ -24,7 +24,7 @@ std::string SimpleLibAddin::slAdder(const std::string &objectID, int x) {
     return returnValue;
 }
 
-int SimpleLibAddin::slAdderAdd(const std::string &objectID, int y) {
+long SimpleLibAddin::slAdderAdd(const std::string &objectID, long y) {
     OH_GET_REFERENCE(x, objectID, SimpleLibAddin::Adder, SimpleLib::Adder);
     return x->add(y);
 }

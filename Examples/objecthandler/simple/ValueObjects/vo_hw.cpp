@@ -49,7 +49,7 @@ void ValueObjects::slAdder::setSystemProperty(const std::string& name, const Obj
 ValueObjects::slAdder::slAdder(
         const std::string& ObjectId,
         bool Permanent,
-        int x) :
+        long x) :
     ObjectHandler::ValueObject(ObjectId, "slAdder", Permanent),
     Permanent_(Permanent) {
 }

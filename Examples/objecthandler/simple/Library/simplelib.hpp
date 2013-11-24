@@ -10,10 +10,10 @@ namespace SimpleLib {
 
     class Adder {
     private:
-        int x_;
+        long x_;
     public:
-        Adder(int x);
-        int add(int y);
+        Adder(long x);
+        long add(long y);
     };
 
 };

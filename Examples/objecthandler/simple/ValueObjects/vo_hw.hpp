@@ -15,7 +15,7 @@ namespace ValueObjects {
         slAdder(
             const std::string& ObjectId,
             bool Permanent,
-            int x);
+            long x);
 
         const std::set<std::string>& getSystemPropertyNames() const;
         std::vector<std::string> getPropertyNamesVector() const;
@@ -26,10 +26,10 @@ namespace ValueObjects {
         static const char* mPropertyNames[];
         static std::set<std::string> mSystemPropertyNames;
         bool Permanent_;
-        int x_;
+        long x_;
 
         template<class Archive>
-        void serialize(Archive& ar, const unsigned int) {
+        void serialize(Archive& ar, const unsigned long) {
         boost::serialization::void_cast_register<slAdder, ObjectHandler::ValueObject>(this, this);
             ar  & boost::serialization::make_nvp("ObjectId", objectId_)
                 & boost::serialization::make_nvp("Permanent", Permanent_)

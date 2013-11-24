@@ -6,9 +6,9 @@ std::string SimpleLib::func() {
     return "f()";
 }
 
-SimpleLib::Adder::Adder(int x) : x_(x) {}
+SimpleLib::Adder::Adder(long x) : x_(x) {}
 
-int SimpleLib::Adder::add(int y) {
+long SimpleLib::Adder::add(long y) {
     return x_ + y;
 }
 

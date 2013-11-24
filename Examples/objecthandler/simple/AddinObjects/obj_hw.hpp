@@ -17,7 +17,7 @@ namespace SimpleLibAddin {
         Adder(
             const boost::shared_ptr<ObjectHandler::ValueObject>& properties,
             bool permanent,
-            int x);
+            long x);
     };
 }
 

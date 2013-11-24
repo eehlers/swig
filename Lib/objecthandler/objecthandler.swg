@@ -3,5 +3,5 @@
 %feature("featurename", "1");
 
 %typemap(excel) std::string "C";
-%typemap(excel) int "N";
+%typemap(excel) long "N";
 
