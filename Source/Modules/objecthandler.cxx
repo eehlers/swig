@@ -447,18 +447,22 @@ std::string f(String *c) {
     return s.str();
 }
 
+String *getType(const char *typemapname, Node *n, SwigType *type) {
+    String *tm = Swig_typemap_lookup(typemapname, n, type, 0);
+    if (!tm) {
+        printf("No \"%s\" typemap for type \"%s\".\n", typemapname, Char(SwigType_str(type, 0)));
+        SWIG_exit(EXIT_FAILURE);
+    }
+    return tm;
+}
+
 String *f2(Node *n, SwigType *type, ParmList *parms, int ftype) {
     String *s = NewString("");
     if (0 == ftype) {
         Append(s, "C");
     } else {
-        String *tm = Swig_typemap_lookup("excel", n, type, 0);
-        if (tm) {
-            Append(s, tm);
-        } else {
-            printf("No \"excel\" typemap for type \"%s\".\n", Char(SwigType_str(type, 0)));
-            SWIG_exit(EXIT_FAILURE);
-        }
+        String *tm = getType("excel", n, type);
+        Append(s, tm);
     }
     if (0 == ftype || 1 == ftype)
         Append(s, "C");
@@ -471,13 +475,8 @@ String *f2(Node *n, SwigType *type, ParmList *parms, int ftype) {
             }
         }
         SwigType *t  = Getattr(p, "type");
-        String *tm = Swig_typemap_lookup("excel", p, t, 0);
-        if (tm) {
-            Append(s, tm);
-        } else {
-            printf("No \"excel\" typemap for type \"%s\".\n", Char(SwigType_str(type, 0)));
-            SWIG_exit(EXIT_FAILURE);
-        }
+        String *tm = getType("excel", p, t);
+        Append(s, tm);
     }
     Append(s, "#");
     return s;
@@ -508,7 +507,7 @@ String *f3(ParmList *parms, int ftype) {
     return s;
 }
 
-void f4(Node *n, String *symname, SwigType *type, ParmList *parms, int ftype) {
+void f4(Node *n, SwigType *type, ParmList *parms, int ftype) {
     String *funcName   = Getattr(n, "oh:funcName");
     Printf(b_xll_cpp1, "\n");
     Printf(b_xll_cpp1, "        Excel(xlfRegister, 0, 7, &xDll,\n");
@@ -573,7 +572,7 @@ void printFunc(Node *n) {
     Printf(b_cpp_cpp,");\n");
     Printf(b_cpp_cpp,"}\n");
 
-    f4(n, symname, type, parms, 2);
+    f4(n, type, parms, 2);
 
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "DLLEXPORT %s *%s(", type, funcName);
@@ -592,13 +591,8 @@ void printFunc(Node *n) {
     emitParmList2(parms, b_xll_cpp3, true, false, true);
     Printf(b_xll_cpp3, ");\n");
 
-    String *tm = Swig_typemap_lookup("ohxl_ret", n, type, 0);
-    if (tm) {
-        Printf(b_xll_cpp3, Char(tm));
-    } else {
-        printf("No \"ohxl_ret\" typemap for type \"%s\".\n", Char(SwigType_str(type, 0)));
-        SWIG_exit(EXIT_FAILURE);
-    }
+    String *tm = getType("ohxl_ret", n, type);
+    Printf(b_xll_cpp3, Char(tm));
 
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "    } catch (const std::exception &e) {\n");
@@ -645,10 +639,10 @@ void printMemb(Node *n) {
 
     Printf(b_cpp_cpp,"}\n");
 
-    String *s = NewString("");
-    Append(s, cls);
-    Append(s, name);
-    f4(n, s, type, parms, 1);
+    //String *s = NewString("");
+    //Append(s, cls);
+    //Append(s, name);
+    f4(n, type, parms, 1);
 
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "DLLEXPORT %s *%s(char *objectID", type, funcName);
@@ -812,7 +806,7 @@ void printCtor(Node *n) {
     Printf(b_cpp_cpp,"    return returnValue;\n");
     Printf(b_cpp_cpp,"}\n");
 
-    f4(n, name, 0, parms, 0);
+    f4(n, 0, parms, 0);
 
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "DLLEXPORT char *%s(char *objectID", funcName);
