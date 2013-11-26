@@ -52,7 +52,7 @@ public:
   virtual void main(int argc, char *argv[]) {
     printf("I'm the ObjectHandler module.\n");
 
-/* Set language-specific subdirectory in SWIG library */
+    /* Set language-specific subdirectory in SWIG library */
    SWIG_library_directory("objecthandler");
 
    /* Set language-specific preprocessing symbol */
@@ -385,25 +385,25 @@ virtual int top(Node *n) {
    return SWIG_OK;
   }
 
-//String *printList2(Node *n) {
-//  String   *s = NewString("");
-//    while (n) {
-//        Append(s, Getattr(n,"type"));
-//        Append(s, " ");
-//        Append(s, Getattr(n,"name"));
-//        Append(s, " ");
-//        n = Getattr(n,"nextSibling");
-//    }
-//    return s;
-//}
+void printNode(Node *n) {
+    List *list1 = Keys(n);
+    for(int i=0; i<Len(list1); ++i) {
+        String *key = Getitem(list1, i);
+        Printf(b_wrappers,"/* %d %s %s */\n", i, key, Getattr(n, key));
+    }
+}
+
+void printList(Node *n) {
+    while (n) {
+        printNode(n);
+        n = Getattr(n,"nextSibling");
+    }
+}
 
 // "double d, string s"
-void emitParmList(ParmList *parms, File *buf, bool first = true, bool skipFirst = false, bool deref = false) {
+void emitParmList(ParmList *parms, File *buf, bool deref = false) {
+    bool first = true;
     for (Parm *p = parms; p; p = nextSibling(p)) {
-        if (skipFirst) {
-            skipFirst = false;
-            continue;
-        }
         if (first) {
             first = false;
         } else {
@@ -422,12 +422,10 @@ void emitParmList(ParmList *parms, File *buf, bool first = true, bool skipFirst 
 }
 
 // "d, s"
-void emitParmList2(ParmList *parms, File *buf, bool first = true, bool skipFirst = false, bool deref = false) {
+void emitParmList2(ParmList *parms, File *buf, bool deref = false) {
+    bool first = true;
     for (Parm *p = parms; p; p = nextSibling(p)) {
-        if (skipFirst) {
-            skipFirst = false;
-            continue;
-        }
+        if (Getattr(p, "hidden")) continue;
         if (first) {
             first = false;
         } else {
@@ -448,6 +446,9 @@ std::string f(String *c) {
 }
 
 String *getType(const char *typemapname, Node *n, SwigType *type) {
+    //while (SwigType *t = SwigType_typedef_resolve(type)) {
+    //    type = t;
+    //}
     String *tm = Swig_typemap_lookup(typemapname, n, type, 0);
     if (!tm) {
         printf("No \"%s\" typemap for type \"%s\".\n", typemapname, Char(SwigType_str(type, 0)));
@@ -456,24 +457,13 @@ String *getType(const char *typemapname, Node *n, SwigType *type) {
     return tm;
 }
 
-String *f2(Node *n, SwigType *type, ParmList *parms, int ftype) {
+String *f2(Node *n, SwigType *type, ParmList *parms) {
     String *s = NewString("");
-    if (0 == ftype) {
-        Append(s, "C");
-    } else {
+    if (type) {
         String *tm = getType("excel", n, type);
         Append(s, tm);
     }
-    if (0 == ftype || 1 == ftype)
-        Append(s, "C");
-    bool first = true;
     for (Parm *p = parms; p; p = nextSibling(p)) {
-        if (first) {
-            first = false;
-            if (1 == ftype) {
-                continue;
-            }
-        }
         SwigType *t  = Getattr(p, "type");
         String *tm = getType("excel", p, t);
         Append(s, tm);
@@ -482,44 +472,34 @@ String *f2(Node *n, SwigType *type, ParmList *parms, int ftype) {
     return s;
 }
 
-String *f3(ParmList *parms, int ftype) {
+String *f3(ParmList *parms) {
     String *s = NewString("");
     bool first = true;
-    if (0==ftype) {
-        Append(s, "ObjectId");
-        first = false;
-    }
     for (Parm *p = parms; p; p = nextSibling(p)) {
-        String *name;
         if (first) {
             first = false;
-            if (1==ftype) {
-                name = NewString("ObjectId");
-            } else {
-                name = Getattr(p,"name");
-            }
         } else {
             Append(s, ",");
-            name = Getattr(p,"name");
         }
+        String *name = Getattr(p,"name");
         Append(s, name);
     }
     return s;
 }
 
-void f4(Node *n, SwigType *type, ParmList *parms, int ftype) {
+void f4(Node *n, SwigType *type, ParmList *parms) {
     String *funcName   = Getattr(n, "oh:funcName");
     Printf(b_xll_cpp1, "\n");
     Printf(b_xll_cpp1, "        Excel(xlfRegister, 0, 7, &xDll,\n");
     Printf(b_xll_cpp1, "            // function code name\n");
     Printf(b_xll_cpp1, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(funcName).c_str(), funcName);
     Printf(b_xll_cpp1, "            // parameter codes\n");
-    String *x = f2(n, type, parms, ftype);
+    String *x = f2(n, type, parms);
     Printf(b_xll_cpp1, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(x).c_str(), x);
     Printf(b_xll_cpp1, "            // function display name\n");
     Printf(b_xll_cpp1, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(funcName).c_str(), funcName);
     Printf(b_xll_cpp1, "            // comma-delimited list of parameters\n");
-    String *x2 = f3(parms, ftype);
+    String *x2 = f3(parms);
     Printf(b_xll_cpp1, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(x2).c_str(), x2);
     Printf(b_xll_cpp1, "            // function type (0 = hidden function, 1 = worksheet function, 2 = command macro)\n");
     Printf(b_xll_cpp1, "            TempStrNoSize(\"\\x01\"\"1\"),\n");
@@ -572,11 +552,11 @@ void printFunc(Node *n) {
     Printf(b_cpp_cpp,");\n");
     Printf(b_cpp_cpp,"}\n");
 
-    f4(n, type, parms, 2);
+    f4(n, type, parms);
 
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "DLLEXPORT %s *%s(", type, funcName);
-    emitParmList(parms, b_xll_cpp3, true, false, true);
+    emitParmList(parms, b_xll_cpp3, true);
     Printf(b_xll_cpp3, ") {\n");
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
@@ -588,7 +568,7 @@ void printFunc(Node *n) {
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        %s returnValue =\n", type);
     Printf(b_xll_cpp3, "            %s::%s(", module, symname);
-    emitParmList2(parms, b_xll_cpp3, true, false, true);
+    emitParmList2(parms, b_xll_cpp3, true);
     Printf(b_xll_cpp3, ");\n");
 
     String *tm = getType("ohxl_ret", n, type);
@@ -619,34 +599,48 @@ void printMemb(Node *n) {
     Setattr(n, "oh:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
+    Parm *p0 = NewHash();
+    Setattr(p0, "name", "objectID");
+    String *nt  = NewStringf("std::string");
+    SwigType_add_qualifier(nt, "const");
+    SwigType_add_reference(nt);
+    Setattr(p0, "type", nt);
+    ParmList *parms2 = p0;
+    bool first = true;
+    for (Parm *p = parms; p; p = nextSibling(p)) {
+        if (first) {
+            first = false;
+            continue;
+        }
+        Parm *p1 = CopyParm(p);
+        Setattr(p0, "nextSibling", p1);
+        p0 = p1;
+    }
+    Printf(b_wrappers, "//***ABC\n");
+    printList(parms2);
+    Printf(b_wrappers, "// *a0* %s <<\n", Char(ParmList_str(parms)));
+    Printf(b_wrappers, "// *a1* %s <<\n", Char(ParmList_protostr(parms)));
+    Printf(b_wrappers, "// *a2* %s <<\n", Char(ParmList_str(parms2)));
+    Printf(b_wrappers, "// *a3* %s <<\n", Char(ParmList_protostr(parms2)));
+    Printf(b_wrappers, "//***ABC\n");
+
     while (SwigType *t = SwigType_typedef_resolve(type)) {
         type = t;
     }
-    Printf(b_cpp_hpp,"    %s %s(const std::string &objectID", type, funcName);
-    emitParmList(parms, b_cpp_hpp, false, true);
-    Printf(b_cpp_hpp,");\n");
+    Printf(b_cpp_hpp,"    %s %s(%s);\n", type, funcName, Char(ParmList_str(parms2)));
 
-
-    Printf(b_cpp_cpp,"%s %s::%s(const std::string &objectID\n", type, module, funcName);
-    emitParmList(parms, b_cpp_cpp, false, true);
-    Printf(b_cpp_cpp,") {\n");
-
+    Printf(b_cpp_cpp,"%s %s::%s(%s) {\n", type, module, funcName, Char(ParmList_str(parms2)));
     Printf(b_cpp_cpp,"    OH_GET_REFERENCE(x, objectID, %s::%s, %s);\n", module, cls, pname);
-
     Printf(b_cpp_cpp,"    return x->%s(", name);
-    emitParmList2(parms, b_cpp_cpp, true, true);
+    emitParmList2(parms, b_cpp_cpp);
     Printf(b_cpp_cpp,");\n", name);
-
     Printf(b_cpp_cpp,"}\n");
 
-    //String *s = NewString("");
-    //Append(s, cls);
-    //Append(s, name);
-    f4(n, type, parms, 1);
+    f4(n, 0, parms2);
 
     Printf(b_xll_cpp3, "\n");
-    Printf(b_xll_cpp3, "DLLEXPORT %s *%s(char *objectID", type, funcName);
-    emitParmList(parms, b_xll_cpp3, false, true, true);
+    Printf(b_xll_cpp3, "DLLEXPORT %s *%s(", type, funcName);
+    emitParmList(parms2, b_xll_cpp3);
     Printf(b_xll_cpp3, ") {\n");
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
@@ -660,7 +654,7 @@ void printMemb(Node *n) {
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        static %s ret;\n", type);
     Printf(b_xll_cpp3, "        ret = x->%s(", name);
-    emitParmList2(parms, b_xll_cpp3, true, true, true);
+    emitParmList2(parms, b_xll_cpp3, true);
     Printf(b_xll_cpp3, ");\n");
     Printf(b_xll_cpp3, "        return &ret;\n");
     Printf(b_xll_cpp3, "\n");
@@ -685,6 +679,31 @@ void printCtor(Node *n) {
     String *funcName = NewStringf("%s%s", prefix, temp);
     Setattr(n, "oh:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
+
+    Parm *p0 = NewHash();
+    Setattr(p0, "name", "objectID");
+    String *nt  = NewStringf("std::string");
+    SwigType_add_qualifier(nt, "const");
+    SwigType_add_reference(nt);
+    Setattr(p0, "type", nt);
+    ParmList *parms2 = p0;
+    Parm *p1 = 0;
+    for (Parm *p = parms; p; p = nextSibling(p)) {
+        p1 = CopyParm(p);
+        Setattr(p0, "nextSibling", p1);
+        p0 = p1;
+    }
+    //p1 = NewHash();
+    //Setattr(p1, "name", "permanent");
+    //Setattr(p1, "type", "bool");
+    //Setattr(p0, "nextSibling", p1);
+    Printf(b_wrappers, "//***DEF\n");
+    printList(parms2);
+    Printf(b_wrappers, "// *a0* %s <<\n", Char(ParmList_str(parms)));
+    Printf(b_wrappers, "// *a1* %s <<\n", Char(ParmList_protostr(parms)));
+    Printf(b_wrappers, "// *a2* %s <<\n", Char(ParmList_str(parms2)));
+    Printf(b_wrappers, "// *a3* %s <<\n", Char(ParmList_protostr(parms2)));
+    Printf(b_wrappers, "//***DEF\n");
 
     //while (SwigType *t = SwigType_typedef_resolve(type)) {
     //    type = t;
@@ -774,9 +793,9 @@ void printCtor(Node *n) {
     Printf(b_obj_hpp1,"        public ObjectHandler::LibraryObject<%s> {\n", pname);
     Printf(b_obj_hpp1,"    public:\n");
     Printf(b_obj_hpp1,"        %s(\n", name);
-    Printf(b_obj_hpp1,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties\n");
-    emitParmList(parms, b_obj_hpp1, false);
-    Printf(b_obj_hpp1,"            ,bool permanent)\n");
+    Printf(b_obj_hpp1,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties,\n");
+    emitParmList(parms, b_obj_hpp1);
+    Printf(b_obj_hpp1,", bool permanent)\n");
     Printf(b_obj_hpp1,"        : ObjectHandler::LibraryObject<%s>(properties, permanent) {\n", pname);
     Printf(b_obj_hpp1,"            libraryObject_ = boost::shared_ptr<%s>(new %s(", pname, pname);
     emitParmList2(parms, b_obj_hpp1);
@@ -785,20 +804,16 @@ void printCtor(Node *n) {
     Printf(b_obj_hpp1,"    };\n");
     Printf(b_obj_hpp1,"\n");
 
-    Printf(b_cpp_hpp,"    std::string %s(const std::string &objectID", funcName);
-    emitParmList(parms, b_cpp_hpp, false);
-    Printf(b_cpp_hpp,");\n");
+    Printf(b_cpp_hpp,"    std::string %s(%s);\n", funcName, Char(ParmList_str(parms2)));
 
-    Printf(b_cpp_cpp,"std::string %s::%s(const std::string &objectID", module, funcName);
-    emitParmList(parms, b_cpp_cpp, false);
-    Printf(b_cpp_cpp,") {\n");
+    Printf(b_cpp_cpp,"std::string %s::%s(%s) {\n", module, funcName, Char(ParmList_str(parms2)));
     Printf(b_cpp_cpp,"    boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
     Printf(b_cpp_cpp,"        new %s::ValueObjects::%s(\n", module, funcName);
     Printf(b_cpp_cpp,"            objectID, false));\n");
     Printf(b_cpp_cpp,"    boost::shared_ptr<ObjectHandler::Object> object(\n");
     Printf(b_cpp_cpp,"        new %s::%s(\n", module, name);
-    Printf(b_cpp_cpp,"            valueObject");
-    emitParmList2(parms, b_cpp_cpp, false);
+    Printf(b_cpp_cpp,"            valueObject, ");
+    emitParmList2(parms, b_cpp_cpp);
     Printf(b_cpp_cpp,", false));\n");
     Printf(b_cpp_cpp,"    std::string returnValue =\n");
     Printf(b_cpp_cpp,"        ObjectHandler::Repository::instance().storeObject(\n");
@@ -806,11 +821,11 @@ void printCtor(Node *n) {
     Printf(b_cpp_cpp,"    return returnValue;\n");
     Printf(b_cpp_cpp,"}\n");
 
-    f4(n, 0, parms, 0);
+    f4(n, 0, parms);
 
     Printf(b_xll_cpp3, "\n");
-    Printf(b_xll_cpp3, "DLLEXPORT char *%s(char *objectID", funcName);
-    emitParmList(parms, b_xll_cpp3, false, false, true);
+    Printf(b_xll_cpp3, "DLLEXPORT char *%s(", funcName);
+    emitParmList(parms, b_xll_cpp3, true);
     Printf(b_xll_cpp3, ") {\n");
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
@@ -825,8 +840,8 @@ void printCtor(Node *n) {
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        boost::shared_ptr<ObjectHandler::Object> object(\n");
     Printf(b_xll_cpp3, "            new %s::%s(valueObject,", module, name);
-    emitParmList2(parms, b_xll_cpp3, true, false, true);
-    Printf(b_xll_cpp3, ", false));\n");
+    emitParmList2(parms2, b_xll_cpp3, true);
+    Printf(b_xll_cpp3, "));\n");
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "        std::string returnValue =\n");
     Printf(b_xll_cpp3, "            ObjectHandler::RepositoryXL::instance().storeObject(objectID, object, true);\n");
@@ -842,21 +857,6 @@ void printCtor(Node *n) {
     Printf(b_xll_cpp3, "\n");
     Printf(b_xll_cpp3, "    }\n");
     Printf(b_xll_cpp3, "}\n");
-}
-
-void printNode(Node *n) {
-    List *list1 = Keys(n);
-    for(int i=0; i<Len(list1); ++i) {
-        String *key = Getitem(list1, i);
-        Printf(b_wrappers,"/* %d %s %s */\n", i, key, Getattr(n, key));
-    }
-}
-
-void printList(Node *n) {
-    while (n) {
-        printNode(n);
-        n = Getattr(n,"nextSibling");
-    }
 }
 
 int functionWrapper(Node *n) {
