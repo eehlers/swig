@@ -404,6 +404,7 @@ void printList(Node *n) {
 void emitParmList(ParmList *parms, File *buf, bool deref = false) {
     bool first = true;
     for (Parm *p = parms; p; p = nextSibling(p)) {
+        //if (Getattr(p, "hidden")) continue;
         if (first) {
             first = false;
         } else {
@@ -464,6 +465,7 @@ String *f2(Node *n, SwigType *type, ParmList *parms) {
         Append(s, tm);
     }
     for (Parm *p = parms; p; p = nextSibling(p)) {
+        //if (Getattr(p, "hidden")) continue;
         SwigType *t  = Getattr(p, "type");
         String *tm = getType("excel", p, t);
         Append(s, tm);
@@ -476,6 +478,7 @@ String *f3(ParmList *parms) {
     String *s = NewString("");
     bool first = true;
     for (Parm *p = parms; p; p = nextSibling(p)) {
+        //if (Getattr(p, "hidden")) continue;
         if (first) {
             first = false;
         } else {
@@ -524,7 +527,7 @@ void printFunc(Node *n) {
 
     String *temp = copyUpper(symname);
     String *funcName = NewStringf("%s%s", prefix, temp);
-    Setattr(n, "oh:funcName", funcName);
+    //Setattr(n, "oh:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
     Printf(b_obj_hpp1,"\n");
@@ -596,26 +599,17 @@ void printMemb(Node *n) {
     String *temp0 = copyUpper(cls);
     String *temp1 = copyUpper(name);
     String *funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
-    Setattr(n, "oh:funcName", funcName);
+    //Setattr(n, "oh:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
-    Parm *p0 = NewHash();
-    Setattr(p0, "name", "objectID");
+    Parm *parms2 = NewHash();
+    Setattr(parms2, "name", "objectID");
     String *nt  = NewStringf("std::string");
     SwigType_add_qualifier(nt, "const");
     SwigType_add_reference(nt);
-    Setattr(p0, "type", nt);
-    ParmList *parms2 = p0;
-    bool first = true;
-    for (Parm *p = parms; p; p = nextSibling(p)) {
-        if (first) {
-            first = false;
-            continue;
-        }
-        Parm *p1 = CopyParm(p);
-        Setattr(p0, "nextSibling", p1);
-        p0 = p1;
-    }
+    Setattr(parms2, "type", nt);
+    Setattr(parms2, "nextSibling", Getattr(parms, "nextSibling"));
+
     Printf(b_wrappers, "//***ABC\n");
     printList(parms2);
     Printf(b_wrappers, "// *a0* %s <<\n", Char(ParmList_str(parms)));
@@ -677,26 +671,17 @@ void printCtor(Node *n) {
 
     String *temp = copyUpper(name);
     String *funcName = NewStringf("%s%s", prefix, temp);
-    Setattr(n, "oh:funcName", funcName);
+    //Setattr(n, "oh:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
-    Parm *p0 = NewHash();
-    Setattr(p0, "name", "objectID");
+    Parm *parms2 = NewHash();
+    Setattr(parms2, "name", "objectID");
     String *nt  = NewStringf("std::string");
     SwigType_add_qualifier(nt, "const");
     SwigType_add_reference(nt);
-    Setattr(p0, "type", nt);
-    ParmList *parms2 = p0;
-    Parm *p1 = 0;
-    for (Parm *p = parms; p; p = nextSibling(p)) {
-        p1 = CopyParm(p);
-        Setattr(p0, "nextSibling", p1);
-        p0 = p1;
-    }
-    //p1 = NewHash();
-    //Setattr(p1, "name", "permanent");
-    //Setattr(p1, "type", "bool");
-    //Setattr(p0, "nextSibling", p1);
+    Setattr(parms2, "type", nt);
+    Setattr(parms2, "nextSibling", parms);
+
     Printf(b_wrappers, "//***DEF\n");
     printList(parms2);
     Printf(b_wrappers, "// *a0* %s <<\n", Char(ParmList_str(parms)));
