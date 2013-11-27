@@ -1,0 +1,2 @@
+export SWIG_LIB=/home/erik/repos/swig/swig/Lib
+gdb --args ../../../swig -prefix sl -c++ -objecthandler simple.i
