@@ -1,4 +1,5 @@
 *.user
 Release
-sla.?pp
+cpp_*.?pp
+!cpp_hw.?pp
 !Makefile

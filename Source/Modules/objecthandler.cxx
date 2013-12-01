@@ -14,8 +14,7 @@ String *module = 0;
 //    return type;
 //}
 
-File *initFile(const char *filename) {
-   String *outfile = NewStringf(filename);
+File *initFile(String *outfile) {
    File *f = NewFile(outfile, "w", SWIG_output_files());
    if (!f) {
       FileErrorDisplay(outfile);
@@ -39,11 +38,11 @@ struct Buffer {
    File *b_xll_cpp2;
    File *b_xll_cpp3;
 
-    //String *name_;
+    String *name_;
 
-    Buffer(/*String *name*/) {
+    Buffer(String *name) {
 
-        //name_ = Copy(name);
+        name_ = Copy(name);
 
         b_val_cpp = NewString("");
         b_val_hpp = NewString("");
@@ -58,8 +57,8 @@ struct Buffer {
         b_xll_cpp3 = NewString("");
 
         Printf(b_val_hpp, "\n");
-        Printf(b_val_hpp, "#ifndef vo_hpp\n");
-        Printf(b_val_hpp, "#define vo_hpp\n");
+        Printf(b_val_hpp, "#ifndef vo_%s_hpp\n", name);
+        Printf(b_val_hpp, "#define vo_%s_hpp\n", name);
         Printf(b_val_hpp, "\n");
         Printf(b_val_hpp, "#include <string>\n");
         Printf(b_val_hpp, "#include <set>\n");
@@ -71,7 +70,7 @@ struct Buffer {
         Printf(b_val_hpp, "\n");
 
         Printf(b_val_cpp, "\n");
-        Printf(b_val_cpp, "#include \"vo.hpp\"\n");
+        Printf(b_val_cpp, "#include \"vo_%s.hpp\"\n", name);
         Printf(b_val_cpp, "#include <boost/algorithm/string/case_conv.hpp>\n");
         Printf(b_val_cpp, "\n");
         Printf(b_val_cpp,"namespace %s {\n", module);
@@ -80,8 +79,8 @@ struct Buffer {
         Printf(b_val_cpp, "\n");
 
         Printf(b_obj_hpp0, "\n");
-        Printf(b_obj_hpp0, "#ifndef obj_hpp\n");
-        Printf(b_obj_hpp0, "#define obj_hpp\n");
+        Printf(b_obj_hpp0, "#ifndef obj_%s_hpp\n", name);
+        Printf(b_obj_hpp0, "#define obj_%s_hpp\n", name);
         Printf(b_obj_hpp0, "\n");
         Printf(b_obj_hpp0, "#include <string>\n");
         Printf(b_obj_hpp0, "#include <oh/libraryobject.hpp>\n");
@@ -92,20 +91,20 @@ struct Buffer {
         Printf(b_obj_hpp1,"namespace %s {\n", module);
 
         Printf(b_obj_cpp, "\n");
-        Printf(b_obj_cpp, "#include \"obj.hpp\"\n");
+        Printf(b_obj_cpp, "#include \"obj_%s.hpp\"\n", name);
         Printf(b_obj_cpp, "\n");
 
-        Printf(b_cpp_hpp, "#ifndef sla_hpp\n");
-        Printf(b_cpp_hpp, "#define sla_hpp\n");
+        Printf(b_cpp_hpp, "#ifndef cpp_%s_hpp\n", name);
+        Printf(b_cpp_hpp, "#define cpp_%s_hpp\n", name);
         Printf(b_cpp_hpp, "\n");
         Printf(b_cpp_hpp, "#include <string>\n");
         Printf(b_cpp_hpp, "\n");
         Printf(b_cpp_hpp, "namespace %s {\n", module);
         Printf(b_cpp_hpp, "\n");
 
-        Printf(b_cpp_cpp, "#include \"sla.hpp\"\n");
-        Printf(b_cpp_cpp, "#include \"ValueObjects/vo.hpp\"\n");
-        Printf(b_cpp_cpp, "#include \"AddinObjects/obj.hpp\"\n");
+        Printf(b_cpp_cpp, "#include \"cpp_%s.hpp\"\n", name);
+        Printf(b_cpp_cpp, "#include \"ValueObjects/vo_%s.hpp\"\n", name);
+        Printf(b_cpp_cpp, "#include \"AddinObjects/obj_%s.hpp\"\n", name);
         Printf(b_cpp_cpp, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_cpp_cpp, "#include <oh/repository.hpp>\n");
         Printf(b_cpp_cpp, "\n");
@@ -117,8 +116,8 @@ struct Buffer {
         Printf(b_xll_cpp0, "#include <ohxl/functions/export.hpp>\n");
         Printf(b_xll_cpp0, "#include <ohxl/utilities/xlutilities.hpp>\n");
         Printf(b_xll_cpp0, "#include <ohxl/objectwrapperxl.hpp>\n");
-        Printf(b_xll_cpp0, "#include \"ValueObjects/vo.hpp\"\n");
-        Printf(b_xll_cpp0, "#include \"AddinObjects/obj.hpp\"\n");
+        Printf(b_xll_cpp0, "#include \"ValueObjects/vo_%s.hpp\"\n", name);
+        Printf(b_xll_cpp0, "#include \"AddinObjects/obj_%s.hpp\"\n", name);
         Printf(b_xll_cpp0, "\n");
         Printf(b_xll_cpp0, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
         Printf(b_xll_cpp0, "   for example) also #define _MSC_VER\n");
@@ -229,14 +228,30 @@ struct Buffer {
         Printf(b_cpp_hpp, "#endif\n");
         Printf(b_cpp_hpp, "\n");
 
+        String *s_val_cpp = NewStringf("ValueObjects/vo_%s.cpp", name_);
+        String *s_val_hpp = NewStringf("ValueObjects/vo_%s.hpp", name_);
+        String *s_obj_cpp = NewStringf("AddinObjects/obj_%s.cpp", name_);
+        String *s_obj_hpp = NewStringf("AddinObjects/obj_%s.hpp", name_);
+        String *s_cpp_cpp = NewStringf("AddinCpp/cpp_%s.cpp", name_);
+        String *s_cpp_hpp = NewStringf("AddinCpp/cpp_%s.hpp", name_);
+        String *s_xll_cpp = NewStringf("AddinXl/xl_%s.cpp", name_);
+
         // OH output files
-        File *f_val_cpp = initFile("ValueObjects/vo.cpp");
-        File *f_val_hpp = initFile("ValueObjects/vo.hpp");
-        File *f_obj_cpp = initFile("AddinObjects/obj.cpp");
-        File *f_obj_hpp = initFile("AddinObjects/obj.hpp");
-        File *f_cpp_cpp = initFile("AddinCpp/sla.cpp");
-        File *f_cpp_hpp = initFile("AddinCpp/sla.hpp");
-        File *f_xll_cpp = initFile("AddinXl/AddinXl.cpp");
+        File *f_val_cpp = initFile(s_val_cpp);
+        File *f_val_hpp = initFile(s_val_hpp);
+        File *f_obj_cpp = initFile(s_obj_cpp);
+        File *f_obj_hpp = initFile(s_obj_hpp);
+        File *f_cpp_cpp = initFile(s_cpp_cpp);
+        File *f_cpp_hpp = initFile(s_cpp_hpp);
+        File *f_xll_cpp = initFile(s_xll_cpp);
+
+        Delete(s_val_cpp);
+        Delete(s_val_hpp);
+        Delete(s_obj_cpp);
+        Delete(s_obj_hpp);
+        Delete(s_cpp_cpp);
+        Delete(s_cpp_hpp);
+        Delete(s_xll_cpp);
 
        /* Write all to the file */
         Dump(b_val_cpp, f_val_cpp);
@@ -277,9 +292,17 @@ struct Buffer {
 
 // placeholder for upcoming change
 struct BufferHash {
-    Buffer b;
+    Buffer *b;
+    void init(String *name) {
+        if (!b) b = new Buffer(name);
+    }
     Buffer *f(String*) {
-        return &b;
+        return b;
+    }
+    BufferHash() : b(0) {
+    }
+    ~BufferHash() {
+        delete b;
     }
 };
 
@@ -370,7 +393,9 @@ virtual int top(Node *n) {
     // SWIG buffers will be written.  We are not going to compile this file but
     // we give it a cpp extension so that the editor will apply syntax
     // highlighting.
-    f_test = initFile("test.cpp");
+    String *s_test = NewString("test.cpp");
+    f_test = initFile(s_test);
+    Delete(s_test);
 
     // Write all of the SWIG buffers to the dummy output file.
     Printf(f_test, "//**********begin b_begin\n");
@@ -864,6 +889,7 @@ void printCtor(Node *n) {
 
 int functionWrapper(Node *n) {
     group_ = Getattr(n,"feature:oh:group");
+    bh_->init(group_);
     Printf(b_wrappers,"//XXX***functionWrapper*******\n");
     Printf(b_wrappers,"//module=%s\n", module);
     Printf(b_wrappers,"//group_=%s\n", Char(group_));

@@ -1,6 +1,6 @@
 
 #include <iostream>
-#include "AddinCpp/sla.hpp"
+#include "AddinCpp/cpp_adder.hpp"
 
 int main() {
 	std::cout << "hi" << std::endl;

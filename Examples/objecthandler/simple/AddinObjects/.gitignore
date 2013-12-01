@@ -1,4 +1,5 @@
 *.user
 Release
-obj.?pp
+obj_*.?pp
+!obj_hw.?pp
 !Makefile

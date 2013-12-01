@@ -1,6 +1,6 @@
 
 #include <iostream>
-#include "AddinCpp/sla_hw.hpp"
+#include "AddinCpp/cpp_hw.hpp"
 
 int main() {
 	std::cout << "hi" << std::endl;

@@ -3,6 +3,7 @@
 %{
 #include <Library/simplelib.hpp>
 %}
+%feature("oh:group", "adder");
 namespace SimpleLib {
     std::string func();
     class Adder {

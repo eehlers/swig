@@ -9,8 +9,8 @@ all: $(LIBHW) $(LIB)
 $(LIBHW): obj_hw.cpp obj_hw.hpp
 	g++ -shared -fPIC -g -Wall -o $(LIBHW) -I. -I.. -I$(IDIR) obj_hw.cpp
 
-$(LIB): obj.cpp obj_hw.hpp
-	g++ -shared -fPIC -g -Wall -o $(LIB) -I. -I.. -I$(IDIR) obj.cpp
+$(LIB): obj_adder.cpp obj_adder.hpp
+	g++ -shared -fPIC -g -Wall -o $(LIB) -I. -I.. -I$(IDIR) obj_adder.cpp
 
 clean:
 	rm -f $(LIBHW) $(LIB)
