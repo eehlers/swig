@@ -7,11 +7,20 @@ LIB = ../lib/libAddinCpp.so
 
 all: $(LIBHW) $(LIB)
 
-$(LIBHW): cpp_hw.cpp cpp_hw.hpp
-	g++ -shared -fPIC -g -Wall -o $(LIBHW) -I.. -I$(IDIR) cpp_hw.cpp -L../lib -lValueObjectsHw -lAddinObjectsHw -lSimpleLib -L$(LDIR) -lObjectHandler -lboost_regex -lboost_serialization -lboost_system -lboost_filesystem
+$(LIBHW): cpp_hw.o
+	g++ -shared -fPIC -g -Wall -o $(LIBHW) -I.. -I$(IDIR) cpp_hw.o -L../lib -lSimpleLib -lValueObjectsHw -lAddinObjectsHw -L$(LDIR) -lObjectHandler -lboost_regex -lboost_serialization -lboost_system -lboost_filesystem
 
-$(LIB): cpp_adder.cpp cpp_adder.hpp
-	g++ -shared -fPIC -g -Wall -o $(LIB) -I.. -I$(IDIR) cpp_adder.cpp -L../lib -lValueObjects -lAddinObjects -lSimpleLib -L$(LDIR) -lObjectHandler -lboost_regex -lboost_serialization -lboost_system -lboost_filesystem
+cpp_hw.o: cpp_hw.cpp cpp_hw.hpp
+	g++ -c -fPIC -g -Wall -o cpp_hw.o -I.. -I$(IDIR) cpp_hw.cpp
+
+$(LIB): cpp_adder.o cpp_foo.o
+	g++ -shared -fPIC -g -Wall -o $(LIB) -I.. -I$(IDIR) cpp_adder.o cpp_foo.o -L../lib -lSimpleLib -lValueObjects -lAddinObjects -L$(LDIR) -lObjectHandler -lboost_regex -lboost_serialization -lboost_system -lboost_filesystem
+
+cpp_adder.o: cpp_adder.cpp cpp_adder.hpp
+	g++ -c -fPIC -g -Wall -o cpp_adder.o -I.. -I$(IDIR) cpp_adder.cpp
+
+cpp_foo.o: cpp_foo.cpp cpp_foo.hpp
+	g++ -c -fPIC -g -Wall -o cpp_foo.o -I.. -I$(IDIR) cpp_foo.cpp
 
 clean:
 	rm -f $(LIBHW) $(LIB)

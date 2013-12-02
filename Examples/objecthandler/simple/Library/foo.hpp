@@ -7,7 +7,9 @@
 namespace SimpleLib {
 
     class Foo {
+        long f_;
     public:
+        Foo(long f);
         long f();
     };
 

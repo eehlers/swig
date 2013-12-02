@@ -2,4 +2,5 @@
 Release
 *.xll
 !Makefile
-AddinXl.cpp
+xl_*.cpp
+!xl_hw.cpp
