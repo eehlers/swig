@@ -22,5 +22,5 @@ vo_foo.o: vo_foo.cpp vo_foo.hpp
 	g++ -c -fPIC -g -Wall -o vo_foo.o -I$(IDIR) vo_foo.cpp
 
 clean:
-	rm -f $(LIBHW) $(LIB)
+	rm -f $(LIBHW) $(LIB) *.o
 

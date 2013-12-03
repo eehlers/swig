@@ -22,5 +22,5 @@ obj_foo.o: obj_foo.cpp obj_foo.hpp
 	g++ -c -fPIC -g -Wall -o obj_foo.o -I. -I.. -I$(IDIR) obj_foo.cpp
 
 clean:
-	rm -f $(LIBHW) $(LIB)
+	rm -f $(LIBHW) $(LIB) *.o
 

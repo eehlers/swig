@@ -13,5 +13,5 @@ foo.o: foo.cpp foo.hpp
 	g++ -c -fPIC -g -Wall -o foo.o -I.. foo.cpp
 
 clean:
-	rm -f $(LIB)
+	rm -f $(LIB) *.o
 

@@ -23,5 +23,5 @@ cpp_foo.o: cpp_foo.cpp cpp_foo.hpp
 	g++ -c -fPIC -g -Wall -o cpp_foo.o -I.. -I$(IDIR) cpp_foo.cpp
 
 clean:
-	rm -f $(LIBHW) $(LIB)
+	rm -f $(LIBHW) $(LIB) *.o
 
