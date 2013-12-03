@@ -41,7 +41,7 @@ struct Buffer {
 
     String *name_;
 
-    Buffer(String *name) {
+    Buffer(String *name, String *include) {
 
         name_ = Copy(name);
 
@@ -86,8 +86,8 @@ struct Buffer {
         Printf(b_obj_hpp0, "#include <string>\n");
         Printf(b_obj_hpp0, "#include <oh/libraryobject.hpp>\n");
         Printf(b_obj_hpp0, "#include <oh/valueobject.hpp>\n");
-        Printf(b_obj_hpp0, "#include <boost/shared_ptr.hpp>\n");
-        Printf(b_obj_hpp0, "#include \"Library/simplelib.hpp\"\n");
+        Printf(b_obj_hpp0, "#include <boost/shared_ptr.hpp>");
+        Printf(b_obj_hpp0, "%s\n", include);
 
         Printf(b_obj_hpp1,"namespace %s {\n", module);
 
@@ -299,10 +299,10 @@ class BufferMap {
 
 public:
 
-    void init(String *name) {
+    void init(String *name, String *include) {
         name_ = Char(name);
         if (bm_.end() == bm_.find(name_))
-            bm_[name_] = new Buffer(name);
+            bm_[name_] = new Buffer(name, include);
     }
 
     Buffer *f() {
@@ -317,7 +317,6 @@ public:
 
 class OBJECTHANDLER : public Language {
 
-    String *group_;
     BufferMap bm_;
 
 protected:
@@ -893,16 +892,18 @@ void printCtor(Node *n) {
 }
 
 int functionWrapper(Node *n) {
-    group_ = Getattr(n,"feature:oh:group");
-    bm_.init(group_);
+    String *group = Getattr(n,"feature:oh:group");
+    String *include = Getattr(n,"feature:oh:include");
+    bm_.init(group, include);
+
     Printf(b_wrappers,"//XXX***functionWrapper*******\n");
     Printf(b_wrappers,"//module=%s\n", module);
-    Printf(b_wrappers,"//group_=%s\n", Char(group_));
+    Printf(b_wrappers,"//group=%s\n", group);
     printNode(n);
     printList(Getattr(n, "parms"));
     Printf(b_wrappers,"//*************\n");
 
-  String   *nodeType   = Getattr(n,"nodeType");
+    String *nodeType = Getattr(n,"nodeType");
     if (0 == Strcmp("cdecl", nodeType)) {
         if (NULL == Getattr(n, "ismember")) {
             printFunc(n);

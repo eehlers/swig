@@ -1,11 +1,12 @@
 
 SWIG = ../../../preinst-swig
+#SWIG_DEBUG = -debug-top 4
 
 all: SWIG Library ValueObjects AddinObjects AddinCpp Main
 
 .PHONY: SWIG
 SWIG: simple.i ../../../swig
-	$(SWIG) -debug-top 4 -prefix sl -c++ -objecthandler simple.i
+	$(SWIG) $(SWIG_DEBUG)-prefix sl -c++ -objecthandler simple.i
 
 .PHONY: Library
 Library:
