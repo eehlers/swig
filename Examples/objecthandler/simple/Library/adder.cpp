@@ -1,5 +1,5 @@
 
-#include "Library/adder.hpp"
+#include "adder.hpp"
 #include <iostream>
 
 std::string SimpleLib::func() {

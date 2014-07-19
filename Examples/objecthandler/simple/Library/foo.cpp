@@ -1,5 +1,5 @@
 
-#include "Library/foo.hpp"
+#include "foo.hpp"
 
 SimpleLib::Foo::Foo(long f) : f_(f) {}
 

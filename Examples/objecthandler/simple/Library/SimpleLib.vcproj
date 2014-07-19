@@ -144,7 +144,19 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\simplelib.cpp"
+			RelativePath=".\adder.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\adder.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\foo.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\foo.hpp"
 			>
 		</File>
 		<File

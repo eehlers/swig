@@ -145,11 +145,11 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\sla_hw.cpp"
+			RelativePath=".\cpp_hw.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\sla_hw.hpp"
+			RelativePath=".\cpp_hw.hpp"
 			>
 		</File>
 	</Files>

@@ -145,11 +145,19 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\obj.cpp"
+			RelativePath=".\obj_adder.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\obj.hpp"
+			RelativePath=".\obj_adder.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\obj_foo.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\obj_foo.hpp"
 			>
 		</File>
 	</Files>

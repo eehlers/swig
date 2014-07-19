@@ -133,7 +133,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ObjectHandler-vc90-mt-1_3_0.lib"
+				AdditionalDependencies="ObjectHandler-vc90-mt-1_5_0.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\..\quantlib\ObjectHandler\lib"
 				GenerateDebugInformation="true"

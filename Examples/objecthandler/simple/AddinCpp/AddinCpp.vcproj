@@ -145,11 +145,19 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\sla.cpp"
+			RelativePath=".\cpp_adder.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\sla.hpp"
+			RelativePath=".\cpp_adder.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\cpp_foo.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\cpp_foo.hpp"
 			>
 		</File>
 	</Files>
