@@ -747,6 +747,14 @@ void printCtor(Node *n) {
     Setattr(parms2, "type", nt);
     Setattr(parms2, "nextSibling", parms);
 
+    Parm *parms3 = NewHash();
+    Setattr(parms3, "name", "objectID");
+    String *nt2  = NewStringf("std::string");
+    SwigType_add_qualifier(nt2, "const");
+    SwigType_add_reference(nt2);
+    Setattr(parms3, "type", nt2);
+    Setattr(parms3, "nextSibling", parms2);
+
     Printf(b_wrappers, "//***DEF\n");
     printList(parms2);
     Printf(b_wrappers, "// *a0* %s <<\n", Char(ParmList_str(parms)));
@@ -869,7 +877,7 @@ void printCtor(Node *n) {
     Printf(bm_.f()->b_cpp_cpp,"    return returnValue;\n");
     Printf(bm_.f()->b_cpp_cpp,"}\n");
 
-    f4(n, 0, parms2);
+    f4(n, 0, parms3);
 
     Printf(bm_.f()->b_xll_cpp3, "\n");
     Printf(bm_.f()->b_xll_cpp3, "DLLEXPORT char *%s(", funcName);
