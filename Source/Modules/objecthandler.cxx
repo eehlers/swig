@@ -567,7 +567,7 @@ String *f3(ParmList *parms) {
     String *s = NewString("");
     bool first = true;
     for (Parm *p = parms; p; p = nextSibling(p)) {
-        //if (Getattr(p, "hidden")) continue;
+        if (Getattr(p, "hidden")) continue;
         if (first) {
             first = false;
         } else {
@@ -781,6 +781,7 @@ void printCtor(Node *n) {
     SwigType_add_qualifier(nt2, "const");
     SwigType_add_reference(nt2);
     Setattr(parms3, "type", nt2);
+    Setattr(parms3, "hidden", "1");
     Setattr(parms3, "nextSibling", parms2);
 
     Printf(b_wrappers, "//***DEF\n");
