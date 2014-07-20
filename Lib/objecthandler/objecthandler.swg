@@ -17,15 +17,15 @@
         return &ret;
 %}
 
-%typemap(ohxl_ret) double {
+%typemap(ohxl_ret) double %{
         static double ret = 0;
         ret = returnValue;
         return &ret;
-}
+%}
 
-%typemap(ohxl_ret) std::string {
+%typemap(ohxl_ret) std::string %{
         static char ret[XL_MAX_STR_LEN];
         ObjectHandler::stringToChar(returnValue, ret);
         return ret;
-}
+%}
 
