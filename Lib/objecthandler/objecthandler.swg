@@ -8,6 +8,9 @@
 %typemap(excel) double "E";
 %typemap(excel) bool "L";
 
+%typemap(excel_in) long "long*";
+%typemap(excel_in) std::string& "char*";
+
 %typemap(ohxl_ret) bool %{
         static bool ret = true;
         ret = returnValue;
@@ -25,3 +28,4 @@
         ObjectHandler::stringToChar(returnValue, ret);
         return ret;
 }
+
