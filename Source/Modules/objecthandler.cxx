@@ -739,6 +739,8 @@ void printCtor(Node *n) {
     Setattr(n, "oh:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
+    // Create from parms another list parms2 - prepend an argument to represent
+    // the object ID which is passed in as the first parameter to every ctor.
     Parm *parms2 = NewHash();
     Setattr(parms2, "name", "objectID");
     String *nt  = NewStringf("std::string");
@@ -747,8 +749,10 @@ void printCtor(Node *n) {
     Setattr(parms2, "type", nt);
     Setattr(parms2, "nextSibling", parms);
 
+    // Create from parms2 another list parms3 - prepend an argument to represent
+    // the object ID which is the return value of addin func that wraps ctor.
     Parm *parms3 = NewHash();
-    Setattr(parms3, "name", "objectID");
+    Setattr(parms3, "name", "");
     String *nt2  = NewStringf("std::string");
     SwigType_add_qualifier(nt2, "const");
     SwigType_add_reference(nt2);
