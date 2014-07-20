@@ -9,10 +9,13 @@
 %typemap(excel) bool "L";
 
 %typemap(excel_in) long "long*";
+%typemap(excel_in) double "double*";
 %typemap(excel_in) std::string& "char*";
 
-%typemap(excel_out) std::string "char*";
+%typemap(excel_out) bool "bool*";
 %typemap(excel_out) long "long*";
+%typemap(excel_out) double "double*";
+%typemap(excel_out) std::string "char*";
 
 %typemap(ohxl_ret) bool %{
         static bool ret = true;
