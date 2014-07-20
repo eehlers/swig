@@ -389,6 +389,14 @@ virtual int top(Node *n) {
     Swig_register_filebyname("director", b_director);
     Swig_register_filebyname("director_h", b_director_h);
 
+    File *b_xll_cpp4 = NewString("");
+    String *s_xll_cpp4 = NewStringf("AddinXl/xl_addin.cpp");
+    File *f_xll_cpp4 = initFile(s_xll_cpp4);
+    Printf(b_xll_cpp4, "hi\n");
+    Dump(b_xll_cpp4, f_xll_cpp4);
+    Delete(b_xll_cpp4);
+    Delete(f_xll_cpp4);
+
    /* Output module initialization code */
    Swig_banner(b_begin);
 
