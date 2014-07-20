@@ -666,7 +666,7 @@ void printMemb(Node *n) {
     String *temp0 = copyUpper(cls);
     String *temp1 = copyUpper(name);
     String *funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
-    //Setattr(n, "oh:funcName", funcName);
+    Setattr(n, "oh:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
     Parm *parms2 = NewHash();
@@ -736,7 +736,7 @@ void printCtor(Node *n) {
 
     String *temp = copyUpper(name);
     String *funcName = NewStringf("%s%s", prefix, temp);
-    //Setattr(n, "oh:funcName", funcName);
+    Setattr(n, "oh:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
     Parm *parms2 = NewHash();
