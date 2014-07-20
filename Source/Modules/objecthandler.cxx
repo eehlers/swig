@@ -152,7 +152,7 @@ struct Buffer {
         Printf(b_xll_cpp2, "    } catch (const std::exception &e) {\n");
         Printf(b_xll_cpp2, "\n");
         Printf(b_xll_cpp2, "        std::ostringstream err;\n");
-        Printf(b_xll_cpp2, "        err << \"Error loading AddinXlHw: \" << e.what();\n");
+        Printf(b_xll_cpp2, "        err << \"Error loading AddinXl: \" << e.what();\n");
         Printf(b_xll_cpp2, "        Excel(xlcAlert, 0, 1, TempStrStl(err.str()));\n");
         Printf(b_xll_cpp2, "        Excel(xlFree, 0, 1, &xDll);\n");
         Printf(b_xll_cpp2, "        return 0;\n");
@@ -181,7 +181,7 @@ struct Buffer {
         Printf(b_xll_cpp2, "    } catch (const std::exception &e) {\n");
         Printf(b_xll_cpp2, "\n");
         Printf(b_xll_cpp2, "        std::ostringstream err;\n");
-        Printf(b_xll_cpp2, "        err << \"Error unloading AddinXlHw: \" << e.what();\n");
+        Printf(b_xll_cpp2, "        err << \"Error unloading AddinXl: \" << e.what();\n");
         Printf(b_xll_cpp2, "        Excel(xlcAlert, 0, 1, TempStrStl(err.str()));\n");
         Printf(b_xll_cpp2, "        Excel(xlFree, 0, 1, &xDll);\n");
         Printf(b_xll_cpp2, "        return 0;\n");
