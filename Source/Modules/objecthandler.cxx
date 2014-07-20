@@ -928,8 +928,8 @@ void printCtor(Node *n) {
     Printf(bm_.f()->b_xll_cpp3, "\n");
     Printf(bm_.f()->b_xll_cpp3, "        boost::shared_ptr<ObjectHandler::Object> object(\n");
     Printf(bm_.f()->b_xll_cpp3, "            new %s::%s(valueObject,", module, name);
-    emitParmList2(parms2, bm_.f()->b_xll_cpp3, true);
-    Printf(bm_.f()->b_xll_cpp3, "));\n");
+    emitParmList2(parms, bm_.f()->b_xll_cpp3, true);
+    Printf(bm_.f()->b_xll_cpp3, ", false));\n");
     Printf(bm_.f()->b_xll_cpp3, "\n");
     Printf(bm_.f()->b_xll_cpp3, "        std::string returnValue =\n");
     Printf(bm_.f()->b_xll_cpp3, "            ObjectHandler::RepositoryXL::instance().storeObject(objectID, object, true);\n");
