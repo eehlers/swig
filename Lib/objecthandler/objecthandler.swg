@@ -11,6 +11,9 @@
 %typemap(excel_in) long "long*";
 %typemap(excel_in) std::string& "char*";
 
+%typemap(excel_out) std::string "char*";
+%typemap(excel_out) long "long*";
+
 %typemap(ohxl_ret) bool %{
         static bool ret = true;
         ret = returnValue;

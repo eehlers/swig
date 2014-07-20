@@ -619,6 +619,7 @@ void printFunc(Node *n) {
     Setattr(n, "oh:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
+
     Printf(bm_.f()->b_obj_hpp1,"\n");
     Printf(bm_.f()->b_obj_hpp1,"    %s %s(", type, symname);
     emitParmList(parms, bm_.f()->b_obj_hpp1);
@@ -646,8 +647,9 @@ void printFunc(Node *n) {
 
     f4(n, type, parms);
 
+    String *ret_type = getType("excel_out", n, type);
     Printf(bm_.f()->b_xll_cpp3, "\n");
-    Printf(bm_.f()->b_xll_cpp3, "DLLEXPORT %s *%s(", type, funcName);
+    Printf(bm_.f()->b_xll_cpp3, "DLLEXPORT %s %s(", ret_type, funcName);
     emitParmList(parms, bm_.f()->b_xll_cpp3, true);
     Printf(bm_.f()->b_xll_cpp3, ") {\n");
     Printf(bm_.f()->b_xll_cpp3, "\n");
@@ -721,8 +723,9 @@ void printMemb(Node *n) {
 
     f4(n, type, parms2);
 
+    String *ret_type = getType("excel_out", n, type);
     Printf(bm_.f()->b_xll_cpp3, "\n");
-    Printf(bm_.f()->b_xll_cpp3, "DLLEXPORT %s *%s(", type, funcName);
+    Printf(bm_.f()->b_xll_cpp3, "DLLEXPORT %s %s(", ret_type, funcName);
     emitParmList3(parms2, bm_.f()->b_xll_cpp3);
     Printf(bm_.f()->b_xll_cpp3, ") {\n");
     Printf(bm_.f()->b_xll_cpp3, "\n");
