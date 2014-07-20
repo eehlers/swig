@@ -695,7 +695,7 @@ void printMemb(Node *n) {
     Printf(bm_.f()->b_cpp_cpp,");\n", name);
     Printf(bm_.f()->b_cpp_cpp,"}\n");
 
-    f4(n, 0, parms2);
+    f4(n, type, parms2);
 
     Printf(bm_.f()->b_xll_cpp3, "\n");
     Printf(bm_.f()->b_xll_cpp3, "DLLEXPORT %s *%s(", type, funcName);
