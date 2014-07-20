@@ -669,6 +669,8 @@ void printMemb(Node *n) {
     Setattr(n, "oh:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
+    // Create from parms another list parms2 - prepend an argument to represent
+    // the object ID which is passed in as the first parameter to every member.
     Parm *parms2 = NewHash();
     Setattr(parms2, "name", "objectID");
     String *nt  = NewStringf("std::string");
@@ -699,7 +701,7 @@ void printMemb(Node *n) {
 
     Printf(bm_.f()->b_xll_cpp3, "\n");
     Printf(bm_.f()->b_xll_cpp3, "DLLEXPORT %s *%s(", type, funcName);
-    emitParmList(parms2, bm_.f()->b_xll_cpp3);
+    emitParmList3(parms2, bm_.f()->b_xll_cpp3);
     Printf(bm_.f()->b_xll_cpp3, ") {\n");
     Printf(bm_.f()->b_xll_cpp3, "\n");
     Printf(bm_.f()->b_xll_cpp3, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
