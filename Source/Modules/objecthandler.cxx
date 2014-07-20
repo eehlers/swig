@@ -869,7 +869,7 @@ void printCtor(Node *n) {
     Printf(bm_.f()->b_cpp_cpp,"    return returnValue;\n");
     Printf(bm_.f()->b_cpp_cpp,"}\n");
 
-    f4(n, 0, parms);
+    f4(n, 0, parms2);
 
     Printf(bm_.f()->b_xll_cpp3, "\n");
     Printf(bm_.f()->b_xll_cpp3, "DLLEXPORT char *%s(", funcName);
