@@ -23,6 +23,10 @@
         return &ret;
 %}
 
+%typemap(ohxl_ret) long %{
+        return 0;
+%}
+
 %typemap(ohxl_ret) double %{
         static double ret = 0;
         ret = returnValue;

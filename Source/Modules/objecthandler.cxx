@@ -671,14 +671,15 @@ void printFunc(Node *n, bool manual) {
     }
 
     Printf(bm_.f()->b_cpp_hpp->b,"    %s %s(", type, funcName);
-    emitParmList(parms, bm_.f()->b_cpp_hpp->b);
+    emitParmList4(parms, bm_.f()->b_cpp_hpp->b);
     Printf(bm_.f()->b_cpp_hpp->b,");\n");
 
     Printf(bm_.f()->b_cpp_cpp->b,"%s %s::%s(", type, module, funcName);
-    emitParmList(parms, bm_.f()->b_cpp_cpp->b);
+    emitParmList4(parms, bm_.f()->b_cpp_cpp->b);
     Printf(bm_.f()->b_cpp_cpp->b,") {\n");
+    emitParmList5(parms, bm_.f()->b_cpp_cpp->b);
     Printf(bm_.f()->b_cpp_cpp->b,"    return %s::%s(", module, symname);
-    emitParmList2(parms, bm_.f()->b_cpp_cpp->b);
+    emitParmList6(parms, bm_.f()->b_cpp_cpp->b);
     Printf(bm_.f()->b_cpp_cpp->b,");\n");
     Printf(bm_.f()->b_cpp_cpp->b,"}\n");
 
