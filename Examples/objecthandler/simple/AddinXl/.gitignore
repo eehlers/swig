@@ -3,4 +3,4 @@ Release
 *.xll
 !Makefile
 xl_*.cpp
-!xl_hw.cpp
+!xl_hw*.cpp

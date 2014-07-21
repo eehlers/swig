@@ -1,5 +1,5 @@
 *.user
 Release
 cpp_*.?pp
-!cpp_hw.?pp
+!cpp_hw*.?pp
 !Makefile

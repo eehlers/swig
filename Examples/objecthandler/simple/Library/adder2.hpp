@@ -19,8 +19,8 @@ namespace SimpleLib {
     private:
         long x_;
     public:
-        Adder2(Long x);
-        long add(Long y);
+        Adder2(long x);
+        long add(long y);
     };
 
 };
