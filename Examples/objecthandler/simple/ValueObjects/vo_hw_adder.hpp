@@ -1,6 +1,6 @@
 
-#ifndef vo_hw_hpp
-#define vo_hw_hpp
+#ifndef vo_hw_adder_hpp
+#define vo_hw_adder_hpp
 
 #include <string>
 #include <set>

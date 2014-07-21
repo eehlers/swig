@@ -1,6 +1,6 @@
 
-#ifndef cpp_hw_hpp
-#define cpp_hw_hpp
+#ifndef cpp_hw_adder_hpp
+#define cpp_hw_adder_hpp
 
 #include <string>
 

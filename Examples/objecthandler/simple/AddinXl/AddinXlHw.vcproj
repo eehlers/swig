@@ -170,7 +170,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\xl_hw.cpp"
+			RelativePath=".\xl_hw_adder.cpp"
 			>
 		</File>
 	</Files>

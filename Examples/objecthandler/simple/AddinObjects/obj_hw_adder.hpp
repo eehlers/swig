@@ -1,6 +1,6 @@
 
-#ifndef obj_hpp
-#define obj_hpp
+#ifndef obj_hw_adder_hpp
+#define obj_hw_adder_hpp
 
 #include <string>
 #include <oh/libraryobject.hpp>

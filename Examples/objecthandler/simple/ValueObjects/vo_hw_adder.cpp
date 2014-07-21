@@ -1,5 +1,5 @@
 
-#include "vo_hw.hpp"
+#include "vo_hw_adder.hpp"
 #include <boost/algorithm/string/case_conv.hpp>
 
 const char* ValueObjects::slAdder::mPropertyNames[] = {

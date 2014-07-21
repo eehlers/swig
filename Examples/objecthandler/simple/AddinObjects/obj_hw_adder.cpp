@@ -1,5 +1,5 @@
 
-#include "obj_hw.hpp"
+#include "obj_hw_adder.hpp"
 
 std::string SimpleLibAddin::func() {
     return SimpleLib::func();

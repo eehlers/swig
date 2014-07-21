@@ -1,7 +1,7 @@
 
-#include "cpp_hw.hpp"
-#include "ValueObjects/vo_hw.hpp"
-#include "AddinObjects/obj_hw.hpp"
+#include "cpp_hw_adder.hpp"
+#include "ValueObjects/vo_hw_adder.hpp"
+#include "AddinObjects/obj_hw_adder.hpp"
 #include <boost/shared_ptr.hpp>
 #include <oh/repository.hpp>
 
