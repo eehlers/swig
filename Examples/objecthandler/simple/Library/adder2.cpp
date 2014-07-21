@@ -17,7 +17,7 @@ long SimpleLib::Long::x() {
 SimpleLib::Adder2::Adder2(Long x) : x_(x.x()) {
 }
 
-//long SimpleLib::Adder2::add(Long y) {
-//    return x_ + y.x();
-//}
+long SimpleLib::Adder2::add(Long y) {
+    return x_ + y.x();
+}
 

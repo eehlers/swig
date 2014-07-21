@@ -28,6 +28,8 @@ namespace ObjectHandler {
             long l;
             if (is_numeric(s, l))
                 return SimpleLib::Long(l);
+            else
+                OH_FAIL("unable to convert string '" << s << "' to type 'SimpleLib::Long'");
         }
         OH_FAIL("unable to convert type '" << c.type().name() << "' to type 'SimpleLib::Long'");
     }
@@ -37,19 +39,6 @@ namespace ObjectHandler {
         return convertLong(c);
     }
 }
-
-//std::string SimpleLibAddin::slLong(const std::string &objectID, long x) {
-//    boost::shared_ptr<ObjectHandler::ValueObject> valueObject(
-//        new ValueObjects::slLong(
-//            objectID, false, x));
-//    boost::shared_ptr<ObjectHandler::Object> object(
-//        new SimpleLibAddin::Long(
-//            valueObject, false, x));
-//    std::string returnValue =
-//        ObjectHandler::Repository::instance().storeObject(
-//            objectID, object, false, valueObject);
-//    return returnValue;
-//}
 
 std::string SimpleLibAddin::slAdder2(const std::string &objectID, const ObjectHandler::property_t& x) {
     boost::shared_ptr<ObjectHandler::ValueObject> valueObject(
@@ -65,8 +54,9 @@ std::string SimpleLibAddin::slAdder2(const std::string &objectID, const ObjectHa
     return returnValue;
 }
 
-//long SimpleLibAddin::slAdder2Add(const std::string &objectID, long y) {
-//    OH_GET_REFERENCE(x, objectID, SimpleLibAddin::Adder2, SimpleLib::Adder2);
-//    return x->add(y);
-//}
+long SimpleLibAddin::slAdder2Add(const std::string &objectID, const ObjectHandler::property_t& y) {
+    OH_GET_REFERENCE(x, objectID, SimpleLibAddin::Adder2, SimpleLib::Adder2);
+    SimpleLib::Long y2=ObjectHandler::convert2<SimpleLib::Long, ObjectHandler::property_t>(y);
+    return x->add(y2);
+}
 

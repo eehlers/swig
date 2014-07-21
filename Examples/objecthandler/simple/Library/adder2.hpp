@@ -20,7 +20,7 @@ namespace SimpleLib {
         long x_;
     public:
         Adder2(SimpleLib::Long x);
-        //long add(SimpleLib::Long y);
+        long add(SimpleLib::Long y);
     };
 
 };
