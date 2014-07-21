@@ -52,34 +52,39 @@ struct BufferGroup {
     Buffer *b_xll_cpp;
 
     String *name_;
+    bool manual_;
 
-    BufferGroup(String *name, String *include) {
+    BufferGroup(String *name, String *include, bool manual) {
 
         name_ = Copy(name);
+        manual_ = manual;
 
         String *s_val_cpp = NewStringf("ValueObjects/vo_%s.cpp", name_);
         String *s_val_hpp = NewStringf("ValueObjects/vo_%s.hpp", name_);
-        String *s_obj_cpp = NewStringf("AddinObjects/obj_%s.cpp", name_);
-        String *s_obj_hpp = NewStringf("AddinObjects/obj_%s.hpp", name_);
         String *s_cpp_cpp = NewStringf("AddinCpp/cpp_%s.cpp", name_);
         String *s_cpp_hpp = NewStringf("AddinCpp/cpp_%s.hpp", name_);
         String *s_xll_cpp = NewStringf("AddinXl/xl_%s.cpp", name_);
 
         b_val_cpp = new Buffer(s_val_cpp);
         b_val_hpp = new Buffer(s_val_hpp);
-        b_obj_cpp = new Buffer(s_obj_cpp);
-        b_obj_hpp = new Buffer(s_obj_hpp);
         b_cpp_cpp = new Buffer(s_cpp_cpp);
         b_cpp_hpp = new Buffer(s_cpp_hpp);
         b_xll_cpp = new Buffer(s_xll_cpp);
 
         Delete(s_val_cpp);
         Delete(s_val_hpp);
-        Delete(s_obj_cpp);
-        Delete(s_obj_hpp);
         Delete(s_cpp_cpp);
         Delete(s_cpp_hpp);
         Delete(s_xll_cpp);
+
+        if (!manual_) {
+            String *s_obj_cpp = NewStringf("AddinObjects/obj_%s.cpp", name_);
+            String *s_obj_hpp = NewStringf("AddinObjects/obj_%s.hpp", name_);
+            b_obj_cpp = new Buffer(s_obj_cpp);
+            b_obj_hpp = new Buffer(s_obj_hpp);
+            Delete(s_obj_cpp);
+            Delete(s_obj_hpp);
+        }
 
         Printf(b_val_hpp->b, "\n");
         Printf(b_val_hpp->b, "#ifndef vo_%s_hpp\n", name);
@@ -103,6 +108,7 @@ struct BufferGroup {
         Printf(b_val_cpp->b, "namespace ValueObjects {\n");
         Printf(b_val_cpp->b, "\n");
 
+        if (!manual_) {
         Printf(b_obj_hpp->b, "\n");
         Printf(b_obj_hpp->b, "#ifndef obj_%s_hpp\n", name);
         Printf(b_obj_hpp->b, "#define obj_%s_hpp\n", name);
@@ -117,6 +123,7 @@ struct BufferGroup {
         Printf(b_obj_cpp->b, "\n");
         Printf(b_obj_cpp->b, "#include \"obj_%s.hpp\"\n", name);
         Printf(b_obj_cpp->b, "\n");
+        }
 
         Printf(b_cpp_hpp->b, "#ifndef cpp_%s_hpp\n", name);
         Printf(b_cpp_hpp->b, "#define cpp_%s_hpp\n", name);
@@ -169,10 +176,12 @@ struct BufferGroup {
         Printf(b_val_cpp->b, "} // namespace ValueObjects\n");
         Printf(b_val_cpp->b, "\n");
 
+        if (!manual_) {
         Printf(b_obj_hpp->b, "} // namespace %s\n", module);
         Printf(b_obj_hpp->b, "\n");
         Printf(b_obj_hpp->b, "#endif\n");
         Printf(b_obj_hpp->b, "\n");
+        }
 
         Printf(b_cpp_hpp->b, "\n");
         Printf(b_cpp_hpp->b, "} // namespace %s\n", module);
@@ -182,8 +191,10 @@ struct BufferGroup {
 
         delete b_val_cpp;
         delete b_val_hpp;
+        if (!manual_) {
         delete b_obj_cpp;
         delete b_obj_hpp;
+        }
         delete b_cpp_cpp;
         delete b_cpp_hpp;
         delete b_xll_cpp;
@@ -198,10 +209,10 @@ class BufferMap {
 
 public:
 
-    void init(String *name, String *include) {
+    void init(String *name, String *include, bool manual) {
         name_ = Char(name);
         if (bm_.end() == bm_.find(name_))
-            bm_[name_] = new BufferGroup(name, include);
+            bm_[name_] = new BufferGroup(name, include, manual);
     }
 
     BufferGroup *f() {
@@ -726,7 +737,7 @@ void printMemb(Node *n) {
     Printf(bm_.f()->b_xll_cpp->b, "}\n");
 }
 
-void printCtor(Node *n) {
+void printCtor(Node *n, bool manual) {
     Printf(bm_.f()->b_cpp_cpp->b,"//****CTOR*****\n");
     String   *name   = Getattr(n,"name");
     //SwigType *type   = Getattr(n,"type");
@@ -849,6 +860,7 @@ void printCtor(Node *n) {
     Printf(bm_.f()->b_val_cpp->b,"            Permanent_(Permanent) {\n");
     Printf(bm_.f()->b_val_cpp->b,"        }\n");
 
+    if (!manual) {
     Printf(bm_.f()->b_obj_hpp->b,"\n");
     Printf(bm_.f()->b_obj_hpp->b,"    class %s : \n", name);
     Printf(bm_.f()->b_obj_hpp->b,"        public ObjectHandler::LibraryObject<%s> {\n", pname);
@@ -864,6 +876,7 @@ void printCtor(Node *n) {
     Printf(bm_.f()->b_obj_hpp->b,"        }\n");
     Printf(bm_.f()->b_obj_hpp->b,"    };\n");
     Printf(bm_.f()->b_obj_hpp->b,"\n");
+    }
 
     Printf(bm_.f()->b_cpp_hpp->b,"    std::string %s(%s);\n", funcName, Char(ParmList_str(parms2)));
 
@@ -923,7 +936,8 @@ void printCtor(Node *n) {
 int functionWrapper(Node *n) {
     String *group = Getattr(n,"feature:oh:group");
     String *include = Getattr(n,"feature:oh:include");
-    bm_.init(group, include);
+    bool manual = checkAttribute(n,"feature:oh:generation","manual");
+    bm_.init(group, include, manual);
 
     Printf(b_wrappers,"//XXX***functionWrapper*******\n");
     Printf(b_wrappers,"//module=%s\n", module);
@@ -940,7 +954,7 @@ int functionWrapper(Node *n) {
             printMemb(n);
         }
     } else if (0 == Strcmp("constructor", nodeType)) {
-            printCtor(n);
+            printCtor(n, manual);
     }
 
   return SWIG_OK;
