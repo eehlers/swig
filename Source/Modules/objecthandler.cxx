@@ -232,7 +232,7 @@ protected:
     // SWIG output files
     File *f_test;
 
-    File *b_xll_cpp4;
+    Buffer *b_xll_cpp4;
 
 public:
 
@@ -290,41 +290,41 @@ virtual int top(Node *n) {
     Swig_register_filebyname("director", b_director);
     Swig_register_filebyname("director_h", b_director_h);
 
-    b_xll_cpp4 = NewString("");
-    String *s_xll_cpp4 = NewStringf("AddinXl/xl_addin.cpp");
-    File *f_xll_cpp4 = initFile(s_xll_cpp4);
+    String *s_xll_cpp4 = NewString("AddinXl/xl_addin.cpp");
+    b_xll_cpp4 = new Buffer(s_xll_cpp4);
+    Delete(s_xll_cpp4);
 
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "#include <ohxl/objecthandlerxl.hpp>\n");
-        Printf(b_xll_cpp4, "#include <ohxl/register/register_all.hpp>\n");
-        Printf(b_xll_cpp4, "#include <ohxl/functions/export.hpp>\n");
-        Printf(b_xll_cpp4, "#include <ohxl/utilities/xlutilities.hpp>\n");
-        Printf(b_xll_cpp4, "#include <ohxl/objectwrapperxl.hpp>\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
-        Printf(b_xll_cpp4, "   for example) also #define _MSC_VER\n");
-        Printf(b_xll_cpp4, "*/\n");
-        Printf(b_xll_cpp4, "#ifdef BOOST_MSVC\n");
-        Printf(b_xll_cpp4, "#  define BOOST_LIB_DIAGNOSTIC\n");
-        Printf(b_xll_cpp4, "#  include <oh/auto_link.hpp>\n");
-        Printf(b_xll_cpp4, "#  undef BOOST_LIB_DIAGNOSTIC\n");
-        Printf(b_xll_cpp4, "#endif\n");
-        Printf(b_xll_cpp4, "#include <sstream>\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "DLLEXPORT int xlAutoOpen() {\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "    // Instantiate the ObjectHandler Repository\n");
-        Printf(b_xll_cpp4, "    static ObjectHandler::RepositoryXL repositoryXL;\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "    static XLOPER xDll;\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "    try {\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "        Excel(xlGetName, &xDll, 0);\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "        ObjectHandler::Configuration::instance().init();\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "        registerOhFunctions(xDll);\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "#include <ohxl/objecthandlerxl.hpp>\n");
+        Printf(b_xll_cpp4->b, "#include <ohxl/register/register_all.hpp>\n");
+        Printf(b_xll_cpp4->b, "#include <ohxl/functions/export.hpp>\n");
+        Printf(b_xll_cpp4->b, "#include <ohxl/utilities/xlutilities.hpp>\n");
+        Printf(b_xll_cpp4->b, "#include <ohxl/objectwrapperxl.hpp>\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
+        Printf(b_xll_cpp4->b, "   for example) also #define _MSC_VER\n");
+        Printf(b_xll_cpp4->b, "*/\n");
+        Printf(b_xll_cpp4->b, "#ifdef BOOST_MSVC\n");
+        Printf(b_xll_cpp4->b, "#  define BOOST_LIB_DIAGNOSTIC\n");
+        Printf(b_xll_cpp4->b, "#  include <oh/auto_link.hpp>\n");
+        Printf(b_xll_cpp4->b, "#  undef BOOST_LIB_DIAGNOSTIC\n");
+        Printf(b_xll_cpp4->b, "#endif\n");
+        Printf(b_xll_cpp4->b, "#include <sstream>\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "DLLEXPORT int xlAutoOpen() {\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "    // Instantiate the ObjectHandler Repository\n");
+        Printf(b_xll_cpp4->b, "    static ObjectHandler::RepositoryXL repositoryXL;\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "    static XLOPER xDll;\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "    try {\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "        Excel(xlGetName, &xDll, 0);\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "        ObjectHandler::Configuration::instance().init();\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "        registerOhFunctions(xDll);\n");
 
    /* Output module initialization code */
    Swig_banner(b_begin);
@@ -332,65 +332,63 @@ virtual int top(Node *n) {
    /* Emit code for children */
    Language::top(n);
 
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "        Excel(xlFree, 0, 1, &xDll);\n");
-        Printf(b_xll_cpp4, "        return 1;\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "    } catch (const std::exception &e) {\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "        std::ostringstream err;\n");
-        Printf(b_xll_cpp4, "        err << \"Error loading AddinXl: \" << e.what();\n");
-        Printf(b_xll_cpp4, "        Excel(xlcAlert, 0, 1, TempStrStl(err.str()));\n");
-        Printf(b_xll_cpp4, "        Excel(xlFree, 0, 1, &xDll);\n");
-        Printf(b_xll_cpp4, "        return 0;\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "    } catch (...) {\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "        Excel(xlFree, 0, 1, &xDll);\n");
-        Printf(b_xll_cpp4, "        return 0;\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "    }\n");
-        Printf(b_xll_cpp4, "}\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "DLLEXPORT int xlAutoClose() {\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "    static XLOPER xDll;\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "    try {\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "        Excel(xlGetName, &xDll, 0);\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "        unregisterOhFunctions(xDll);\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "        Excel(xlFree, 0, 1, &xDll);\n");
-        Printf(b_xll_cpp4, "        return 1;\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "    } catch (const std::exception &e) {\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "        std::ostringstream err;\n");
-        Printf(b_xll_cpp4, "        err << \"Error unloading AddinXl: \" << e.what();\n");
-        Printf(b_xll_cpp4, "        Excel(xlcAlert, 0, 1, TempStrStl(err.str()));\n");
-        Printf(b_xll_cpp4, "        Excel(xlFree, 0, 1, &xDll);\n");
-        Printf(b_xll_cpp4, "        return 0;\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "    } catch (...) {\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "        Excel(xlFree, 0, 1, &xDll);\n");
-        Printf(b_xll_cpp4, "        return 0;\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "    }\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "}\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "DLLEXPORT void xlAutoFree(XLOPER *px) {\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "    freeOper(px);\n");
-        Printf(b_xll_cpp4, "\n");
-        Printf(b_xll_cpp4, "}\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
+        Printf(b_xll_cpp4->b, "        return 1;\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "    } catch (const std::exception &e) {\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "        std::ostringstream err;\n");
+        Printf(b_xll_cpp4->b, "        err << \"Error loading AddinXl: \" << e.what();\n");
+        Printf(b_xll_cpp4->b, "        Excel(xlcAlert, 0, 1, TempStrStl(err.str()));\n");
+        Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
+        Printf(b_xll_cpp4->b, "        return 0;\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "    } catch (...) {\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
+        Printf(b_xll_cpp4->b, "        return 0;\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "    }\n");
+        Printf(b_xll_cpp4->b, "}\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "DLLEXPORT int xlAutoClose() {\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "    static XLOPER xDll;\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "    try {\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "        Excel(xlGetName, &xDll, 0);\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "        unregisterOhFunctions(xDll);\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
+        Printf(b_xll_cpp4->b, "        return 1;\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "    } catch (const std::exception &e) {\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "        std::ostringstream err;\n");
+        Printf(b_xll_cpp4->b, "        err << \"Error unloading AddinXl: \" << e.what();\n");
+        Printf(b_xll_cpp4->b, "        Excel(xlcAlert, 0, 1, TempStrStl(err.str()));\n");
+        Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
+        Printf(b_xll_cpp4->b, "        return 0;\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "    } catch (...) {\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
+        Printf(b_xll_cpp4->b, "        return 0;\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "    }\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "}\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "DLLEXPORT void xlAutoFree(XLOPER *px) {\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "    freeOper(px);\n");
+        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_xll_cpp4->b, "}\n");
 
-    Dump(b_xll_cpp4, f_xll_cpp4);
-    Delete(b_xll_cpp4);
-    Delete(f_xll_cpp4);
+    delete b_xll_cpp4;
 
     // To help with troubleshooting, create an output file to which all of the
     // SWIG buffers will be written.  We are not going to compile this file but
@@ -556,22 +554,22 @@ String *f3(ParmList *parms) {
 
 void f4(Node *n, SwigType *type, ParmList *parms) {
     String *funcName   = Getattr(n, "oh:funcName");
-    Printf(b_xll_cpp4, "\n");
-    Printf(b_xll_cpp4, "        Excel(xlfRegister, 0, 7, &xDll,\n");
-    Printf(b_xll_cpp4, "            // function code name\n");
-    Printf(b_xll_cpp4, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(funcName).c_str(), funcName);
-    Printf(b_xll_cpp4, "            // parameter codes\n");
+    Printf(b_xll_cpp4->b, "\n");
+    Printf(b_xll_cpp4->b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
+    Printf(b_xll_cpp4->b, "            // function code name\n");
+    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(funcName).c_str(), funcName);
+    Printf(b_xll_cpp4->b, "            // parameter codes\n");
     String *x = f2(n, type, parms);
-    Printf(b_xll_cpp4, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(x).c_str(), x);
-    Printf(b_xll_cpp4, "            // function display name\n");
-    Printf(b_xll_cpp4, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(funcName).c_str(), funcName);
-    Printf(b_xll_cpp4, "            // comma-delimited list of parameters\n");
+    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(x).c_str(), x);
+    Printf(b_xll_cpp4->b, "            // function display name\n");
+    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(funcName).c_str(), funcName);
+    Printf(b_xll_cpp4->b, "            // comma-delimited list of parameters\n");
     String *x2 = f3(parms);
-    Printf(b_xll_cpp4, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(x2).c_str(), x2);
-    Printf(b_xll_cpp4, "            // function type (0 = hidden function, 1 = worksheet function, 2 = command macro)\n");
-    Printf(b_xll_cpp4, "            TempStrNoSize(\"\\x01\"\"1\"),\n");
-    Printf(b_xll_cpp4, "            // function category\n");
-    Printf(b_xll_cpp4, "            TempStrNoSize(\"\\x07\"\"Example\"));\n");
+    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(x2).c_str(), x2);
+    Printf(b_xll_cpp4->b, "            // function type (0 = hidden function, 1 = worksheet function, 2 = command macro)\n");
+    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x01\"\"1\"),\n");
+    Printf(b_xll_cpp4->b, "            // function category\n");
+    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x07\"\"Example\"));\n");
 }
 
 String *copyUpper(String *s) {
