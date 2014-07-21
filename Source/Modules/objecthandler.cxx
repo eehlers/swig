@@ -593,18 +593,18 @@ void printFunc(Node *n) {
     printf("funcName=%s\n", Char(funcName));
 
 
-    Printf(bm_.f()->b_obj_hpp->b,"\n");
-    Printf(bm_.f()->b_obj_hpp->b,"    %s %s(", type, symname);
-    emitParmList(parms, bm_.f()->b_obj_hpp->b);
-    Printf(bm_.f()->b_obj_hpp->b,");\n");
+    //Printf(bm_.f()->b_obj_hpp->b,"\n");
+    //Printf(bm_.f()->b_obj_hpp->b,"    %s %s(", type, symname);
+    //emitParmList(parms, bm_.f()->b_obj_hpp->b);
+    //Printf(bm_.f()->b_obj_hpp->b,");\n");
 
-    Printf(bm_.f()->b_obj_cpp->b,"%s %s::%s(", type, module, symname);
-    emitParmList(parms, bm_.f()->b_obj_cpp->b);
-    Printf(bm_.f()->b_obj_cpp->b,") {\n");
-    Printf(bm_.f()->b_obj_cpp->b,"    return %s(", name);
-    emitParmList2(parms, bm_.f()->b_obj_cpp->b);
-    Printf(bm_.f()->b_obj_cpp->b,");\n");
-    Printf(bm_.f()->b_obj_cpp->b,"}\n");
+    //Printf(bm_.f()->b_obj_cpp->b,"%s %s::%s(", type, module, symname);
+    //emitParmList(parms, bm_.f()->b_obj_cpp->b);
+    //Printf(bm_.f()->b_obj_cpp->b,") {\n");
+    //Printf(bm_.f()->b_obj_cpp->b,"    return %s(", name);
+    //emitParmList2(parms, bm_.f()->b_obj_cpp->b);
+    //Printf(bm_.f()->b_obj_cpp->b,");\n");
+    //Printf(bm_.f()->b_obj_cpp->b,"}\n");
 
     Printf(bm_.f()->b_cpp_hpp->b,"    %s %s(", type, funcName);
     emitParmList(parms, bm_.f()->b_cpp_hpp->b);
