@@ -2,9 +2,6 @@
 %feature("oh:x", "abc") def;
 %feature("featurename", "1");
 
-%typemap(cpp_in) long "long";
-%typemap(cpp_in) const std::string& "const std::string&";
-
 %typemap(excel) std::string& "C";
 %typemap(excel) std::string "C";
 %typemap(excel) long "N";

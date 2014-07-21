@@ -536,7 +536,9 @@ void emitParmList4(ParmList *parms, File *buf) {
             Append(buf,", ");
         }
         SwigType *type  = Getattr(p,"type");
-        String *tm = getType("cpp_in", p, type);
+        String *tm = Swig_typemap_lookup("cpp_in", p, type, 0);
+        if (!tm)
+            tm = SwigType_str(type, 0);
         String   *name  = Getattr(p,"name");
         Printf(buf, "%s %s", tm, name);
     }
