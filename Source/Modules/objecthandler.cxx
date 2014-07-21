@@ -590,7 +590,7 @@ String *copyUpper(String *s) {
     return ret;
 }
 
-void printFunc(Node *n) {
+void printFunc(Node *n, bool manual) {
     Printf(bm_.f()->b_cpp_cpp->b,"//****FUNC*****\n");
     String   *name   = Getattr(n,"name");
     SwigType *type   = Getattr(n,"type");
@@ -603,19 +603,20 @@ void printFunc(Node *n) {
     Setattr(n, "oh:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
+    if (!manual) {
+    Printf(bm_.f()->b_obj_hpp->b,"\n");
+    Printf(bm_.f()->b_obj_hpp->b,"    %s %s(", type, symname);
+    emitParmList(parms, bm_.f()->b_obj_hpp->b);
+    Printf(bm_.f()->b_obj_hpp->b,");\n");
 
-    //Printf(bm_.f()->b_obj_hpp->b,"\n");
-    //Printf(bm_.f()->b_obj_hpp->b,"    %s %s(", type, symname);
-    //emitParmList(parms, bm_.f()->b_obj_hpp->b);
-    //Printf(bm_.f()->b_obj_hpp->b,");\n");
-
-    //Printf(bm_.f()->b_obj_cpp->b,"%s %s::%s(", type, module, symname);
-    //emitParmList(parms, bm_.f()->b_obj_cpp->b);
-    //Printf(bm_.f()->b_obj_cpp->b,") {\n");
-    //Printf(bm_.f()->b_obj_cpp->b,"    return %s(", name);
-    //emitParmList2(parms, bm_.f()->b_obj_cpp->b);
-    //Printf(bm_.f()->b_obj_cpp->b,");\n");
-    //Printf(bm_.f()->b_obj_cpp->b,"}\n");
+    Printf(bm_.f()->b_obj_cpp->b,"%s %s::%s(", type, module, symname);
+    emitParmList(parms, bm_.f()->b_obj_cpp->b);
+    Printf(bm_.f()->b_obj_cpp->b,") {\n");
+    Printf(bm_.f()->b_obj_cpp->b,"    return %s(", name);
+    emitParmList2(parms, bm_.f()->b_obj_cpp->b);
+    Printf(bm_.f()->b_obj_cpp->b,");\n");
+    Printf(bm_.f()->b_obj_cpp->b,"}\n");
+    }
 
     Printf(bm_.f()->b_cpp_hpp->b,"    %s %s(", type, funcName);
     emitParmList(parms, bm_.f()->b_cpp_hpp->b);
@@ -624,7 +625,7 @@ void printFunc(Node *n) {
     Printf(bm_.f()->b_cpp_cpp->b,"%s %s::%s(", type, module, funcName);
     emitParmList(parms, bm_.f()->b_cpp_cpp->b);
     Printf(bm_.f()->b_cpp_cpp->b,") {\n");
-    Printf(bm_.f()->b_cpp_cpp->b,"    return %s(", name);
+    Printf(bm_.f()->b_cpp_cpp->b,"    return %s::%s(", module, symname);
     emitParmList2(parms, bm_.f()->b_cpp_cpp->b);
     Printf(bm_.f()->b_cpp_cpp->b,");\n");
     Printf(bm_.f()->b_cpp_cpp->b,"}\n");
@@ -949,7 +950,7 @@ int functionWrapper(Node *n) {
     String *nodeType = Getattr(n,"nodeType");
     if (0 == Strcmp("cdecl", nodeType)) {
         if (NULL == Getattr(n, "ismember")) {
-            printFunc(n);
+            printFunc(n, manual);
         } else {
             printMemb(n);
         }
