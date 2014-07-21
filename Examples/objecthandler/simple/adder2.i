@@ -5,16 +5,10 @@
 %}
 
 namespace SimpleLib {
-    class Long {
-    public:
-        Long(long x);
-        Long(std::string x);
-        long x();
-    };
     class Adder2 {
     public:
-        Adder2(Long x);
-        long add(Long y);
+        Adder2(SimpleLib::Long x);
+        long add(SimpleLib::Long y);
     };
 }
 

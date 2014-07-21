@@ -11,7 +11,7 @@ mainSimpleAddinHw: mainSimpleAddinHw.cpp ../lib/libAddinCppHw.so
 	g++ -fPIC mainSimpleAddinHw.cpp -o mainSimpleAddinHw -I.. -I$(IDIR) -L../lib -lAddinCppHw
 
 mainSimpleAddin: mainSimpleAddin.cpp ../lib/libAddinCpp.so
-	g++ -fPIC mainSimpleAddin.cpp -o mainSimpleAddin -I.. -L../lib -lAddinCpp
+	g++ -fPIC mainSimpleAddin.cpp -o mainSimpleAddin -I.. -I$(IDIR) -L../lib -lAddinCpp
 
 clean:
 	rm -f mainSimpleLib mainSimpleAddinHw mainSimpleAddin

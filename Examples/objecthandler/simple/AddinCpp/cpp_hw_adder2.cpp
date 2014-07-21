@@ -2,43 +2,11 @@
 #include "cpp_hw_adder2.hpp"
 #include "ValueObjects/vo_hw_adder2.hpp"
 #include "AddinObjects/obj_hw_adder2.hpp"
+#include "AddinCpp/conversions.hpp"
 #include <boost/shared_ptr.hpp>
 #include <oh/repository.hpp>
-#include <oh/conversions/convert2.hpp>
 
 static ObjectHandler::Repository repository;
-
-namespace ObjectHandler {
-
-    inline bool is_numeric(const std::string &s, long &l) {
-        try {
-            l = boost::lexical_cast<long>(s);
-            return true;
-        } catch(...) {
-            return false;
-        }
-    }
-
-    template<class container_t>
-    SimpleLib::Long convertLong(const container_t& c) {
-        if(c.type() == typeid(long))
-            return SimpleLib::Long(c.operator long());
-        else if(c.type() == typeid(std::string)) {
-            std::string s = c.operator std::string();
-            long l;
-            if (is_numeric(s, l))
-                return SimpleLib::Long(l);
-            else
-                OH_FAIL("unable to convert string '" << s << "' to type 'SimpleLib::Long'");
-        }
-        OH_FAIL("unable to convert type '" << c.type().name() << "' to type 'SimpleLib::Long'");
-    }
-
-    template<> 
-    SimpleLib::Long convert2<SimpleLib::Long, property_t>(const property_t& c) {
-        return convertLong(c);
-    }
-}
 
 std::string SimpleLibAddin::slAdder2(const std::string &objectID, const ObjectHandler::property_t& x) {
     boost::shared_ptr<ObjectHandler::ValueObject> valueObject(

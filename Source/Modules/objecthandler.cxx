@@ -129,6 +129,8 @@ struct BufferGroup {
         Printf(b_cpp_hpp->b, "#define cpp_%s_hpp\n", name);
         Printf(b_cpp_hpp->b, "\n");
         Printf(b_cpp_hpp->b, "#include <string>\n");
+        // FIXME this #include is only needed if a datatype conversion is taking place.
+        Printf(b_cpp_hpp->b, "#include <oh/property.hpp>\n");
         Printf(b_cpp_hpp->b, "\n");
         Printf(b_cpp_hpp->b, "namespace %s {\n", module);
         Printf(b_cpp_hpp->b, "\n");
@@ -525,6 +527,54 @@ void emitParmList3(ParmList *parms, File *buf) {
     }
 }
 
+void emitParmList4(ParmList *parms, File *buf) {
+    bool first = true;
+    for (Parm *p = parms; p; p = nextSibling(p)) {
+        if (first) {
+            first = false;
+        } else {
+            Append(buf,", ");
+        }
+        SwigType *type  = Getattr(p,"type");
+        String *tm = getType("cpp_in", p, type);
+        String   *name  = Getattr(p,"name");
+        Printf(buf, "%s %s", tm, name);
+    }
+}
+
+void emitParmList5(ParmList *parms, File *buf) {
+    bool first = true;
+    for (Parm *p = parms; p; p = nextSibling(p)) {
+        SwigType *type  = Getattr(p,"type");
+        String *tm = Swig_typemap_lookup("cpp_cnv", p, type, 0);
+        if (!tm)
+            continue;
+        if (first) {
+            first = false;
+        } else {
+            Append(buf,", ");
+        }
+        Printf(buf, "%s", tm);
+    }
+}
+
+void emitParmList6(ParmList *parms, File *buf) {
+    bool first = true;
+    for (Parm *p = parms; p; p = nextSibling(p)) {
+        if (Getattr(p, "hidden")) continue;
+        if (first) {
+            first = false;
+        } else {
+            Append(buf,", ");
+        }
+        SwigType *type  = Getattr(p,"type");
+        String *tm = Swig_typemap_lookup("cpp_call", p, type, 0);
+        if (!tm)
+            tm  = Getattr(p,"name");
+        Printf(buf, "%s", tm);
+    }
+}
+
 std::string f(String *c) {
     std::stringstream s;
     s << std::hex << std::setw(2) << std::setfill('0') << Len(c);
@@ -697,12 +747,17 @@ void printMemb(Node *n) {
     Printf(b_wrappers, "//***ABC\n");
 
     //type = reduceType(type);
-    Printf(bm_.f()->b_cpp_hpp->b,"    %s %s(%s);\n", type, funcName, Char(ParmList_str(parms2)));
+    Printf(bm_.f()->b_cpp_hpp->b,"    %s %s(", type, funcName);
+    emitParmList4(parms2, bm_.f()->b_cpp_hpp->b);
+    Printf(bm_.f()->b_cpp_hpp->b,");\n");
 
-    Printf(bm_.f()->b_cpp_cpp->b,"%s %s::%s(%s) {\n", type, module, funcName, Char(ParmList_str(parms2)));
+    Printf(bm_.f()->b_cpp_cpp->b,"%s %s::%s(\n", type, module, funcName);
+    emitParmList4(parms2, bm_.f()->b_cpp_cpp->b);
+    Printf(bm_.f()->b_cpp_cpp->b,") {\n");
+    emitParmList5(parms, bm_.f()->b_cpp_cpp->b);
     Printf(bm_.f()->b_cpp_cpp->b,"    OH_GET_REFERENCE(x, objectID, %s::%s, %s);\n", module, cls, pname);
     Printf(bm_.f()->b_cpp_cpp->b,"    return x->%s(", name);
-    emitParmList2(parms, bm_.f()->b_cpp_cpp->b);
+    emitParmList6(parms, bm_.f()->b_cpp_cpp->b);
     Printf(bm_.f()->b_cpp_cpp->b,");\n", name);
     Printf(bm_.f()->b_cpp_cpp->b,"}\n");
 
@@ -868,6 +923,7 @@ void printCtor(Node *n, bool manual) {
     Printf(bm_.f()->b_obj_hpp->b,"    public:\n");
     Printf(bm_.f()->b_obj_hpp->b,"        %s(\n", name);
     Printf(bm_.f()->b_obj_hpp->b,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties,\n");
+    Printf(bm_.f()->b_obj_hpp->b,"            ");
     emitParmList(parms, bm_.f()->b_obj_hpp->b);
     Printf(bm_.f()->b_obj_hpp->b,", bool permanent)\n");
     Printf(bm_.f()->b_obj_hpp->b,"        : ObjectHandler::LibraryObject<%s>(properties, permanent) {\n", pname);
@@ -879,16 +935,21 @@ void printCtor(Node *n, bool manual) {
     Printf(bm_.f()->b_obj_hpp->b,"\n");
     }
 
-    Printf(bm_.f()->b_cpp_hpp->b,"    std::string %s(%s);\n", funcName, Char(ParmList_str(parms2)));
+    Printf(bm_.f()->b_cpp_hpp->b,"    std::string %s(", funcName);
+    emitParmList4(parms2, bm_.f()->b_cpp_hpp->b);
+    Printf(bm_.f()->b_cpp_hpp->b,");\n");
 
-    Printf(bm_.f()->b_cpp_cpp->b,"std::string %s::%s(%s) {\n", module, funcName, Char(ParmList_str(parms2)));
+    Printf(bm_.f()->b_cpp_cpp->b,"std::string %s::%s(", module, funcName);
+    emitParmList4(parms2, bm_.f()->b_cpp_cpp->b);
+    Printf(bm_.f()->b_cpp_cpp->b,") {\n");
+    emitParmList5(parms, bm_.f()->b_cpp_cpp->b);
     Printf(bm_.f()->b_cpp_cpp->b,"    boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
     Printf(bm_.f()->b_cpp_cpp->b,"        new %s::ValueObjects::%s(\n", module, funcName);
     Printf(bm_.f()->b_cpp_cpp->b,"            objectID, false));\n");
     Printf(bm_.f()->b_cpp_cpp->b,"    boost::shared_ptr<ObjectHandler::Object> object(\n");
     Printf(bm_.f()->b_cpp_cpp->b,"        new %s::%s(\n", module, name);
     Printf(bm_.f()->b_cpp_cpp->b,"            valueObject, ");
-    emitParmList2(parms, bm_.f()->b_cpp_cpp->b);
+    emitParmList6(parms, bm_.f()->b_cpp_cpp->b);
     Printf(bm_.f()->b_cpp_cpp->b,", false));\n");
     Printf(bm_.f()->b_cpp_cpp->b,"    std::string returnValue =\n");
     Printf(bm_.f()->b_cpp_cpp->b,"        ObjectHandler::Repository::instance().storeObject(\n");
