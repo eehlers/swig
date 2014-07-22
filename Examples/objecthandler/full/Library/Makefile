@@ -1,20 +1,15 @@
 
 LIB = ../lib/libSimpleLib.so
+OBJECTS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 
 all: $(LIB)
 
-$(LIB): adder.o adder2.o foo.o
-	g++ -shared -fPIC -g -Wall -o $(LIB) adder.o adder2.o foo.o
+$(LIB): $(OBJECTS)
+	g++ -shared -fPIC -g -Wall -o $(LIB) $(OBJECTS)
 
-adder.o: adder.cpp adder.hpp
-	g++ -c -fPIC -g -Wall -o adder.o -I.. adder.cpp
-
-adder2.o: adder2.cpp adder2.hpp
-	g++ -c -fPIC -g -Wall -o adder2.o -I.. adder2.cpp
-
-foo.o: foo.cpp foo.hpp
-	g++ -c -fPIC -g -Wall -o foo.o -I.. foo.cpp
+%.o: %.cpp %.hpp
+	g++ -c -fPIC -g -Wall -I.. $< -o $@
 
 clean:
-	rm -f $(LIB) *.o
+	rm -f $(LIB) $(OBJECTS)
 
