@@ -1,6 +1,5 @@
 *.user
 Release
 *.xll
-!Makefile
 xl_*.cpp
 !xl_hw*.cpp
