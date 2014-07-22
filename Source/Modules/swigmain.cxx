@@ -36,7 +36,6 @@ extern "C" {
   Language *swig_java(void);
   Language *swig_php(void);
   Language *swig_php4(void);
-  Language *swig_objecthandler(void);
   Language *swig_ocaml(void);
   Language *swig_octave(void);
   Language *swig_pike(void);
@@ -52,6 +51,7 @@ extern "C" {
   Language *swig_r(void);
   Language *swig_go(void);
   Language *swig_d(void);
+  Language *swig_reposit(void);
 }
 
 struct swig_module {
@@ -77,7 +77,6 @@ static swig_module modules[] = {
   {"-lua", swig_lua, "Lua"},
   {"-modula3", swig_modula3, "Modula 3"},
   {"-mzscheme", swig_mzscheme, "Mzscheme"},
-  {"-objecthandler", swig_objecthandler, "ObjectHandler"},
   {"-ocaml", swig_ocaml, "Ocaml"},
   {"-octave", swig_octave, "Octave"},
   {"-perl", swig_perl5, "Perl"},
@@ -88,6 +87,7 @@ static swig_module modules[] = {
   {"-pike", swig_pike, "Pike"},
   {"-python", swig_python, "Python"},
   {"-r", swig_r, "R (aka GNU S)"},
+  {"-reposit", swig_reposit, "reposit"},
   {"-ruby", swig_ruby, "Ruby"},
   {"-sexp", swig_sexp, "Lisp S-Expressions"},
   {"-tcl", swig_tcl, "Tcl"},

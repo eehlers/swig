@@ -1,6 +1,6 @@
 
-%feature("oh:group", "foo");
-%feature("oh:include") %{
+%feature("rp:group", "foo");
+%feature("rp:include") %{
 #include "Library/foo.hpp"
 %}
 

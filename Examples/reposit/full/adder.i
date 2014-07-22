@@ -1,6 +1,6 @@
 
-%feature("oh:group", "adder");
-%feature("oh:include") %{
+%feature("rp:group", "adder");
+%feature("rp:include") %{
 #include "Library/adder.hpp"
 %}
 
