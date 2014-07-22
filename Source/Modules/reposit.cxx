@@ -227,7 +227,7 @@ public:
     }
 };
 
-class OBJECTHANDLER : public Language {
+class REPOSIT : public Language {
 
     BufferMap bm_;
 
@@ -250,19 +250,19 @@ protected:
 public:
 
   virtual void main(int argc, char *argv[]) {
-    printf("I'm the ObjectHandler module.\n");
+    printf("I'm the reposit module.\n");
 
     /* Set language-specific subdirectory in SWIG library */
-   SWIG_library_directory("objecthandler");
+   SWIG_library_directory("reposit");
 
    /* Set language-specific preprocessing symbol */
-   Preprocessor_define("SWIGOBJECTHANDLER 1", 0);
+   Preprocessor_define("SWIGREPOSIT 1", 0);
 
    /* Set language-specific configuration file */
-   SWIG_config_file("objecthandler.swg");
+   SWIG_config_file("reposit.swg");
 
    /* Set typemap language (historical) */
-   SWIG_typemap_lang("objecthandler");
+   SWIG_typemap_lang("reposit");
 
     for (int i = 1; i < argc; i++) {
 	if (strcmp(argv[i], "-prefix") == 0) {
@@ -616,7 +616,7 @@ String *f3(ParmList *parms) {
 }
 
 void f4(Node *n, SwigType *type, ParmList *parms) {
-    String *funcName   = Getattr(n, "oh:funcName");
+    String *funcName   = Getattr(n, "rp:funcName");
     Printf(b_xll_cpp4->b, "\n");
     Printf(b_xll_cpp4->b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
     Printf(b_xll_cpp4->b, "            // function code name\n");
@@ -652,7 +652,7 @@ void printFunc(Node *n, bool manual) {
 
     String *temp = copyUpper(symname);
     String *funcName = NewStringf("%s%s", prefix, temp);
-    Setattr(n, "oh:funcName", funcName);
+    Setattr(n, "rp:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
     if (!manual) {
@@ -728,7 +728,7 @@ void printMemb(Node *n) {
     String *temp0 = copyUpper(cls);
     String *temp1 = copyUpper(name);
     String *funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
-    Setattr(n, "oh:funcName", funcName);
+    Setattr(n, "rp:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
     // Create from parms another list parms2 - prepend an argument to represent
@@ -806,7 +806,7 @@ void printCtor(Node *n, bool manual) {
 
     String *temp = copyUpper(name);
     String *funcName = NewStringf("%s%s", prefix, temp);
-    Setattr(n, "oh:funcName", funcName);
+    Setattr(n, "rp:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
     // Create from parms another list parms2 - prepend an argument to represent
@@ -999,9 +999,9 @@ void printCtor(Node *n, bool manual) {
 }
 
 int functionWrapper(Node *n) {
-    String *group = Getattr(n,"feature:oh:group");
-    String *include = Getattr(n,"feature:oh:include");
-    bool manual = checkAttribute(n,"feature:oh:generation","manual");
+    String *group = Getattr(n,"feature:rp:group");
+    String *include = Getattr(n,"feature:rp:include");
+    bool manual = checkAttribute(n,"feature:rp:generation","manual");
     bm_.init(group, include, manual);
 
     Printf(b_wrappers,"//XXX***functionWrapper*******\n");
@@ -1025,10 +1025,10 @@ int functionWrapper(Node *n) {
   return SWIG_OK;
 }
 
-}; // class OBJECTHANDLER
+}; // class REPOSIT
 
 extern "C" Language *
-swig_objecthandler(void) {
-  return new OBJECTHANDLER();
+swig_reposit(void) {
+  return new REPOSIT();
 }
 
