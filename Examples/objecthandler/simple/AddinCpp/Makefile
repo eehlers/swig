@@ -7,29 +7,17 @@ LIB = ../lib/libAddinCpp.so
 
 all: $(LIBHW) $(LIB)
 
-$(LIBHW): cpp_hw_adder.o cpp_hw_adder2.o conversions.o
-	g++ -shared -fPIC -g -Wall -o $(LIBHW) -I.. -I$(IDIR) cpp_hw_adder.o cpp_hw_adder2.o conversions.o -L../lib -lSimpleLib -lValueObjectsHw -lAddinObjectsHw $(SYS_LIBS)
+$(LIBHW): cpp_hw_adder.o
+	g++ -shared -fPIC -g -Wall -o $(LIBHW) -I.. -I$(IDIR) cpp_hw_adder.o -L../lib -lSimpleLib -lValueObjectsHw -lAddinObjectsHw $(SYS_LIBS)
 
 cpp_hw_adder.o: cpp_hw_adder.cpp cpp_hw_adder.hpp
 	g++ -c -fPIC -g -Wall -o cpp_hw_adder.o -I.. -I$(IDIR) cpp_hw_adder.cpp
 
-cpp_hw_adder2.o: cpp_hw_adder2.cpp cpp_hw_adder2.hpp
-	g++ -c -fPIC -g -Wall -o cpp_hw_adder2.o -I.. -I$(IDIR) cpp_hw_adder2.cpp
-
-$(LIB): cpp_adder.o cpp_adder2.o cpp_foo.o conversions.o
-	g++ -shared -fPIC -g -Wall -o $(LIB) -I.. -I$(IDIR) cpp_adder.o cpp_adder2.o cpp_foo.o conversions.o -L../lib -lSimpleLib -lValueObjects -lAddinObjects $(SYS_LIBS)
-
-conversions.o: conversions.cpp
-	g++ -c -fPIC -g -Wall -o conversions.o -I.. -I$(IDIR) conversions.cpp
+$(LIB): cpp_adder.o
+	g++ -shared -fPIC -g -Wall -o $(LIB) -I.. -I$(IDIR) cpp_adder.o -L../lib -lSimpleLib -lValueObjects -lAddinObjects $(SYS_LIBS)
 
 cpp_adder.o: cpp_adder.cpp cpp_adder.hpp
 	g++ -c -fPIC -g -Wall -o cpp_adder.o -I.. -I$(IDIR) cpp_adder.cpp
-
-cpp_adder2.o: cpp_adder2.cpp cpp_adder2.hpp
-	g++ -c -fPIC -g -Wall -o cpp_adder2.o -I.. -I$(IDIR) cpp_adder2.cpp
-
-cpp_foo.o: cpp_foo.cpp cpp_foo.hpp
-	g++ -c -fPIC -g -Wall -o cpp_foo.o -I.. -I$(IDIR) cpp_foo.cpp
 
 clean:
 	rm -f $(LIBHW) $(LIB) *.o

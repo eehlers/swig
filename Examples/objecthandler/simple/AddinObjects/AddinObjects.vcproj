@@ -152,14 +152,6 @@
 			RelativePath=".\obj_adder.hpp"
 			>
 		</File>
-		<File
-			RelativePath=".\obj_foo.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\obj_foo.hpp"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

@@ -149,15 +149,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\vo.hpp"
-			>
-		</File>
-		<File
-			RelativePath=".\vo_foo.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\vo.hpp"
+			RelativePath=".\vo_adder.hpp"
 			>
 		</File>
 	</Files>

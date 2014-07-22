@@ -145,11 +145,11 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\obj_hw.cpp"
+			RelativePath=".\obj_hw_adder.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\obj_hw.hpp"
+			RelativePath=".\obj_hw_adder.hpp"
 			>
 		</File>
 	</Files>

@@ -152,14 +152,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\foo.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\foo.hpp"
-			>
-		</File>
-		<File
 			RelativePath=".\simplelib.hpp"
 			>
 		</File>
