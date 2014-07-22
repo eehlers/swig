@@ -1,0 +1,4 @@
+*.user
+Release
+obj_*.?pp
+!Makefile

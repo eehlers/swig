@@ -1,0 +1,4 @@
+*.user
+Release
+cpp_*.?pp
+!Makefile

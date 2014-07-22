@@ -1,0 +1,6 @@
+mainSimpleLib
+mainSimpleAddinHw
+mainSimpleAddin
+Release
+*.user
+!Makefile

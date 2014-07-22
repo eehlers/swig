@@ -1,0 +1,4 @@
+*.user
+Release
+vo_*.?pp
+!Makefile
