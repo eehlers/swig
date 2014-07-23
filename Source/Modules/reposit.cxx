@@ -9,12 +9,6 @@
 String *prefix = 0;
 String *module = 0;
 
-//SwigType *reduceType(SwigType *type) {
-//    while (SwigType *t = SwigType_typedef_resolve(type))
-//        type = t;
-//    return type;
-//}
-
 File *initFile(String *outfile) {
    File *f = NewFile(outfile, "w", SWIG_output_files());
    if (!f) {
@@ -472,7 +466,6 @@ void printList(Node *n) {
 }
 
 String *getType(const char *typemapname, Node *n, SwigType *type) {
-    //type = reduceType(type);
     String *tm = Swig_typemap_lookup(typemapname, n, type, 0);
     if (!tm) {
         printf("No \"%s\" typemap for type \"%s\".\n", typemapname, Char(SwigType_str(type, 0)));
@@ -493,7 +486,6 @@ void emitParmList(ParmList *parms, File *buf/*, bool deref = false*/) {
         }
         SwigType *type  = Getattr(p,"type");
         String   *name  = Getattr(p,"name");
-        //type = reduceType(type);
         //if (deref)
         //    Printf(buf, "%s *%s", type, name);
         //else
@@ -758,7 +750,6 @@ void printMemb(Node *n) {
     Printf(b_wrappers, "// *a3* %s <<\n", Char(ParmList_protostr(parms2)));
     Printf(b_wrappers, "//***ABC\n");
 
-    //type = reduceType(type);
     Printf(bm_.f()->b_cpp_hpp->b,"    %s %s(", type, funcName);
     emitParmList4(parms2, bm_.f()->b_cpp_hpp->b);
     Printf(bm_.f()->b_cpp_hpp->b,");\n");
@@ -846,8 +837,6 @@ void printCtor(Node *n, bool manual) {
     Printf(b_wrappers, "// *a2* %s <<\n", Char(ParmList_str(parms2)));
     Printf(b_wrappers, "// *a3* %s <<\n", Char(ParmList_protostr(parms2)));
     Printf(b_wrappers, "//***DEF\n");
-
-    //type = reduceType(type);
 
     Printf(bm_.f()->b_val_hpp->b,"        class %s : public ObjectHandler::ValueObject {\n", funcName);
     Printf(bm_.f()->b_val_hpp->b,"            friend class boost::serialization::access;\n");
