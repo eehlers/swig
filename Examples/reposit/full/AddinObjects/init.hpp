@@ -1,7 +1,7 @@
 
 namespace SimpleLibAddin {
 
-    void initializeAddin2();
+    void initializeAddin();
 
 }
 

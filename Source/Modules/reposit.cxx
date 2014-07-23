@@ -133,7 +133,7 @@ struct BufferGroup {
         // FIXME this #include is only needed if a datatype conversion is taking place.
         Printf(b_cpp_hpp->b, "#include <oh/property.hpp>\n");
         Printf(b_cpp_hpp->b, "\n");
-        Printf(b_cpp_hpp->b, "namespace %s {\n", module);
+        Printf(b_cpp_hpp->b, "namespace %sCpp {\n", module);
         Printf(b_cpp_hpp->b, "\n");
 
         Printf(b_cpp_cpp->b, "\n");
@@ -192,7 +192,7 @@ struct BufferGroup {
         }
 
         Printf(b_cpp_hpp->b, "\n");
-        Printf(b_cpp_hpp->b, "} // namespace %s\n", module);
+        Printf(b_cpp_hpp->b, "} // namespace %sCpp\n", module);
         Printf(b_cpp_hpp->b, "\n");
         Printf(b_cpp_hpp->b, "#endif\n");
         Printf(b_cpp_hpp->b, "\n");
@@ -482,7 +482,7 @@ String *getType(const char *typemapname, Node *n, SwigType *type) {
 }
 
 // "double d, string s"
-void emitParmList(ParmList *parms, File *buf, bool deref = false) {
+void emitParmList(ParmList *parms, File *buf/*, bool deref = false*/) {
     bool first = true;
     for (Parm *p = parms; p; p = nextSibling(p)) {
         //if (Getattr(p, "hidden")) continue;
@@ -683,7 +683,7 @@ void printFunc(Node *n, bool manual) {
     emitParmList4(parms, bm_.f()->b_cpp_hpp->b);
     Printf(bm_.f()->b_cpp_hpp->b,");\n");
 
-    Printf(bm_.f()->b_cpp_cpp->b,"%s %s::%s(", type, module, funcName);
+    Printf(bm_.f()->b_cpp_cpp->b,"%s %sCpp::%s(", type, module, funcName);
     emitParmList4(parms, bm_.f()->b_cpp_cpp->b);
     Printf(bm_.f()->b_cpp_cpp->b,") {\n");
     emitParmList5(parms, bm_.f()->b_cpp_cpp->b);
@@ -697,7 +697,7 @@ void printFunc(Node *n, bool manual) {
     String *ret_type = getType("excel_out", n, type);
     Printf(bm_.f()->b_xll_cpp->b, "\n");
     Printf(bm_.f()->b_xll_cpp->b, "DLLEXPORT %s %s(", ret_type, funcName);
-    emitParmList(parms, bm_.f()->b_xll_cpp->b, true);
+    emitParmList(parms, bm_.f()->b_xll_cpp->b/*, true*/);
     Printf(bm_.f()->b_xll_cpp->b, ") {\n");
     Printf(bm_.f()->b_xll_cpp->b, "\n");
     Printf(bm_.f()->b_xll_cpp->b, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
@@ -763,7 +763,7 @@ void printMemb(Node *n) {
     emitParmList4(parms2, bm_.f()->b_cpp_hpp->b);
     Printf(bm_.f()->b_cpp_hpp->b,");\n");
 
-    Printf(bm_.f()->b_cpp_cpp->b,"%s %s::%s(\n", type, module, funcName);
+    Printf(bm_.f()->b_cpp_cpp->b,"%s %sCpp::%s(\n", type, module, funcName);
     emitParmList4(parms2, bm_.f()->b_cpp_cpp->b);
     Printf(bm_.f()->b_cpp_cpp->b,") {\n");
     emitParmList5(parms, bm_.f()->b_cpp_cpp->b);
@@ -951,7 +951,7 @@ void printCtor(Node *n, bool manual) {
     emitParmList4(parms2, bm_.f()->b_cpp_hpp->b);
     Printf(bm_.f()->b_cpp_hpp->b,");\n");
 
-    Printf(bm_.f()->b_cpp_cpp->b,"std::string %s::%s(", module, funcName);
+    Printf(bm_.f()->b_cpp_cpp->b,"std::string %sCpp::%s(", module, funcName);
     emitParmList4(parms2, bm_.f()->b_cpp_cpp->b);
     Printf(bm_.f()->b_cpp_cpp->b,") {\n");
     emitParmList5(parms, bm_.f()->b_cpp_cpp->b);

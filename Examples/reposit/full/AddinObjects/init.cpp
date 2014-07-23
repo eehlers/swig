@@ -7,7 +7,7 @@
 //#include <qlo/serialization/serializationfactory.hpp>
 #include "enumerations.hpp"
 
-void SimpleLibAddin::initializeAddin2() {
+void SimpleLibAddin::initializeAddin() {
 
         // Initialize the Enumeration Registry
         registerEnumeratedTypes();

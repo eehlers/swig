@@ -7,7 +7,7 @@
 //#include <qlo/serialization/serializationfactory.hpp>
 #include "AddinObjects/init.hpp"
 
-void SimpleLibAddin::initializeAddin() {
+void SimpleLibAddinCpp::initializeAddin() {
 
         // Instantiate the ObjectHandler Repository
         static ObjectHandler::Repository repository;
@@ -28,6 +28,6 @@ void SimpleLibAddin::initializeAddin() {
         static ObjectHandler::EnumPairRegistry enumPairRegistry;
 
         // Initialize the Enumeration Registry
-        initializeAddin2();
+        SimpleLibAddin::initializeAddin();
 }
 

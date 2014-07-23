@@ -1,5 +1,5 @@
 
-namespace SimpleLibAddin {
+namespace SimpleLibAddinCpp {
 
     void initializeAddin();
 
