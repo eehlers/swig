@@ -13,7 +13,7 @@ convert2.o: convert2.cpp convert2.hpp
 	g++ -c -fPIC -g -Wall -o convert2.o -I.. -I$(IDIR) convert2.cpp
 
 %.o: %.cpp %.hpp
-	g++ -c -fPIC -g -Wall -I.. -I$(IDIR) $< -o $@
+	g++ -c -fPIC -g -Wall -I. -I.. -I$(IDIR) $< -o $@
 
 clean:
 	rm -f $(LIB) $(OBJECTS)

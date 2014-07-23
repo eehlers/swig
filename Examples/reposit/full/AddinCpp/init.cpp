@@ -5,7 +5,7 @@
 #include <oh/enumerations/enumregistry.hpp>
 //#include <qlo/enumerations/register/register_all.hpp>
 //#include <qlo/serialization/serializationfactory.hpp>
-#include "enumerations.hpp"
+#include "AddinObjects/init.hpp"
 
 void SimpleLibAddin::initializeAddin() {
 
@@ -28,6 +28,6 @@ void SimpleLibAddin::initializeAddin() {
         static ObjectHandler::EnumPairRegistry enumPairRegistry;
 
         // Initialize the Enumeration Registry
-        registerEnumeratedTypes();
+        initializeAddin2();
 }
 
