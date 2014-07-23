@@ -9,7 +9,7 @@
 
 %typemap(cpp_cnv) SimpleLib::Account::Type %{
     SimpleLib::Account::Type $1_name_enum =
-        ObjectHandler::Create<SimpleLib::Account::Type>()($1_name);
+        ObjectHandler::Create<$1_type>()($1_name);
 %} 
 
 //%typemap(cpp_cnv) SimpleLib::Color const & %{
