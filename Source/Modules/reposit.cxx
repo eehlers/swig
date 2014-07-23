@@ -125,6 +125,7 @@ struct BufferGroup {
         Printf(b_obj_cpp->b, "\n");
         }
 
+        Printf(b_cpp_hpp->b, "\n");
         Printf(b_cpp_hpp->b, "#ifndef cpp_%s_hpp\n", name);
         Printf(b_cpp_hpp->b, "#define cpp_%s_hpp\n", name);
         Printf(b_cpp_hpp->b, "\n");
@@ -135,7 +136,10 @@ struct BufferGroup {
         Printf(b_cpp_hpp->b, "namespace %s {\n", module);
         Printf(b_cpp_hpp->b, "\n");
 
+        Printf(b_cpp_cpp->b, "\n");
         Printf(b_cpp_cpp->b, "#include \"cpp_%s.hpp\"\n", name);
+        Printf(b_cpp_cpp->b, "#include \"convert2.hpp\"\n");
+        // FIXME this #include is only required if the file contains constructors.
         Printf(b_cpp_cpp->b, "#include \"ValueObjects/vo_%s.hpp\"\n", name);
         Printf(b_cpp_cpp->b, "#include \"AddinObjects/obj_%s.hpp\"\n", name);
         Printf(b_cpp_cpp->b, "#include <boost/shared_ptr.hpp>\n");
@@ -190,6 +194,8 @@ struct BufferGroup {
         Printf(b_cpp_hpp->b, "\n");
         Printf(b_cpp_hpp->b, "#endif\n");
         Printf(b_cpp_hpp->b, "\n");
+
+        Printf(b_cpp_cpp->b, "\n");
 
         delete b_val_cpp;
         delete b_val_hpp;
