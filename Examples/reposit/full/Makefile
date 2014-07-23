@@ -2,7 +2,7 @@
 SWIG = ../../../preinst-swig
 #SWIG_DEBUG = -debug-top 4
 
-all: SWIG Library ValueObjects AddinObjects AddinCpp Main
+all: Library ValueObjects AddinObjects AddinCpp Main
 
 .PHONY: SWIG
 SWIG: simple.i ../../../swig
