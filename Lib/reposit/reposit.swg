@@ -2,38 +2,38 @@
 %feature("oh:x", "abc") def;
 %feature("featurename", "1");
 
-%typemap(excel) std::string& "C";
-%typemap(excel) std::string "C";
-%typemap(excel) long "N";
-%typemap(excel) double "E";
-%typemap(excel) bool "L";
+%typemap(rp_excel) std::string& "C";
+%typemap(rp_excel) std::string "C";
+%typemap(rp_excel) long "N";
+%typemap(rp_excel) double "E";
+%typemap(rp_excel) bool "L";
 
-%typemap(excel_in) long "long*";
-%typemap(excel_in) double "double*";
-%typemap(excel_in) std::string& "char*";
+%typemap(rp_excel_in) long "long*";
+%typemap(rp_excel_in) double "double*";
+%typemap(rp_excel_in) std::string& "char*";
 
-%typemap(excel_out) bool "bool*";
-%typemap(excel_out) long "long*";
-%typemap(excel_out) double "double*";
-%typemap(excel_out) std::string "char*";
+%typemap(rp_excel_out) bool "bool*";
+%typemap(rp_excel_out) long "long*";
+%typemap(rp_excel_out) double "double*";
+%typemap(rp_excel_out) std::string "char*";
 
-%typemap(ohxl_ret) bool %{
+%typemap(rp_ohxl_ret) bool %{
         static bool ret = true;
         ret = returnValue;
         return &ret;
 %}
 
-%typemap(ohxl_ret) long %{
+%typemap(rp_ohxl_ret) long %{
         return 0;
 %}
 
-%typemap(ohxl_ret) double %{
+%typemap(rp_ohxl_ret) double %{
         static double ret = 0;
         ret = returnValue;
         return &ret;
 %}
 
-%typemap(ohxl_ret) std::string %{
+%typemap(rp_ohxl_ret) std::string %{
         static char ret[XL_MAX_STR_LEN];
         ObjectHandler::stringToChar(returnValue, ret);
         return ret;

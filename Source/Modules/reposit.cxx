@@ -530,7 +530,7 @@ void emitParmList3(ParmList *parms, File *buf) {
             Append(buf, ", ");
         }
         SwigType *type  = Getattr(p, "type");
-        String *tm = getType("excel_in", p, type);
+        String *tm = getType("rp_excel_in", p, type);
         String *name  = Getattr(p,"name");
         Printf(buf, "%s %s", tm, name);
     }
@@ -545,7 +545,7 @@ void emitParmList4(ParmList *parms, File *buf) {
             Append(buf,", ");
         }
         SwigType *type  = Getattr(p,"type");
-        String *tm = Swig_typemap_lookup("cpp_in", p, type, 0);
+        String *tm = Swig_typemap_lookup("rp_cpp_in", p, type, 0);
         if (!tm)
             tm = SwigType_str(type, 0);
         String   *name  = Getattr(p,"name");
@@ -557,7 +557,7 @@ void emitParmList5(ParmList *parms, File *buf) {
     bool first = true;
     for (Parm *p = parms; p; p = nextSibling(p)) {
         SwigType *type  = Getattr(p,"type");
-        String *tm = Swig_typemap_lookup("cpp_cnv", p, type, 0);
+        String *tm = Swig_typemap_lookup("rp_cpp_cnv", p, type, 0);
         if (!tm)
             continue;
         if (first) {
@@ -579,7 +579,7 @@ void emitParmList6(ParmList *parms, File *buf) {
             Append(buf,", ");
         }
         SwigType *type  = Getattr(p,"type");
-        String *tm = Swig_typemap_lookup("cpp_call", p, type, 0);
+        String *tm = Swig_typemap_lookup("rp_cpp_call", p, type, 0);
         if (!tm)
             tm  = Getattr(p,"name");
         Printf(buf, "%s", tm);
@@ -595,13 +595,13 @@ std::string f(String *c) {
 String *f2(Node *n, SwigType *type, ParmList *parms) {
     String *s = NewString("");
     if (type) {
-        String *tm = getType("excel", n, type);
+        String *tm = getType("rp_excel", n, type);
         Append(s, tm);
     }
     for (Parm *p = parms; p; p = nextSibling(p)) {
         //if (Getattr(p, "hidden")) continue;
         SwigType *t  = Getattr(p, "type");
-        String *tm = getType("excel", p, t);
+        String *tm = getType("rp_excel", p, t);
         Append(s, tm);
     }
     Append(s, "#");
@@ -694,7 +694,7 @@ void printFunc(Node *n, bool manual) {
 
     f4(n, type, parms);
 
-    String *ret_type = getType("excel_out", n, type);
+    String *ret_type = getType("rp_excel_out", n, type);
     Printf(bm_.f()->b_xll_cpp->b, "\n");
     Printf(bm_.f()->b_xll_cpp->b, "DLLEXPORT %s %s(", ret_type, funcName);
     emitParmList(parms, bm_.f()->b_xll_cpp->b/*, true*/);
@@ -712,7 +712,7 @@ void printFunc(Node *n, bool manual) {
     emitParmList2(parms, bm_.f()->b_xll_cpp->b, true);
     Printf(bm_.f()->b_xll_cpp->b, ");\n");
 
-    String *tm = getType("ohxl_ret", n, type);
+    String *tm = getType("rp_ohxl_ret", n, type);
     Printf(bm_.f()->b_xll_cpp->b, Char(tm));
 
     Printf(bm_.f()->b_xll_cpp->b, "\n");
@@ -775,7 +775,7 @@ void printMemb(Node *n) {
 
     f4(n, type, parms2);
 
-    String *ret_type = getType("excel_out", n, type);
+    String *ret_type = getType("rp_excel_out", n, type);
     Printf(bm_.f()->b_xll_cpp->b, "\n");
     Printf(bm_.f()->b_xll_cpp->b, "DLLEXPORT %s %s(", ret_type, funcName);
     emitParmList3(parms2, bm_.f()->b_xll_cpp->b);
