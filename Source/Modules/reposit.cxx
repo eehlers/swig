@@ -138,14 +138,16 @@ struct BufferGroup {
 
         Printf(b_cpp_cpp->b, "\n");
         Printf(b_cpp_cpp->b, "#include \"cpp_%s.hpp\"\n", name);
+        // FIXME this #include is only required if the file contains conversions.
         Printf(b_cpp_cpp->b, "#include \"convert2.hpp\"\n");
+        // FIXME this #include is only required if the file contains enumerations.
+        Printf(b_cpp_cpp->b, "#include <oh/enumerations/typefactory.hpp>\n");
         // FIXME this #include is only required if the file contains constructors.
         Printf(b_cpp_cpp->b, "#include \"ValueObjects/vo_%s.hpp\"\n", name);
         Printf(b_cpp_cpp->b, "#include \"AddinObjects/obj_%s.hpp\"\n", name);
         Printf(b_cpp_cpp->b, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_cpp_cpp->b, "#include <oh/repository.hpp>\n");
         Printf(b_cpp_cpp->b, "\n");
-        Printf(b_cpp_cpp->b, "static ObjectHandler::Repository repository;\n");
 
         Printf(b_xll_cpp->b, "\n");
         Printf(b_xll_cpp->b, "#include <ohxl/objecthandlerxl.hpp>\n");
@@ -492,10 +494,11 @@ void emitParmList(ParmList *parms, File *buf, bool deref = false) {
         SwigType *type  = Getattr(p,"type");
         String   *name  = Getattr(p,"name");
         //type = reduceType(type);
-        if (deref)
-            Printf(buf, "%s *%s", type, name);
-        else
-            Printf(buf, "%s %s", type, name);
+        //if (deref)
+        //    Printf(buf, "%s *%s", type, name);
+        //else
+        //    Printf(buf, "%s %s", type, name);
+        Printf(buf, "%s", Char(SwigType_str(type, name)));
     }
 }
 
