@@ -465,9 +465,9 @@ void printList(Node *n) {
     }
 }
 
-String *getType(const char *typemapname, Node *n, SwigType *type) {
+String *getType(const char *typemapname, Node *n, SwigType *type, bool fatal=true) {
     String *tm = Swig_typemap_lookup(typemapname, n, type, 0);
-    if (!tm) {
+    if (!tm && fatal) {
         printf("No \"%s\" typemap for type \"%s\".\n", typemapname, Char(SwigType_str(type, 0)));
         SWIG_exit(EXIT_FAILURE);
     }
@@ -537,7 +537,7 @@ void emitParmList4(ParmList *parms, File *buf) {
             Append(buf,", ");
         }
         SwigType *type  = Getattr(p,"type");
-        String *tm = Swig_typemap_lookup("rp_cpp_in", p, type, 0);
+        String *tm = getType("rp_cpp_in", p, type, false);
         if (!tm)
             tm = SwigType_str(type, 0);
         String   *name  = Getattr(p,"name");
@@ -549,7 +549,7 @@ void emitParmList5(ParmList *parms, File *buf) {
     bool first = true;
     for (Parm *p = parms; p; p = nextSibling(p)) {
         SwigType *type  = Getattr(p,"type");
-        String *tm = Swig_typemap_lookup("rp_cpp_cnv", p, type, 0);
+        String *tm = getType("rp_cpp_cnv", p, type, false);
         if (!tm)
             continue;
         if (first) {
@@ -571,7 +571,7 @@ void emitParmList6(ParmList *parms, File *buf) {
             Append(buf,", ");
         }
         SwigType *type  = Getattr(p,"type");
-        String *tm = Swig_typemap_lookup("rp_cpp_call", p, type, 0);
+        String *tm = getType("rp_cpp_call", p, type, false);
         if (!tm)
             tm  = Getattr(p,"name");
         Printf(buf, "%s", tm);
