@@ -2,6 +2,8 @@
 %feature("oh:x", "abc") def;
 %feature("featurename", "1");
 
+%typemap(rp_cpp_call) SWIGTYPE "$1_name";
+
 %typemap(rp_excel) std::string& "C";
 %typemap(rp_excel) std::string "C";
 %typemap(rp_excel) long "N";

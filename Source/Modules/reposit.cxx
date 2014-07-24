@@ -465,142 +465,84 @@ void printList(Node *n) {
     }
 }
 
-String *getType(const char *typemapname, Node *n, SwigType *type, bool fatal=true) {
-    String *tm = Swig_typemap_lookup(typemapname, n, type, 0);
-    if (!tm && fatal) {
-        printf("No \"%s\" typemap for type \"%s\".\n", typemapname, Char(SwigType_str(type, 0)));
-        SWIG_exit(EXIT_FAILURE);
+String *getTypeMap(const char *m, Node *n, SwigType *t, int nomatch=2) {
+    if (String *tm = Swig_typemap_lookup(m, n, t, 0))
+        return tm;
+    String *ret = 0;
+    switch (nomatch) {
+        case 0:
+            ret = t;
+            break;
+        case 1:
+            ret = 0;
+            break;
+        default:
+            printf("typemap '%s' does not match type '%s'.\n", m, Char(SwigType_str(t, 0)));
+            SWIG_exit(EXIT_FAILURE);
     }
-    return tm;
+    return ret;
 }
 
-// "double d, string s"
-void emitParmList(ParmList *parms, File *buf/*, bool deref = false*/) {
-    bool first = true;
-    for (Parm *p = parms; p; p = nextSibling(p)) {
-        //if (Getattr(p, "hidden")) continue;
-        if (first) {
-            first = false;
-        } else {
-            Append(buf,", ");
-        }
-        SwigType *type  = Getattr(p,"type");
-        String   *name  = Getattr(p,"name");
-        //if (deref)
-        //    Printf(buf, "%s *%s", type, name);
-        //else
-        //    Printf(buf, "%s %s", type, name);
-        Printf(buf, "%s", Char(SwigType_str(type, name)));
-    }
+String *getType(Parm *p, const char *m, int nomatch) {
+    SwigType *t  = Getattr(p, "type");
+    if (m)
+        return getTypeMap(m, p, t, nomatch);
+    else
+        return t;
 }
 
-// "d, s"
-void emitParmList2(ParmList *parms, File *buf, bool deref = false) {
-    bool first = true;
-    for (Parm *p = parms; p; p = nextSibling(p)) {
-        if (Getattr(p, "hidden")) continue;
-        if (first) {
-            first = false;
-        } else {
-            Append(buf,", ");
-        }
-        String *name  = Getattr(p,"name");
-        if (deref)
-            Printf(buf, "*%s", name);
-        else
-            Printf(buf, "%s", name);
-    }
-}
+void emitParmList(
+    ParmList *parms,
+    File *buf,
+    int mode=0,         // 0=name, 1=type, 2=both
+    const char *map=0,
+    int nomatch=0,       // 0=type, 1=null, 2=exception
+    bool skipHidden=false) {
 
-// "double d, string s"
-void emitParmList3(ParmList *parms, File *buf) {
     bool first = true;
-    for (Parm *p = parms; p; p = nextSibling(p)) {
-        if (first) {
-            first = false;
-        } else {
-            Append(buf, ", ");
-        }
-        SwigType *type  = Getattr(p, "type");
-        String *tm = getType("rp_excel_in", p, type);
-        String *name  = Getattr(p,"name");
-        Printf(buf, "%s %s", tm, name);
-    }
-}
 
-void emitParmList4(ParmList *parms, File *buf) {
-    bool first = true;
     for (Parm *p = parms; p; p = nextSibling(p)) {
-        if (first) {
-            first = false;
-        } else {
-            Append(buf,", ");
-        }
-        SwigType *type  = Getattr(p,"type");
-        String *tm = getType("rp_cpp_in", p, type, false);
-        if (!tm)
-            tm = SwigType_str(type, 0);
-        String   *name  = Getattr(p,"name");
-        Printf(buf, "%s %s", tm, name);
-    }
-}
 
-void emitParmList5(ParmList *parms, File *buf) {
-    bool first = true;
-    for (Parm *p = parms; p; p = nextSibling(p)) {
-        SwigType *type  = Getattr(p,"type");
-        String *tm = getType("rp_cpp_cnv", p, type, false);
-        if (!tm)
+        if (skipHidden && Getattr(p, "hidden"))
             continue;
-        if (first) {
+
+        String *name = Getattr(p,"name");
+        String *type  = getType(p, map, nomatch);
+
+        if (!type)
+            continue;
+
+        if (first)
             first = false;
-        } else {
+        else
             Append(buf,", ");
-        }
-        Printf(buf, "%s", tm);
+
+        if (0==mode)
+            Printf(buf, "%s", name);
+        else if (1==mode)
+            Printf(buf, "%s", type);
+        else
+            Printf(buf, "%s", Char(SwigType_str(type, name)));
     }
 }
 
-void emitParmList6(ParmList *parms, File *buf) {
-    bool first = true;
-    for (Parm *p = parms; p; p = nextSibling(p)) {
-        if (Getattr(p, "hidden")) continue;
-        if (first) {
-            first = false;
-        } else {
-            Append(buf,", ");
-        }
-        SwigType *type  = Getattr(p,"type");
-        String *tm = getType("rp_cpp_call", p, type, false);
-        if (!tm)
-            tm  = Getattr(p,"name");
-        Printf(buf, "%s", tm);
-    }
-}
-
-std::string f(String *c) {
-    std::stringstream s;
-    s << std::hex << std::setw(2) << std::setfill('0') << Len(c);
-    return s.str();
-}
-
-String *f2(Node *n, SwigType *type, ParmList *parms) {
+String *excelParamCodes(Node *n, SwigType *type, ParmList *parms) {
     String *s = NewString("");
     if (type) {
-        String *tm = getType("rp_excel", n, type);
+        String *tm = getTypeMap("rp_excel", n, type);
         Append(s, tm);
     }
     for (Parm *p = parms; p; p = nextSibling(p)) {
         //if (Getattr(p, "hidden")) continue;
         SwigType *t  = Getattr(p, "type");
-        String *tm = getType("rp_excel", p, t);
+        String *tm = getTypeMap("rp_excel", p, t);
         Append(s, tm);
     }
     Append(s, "#");
     return s;
 }
 
-String *f3(ParmList *parms) {
+String *excelParamList(ParmList *parms) {
     String *s = NewString("");
     bool first = true;
     for (Parm *p = parms; p; p = nextSibling(p)) {
@@ -616,20 +558,26 @@ String *f3(ParmList *parms) {
     return s;
 }
 
+std::string hexLen(String *c) {
+    std::stringstream s;
+    s << std::hex << std::setw(2) << std::setfill('0') << Len(c);
+    return s.str();
+}
+
 void f4(Node *n, SwigType *type, ParmList *parms) {
     String *funcName   = Getattr(n, "rp:funcName");
     Printf(b_xll_cpp4->b, "\n");
     Printf(b_xll_cpp4->b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
     Printf(b_xll_cpp4->b, "            // function code name\n");
-    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(funcName).c_str(), funcName);
+    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
     Printf(b_xll_cpp4->b, "            // parameter codes\n");
-    String *x = f2(n, type, parms);
-    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(x).c_str(), x);
+    String *xlParamCodes = excelParamCodes(n, type, parms);
+    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(xlParamCodes).c_str(), xlParamCodes);
     Printf(b_xll_cpp4->b, "            // function display name\n");
-    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(funcName).c_str(), funcName);
+    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
     Printf(b_xll_cpp4->b, "            // comma-delimited list of parameters\n");
-    String *x2 = f3(parms);
-    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", f(x2).c_str(), x2);
+    String *xlParamList = excelParamList(parms);
+    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(xlParamList).c_str(), xlParamList);
     Printf(b_xll_cpp4->b, "            // function type (0 = hidden function, 1 = worksheet function, 2 = command macro)\n");
     Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x01\"\"1\"),\n");
     Printf(b_xll_cpp4->b, "            // function category\n");
@@ -659,34 +607,34 @@ void printFunc(Node *n, bool manual) {
     if (!manual) {
     Printf(bm_.f()->b_obj_hpp->b,"\n");
     Printf(bm_.f()->b_obj_hpp->b,"    %s %s(", type, symname);
-    emitParmList(parms, bm_.f()->b_obj_hpp->b);
+    emitParmList(parms, bm_.f()->b_obj_hpp->b, 2);
     Printf(bm_.f()->b_obj_hpp->b,");\n");
 
     Printf(bm_.f()->b_obj_cpp->b,"%s %s::%s(", type, module, symname);
-    emitParmList(parms, bm_.f()->b_obj_cpp->b);
+    emitParmList(parms, bm_.f()->b_obj_cpp->b, 2);
     Printf(bm_.f()->b_obj_cpp->b,") {\n");
     Printf(bm_.f()->b_obj_cpp->b,"    return %s(", name);
-    emitParmList2(parms, bm_.f()->b_obj_cpp->b);
+    emitParmList(parms, bm_.f()->b_obj_cpp->b, 0, 0, 0, true);
     Printf(bm_.f()->b_obj_cpp->b,");\n");
     Printf(bm_.f()->b_obj_cpp->b,"}\n");
     }
 
     Printf(bm_.f()->b_cpp_hpp->b,"    %s %s(", type, funcName);
-    emitParmList4(parms, bm_.f()->b_cpp_hpp->b);
+    emitParmList(parms, bm_.f()->b_cpp_hpp->b, 2, "rp_cpp_in");
     Printf(bm_.f()->b_cpp_hpp->b,");\n");
 
     Printf(bm_.f()->b_cpp_cpp->b,"%s %sCpp::%s(", type, module, funcName);
-    emitParmList4(parms, bm_.f()->b_cpp_cpp->b);
+    emitParmList(parms, bm_.f()->b_cpp_cpp->b, 2, "rp_cpp_in");
     Printf(bm_.f()->b_cpp_cpp->b,") {\n");
-    emitParmList5(parms, bm_.f()->b_cpp_cpp->b);
+    emitParmList(parms, bm_.f()->b_cpp_cpp->b, 1, "rp_cpp_cnv", 1);
     Printf(bm_.f()->b_cpp_cpp->b,"    return %s::%s(", module, symname);
-    emitParmList6(parms, bm_.f()->b_cpp_cpp->b);
+    emitParmList(parms, bm_.f()->b_cpp_cpp->b, 1, "rp_cpp_call", 2, true);
     Printf(bm_.f()->b_cpp_cpp->b,");\n");
     Printf(bm_.f()->b_cpp_cpp->b,"}\n");
 
     f4(n, type, parms);
 
-    String *ret_type = getType("rp_excel_out", n, type);
+    String *ret_type = getTypeMap("rp_excel_out", n, type);
     Printf(bm_.f()->b_xll_cpp->b, "\n");
     Printf(bm_.f()->b_xll_cpp->b, "DLLEXPORT %s %s(", ret_type, funcName);
     emitParmList(parms, bm_.f()->b_xll_cpp->b/*, true*/);
@@ -701,10 +649,10 @@ void printFunc(Node *n, bool manual) {
     Printf(bm_.f()->b_xll_cpp->b, "\n");
     Printf(bm_.f()->b_xll_cpp->b, "        %s returnValue =\n", type);
     Printf(bm_.f()->b_xll_cpp->b, "            %s::%s(", module, symname);
-    emitParmList2(parms, bm_.f()->b_xll_cpp->b, true);
+    emitParmList(parms, bm_.f()->b_xll_cpp->b, 0, 0, 0, true);
     Printf(bm_.f()->b_xll_cpp->b, ");\n");
 
-    String *tm = getType("rp_ohxl_ret", n, type);
+    String *tm = getTypeMap("rp_ohxl_ret", n, type);
     Printf(bm_.f()->b_xll_cpp->b, Char(tm));
 
     Printf(bm_.f()->b_xll_cpp->b, "\n");
@@ -751,25 +699,25 @@ void printMemb(Node *n) {
     Printf(b_wrappers, "//***ABC\n");
 
     Printf(bm_.f()->b_cpp_hpp->b,"    %s %s(", type, funcName);
-    emitParmList4(parms2, bm_.f()->b_cpp_hpp->b);
+    emitParmList(parms2, bm_.f()->b_cpp_hpp->b, 2, "rp_cpp_in");
     Printf(bm_.f()->b_cpp_hpp->b,");\n");
 
     Printf(bm_.f()->b_cpp_cpp->b,"%s %sCpp::%s(\n", type, module, funcName);
-    emitParmList4(parms2, bm_.f()->b_cpp_cpp->b);
+    emitParmList(parms2, bm_.f()->b_cpp_cpp->b, 2, "rp_cpp_in");
     Printf(bm_.f()->b_cpp_cpp->b,") {\n");
-    emitParmList5(parms, bm_.f()->b_cpp_cpp->b);
+    emitParmList(parms, bm_.f()->b_cpp_cpp->b, 1, "rp_cpp_cnv", 1);
     Printf(bm_.f()->b_cpp_cpp->b,"    OH_GET_REFERENCE(x, objectID, %s::%s, %s);\n", module, cls, pname);
     Printf(bm_.f()->b_cpp_cpp->b,"    return x->%s(", name);
-    emitParmList6(parms, bm_.f()->b_cpp_cpp->b);
+    emitParmList(parms, bm_.f()->b_cpp_cpp->b, 1, "rp_cpp_call", 2, true);
     Printf(bm_.f()->b_cpp_cpp->b,");\n", name);
     Printf(bm_.f()->b_cpp_cpp->b,"}\n");
 
     f4(n, type, parms2);
 
-    String *ret_type = getType("rp_excel_out", n, type);
+    String *ret_type = getTypeMap("rp_excel_out", n, type);
     Printf(bm_.f()->b_xll_cpp->b, "\n");
     Printf(bm_.f()->b_xll_cpp->b, "DLLEXPORT %s %s(", ret_type, funcName);
-    emitParmList3(parms2, bm_.f()->b_xll_cpp->b);
+    emitParmList(parms2, bm_.f()->b_xll_cpp->b, 2, "rp_excel_in", 2);
     Printf(bm_.f()->b_xll_cpp->b, ") {\n");
     Printf(bm_.f()->b_xll_cpp->b, "\n");
     Printf(bm_.f()->b_xll_cpp->b, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
@@ -783,7 +731,7 @@ void printMemb(Node *n) {
     Printf(bm_.f()->b_xll_cpp->b, "\n");
     Printf(bm_.f()->b_xll_cpp->b, "        static %s ret;\n", type);
     Printf(bm_.f()->b_xll_cpp->b, "        ret = x->%s(", name);
-    emitParmList2(parms, bm_.f()->b_xll_cpp->b, true);
+    emitParmList(parms, bm_.f()->b_xll_cpp->b, 0, 0, 0, true);
     Printf(bm_.f()->b_xll_cpp->b, ");\n");
     Printf(bm_.f()->b_xll_cpp->b, "        return &ret;\n");
     Printf(bm_.f()->b_xll_cpp->b, "\n");
@@ -925,11 +873,11 @@ void printCtor(Node *n, bool manual) {
     Printf(bm_.f()->b_obj_hpp->b,"        %s(\n", name);
     Printf(bm_.f()->b_obj_hpp->b,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties,\n");
     Printf(bm_.f()->b_obj_hpp->b,"            ");
-    emitParmList(parms, bm_.f()->b_obj_hpp->b);
+    emitParmList(parms, bm_.f()->b_obj_hpp->b, 2);
     Printf(bm_.f()->b_obj_hpp->b,", bool permanent)\n");
     Printf(bm_.f()->b_obj_hpp->b,"        : ObjectHandler::LibraryObject<%s>(properties, permanent) {\n", pname);
     Printf(bm_.f()->b_obj_hpp->b,"            libraryObject_ = boost::shared_ptr<%s>(new %s(", pname, pname);
-    emitParmList2(parms, bm_.f()->b_obj_hpp->b);
+    emitParmList(parms, bm_.f()->b_obj_hpp->b, 0, 0, 0, true);
     Printf(bm_.f()->b_obj_hpp->b,"));\n");
     Printf(bm_.f()->b_obj_hpp->b,"        }\n");
     Printf(bm_.f()->b_obj_hpp->b,"    };\n");
@@ -937,20 +885,20 @@ void printCtor(Node *n, bool manual) {
     }
 
     Printf(bm_.f()->b_cpp_hpp->b,"    std::string %s(", funcName);
-    emitParmList4(parms2, bm_.f()->b_cpp_hpp->b);
+    emitParmList(parms2, bm_.f()->b_cpp_hpp->b, 2, "rp_cpp_in");
     Printf(bm_.f()->b_cpp_hpp->b,");\n");
 
     Printf(bm_.f()->b_cpp_cpp->b,"std::string %sCpp::%s(", module, funcName);
-    emitParmList4(parms2, bm_.f()->b_cpp_cpp->b);
+    emitParmList(parms2, bm_.f()->b_cpp_cpp->b, 2, "rp_cpp_in");
     Printf(bm_.f()->b_cpp_cpp->b,") {\n");
-    emitParmList5(parms, bm_.f()->b_cpp_cpp->b);
+    emitParmList(parms, bm_.f()->b_cpp_cpp->b, 1, "rp_cpp_cnv", 1);
     Printf(bm_.f()->b_cpp_cpp->b,"    boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
     Printf(bm_.f()->b_cpp_cpp->b,"        new %s::ValueObjects::%s(\n", module, funcName);
     Printf(bm_.f()->b_cpp_cpp->b,"            objectID, false));\n");
     Printf(bm_.f()->b_cpp_cpp->b,"    boost::shared_ptr<ObjectHandler::Object> object(\n");
     Printf(bm_.f()->b_cpp_cpp->b,"        new %s::%s(\n", module, name);
     Printf(bm_.f()->b_cpp_cpp->b,"            valueObject, ");
-    emitParmList6(parms, bm_.f()->b_cpp_cpp->b);
+    emitParmList(parms, bm_.f()->b_cpp_cpp->b, 1, "rp_cpp_call", 2, true);
     Printf(bm_.f()->b_cpp_cpp->b,", false));\n");
     Printf(bm_.f()->b_cpp_cpp->b,"    std::string returnValue =\n");
     Printf(bm_.f()->b_cpp_cpp->b,"        ObjectHandler::Repository::instance().storeObject(\n");
@@ -962,7 +910,7 @@ void printCtor(Node *n, bool manual) {
 
     Printf(bm_.f()->b_xll_cpp->b, "\n");
     Printf(bm_.f()->b_xll_cpp->b, "DLLEXPORT char *%s(", funcName);
-    emitParmList3(parms2, bm_.f()->b_xll_cpp->b);
+    emitParmList(parms2, bm_.f()->b_xll_cpp->b, 2, "rp_excel_in", 2);
     Printf(bm_.f()->b_xll_cpp->b, ") {\n");
     Printf(bm_.f()->b_xll_cpp->b, "\n");
     Printf(bm_.f()->b_xll_cpp->b, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
@@ -977,7 +925,7 @@ void printCtor(Node *n, bool manual) {
     Printf(bm_.f()->b_xll_cpp->b, "\n");
     Printf(bm_.f()->b_xll_cpp->b, "        boost::shared_ptr<ObjectHandler::Object> object(\n");
     Printf(bm_.f()->b_xll_cpp->b, "            new %s::%s(valueObject,", module, name);
-    emitParmList2(parms, bm_.f()->b_xll_cpp->b, true);
+    emitParmList(parms, bm_.f()->b_xll_cpp->b, 0, 0, 0, true);
     Printf(bm_.f()->b_xll_cpp->b, ", false));\n");
     Printf(bm_.f()->b_xll_cpp->b, "\n");
     Printf(bm_.f()->b_xll_cpp->b, "        std::string returnValue =\n");
