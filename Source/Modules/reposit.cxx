@@ -135,10 +135,12 @@ struct BufferGroup {
         // FIXME this #include is only required if the file contains conversions.
         Printf(b_cpp_cpp->b, "#include \"convert2.hpp\"\n");
         // FIXME this #include is only required if the file contains enumerations.
-        Printf(b_cpp_cpp->b, "#include <oh/enumerations/typefactory.hpp>\n");
+        //Printf(b_cpp_cpp->b, "#include <oh/enumerations/typefactory.hpp>\n");
         // FIXME this #include is only required if the file contains constructors.
         Printf(b_cpp_cpp->b, "#include \"ValueObjects/vo_%s.hpp\"\n", name);
         Printf(b_cpp_cpp->b, "#include \"AddinObjects/obj_%s.hpp\"\n", name);
+        // FIXME include only factories for types used in the current file.
+        Printf(b_cpp_cpp->b, "#include \"AddinObjects/enum_factories.hpp\"\n");
         Printf(b_cpp_cpp->b, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_cpp_cpp->b, "#include <oh/repository.hpp>\n");
         Printf(b_cpp_cpp->b, "\n");
