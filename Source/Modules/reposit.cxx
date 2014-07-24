@@ -289,6 +289,13 @@ Node *getNode(Node *n, const char *c) {
     return ret;
 }
 
+String *getOption(Node *n, const char *key, const char *dflt) {
+    if (String *ret = Getattr(n, key))
+        return ret;
+    else
+        return NewString(dflt);
+}
+
 virtual int top(Node *n) {
     printf("Generating code.\n");
 
@@ -299,8 +306,8 @@ virtual int top(Node *n) {
     // FIXME store some defaults in reposit.swg and retrieve them here.
     Node *n2 = getNode(n, "module");
     Node *n3 = getNode(n2, "options");
-    Node *n4 = getNode(n3, "rp_obj_dir");
-    Node *n5 = getNode(n3, "rp_xl_dir");
+    String *n4 = getOption(n3, "rp_obj_dir", "AddinObjects");
+    String *n5 = getOption(n3, "rp_xl_dir", "AddinXl");
 
     printf("rp_obj_dir=%s\n", Char(n4));
     printf("rp_xl_dir=%s\n", Char(n5));
