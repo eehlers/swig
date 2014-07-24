@@ -5,6 +5,6 @@
 %}
 
 namespace SimpleLib {
-    //std::string getColorName(const SimpleLib::Color &color);
+    std::string getColorName(const SimpleLib::Color &color);
     std::string accountTypeToString(SimpleLib::Account::Type type);
 }
