@@ -1,6 +1,6 @@
 
-#ifndef addinobjects_enumerations_hpp
-#define addinobjects_enumerations_hpp
+#ifndef addinobjects_enum_reg_types_hpp
+#define addinobjects_enum_reg_types_hpp
 
 namespace SimpleLibAddin {
 

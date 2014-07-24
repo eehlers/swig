@@ -5,11 +5,13 @@
 #include <oh/enumerations/enumregistry.hpp>
 //#include <qlo/enumerations/register/register_all.hpp>
 //#include <qlo/serialization/serializationfactory.hpp>
-#include "enumerations.hpp"
+#include "enum_reg_types.hpp"
+#include "enum_reg_classes.hpp"
 
 void SimpleLibAddin::initializeAddin() {
 
         // Initialize the Enumeration Registry
         registerEnumeratedTypes();
+        registerEnumeratedClasses();
 }
 

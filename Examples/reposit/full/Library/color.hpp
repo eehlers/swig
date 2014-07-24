@@ -3,6 +3,7 @@
 #define simplelib_color_hpp
 
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 namespace SimpleLib {
 
@@ -25,7 +26,7 @@ namespace SimpleLib {
         virtual std::string name() const;
     };
 
-    std::string getColorName(const Color &color);
+    std::string getColorName(boost::shared_ptr<Color> color);
 };
 
 #endif

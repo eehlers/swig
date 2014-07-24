@@ -25,12 +25,18 @@ int main() {
             std::cout << "Error - " << e.what() << std::endl;
         }
 
-        //std::cout << SimpleLibAddinCpp::slGetColorName("Red") << std::endl;
-        //std::cout << SimpleLibAddinCpp::slGetColorName("x") << std::endl;
         std::cout << SimpleLibAddinCpp::slAccountTypeToString("Current") << std::endl;
         std::cout << SimpleLibAddinCpp::slAccountTypeToString("Savings") << std::endl;
         try {
             std::cout << SimpleLibAddinCpp::slAccountTypeToString("wazoo") << std::endl;
+        } catch(const std::exception &e) {
+            std::cout << "Error - " << e.what() << std::endl;
+        }
+
+        std::cout << SimpleLibAddinCpp::slGetColorName("Red") << std::endl;
+        std::cout << SimpleLibAddinCpp::slGetColorName("Blue") << std::endl;
+        try {
+            std::cout << SimpleLibAddinCpp::slGetColorName("wazoo") << std::endl;
         } catch(const std::exception &e) {
             std::cout << "Error - " << e.what() << std::endl;
         }

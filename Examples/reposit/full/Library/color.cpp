@@ -9,8 +9,8 @@ std::string SimpleLib::Blue::name() const {
     return "Blue";
 }
 
-std::string SimpleLib::getColorName(const Color &color) {
-    return color.name();
+std::string SimpleLib::getColorName(boost::shared_ptr<Color> color) {
+    return color->name();
 }
 
 std::string SimpleLib::accountTypeToString(Account::Type type) {
