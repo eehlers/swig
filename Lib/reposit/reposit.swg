@@ -1,6 +1,6 @@
 
-%feature("oh:x", "abc") def;
-%feature("featurename", "1");
+//%feature("oh:x", "abc") def;
+//%feature("featurename", "1");
 
 %typemap(rp_cpp_call) SWIGTYPE "$1_name";
 

@@ -280,11 +280,30 @@ public:
     }
   }
 
+Node *getNode(Node *n, const char *c) {
+    Node *ret = 0;
+    if (!(ret = Getattr(n, c))) {
+        printf ("can't find node %s.\n", c);
+        SWIG_exit(EXIT_FAILURE);
+    }
+    return ret;
+}
+
 virtual int top(Node *n) {
     printf("Generating code.\n");
 
    /* Get the module name */
    module = Getattr(n,"name");
+
+    // Extract some config info.
+    // FIXME store some defaults in reposit.swg and retrieve them here.
+    Node *n2 = getNode(n, "module");
+    Node *n3 = getNode(n2, "options");
+    Node *n4 = getNode(n3, "rp_obj_dir");
+    Node *n5 = getNode(n3, "rp_xl_dir");
+
+    printf("rp_obj_dir=%s\n", Char(n4));
+    printf("rp_xl_dir=%s\n", Char(n5));
 
    /* Initialize I/O */
     b_runtime = NewString("");
