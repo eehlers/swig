@@ -564,7 +564,7 @@ std::string hexLen(String *c) {
     return s.str();
 }
 
-void f4(Node *n, SwigType *type, ParmList *parms) {
+void excelRegister(Node *n, SwigType *type, ParmList *parms) {
     String *funcName   = Getattr(n, "rp:funcName");
     Printf(b_xll_cpp4->b, "\n");
     Printf(b_xll_cpp4->b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
@@ -632,7 +632,7 @@ void printFunc(Node *n, bool manual) {
     Printf(bm_.f()->b_cpp_cpp->b,");\n");
     Printf(bm_.f()->b_cpp_cpp->b,"}\n");
 
-    f4(n, type, parms);
+    excelRegister(n, type, parms);
 
     String *ret_type = getTypeMap("rp_excel_out", n, type);
     Printf(bm_.f()->b_xll_cpp->b, "\n");
@@ -712,7 +712,7 @@ void printMemb(Node *n) {
     Printf(bm_.f()->b_cpp_cpp->b,");\n", name);
     Printf(bm_.f()->b_cpp_cpp->b,"}\n");
 
-    f4(n, type, parms2);
+    excelRegister(n, type, parms2);
 
     String *ret_type = getTypeMap("rp_excel_out", n, type);
     Printf(bm_.f()->b_xll_cpp->b, "\n");
@@ -906,7 +906,7 @@ void printCtor(Node *n, bool manual) {
     Printf(bm_.f()->b_cpp_cpp->b,"    return returnValue;\n");
     Printf(bm_.f()->b_cpp_cpp->b,"}\n");
 
-    f4(n, 0, parms3);
+    excelRegister(n, 0, parms3);
 
     Printf(bm_.f()->b_xll_cpp->b, "\n");
     Printf(bm_.f()->b_xll_cpp->b, "DLLEXPORT char *%s(", funcName);
