@@ -9,6 +9,10 @@
 String *prefix = 0;
 String *module = 0;
 
+// FIXME store some defaults in reposit.swg and retrieve them here.
+String *objDir = NewString("AddinObjects");
+String *xlDir = NewString("AddinXl");
+
 File *initFile(String *outfile) {
    File *f = NewFile(outfile, "w", SWIG_output_files());
    if (!f) {
@@ -72,8 +76,8 @@ struct BufferGroup {
         Delete(s_xll_cpp);
 
         if (!manual_) {
-            String *s_obj_cpp = NewStringf("AddinObjects/obj_%s.cpp", name_);
-            String *s_obj_hpp = NewStringf("AddinObjects/obj_%s.hpp", name_);
+            String *s_obj_cpp = NewStringf("%s/obj_%s.cpp", objDir, name_);
+            String *s_obj_hpp = NewStringf("%s/obj_%s.hpp", objDir, name_);
             b_obj_cpp = new Buffer(s_obj_cpp);
             b_obj_hpp = new Buffer(s_obj_hpp);
             Delete(s_obj_cpp);
@@ -138,9 +142,9 @@ struct BufferGroup {
         //Printf(b_cpp_cpp->b, "#include <oh/enumerations/typefactory.hpp>\n");
         // FIXME this #include is only required if the file contains constructors.
         Printf(b_cpp_cpp->b, "#include \"ValueObjects/vo_%s.hpp\"\n", name);
-        Printf(b_cpp_cpp->b, "#include \"AddinObjects/obj_%s.hpp\"\n", name);
+        Printf(b_cpp_cpp->b, "#include \"%s/obj_%s.hpp\"\n", objDir, name);
         // FIXME include only factories for types used in the current file.
-        Printf(b_cpp_cpp->b, "#include \"AddinObjects/enum_factories.hpp\"\n");
+        Printf(b_cpp_cpp->b, "#include \"%s/enum_factories.hpp\"\n", objDir);
         Printf(b_cpp_cpp->b, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_cpp_cpp->b, "#include <oh/repository.hpp>\n");
         Printf(b_cpp_cpp->b, "\n");
@@ -152,7 +156,7 @@ struct BufferGroup {
         Printf(b_xll_cpp->b, "#include <ohxl/utilities/xlutilities.hpp>\n");
         Printf(b_xll_cpp->b, "#include <ohxl/objectwrapperxl.hpp>\n");
         Printf(b_xll_cpp->b, "#include \"ValueObjects/vo_%s.hpp\"\n", name);
-        Printf(b_xll_cpp->b, "#include \"AddinObjects/obj_%s.hpp\"\n", name);
+        Printf(b_xll_cpp->b, "#include \"%s/obj_%s.hpp\"\n", objDir, name);
         Printf(b_xll_cpp->b, "\n");
         Printf(b_xll_cpp->b, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
         Printf(b_xll_cpp->b, "   for example) also #define _MSC_VER\n");
@@ -289,13 +293,6 @@ Node *getNode(Node *n, const char *c) {
     return ret;
 }
 
-String *getOption(Node *n, const char *key, const char *dflt) {
-    if (String *ret = Getattr(n, key))
-        return ret;
-    else
-        return NewString(dflt);
-}
-
 virtual int top(Node *n) {
     printf("Generating code.\n");
 
@@ -303,14 +300,15 @@ virtual int top(Node *n) {
    module = Getattr(n,"name");
 
     // Extract some config info.
-    // FIXME store some defaults in reposit.swg and retrieve them here.
     Node *n2 = getNode(n, "module");
     Node *n3 = getNode(n2, "options");
-    String *n4 = getOption(n3, "rp_obj_dir", "AddinObjects");
-    String *n5 = getOption(n3, "rp_xl_dir", "AddinXl");
+    if (String *n4 = getNode(n3, "rp_obj_dir"))
+        objDir = n4;
+    if (String *n5 = getNode(n3, "rp_xl_dir"))
+        xlDir = n5;
 
-    printf("rp_obj_dir=%s\n", Char(n4));
-    printf("rp_xl_dir=%s\n", Char(n5));
+    printf("rp_obj_dir=%s\n", Char(objDir));
+    printf("rp_xl_dir=%s\n", Char(xlDir));
 
    /* Initialize I/O */
     b_runtime = NewString("");
