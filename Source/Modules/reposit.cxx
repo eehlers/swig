@@ -295,6 +295,8 @@ virtual int top(Node *n) {
     b_director = NewString("");
     b_begin = NewString("");
 
+        printNode(n);
+
    /* Register file targets with the SWIG file handler */
     Swig_register_filebyname("header", b_header);
     Swig_register_filebyname("wrapper", b_wrappers);
