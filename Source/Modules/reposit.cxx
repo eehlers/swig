@@ -57,8 +57,8 @@ struct BufferGroup {
         name_ = Copy(name);
         manual_ = manual;
 
-        String *s_val_cpp = NewStringf("ValueObjects/vo_%s.cpp", name_);
-        String *s_val_hpp = NewStringf("ValueObjects/vo_%s.hpp", name_);
+        String *s_val_cpp = NewStringf("%s/valueobjects/vo_%s.cpp", objDir, name_);
+        String *s_val_hpp = NewStringf("%s/valueobjects/vo_%s.hpp", objDir, name_);
         String *s_cpp_cpp = NewStringf("AddinCpp/cpp_%s.cpp", name_);
         String *s_cpp_hpp = NewStringf("AddinCpp/cpp_%s.hpp", name_);
         String *s_xll_cpp = NewStringf("AddinXl/xl_%s.cpp", name_);
@@ -141,10 +141,10 @@ struct BufferGroup {
         // FIXME this #include is only required if the file contains enumerations.
         //Printf(b_cpp_cpp->b, "#include <oh/enumerations/typefactory.hpp>\n");
         // FIXME this #include is only required if the file contains constructors.
-        Printf(b_cpp_cpp->b, "#include \"ValueObjects/vo_%s.hpp\"\n", name);
+        Printf(b_cpp_cpp->b, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objDir, name);
         Printf(b_cpp_cpp->b, "#include \"%s/obj_%s.hpp\"\n", objDir, name);
         // FIXME include only factories for types used in the current file.
-        Printf(b_cpp_cpp->b, "#include \"%s/enum_factories.hpp\"\n", objDir);
+        Printf(b_cpp_cpp->b, "#include \"%s/enumerations/factories.hpp\"\n", objDir);
         Printf(b_cpp_cpp->b, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_cpp_cpp->b, "#include <oh/repository.hpp>\n");
         Printf(b_cpp_cpp->b, "\n");
@@ -155,7 +155,7 @@ struct BufferGroup {
         Printf(b_xll_cpp->b, "#include <ohxl/functions/export.hpp>\n");
         Printf(b_xll_cpp->b, "#include <ohxl/utilities/xlutilities.hpp>\n");
         Printf(b_xll_cpp->b, "#include <ohxl/objectwrapperxl.hpp>\n");
-        Printf(b_xll_cpp->b, "#include \"ValueObjects/vo_%s.hpp\"\n", name);
+        Printf(b_xll_cpp->b, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objDir, name);
         Printf(b_xll_cpp->b, "#include \"%s/obj_%s.hpp\"\n", objDir, name);
         Printf(b_xll_cpp->b, "\n");
         Printf(b_xll_cpp->b, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
