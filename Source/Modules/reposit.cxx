@@ -137,7 +137,7 @@ struct BufferGroup {
         Printf(b_cpp_cpp->b, "\n");
         Printf(b_cpp_cpp->b, "#include \"cpp_%s.hpp\"\n", name);
         // FIXME this #include is only required if the file contains conversions.
-        Printf(b_cpp_cpp->b, "#include \"convert2.hpp\"\n");
+        Printf(b_cpp_cpp->b, "#include \"conversions/convert2.hpp\"\n");
         // FIXME this #include is only required if the file contains enumerations.
         //Printf(b_cpp_cpp->b, "#include <oh/enumerations/typefactory.hpp>\n");
         // FIXME this #include is only required if the file contains constructors.
