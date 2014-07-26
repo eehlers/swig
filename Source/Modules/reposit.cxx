@@ -297,15 +297,16 @@ virtual int top(Node *n) {
     printf("Generating code.\n");
 
    /* Get the module name */
-   module = Getattr(n,"name");
+   module = Getattr(n, "name");
 
     // Extract some config info.
     Node *n2 = getNode(n, "module");
-    Node *n3 = getNode(n2, "options");
-    if (String *n4 = getNode(n3, "rp_obj_dir"))
-        objDir = n4;
-    if (String *n5 = getNode(n3, "rp_xl_dir"))
-        xlDir = n5;
+    if (Node *n3 = Getattr(n2, "options")) {
+        if (String *n4 = getNode(n3, "rp_obj_dir"))
+            objDir = n4;
+        if (String *n5 = getNode(n3, "rp_xl_dir"))
+            xlDir = n5;
+    }
 
     printf("rp_obj_dir=%s\n", Char(objDir));
     printf("rp_xl_dir=%s\n", Char(xlDir));
