@@ -1,8 +1,8 @@
 
 #include <oh/enumerations/typefactory.hpp>
-#include "enum_reg_classes.hpp"
-#include "enum_ctor_classes.hpp"
-#include "enum_factories.hpp"
+#include "register_classes.hpp"
+#include "AddinObjects/enumerations/constructors/classes.hpp"
+#include "AddinObjects/enumerations/factories/all.hpp"
 
 namespace SimpleLibAddin {
 

@@ -1,6 +1,6 @@
 
 #include <oh/enumerations/typefactory.hpp>
-#include "enum_reg_types.hpp"
+#include "register_types.hpp"
 #include <Library/color.hpp>
 
 namespace SimpleLibAddin {

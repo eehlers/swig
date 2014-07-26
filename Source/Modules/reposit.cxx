@@ -144,7 +144,7 @@ struct BufferGroup {
         Printf(b_cpp_cpp->b, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objDir, name);
         Printf(b_cpp_cpp->b, "#include \"%s/obj_%s.hpp\"\n", objDir, name);
         // FIXME include only factories for types used in the current file.
-        Printf(b_cpp_cpp->b, "#include \"%s/enumerations/factories.hpp\"\n", objDir);
+        Printf(b_cpp_cpp->b, "#include \"%s/enumerations/factories/all.hpp\"\n", objDir);
         Printf(b_cpp_cpp->b, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_cpp_cpp->b, "#include <oh/repository.hpp>\n");
         Printf(b_cpp_cpp->b, "\n");
