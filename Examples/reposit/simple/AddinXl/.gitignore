@@ -3,3 +3,4 @@ Release
 *.xll
 xl_*.cpp
 !xl_hw*.cpp
+Debug

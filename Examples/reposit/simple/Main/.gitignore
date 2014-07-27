@@ -4,3 +4,4 @@ mainSimpleAddin
 Release
 *.user
 !Makefile
+Debug

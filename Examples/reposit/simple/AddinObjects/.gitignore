@@ -3,3 +3,4 @@ Release
 obj_*.?pp
 !obj_hw*.?pp
 !Makefile
+Debug
