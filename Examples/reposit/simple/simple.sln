@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C++ Express 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleLib", "Library\SimpleLib.vcproj", "{99110FBD-D532-4984-AB3B-1C07515B3667}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AddinObjectsHw", "AddinObjects\AddinObjectsHw.vcproj", "{0245FF1B-F0A2-4222-8A04-F95C3B0DD038}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AddinXl", "AddinXl\AddinXl.vcproj", "{1F9FC421-8257-4EE7-85B1-8F0F67093852}"
 	ProjectSection(ProjectDependencies) = postProject
 		{72B5EDA8-E86D-4655-A759-159F8E377CA4} = {72B5EDA8-E86D-4655-A759-159F8E377CA4}
@@ -32,10 +30,6 @@ Global
 		{99110FBD-D532-4984-AB3B-1C07515B3667}.Debug|Win32.Build.0 = Debug|Win32
 		{99110FBD-D532-4984-AB3B-1C07515B3667}.Release|Win32.ActiveCfg = Release|Win32
 		{99110FBD-D532-4984-AB3B-1C07515B3667}.Release|Win32.Build.0 = Release|Win32
-		{0245FF1B-F0A2-4222-8A04-F95C3B0DD038}.Debug|Win32.ActiveCfg = Debug|Win32
-		{0245FF1B-F0A2-4222-8A04-F95C3B0DD038}.Debug|Win32.Build.0 = Debug|Win32
-		{0245FF1B-F0A2-4222-8A04-F95C3B0DD038}.Release|Win32.ActiveCfg = Release|Win32
-		{0245FF1B-F0A2-4222-8A04-F95C3B0DD038}.Release|Win32.Build.0 = Release|Win32
 		{1F9FC421-8257-4EE7-85B1-8F0F67093852}.Debug|Win32.ActiveCfg = Debug|Win32
 		{1F9FC421-8257-4EE7-85B1-8F0F67093852}.Debug|Win32.Build.0 = Debug|Win32
 		{1F9FC421-8257-4EE7-85B1-8F0F67093852}.Release|Win32.ActiveCfg = Release|Win32
