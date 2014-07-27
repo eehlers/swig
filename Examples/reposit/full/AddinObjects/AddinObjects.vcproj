@@ -144,6 +144,94 @@
 	<References>
 	</References>
 	<Files>
+		<Filter
+			Name="valueobjects"
+			>
+			<File
+				RelativePath=".\valueobjects\vo_adder.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_adder.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_adder2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_adder2.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_color.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_color.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_foo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_foo.hpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="enumerations"
+			>
+			<Filter
+				Name="constructors"
+				>
+				<File
+					RelativePath=".\enumerations\constructors\classes.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\enumerations\constructors\classes.hpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="factories"
+				>
+				<File
+					RelativePath=".\enumerations\factories\all.hpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="register"
+				>
+				<File
+					RelativePath=".\enumerations\register\register_classes.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\enumerations\register\register_classes.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\enumerations\register\register_types.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\enumerations\register\register_types.hpp"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<File
+			RelativePath=".\init.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\init.hpp"
+			>
+		</File>
 		<File
 			RelativePath=".\obj_adder.cpp"
 			>
@@ -158,6 +246,14 @@
 		</File>
 		<File
 			RelativePath=".\obj_adder2.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\obj_color.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\obj_color.hpp"
 			>
 		</File>
 		<File

@@ -4,7 +4,8 @@
 %typemap(rp_cpp_in) boost::shared_ptr<SimpleLib::Color> "const std::string&";
 
 %typemap(rp_cpp_cnv) SimpleLib::Long %{
-    SimpleLib::Long $1_name_cnv=ObjectHandler::convert2<SimpleLib::Long, ObjectHandler::property_t>($1_name);
+    SimpleLib::Long $1_name_cnv =
+        ObjectHandler::convert2<SimpleLib::Long, ObjectHandler::property_t>($1_name);
 %} 
 
 %typemap(rp_cpp_cnv) SimpleLib::Account::Type %{
@@ -21,11 +22,25 @@
 %typemap(rp_cpp_call) SimpleLib::Account::Type "$1_name_enum";
 %typemap(rp_cpp_call) boost::shared_ptr<SimpleLib::Color> "$1_name_enum";
 
-%typemap(rp_excel) SimpleLib::Long "X";
-%typemap(rp_excel) SimpleLib::Account::Type "X";
-%typemap(rp_excel) boost::shared_ptr<SimpleLib::Color> "X";
+%typemap(rp_excel) SimpleLib::Long "XXA";
+%typemap(rp_excel) SimpleLib::Account::Type "XXB";
+%typemap(rp_excel) boost::shared_ptr<SimpleLib::Color> "XXC";
 
-%typemap(rp_excel_in) SimpleLib::Long "X";
+%typemap(rp_excel_in) SimpleLib::Long "OPER*";
+%typemap(rp_excel_in) boost::shared_ptr<SimpleLib::Color> "const char*";
+
+%typemap(rp_excel_cnv) SimpleLib::Long %{
+        SimpleLib::Long $1_name_cnv = ObjectHandler::convert2<SimpleLib::Long>(
+            ObjectHandler::ConvertOper(*$1_name), "$1_name", SimpleLib::Long());
+%} 
+
+%typemap(rp_excel_cnv) boost::shared_ptr<SimpleLib::Color> %{
+        boost::shared_ptr<SimpleLib::Color> $1_name_enum =
+            ObjectHandler::Create<boost::shared_ptr<SimpleLib::Color> >()($1_name);
+%} 
+
+%typemap(rp_excel_call) SimpleLib::Long "$1_name_cnv";
+%typemap(rp_excel_call) boost::shared_ptr<SimpleLib::Color> "$1_name_enum";
 
 %module SimpleLibAddin
 %include adder.i

@@ -41,6 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="..,..\..\..\..\..\quantlib\ObjectHandler"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -144,6 +145,18 @@
 	<References>
 	</References>
 	<Files>
+		<Filter
+			Name="conversions"
+			>
+			<File
+				RelativePath=".\conversions\convert2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\conversions\convert2.hpp"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\cpp_adder.cpp"
 			>
@@ -161,11 +174,27 @@
 			>
 		</File>
 		<File
+			RelativePath=".\cpp_color.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\cpp_color.hpp"
+			>
+		</File>
+		<File
 			RelativePath=".\cpp_foo.cpp"
 			>
 		</File>
 		<File
 			RelativePath=".\cpp_foo.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\init.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\init.hpp"
 			>
 		</File>
 	</Files>

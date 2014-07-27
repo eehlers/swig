@@ -2,3 +2,4 @@
 Release
 cpp_*.?pp
 !Makefile
+Debug

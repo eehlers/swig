@@ -169,12 +169,32 @@
 	<References>
 	</References>
 	<Files>
+		<Filter
+			Name="conversions"
+			>
+			<File
+				RelativePath=".\conversions\convert2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\conversions\convert2.hpp"
+				>
+			</File>
+		</Filter>
+		<File
+			RelativePath=".\xl_adder.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\xl_adder2.cpp"
+			>
+		</File>
 		<File
 			RelativePath=".\xl_addin.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\xl_adder.cpp"
+			RelativePath=".\xl_color.cpp"
 			>
 		</File>
 		<File

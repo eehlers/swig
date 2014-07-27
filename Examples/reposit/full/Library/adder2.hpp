@@ -10,7 +10,7 @@ namespace SimpleLib {
     private:
         long x_;
     public:
-        Long(long x);
+        Long(long x=0);
         Long(std::string x);
         long x();
     };
