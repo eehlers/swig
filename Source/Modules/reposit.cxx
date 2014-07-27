@@ -157,6 +157,7 @@ struct BufferGroup {
         Printf(b_xll_cpp->b, "#include <ohxl/objectwrapperxl.hpp>\n");
         Printf(b_xll_cpp->b, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objDir, name);
         Printf(b_xll_cpp->b, "#include \"%s/obj_%s.hpp\"\n", objDir, name);
+        Printf(b_xll_cpp->b, "#include \"conversions/convert2.hpp\"\n");
         Printf(b_xll_cpp->b, "\n");
         Printf(b_xll_cpp->b, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
         Printf(b_xll_cpp->b, "   for example) also #define _MSC_VER\n");
@@ -663,7 +664,8 @@ void printFunc(Node *n, BufferGroup *bg, bool manual) {
     String *ret_type = getTypeMap("rp_excel_out", n, type);
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "DLLEXPORT %s %s(", ret_type, funcName);
-    emitParmList(parms, bg->b_xll_cpp->b/*, true*/);
+    //emitParmList(parms, bg->b_xll_cpp->b/*, true*/);
+    emitParmList(parms, bg->b_xll_cpp->b, 2, "rp_excel_in");
     Printf(bg->b_xll_cpp->b, ") {\n");
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
@@ -673,9 +675,12 @@ void printFunc(Node *n, BufferGroup *bg, bool manual) {
     Printf(bg->b_xll_cpp->b, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
     Printf(bg->b_xll_cpp->b, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
     Printf(bg->b_xll_cpp->b, "\n");
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_excel_cnv", 1);
+    Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        %s returnValue =\n", type);
     Printf(bg->b_xll_cpp->b, "            %s::%s(", module, symname);
-    emitParmList(parms, bg->b_xll_cpp->b, 0, 0, 0, true);
+    //emitParmList(parms, bg->b_xll_cpp->b, 0, 0, 0, true);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_excel_call", 2, true);
     Printf(bg->b_xll_cpp->b, ");\n");
 
     String *tm = getTypeMap("rp_ohxl_ret", n, type);
@@ -753,6 +758,7 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
     Printf(bg->b_xll_cpp->b, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
     Printf(bg->b_xll_cpp->b, "\n");
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_excel_cnv", 1);
     Printf(bg->b_xll_cpp->b, "        OH_GET_REFERENCE(x, objectID, %s::%s, %s);\n", module, cls, pname);
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        static %s ret;\n", type);
@@ -946,6 +952,7 @@ void printCtor(Node *n, BufferGroup *bg, bool manual) {
     Printf(bg->b_xll_cpp->b, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
     Printf(bg->b_xll_cpp->b, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
     Printf(bg->b_xll_cpp->b, "\n");
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_excel_cnv", 1);
     Printf(bg->b_xll_cpp->b, "        boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
     Printf(bg->b_xll_cpp->b, "            new %s::ValueObjects::%s(objectID, false));\n", module, funcName);
     Printf(bg->b_xll_cpp->b, "\n");
