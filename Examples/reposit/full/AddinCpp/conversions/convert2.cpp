@@ -3,6 +3,8 @@
 
 namespace ObjectHandler {
 
+    // FIXME consolidate with AddinXl/conversions/convert2.cpp
+
     inline bool is_numeric(const std::string &s, long &l) {
         try {
             l = boost::lexical_cast<long>(s);
