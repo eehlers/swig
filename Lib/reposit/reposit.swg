@@ -14,6 +14,9 @@
 %typemap(rp_excel_in) double "double*";
 %typemap(rp_excel_in) std::string& "char*";
 
+%typemap(rp_excel_call) long "*$1_name";
+%typemap(rp_excel_call) SWIGTYPE "$1_name";
+
 %typemap(rp_excel_out) bool "bool*";
 %typemap(rp_excel_out) long "long*";
 %typemap(rp_excel_out) double "double*";
