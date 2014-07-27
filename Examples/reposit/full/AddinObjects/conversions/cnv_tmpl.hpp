@@ -1,6 +1,6 @@
 
-#ifndef addinobjects_convert_cnv_tmpl_hpp
-#define addinobjects_convert_cnv_tmpl_hpp
+#ifndef addinobjects_conversions_cnv_tmpl_hpp
+#define addinobjects_conversions_cnv_tmpl_hpp
 
 // This file contains some templates common to AddinObjects and AddinXl.
 // This file should be #included only by AddinXxx/conversions/xxx.cpp,
