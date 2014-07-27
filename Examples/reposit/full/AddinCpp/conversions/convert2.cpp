@@ -1,5 +1,6 @@
 
 #include "convert2.hpp"
+#include <boost/lexical_cast.hpp>
 
 namespace ObjectHandler {
 

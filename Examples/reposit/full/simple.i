@@ -22,9 +22,9 @@
 %typemap(rp_cpp_call) SimpleLib::Account::Type "$1_name_enum";
 %typemap(rp_cpp_call) boost::shared_ptr<SimpleLib::Color> "$1_name_enum";
 
-%typemap(rp_excel) SimpleLib::Long "XXA";
-%typemap(rp_excel) SimpleLib::Account::Type "XXB";
-%typemap(rp_excel) boost::shared_ptr<SimpleLib::Color> "XXC";
+%typemap(rp_excel) SimpleLib::Long "P";
+%typemap(rp_excel) SimpleLib::Account::Type "P";
+%typemap(rp_excel) boost::shared_ptr<SimpleLib::Color> "P";
 
 %typemap(rp_excel_in) SimpleLib::Long "OPER*";
 %typemap(rp_excel_in) boost::shared_ptr<SimpleLib::Color> "const char*";
