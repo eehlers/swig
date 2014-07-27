@@ -173,10 +173,6 @@
 			RelativePath=".\xl_hw_adder.cpp"
 			>
 		</File>
-		<File
-			RelativePath=".\xl_hw_adder2.cpp"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

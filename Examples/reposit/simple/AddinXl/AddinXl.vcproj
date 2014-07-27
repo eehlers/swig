@@ -177,10 +177,6 @@
 			RelativePath=".\xl_adder.cpp"
 			>
 		</File>
-		<File
-			RelativePath=".\xl_foo.cpp"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

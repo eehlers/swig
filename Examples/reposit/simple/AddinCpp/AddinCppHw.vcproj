@@ -152,6 +152,14 @@
 			RelativePath=".\cpp_hw_adder.hpp"
 			>
 		</File>
+		<File
+			RelativePath=".\init.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\init.hpp"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

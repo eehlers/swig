@@ -144,6 +144,18 @@
 	<References>
 	</References>
 	<Files>
+		<Filter
+			Name="valueobjects"
+			>
+			<File
+				RelativePath=".\valueobjects\vo_adder.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_adder.hpp"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\obj_adder.cpp"
 			>

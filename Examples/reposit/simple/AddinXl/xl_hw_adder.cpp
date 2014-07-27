@@ -19,8 +19,8 @@
 #include <ohxl/functions/export.hpp>
 #include <ohxl/utilities/xlutilities.hpp>
 #include <ohxl/objectwrapperxl.hpp>
-#include "ValueObjects/vo_hw.hpp"
-#include "AddinObjects/obj_hw.hpp"
+#include "AddinObjects/valueobjects/vo_hw_adder.hpp"
+#include "AddinObjects/obj_hw_adder.hpp"
 
 /* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,
    for example) also #define _MSC_VER
