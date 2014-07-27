@@ -151,10 +151,6 @@
 			RelativePath=".\adder.hpp"
 			>
 		</File>
-		<File
-			RelativePath=".\simplelib.hpp"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

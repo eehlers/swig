@@ -6,7 +6,7 @@
 #include <oh/libraryobject.hpp>
 #include <oh/valueobject.hpp>
 #include <boost/shared_ptr.hpp>
-#include <Library/simplelib.hpp>
+#include <Library/adder.hpp>
 
 namespace SimpleLibAddin {
 
