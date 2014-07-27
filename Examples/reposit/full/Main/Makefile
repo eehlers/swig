@@ -5,7 +5,7 @@ LDIR = ../../../../../install/lib
 all: mainSimpleAddin
 
 mainSimpleAddin: mainSimpleAddin.cpp ../lib/libAddinCpp.so
-	g++ -fPIC mainSimpleAddin.cpp -o mainSimpleAddin -I.. -I$(IDIR) -L../lib -lAddinCpp
+	g++ -Wall mainSimpleAddin.cpp -o mainSimpleAddin -I.. -I$(IDIR) -L../lib -lAddinCpp
 
 clean:
 	rm -f mainSimpleAddin

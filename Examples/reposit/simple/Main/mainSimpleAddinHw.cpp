@@ -1,10 +1,12 @@
 
 #include <iostream>
+#include "AddinCpp/init.hpp"
 #include "AddinCpp/cpp_hw_adder.hpp"
 
 int main() {
     try {
         std::cout << "hi" << std::endl;
+        SimpleLibAddinCpp::initializeAddin();
         std::cout << SimpleLibAddin::slFunc() << std::endl;
         SimpleLibAddin::slAdder("adder", 1);
         std::cout << "1 + 2 = " << SimpleLibAddin::slAdderAdd("adder", 2) << std::endl;

@@ -23,6 +23,6 @@ SubDirs:
 
 clean:
 	rm -f $(LIB) $(OBJECTS)
-	$(MAKE) -C enumerations
-	$(MAKE) -C valueobjects
+	$(MAKE) -C enumerations clean
+	$(MAKE) -C valueobjects clean
 

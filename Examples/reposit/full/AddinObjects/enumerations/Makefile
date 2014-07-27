@@ -9,7 +9,7 @@ SubDirs:
 
 clean:
 	rm -f $(LIB)
-	$(MAKE) -C constructors
-	$(MAKE) -C factories
-	$(MAKE) -C register
+	$(MAKE) -C constructors clean
+	$(MAKE) -C factories clean
+	$(MAKE) -C register clean
 
