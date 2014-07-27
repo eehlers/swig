@@ -757,7 +757,7 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        static %s ret;\n", type);
     Printf(bg->b_xll_cpp->b, "        ret = x->%s(", name);
-    emitParmList(parms, bg->b_xll_cpp->b, 0, 0, 0, true);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_excel_call", 2, true);
     Printf(bg->b_xll_cpp->b, ");\n");
     Printf(bg->b_xll_cpp->b, "        return &ret;\n");
     Printf(bg->b_xll_cpp->b, "\n");
@@ -950,8 +950,8 @@ void printCtor(Node *n, BufferGroup *bg, bool manual) {
     Printf(bg->b_xll_cpp->b, "            new %s::ValueObjects::%s(objectID, false));\n", module, funcName);
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        boost::shared_ptr<ObjectHandler::Object> object(\n");
-    Printf(bg->b_xll_cpp->b, "            new %s::%s(valueObject,", module, name);
-    emitParmList(parms, bg->b_xll_cpp->b, 0, 0, 0, true);
+    Printf(bg->b_xll_cpp->b, "            new %s::%s(valueObject, ", module, name);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_excel_call", 2, true);
     Printf(bg->b_xll_cpp->b, ", false));\n");
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        std::string returnValue =\n");
