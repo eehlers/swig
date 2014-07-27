@@ -677,13 +677,13 @@ void printFunc(Node *n, BufferGroup *bg, bool manual) {
     Printf(bg->b_xll_cpp->b, "\n");
     emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_excel_cnv", 1);
     Printf(bg->b_xll_cpp->b, "\n");
-    Printf(bg->b_xll_cpp->b, "        %s returnValue =\n", type);
-    Printf(bg->b_xll_cpp->b, "            %s::%s(", module, symname);
-    //emitParmList(parms, bg->b_xll_cpp->b, 0, 0, 0, true);
+    String *tm2 = getTypeMap("rp_excel_get", n, type);
+    Printf(bg->b_xll_cpp->b, Char(tm2));
+    Printf(bg->b_xll_cpp->b, "        %s::%s(", module, symname);
     emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_excel_call", 2, true);
     Printf(bg->b_xll_cpp->b, ");\n");
 
-    String *tm = getTypeMap("rp_ohxl_ret", n, type);
+    String *tm = getTypeMap("rp_excel_ret", n, type);
     Printf(bg->b_xll_cpp->b, Char(tm));
 
     Printf(bg->b_xll_cpp->b, "\n");
