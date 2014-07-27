@@ -224,6 +224,14 @@
 				</File>
 			</Filter>
 		</Filter>
+		<Filter
+			Name="conversions"
+			>
+			<File
+				RelativePath=".\conversions\cnv_tmpl.hpp"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\init.cpp"
 			>
