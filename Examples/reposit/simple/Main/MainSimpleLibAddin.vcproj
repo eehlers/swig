@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="MainSimpleAddin"
+	Name="MainSimpleLibAddin"
 	ProjectGUID="{2CA85487-1FE7-4508-B6DF-6FAB6B83B4C0}"
-	RootNamespace="MainSimpleAddin"
+	RootNamespace="MainSimpleLibAddin"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
