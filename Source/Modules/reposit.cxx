@@ -983,6 +983,21 @@ int functionWrapper(Node *n) {
     bool manual = checkAttribute(n,"feature:rp:generation","manual");
     BufferGroup *bg = bm_.getBufferGroup (group, include, manual);
 
+    // a little bit of validation
+    String *nodeName = Getattr(n, "name");
+    printf("Processing node name '%s'.\n", Char(nodeName));
+    ParmList *parms  = Getattr(n,"parms");
+    for (Parm *p = parms; p; p = nextSibling(p)) {
+        if (!Getattr(p,"name")) {
+            printf("parameter has no name\n");
+            SWIG_exit(EXIT_FAILURE);
+        }
+        if (!Getattr(p, "type")) {
+            printf ("parameter has no type\n");
+            SWIG_exit(EXIT_FAILURE);
+        }
+    }
+
     Printf(b_wrappers,"//XXX***functionWrapper*******\n");
     Printf(b_wrappers,"//module=%s\n", module);
     Printf(b_wrappers,"//group=%s\n", group);
@@ -999,6 +1014,8 @@ int functionWrapper(Node *n) {
         }
     } else if (0 == Strcmp("constructor", nodeType)) {
             printCtor(n, bg, manual);
+    } else {
+        printf("no handler for this node.\n");
     }
 
   return SWIG_OK;
