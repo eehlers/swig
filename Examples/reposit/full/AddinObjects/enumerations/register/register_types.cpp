@@ -3,19 +3,19 @@
 #include "register_types.hpp"
 #include <Library/color.hpp>
 
-namespace SimpleLibAddin {
+namespace FullLibAddin {
 
     void registerEnumeratedTypes() {
 
-        ObjectHandler::Create<SimpleLib::Account::Type> create;
-        create.registerType("Current", new SimpleLib::Account::Type(SimpleLib::Account::Current));
-        create.registerType("Savings", new SimpleLib::Account::Type(SimpleLib::Account::Savings));
+        ObjectHandler::Create<FullLib::Account::Type> create;
+        create.registerType("Current", new FullLib::Account::Type(FullLib::Account::Current));
+        create.registerType("Savings", new FullLib::Account::Type(FullLib::Account::Savings));
 
     }
 
     void unregisterEnumeratedTypes() {
 
-        ObjectHandler::Create<SimpleLib::Account::Type>().unregisterTypes();
+        ObjectHandler::Create<FullLib::Account::Type>().unregisterTypes();
 
     }
 }

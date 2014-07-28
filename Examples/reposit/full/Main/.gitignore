@@ -1,6 +1,4 @@
-mainSimpleLib
-mainSimpleAddinHw
-mainSimpleAddin
+mainFullLibAddin
 Release
 *.user
 !Makefile

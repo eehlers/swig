@@ -2,7 +2,7 @@
 #ifndef addinobjects_enum_reg_types_hpp
 #define addinobjects_enum_reg_types_hpp
 
-namespace SimpleLibAddin {
+namespace FullLibAddin {
 
     void registerEnumeratedTypes();
     void unregisterEnumeratedTypes();

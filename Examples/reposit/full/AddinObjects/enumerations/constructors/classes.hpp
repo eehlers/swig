@@ -5,10 +5,10 @@
 #include <boost/shared_ptr.hpp>
 #include <Library/color.hpp>
 
-namespace SimpleLibAddin {
+namespace FullLibAddin {
 
-    boost::shared_ptr<SimpleLib::Color> RED_Color();
-    boost::shared_ptr<SimpleLib::Color> BLUE_Color();
+    boost::shared_ptr<FullLib::Color> RED_Color();
+    boost::shared_ptr<FullLib::Color> BLUE_Color();
 
 }
 

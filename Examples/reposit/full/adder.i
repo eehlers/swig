@@ -4,7 +4,7 @@
 #include "Library/adder.hpp"
 %}
 
-namespace SimpleLib {
+namespace FullLib {
     std::string func();
     class Adder {
     public:

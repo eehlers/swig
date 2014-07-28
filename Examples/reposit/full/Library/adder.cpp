@@ -2,13 +2,13 @@
 #include "adder.hpp"
 #include <iostream>
 
-std::string SimpleLib::func() {
+std::string FullLib::func() {
     return "f()";
 }
 
-SimpleLib::Adder::Adder(long x) : x_(x) {}
+FullLib::Adder::Adder(long x) : x_(x) {}
 
-long SimpleLib::Adder::add(long y) {
+long FullLib::Adder::add(long y) {
     return x_ + y;
 }
 

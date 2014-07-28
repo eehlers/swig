@@ -2,7 +2,7 @@
 #ifndef addincpp_init_hpp
 #define addincpp_init_hpp
 
-namespace SimpleLibAddinCpp {
+namespace FullLibAddinCpp {
 
     void initializeAddin();
 

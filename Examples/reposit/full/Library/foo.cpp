@@ -1,9 +1,9 @@
 
 #include "foo.hpp"
 
-SimpleLib::Foo::Foo(long f) : f_(f) {}
+FullLib::Foo::Foo(long f) : f_(f) {}
 
-long SimpleLib::Foo::f() {
+long FullLib::Foo::f() {
     return f_;
 }
 

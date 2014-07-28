@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace SimpleLib {
+namespace FullLib {
 
     class Long {
     private:
@@ -19,8 +19,8 @@ namespace SimpleLib {
     private:
         long x_;
     public:
-        Adder2(SimpleLib::Long x);
-        long add(SimpleLib::Long y);
+        Adder2(FullLib::Long x);
+        long add(FullLib::Long y);
     };
 
 };

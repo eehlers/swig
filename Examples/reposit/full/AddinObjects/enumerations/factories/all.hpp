@@ -7,19 +7,19 @@
 
 namespace ObjectHandler {
 
-    typedef boost::shared_ptr<SimpleLib::Color>(*ColorConstructor)();
+    typedef boost::shared_ptr<FullLib::Color>(*ColorConstructor)();
 
     template<>
-    class Create<boost::shared_ptr<SimpleLib::Color> > :
-        private RegistryManager<SimpleLib::Color, EnumClassRegistry> {
+    class Create<boost::shared_ptr<FullLib::Color> > :
+        private RegistryManager<FullLib::Color, EnumClassRegistry> {
     public:
-        boost::shared_ptr<SimpleLib::Color> operator() (
+        boost::shared_ptr<FullLib::Color> operator() (
                 const std::string& colorName) {
             ColorConstructor colorConstructor =
                 reinterpret_cast<ColorConstructor>(getType(colorName));
             return colorConstructor();
         }
-        using RegistryManager<SimpleLib::Color, EnumClassRegistry>::registerType;
+        using RegistryManager<FullLib::Color, EnumClassRegistry>::registerType;
     };
  }
 

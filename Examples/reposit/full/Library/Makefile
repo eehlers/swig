@@ -1,6 +1,6 @@
 
 IDIR = ../../../../../install/include
-LIB = ../lib/libSimpleLib.so
+LIB = ../lib/libFullLib.so
 OBJECTS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 
 all: $(LIB)

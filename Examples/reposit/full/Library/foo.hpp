@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace SimpleLib {
+namespace FullLib {
 
     class Foo {
         long f_;

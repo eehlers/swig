@@ -8,7 +8,7 @@ STATIC_LIBS = conversions/libConversions.a
 all: $(LIB)
 
 $(LIB): $(OBJECTS) Conversions
-	g++ -shared -fPIC -g -Wall -o $(LIB) $(OBJECTS) $(STATIC_LIBS) -L../lib -lSimpleLib -lValueObjects -lAddinObjects $(SYS_LIBS)
+	g++ -shared -fPIC -g -Wall -o $(LIB) $(OBJECTS) $(STATIC_LIBS) -L../lib -lFullLib -lValueObjects -lAddinObjects $(SYS_LIBS)
 
 %.o: %.cpp %.hpp
 	g++ -c -fPIC -g -Wall -I. -I.. -I$(IDIR) $< -o $@

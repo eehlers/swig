@@ -8,7 +8,7 @@
 #include <AddinObjects/enumerations/register/register_types.hpp>
 #include <AddinObjects/enumerations/register/register_classes.hpp>
 
-void SimpleLibAddin::initializeAddin() {
+void FullLibAddin::initializeAddin() {
 
         // Initialize the Enumeration Registry
         registerEnumeratedTypes();

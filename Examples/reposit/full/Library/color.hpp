@@ -5,7 +5,7 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-namespace SimpleLib {
+namespace FullLib {
 
     struct Account { enum Type { Current, Savings }; };
     std::string accountTypeToString(Account::Type type);

@@ -4,7 +4,7 @@
 #include "Library/foo.hpp"
 %}
 
-namespace SimpleLib {
+namespace FullLib {
     class Foo {
     public:
         Foo(long f);

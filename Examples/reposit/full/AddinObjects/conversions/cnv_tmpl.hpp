@@ -20,18 +20,18 @@ namespace ObjectHandler {
     }
 
     template<class container_t>
-    SimpleLib::Long convertLong(const container_t& c) {
+    FullLib::Long convertLong(const container_t& c) {
         if(c.type() == typeid(long))
-            return SimpleLib::Long(c.operator long());
+            return FullLib::Long(c.operator long());
         else if(c.type() == typeid(std::string)) {
             std::string s = c.operator std::string();
             long l;
             if (is_numeric(s, l))
-                return SimpleLib::Long(l);
+                return FullLib::Long(l);
             else
-                OH_FAIL("unable to convert string '" << s << "' to type 'SimpleLib::Long'");
+                OH_FAIL("unable to convert string '" << s << "' to type 'FullLib::Long'");
         }
-        OH_FAIL("unable to convert type '" << c.type().name() << "' to type 'SimpleLib::Long'");
+        OH_FAIL("unable to convert type '" << c.type().name() << "' to type 'FullLib::Long'");
     }
 }
 

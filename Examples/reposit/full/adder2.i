@@ -4,11 +4,11 @@
 #include "Library/adder2.hpp"
 %}
 
-namespace SimpleLib {
+namespace FullLib {
     class Adder2 {
     public:
-        Adder2(SimpleLib::Long x);
-        long add(SimpleLib::Long y);
+        Adder2(FullLib::Long x);
+        long add(FullLib::Long y);
     };
 }
 

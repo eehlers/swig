@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace SimpleLib {
+namespace FullLib {
 
     std::string func();
 
