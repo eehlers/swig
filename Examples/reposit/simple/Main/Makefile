@@ -2,11 +2,11 @@
 IDIR = ../../../../../install/include
 LDIR = ../../../../../install/lib
 
-all: mainSimpleAddin
+all: mainSimpleLibAddin
 
-mainSimpleAddin: mainSimpleAddin.cpp ../lib/libAddinCpp.so
-	g++ -Wall mainSimpleAddin.cpp -o mainSimpleAddin -I.. -I$(IDIR) -L../lib -lAddinCpp
+mainSimpleAddin: mainSimpleLibAddin.cpp ../lib/libAddinCpp.so
+	g++ -Wall mainSimpleLibAddin.cpp -o mainSimpleLibAddin -I.. -I$(IDIR) -L../lib -lAddinCpp
 
 clean:
-	rm -f mainSimpleAddin
+	rm -f mainSimpleLibAddin
 
