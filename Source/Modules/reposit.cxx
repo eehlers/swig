@@ -147,6 +147,7 @@ struct BufferGroup {
         Printf(b_cpp_cpp->b, "#include \"%s/enumerations/factories/all.hpp\"\n", objDir);
         Printf(b_cpp_cpp->b, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_cpp_cpp->b, "#include <oh/repository.hpp>\n");
+        Printf(b_cpp_cpp->b, "#include \"cpp_includes.hpp\"\n");
         Printf(b_cpp_cpp->b, "\n");
 
         Printf(b_xll_cpp->b, "\n");
@@ -524,7 +525,8 @@ void emitParmList(
     int mode=0,         // 0=name, 1=type, 2=both
     const char *map=0,
     int nomatch=0,       // 0=type, 1=null, 2=exception
-    bool skipHidden=false) {
+    bool skipHidden=false,
+    const char *delim=", ") {
 
     bool first = true;
 
@@ -542,7 +544,7 @@ void emitParmList(
         if (first)
             first = false;
         else
-            Append(buf,", ");
+            Append(buf, delim);
 
         if (0==mode)
             Printf(buf, "%s", name);
@@ -923,7 +925,10 @@ void printCtor(Node *n, BufferGroup *bg, bool manual) {
     Printf(bg->b_cpp_cpp->b,"std::string %sCpp::%s(", module, funcName);
     emitParmList(parms2, bg->b_cpp_cpp->b, 2, "rp_cpp_in");
     Printf(bg->b_cpp_cpp->b,") {\n");
-    emitParmList(parms, bg->b_cpp_cpp->b, 1, "rp_cpp_cnv", 1);
+    Printf(bg->b_cpp_cpp->b,"\n");
+    Printf(bg->b_cpp_cpp->b,"    // Convert input types into Library types\n");
+    emitParmList(parms, bg->b_cpp_cpp->b, 1, "rp_cpp_cnv", 1, false, "");
+    Printf(bg->b_cpp_cpp->b,"\n");
     Printf(bg->b_cpp_cpp->b,"    boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
     Printf(bg->b_cpp_cpp->b,"        new %s::ValueObjects::%s(\n", module, funcName);
     Printf(bg->b_cpp_cpp->b,"            objectID, false));\n");
@@ -983,7 +988,8 @@ int functionWrapper(Node *n) {
     bool manual = checkAttribute(n,"feature:rp:generation","manual");
     BufferGroup *bg = bm_.getBufferGroup (group, include, manual);
 
-    // a little bit of validation
+    // In the *.i files if there is a parameter with no name
+    // that would cause a segfault later so trap it here.
     String *nodeName = Getattr(n, "name");
     printf("Processing node name '%s'.\n", Char(nodeName));
     ParmList *parms  = Getattr(n,"parms");
