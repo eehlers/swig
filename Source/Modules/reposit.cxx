@@ -277,19 +277,18 @@ public:
    /* Set typemap language (historical) */
    SWIG_typemap_lang("reposit");
 
-    for (int i = 1; i < argc; i++) {
-	if (strcmp(argv[i], "-prefix") == 0) {
-	  if (argv[i + 1]) {
-	    prefix = NewString(argv[i + 1]);
-	    Swig_mark_arg(i);
-	    Swig_mark_arg(i + 1);
-	    i++;
-	  } else {
-	    Swig_arg_error();
-	  }
-	  /* end added */
-	}
-    }
+//    for (int i = 1; i < argc; i++) {
+//        if (strcmp(argv[i], "-prefix") == 0) {
+//            if (argv[i + 1]) {
+//                prefix = NewString(argv[i + 1]);
+//                Swig_mark_arg(i);
+//                Swig_mark_arg(i + 1);
+//                i++;
+//            } else {
+//                Swig_arg_error();
+//            }
+//        }
+//    }
   }
 
 Node *getNode(Node *n, const char *c) {
@@ -539,11 +538,11 @@ void emitParmList(
     int nomatch=0,       // 0=type, 1=null, 2=exception
     bool skipHidden=false,
     const char *delim=", ",
-    const char *prefix=0,
-    bool suffix = false) {
+    const char *prepend=0,
+    bool append = false) {
 
-    if (Len(parms) && prefix)
-        Append(buf, prefix);
+    if (Len(parms) && prepend)
+        Append(buf, prepend);
 
     bool first = true;
 
@@ -570,7 +569,7 @@ void emitParmList(
         else
             Printf(buf, "%s", Char(SwigType_str(type, name)));
     }
-    if (suffix)
+    if (append)
         Append(buf, delim);
 }
 
@@ -1032,6 +1031,7 @@ void printCtor(Node *n, BufferGroup *bg) {
 int functionWrapper(Node *n) {
     String *group = Getattr(n,"feature:rp:group");
     String *include = Getattr(n,"feature:rp:include");
+    prefix = Getattr(n,"feature:rp:prefix");
     bool manual = checkAttribute(n,"feature:rp:generation","manual");
     BufferGroup *bg = bm_.getBufferGroup (group, include, manual);
 

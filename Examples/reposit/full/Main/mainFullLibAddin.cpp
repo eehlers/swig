@@ -13,7 +13,7 @@ int main() {
     try {
         std::cout << "hi" << std::endl;
         FullLibAddinCpp::initializeAddin();
-        std::cout << "ObjectHandler version = " << FullLibAddinCpp::flVersion() << std::endl;
+        std::cout << "ObjectHandler version = " << FullLibAddinCpp::ohVersion() << std::endl;
 
         std::cout << FullLibAddinCpp::flFunc() << std::endl;
         FullLibAddinCpp::flAdder("adder", 1);
