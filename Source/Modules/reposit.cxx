@@ -9,6 +9,7 @@
 String *prefix = 0;
 String *module = 0;
 String *addinCppNameSpace = 0;
+String *nmspace = 0;
 
 // FIXME store some defaults in reposit.swg and retrieve them here.
 String *objDir = NewString("AddinObjects");
@@ -797,17 +798,31 @@ void printMemb(Node *n, BufferGroup *bg) {
 }
 
 void printCtor(Node *n, BufferGroup *bg) {
-    Printf(bg->b_cpp_cpp->b,"//****CTOR*****\n");
+
     String   *name   = Getattr(n,"name");
-    //SwigType *type   = Getattr(n,"type");
+    SwigType *type   = Getattr(n,"type");
     ParmList *parms  = Getattr(n,"parms");
     Node *p = Getattr(n,"parentNode");
     String *pname   = Getattr(p,"name");
+
+    String *base = 0;
+    if (List *baseList  = Getattr(p,"baselist")) {
+        if (1==Len(baseList)) {
+            base = Getitem(baseList, 0);
+            printf("base = %s\n", Char(base));
+        } else {
+            printf("ERROR : Classs %s has multiple base classes.\n", Char(name));
+            SWIG_exit(EXIT_FAILURE);
+        }
+    } else {
+        printf("no bases\n");
+    }
 
     String *temp = copyUpper(name);
     String *funcName = NewStringf("%s%s", prefix, temp);
     Setattr(n, "rp:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
+    printf("type=%s\n", Char(SwigType_str(type, 0)));
 
     // Create from parms another list parms2 - prepend an argument to represent
     // the object ID which is passed in as the first parameter to every ctor.
@@ -917,46 +932,61 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_val_cpp->b,"            Permanent_(Permanent) {\n");
     Printf(bg->b_val_cpp->b,"        }\n");
 
-    Printf(bg->b_obj_hpp->b,"\n");
-    Printf(bg->b_obj_hpp->b,"    class %s : \n", name);
-    Printf(bg->b_obj_hpp->b,"        public ObjectHandler::LibraryObject<%s> {\n", pname);
-    Printf(bg->b_obj_hpp->b,"    public:\n");
-    Printf(bg->b_obj_hpp->b,"        %s(\n", name);
-    Printf(bg->b_obj_hpp->b,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties");
-    emitParmList(parms, bg->b_obj_hpp->b, 2, 0, 0, false, ",\n            ", ",\n            ");
-    Printf(bg->b_obj_hpp->b,",\n            bool permanent)\n");
-    Printf(bg->b_obj_hpp->b,"        : ObjectHandler::LibraryObject<%s>(properties, permanent) {\n", pname);
-    Printf(bg->b_obj_hpp->b,"            libraryObject_ = boost::shared_ptr<%s>(new %s(", pname, pname);
-    emitParmList(parms, bg->b_obj_hpp->b, 0, 0, 0, true);
-    Printf(bg->b_obj_hpp->b,"));\n");
-    Printf(bg->b_obj_hpp->b,"        }\n");
-    Printf(bg->b_obj_hpp->b,"    };\n");
-    Printf(bg->b_obj_hpp->b,"\n");
+    String *cppClass = getTypeMap("rp_cpp_class", n, type, 1);
+    if (cppClass) {
+        Printf(bg->b_obj_hpp->b,"%s", cppClass);
+    } else {
+        String *s0 = NewString("");
+        String *s1 = NewString("");
+        if (base) {
+            s0 = base;
+            s1 = NewStringf("%s::%s", nmspace, base);
+        } else {
+            s0 = NewStringf("ObjectHandler::LibraryObject<%s>", pname);
+            s1 = pname;
+        }
+        Printf(bg->b_obj_hpp->b,"\n");
+        Printf(bg->b_obj_hpp->b,"    class %s : \n", name);
+        Printf(bg->b_obj_hpp->b,"        public %s {\n", s0);
+        Printf(bg->b_obj_hpp->b,"    public:\n");
+        Printf(bg->b_obj_hpp->b,"        %s(\n", name);
+        Printf(bg->b_obj_hpp->b,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties");
+        emitParmList(parms, bg->b_obj_hpp->b, 2, 0, 0, false, ",\n            ", ",\n            ");
+        Printf(bg->b_obj_hpp->b,",\n            bool permanent)\n");
+        Printf(bg->b_obj_hpp->b,"        : %s(properties, permanent) {\n", s0);
+        Printf(bg->b_obj_hpp->b,"            libraryObject_ = boost::shared_ptr<%s>(new %s(", s1, pname);
+        emitParmList(parms, bg->b_obj_hpp->b, 0, 0, 0, true);
+        Printf(bg->b_obj_hpp->b,"));\n");
+        Printf(bg->b_obj_hpp->b,"        }\n");
+        Printf(bg->b_obj_hpp->b,"    };\n");
+        Printf(bg->b_obj_hpp->b,"\n");
 
-    Printf(bg->b_cpp_hpp->b,"    std::string %s(", funcName);
-    emitParmList(parms2, bg->b_cpp_hpp->b, 2, "rp_cpp_in");
-    Printf(bg->b_cpp_hpp->b,");\n");
+        Printf(bg->b_cpp_hpp->b,"    std::string %s(", funcName);
+        emitParmList(parms2, bg->b_cpp_hpp->b, 2, "rp_cpp_in");
+        Printf(bg->b_cpp_hpp->b,");\n");
 
-    Printf(bg->b_cpp_cpp->b,"std::string %s::%s(", addinCppNameSpace, funcName);
-    emitParmList(parms2, bg->b_cpp_cpp->b, 2, "rp_cpp_in");
-    Printf(bg->b_cpp_cpp->b,") {\n");
-    Printf(bg->b_cpp_cpp->b,"\n");
-    Printf(bg->b_cpp_cpp->b,"    // Convert input types into Library types\n");
-    emitParmList(parms, bg->b_cpp_cpp->b, 1, "rp_cpp_cnv", 1, false, "");
-    Printf(bg->b_cpp_cpp->b,"\n");
-    Printf(bg->b_cpp_cpp->b,"    boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
-    Printf(bg->b_cpp_cpp->b,"        new %s::ValueObjects::%s(\n", module, funcName);
-    Printf(bg->b_cpp_cpp->b,"            objectID, false));\n");
-    Printf(bg->b_cpp_cpp->b,"    boost::shared_ptr<ObjectHandler::Object> object(\n");
-    Printf(bg->b_cpp_cpp->b,"        new %s::%s(\n", module, name);
-    Printf(bg->b_cpp_cpp->b,"            valueObject");
-    emitParmList(parms, bg->b_cpp_cpp->b, 1, "rp_cpp_call", 2, true, ", ", ", ");
-    Printf(bg->b_cpp_cpp->b,", false));\n");
-    Printf(bg->b_cpp_cpp->b,"    std::string returnValue =\n");
-    Printf(bg->b_cpp_cpp->b,"        ObjectHandler::Repository::instance().storeObject(\n");
-    Printf(bg->b_cpp_cpp->b,"            objectID, object, false, valueObject);\n");
-    Printf(bg->b_cpp_cpp->b,"    return returnValue;\n");
-    Printf(bg->b_cpp_cpp->b,"}\n");
+        Printf(bg->b_cpp_cpp->b,"//****CTOR*****\n");
+        Printf(bg->b_cpp_cpp->b,"std::string %s::%s(", addinCppNameSpace, funcName);
+        emitParmList(parms2, bg->b_cpp_cpp->b, 2, "rp_cpp_in");
+        Printf(bg->b_cpp_cpp->b,") {\n");
+        Printf(bg->b_cpp_cpp->b,"\n");
+        Printf(bg->b_cpp_cpp->b,"    // Convert input types into Library types\n");
+        emitParmList(parms, bg->b_cpp_cpp->b, 1, "rp_cpp_cnv", 1, false, "");
+        Printf(bg->b_cpp_cpp->b,"\n");
+        Printf(bg->b_cpp_cpp->b,"    boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
+        Printf(bg->b_cpp_cpp->b,"        new %s::ValueObjects::%s(\n", module, funcName);
+        Printf(bg->b_cpp_cpp->b,"            objectID, false));\n");
+        Printf(bg->b_cpp_cpp->b,"    boost::shared_ptr<ObjectHandler::Object> object(\n");
+        Printf(bg->b_cpp_cpp->b,"        new %s::%s(\n", module, name);
+        Printf(bg->b_cpp_cpp->b,"            valueObject");
+        emitParmList(parms, bg->b_cpp_cpp->b, 1, "rp_cpp_call", 2, true, ", ", ", ");
+        Printf(bg->b_cpp_cpp->b,", false));\n");
+        Printf(bg->b_cpp_cpp->b,"    std::string returnValue =\n");
+        Printf(bg->b_cpp_cpp->b,"        ObjectHandler::Repository::instance().storeObject(\n");
+        Printf(bg->b_cpp_cpp->b,"            objectID, object, false, valueObject);\n");
+        Printf(bg->b_cpp_cpp->b,"    return returnValue;\n");
+        Printf(bg->b_cpp_cpp->b,"}\n");
+    }
 
     excelRegister(n, 0, parms3);
 
@@ -1007,6 +1037,7 @@ int functionWrapper(Node *n) {
     // that would cause a segfault later so trap it here.
     String *nodeName = Getattr(n, "name");
     printf("Processing node name '%s'.\n", Char(nodeName));
+    printf("Group='%s'.\n", Char(group));
     ParmList *parms  = Getattr(n,"parms");
     for (Parm *p = parms; p; p = nextSibling(p)) {
         if (!Getattr(p,"name")) {
@@ -1040,6 +1071,12 @@ int functionWrapper(Node *n) {
     }
 
   return SWIG_OK;
+}
+
+int namespaceDeclaration(Node *n) {
+    nmspace = Getattr(n, "name");
+    printf("Processing namespace node '%s'.\n", Char(nmspace));
+    return Language::namespaceDeclaration(n);
 }
 
 }; // class REPOSIT

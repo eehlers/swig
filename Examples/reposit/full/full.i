@@ -1,4 +1,8 @@
 
+%typemap(rp_cpp_class) FullLib::Base * %{
+    OH_LIB_CLASS(Base, FullLib::Base);
+%}
+
 %typemap(rp_cpp_in) FullLib::Long "const ObjectHandler::property_t&";
 %typemap(rp_cpp_in) FullLib::Account::Type "const std::string&";
 %typemap(rp_cpp_in) boost::shared_ptr<FullLib::Color> "const std::string&";
@@ -47,5 +51,6 @@
 %include adder2.i
 %include color.i
 %include foo.i
+%include inheritance.i
 %include noparm.i
 

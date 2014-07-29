@@ -5,6 +5,7 @@
 #include "AddinCpp/cpp_adder2.hpp"
 #include "AddinCpp/cpp_color.hpp"
 #include "AddinCpp/cpp_foo.hpp"
+#include "AddinCpp/cpp_inheritance.hpp"
 #include "AddinCpp/cpp_noparm.hpp"
 
 int main() {
@@ -46,6 +47,10 @@ int main() {
         FullLibAddinCpp::slF2();
         FullLibAddinCpp::slNoParm("noparm");
         FullLibAddinCpp::slNoParmF("noparm");
+
+        // Test inheritance
+        FullLibAddinCpp::slDerived("derived");
+        FullLibAddinCpp::slBaseF("derived");
 
         std::cout << "bye" << std::endl;
         return 0;
