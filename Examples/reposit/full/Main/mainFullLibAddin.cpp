@@ -12,45 +12,45 @@ int main() {
     try {
         std::cout << "hi" << std::endl;
         FullLibAddinCpp::initializeAddin();
-        std::cout << FullLibAddinCpp::slFunc() << std::endl;
-        FullLibAddinCpp::slAdder("adder", 1);
-        std::cout << "1 + 2 = " << FullLibAddinCpp::slAdderAdd("adder", 2) << std::endl;
-        FullLibAddinCpp::slFoo("foo", 42);
-        std::cout << FullLibAddinCpp::slFooF("foo") << std::endl;
+        std::cout << FullLibAddinCpp::flFunc() << std::endl;
+        FullLibAddinCpp::flAdder("adder", 1);
+        std::cout << "1 + 2 = " << FullLibAddinCpp::flAdderAdd("adder", 2) << std::endl;
+        FullLibAddinCpp::flFoo("foo", 42);
+        std::cout << FullLibAddinCpp::flFooF("foo") << std::endl;
 
-        FullLibAddinCpp::slAdder2("adder2", 3L);
-        std::cout << "3 + 4 = " << FullLibAddinCpp::slAdder2Add("adder2", "4") << std::endl;
+        FullLibAddinCpp::flAdder2("adder2", 3L);
+        std::cout << "3 + 4 = " << FullLibAddinCpp::flAdder2Add("adder2", "4") << std::endl;
 
         try {
-            FullLibAddinCpp::slAdder2("adder2", "wazoo");
+            FullLibAddinCpp::flAdder2("adder2", "wazoo");
         } catch(const std::exception &e) {
             std::cout << "Error - " << e.what() << std::endl;
         }
 
-        std::cout << FullLibAddinCpp::slAccountTypeToString("Current") << std::endl;
-        std::cout << FullLibAddinCpp::slAccountTypeToString("Savings") << std::endl;
+        std::cout << FullLibAddinCpp::flAccountTypeToString("Current") << std::endl;
+        std::cout << FullLibAddinCpp::flAccountTypeToString("Savings") << std::endl;
         try {
-            std::cout << FullLibAddinCpp::slAccountTypeToString("wazoo") << std::endl;
+            std::cout << FullLibAddinCpp::flAccountTypeToString("wazoo") << std::endl;
         } catch(const std::exception &e) {
             std::cout << "Error - " << e.what() << std::endl;
         }
 
-        std::cout << FullLibAddinCpp::slGetColorName("Red") << std::endl;
-        std::cout << FullLibAddinCpp::slGetColorName("Blue") << std::endl;
+        std::cout << FullLibAddinCpp::flGetColorName("Red") << std::endl;
+        std::cout << FullLibAddinCpp::flGetColorName("Blue") << std::endl;
         try {
-            std::cout << FullLibAddinCpp::slGetColorName("wazoo") << std::endl;
+            std::cout << FullLibAddinCpp::flGetColorName("wazoo") << std::endl;
         } catch(const std::exception &e) {
             std::cout << "Error - " << e.what() << std::endl;
         }
 
         // Test constructors/members/functions that take no arguments and return void.
-        FullLibAddinCpp::slF2();
-        FullLibAddinCpp::slNoParm("noparm");
-        FullLibAddinCpp::slNoParmF("noparm");
+        FullLibAddinCpp::flF2();
+        FullLibAddinCpp::flNoParm("noparm");
+        FullLibAddinCpp::flNoParmF("noparm");
 
         // Test inheritance
-        FullLibAddinCpp::slDerived("derived");
-        FullLibAddinCpp::slBaseF("derived");
+        FullLibAddinCpp::flDerived("derived");
+        FullLibAddinCpp::flBaseF("derived");
 
         std::cout << "bye" << std::endl;
         return 0;
