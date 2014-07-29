@@ -1,6 +1,6 @@
 
-#ifndef simplelib_color_hpp
-#define simplelib_color_hpp
+#ifndef full_lib_color_hpp
+#define full_lib_color_hpp
 
 #include <string>
 #include <boost/shared_ptr.hpp>

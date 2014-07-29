@@ -1,6 +1,6 @@
 
-#ifndef simplelib_foo_hpp
-#define simplelib_foo_hpp
+#ifndef full_lib_foo_hpp
+#define full_lib_foo_hpp
 
 #include <string>
 

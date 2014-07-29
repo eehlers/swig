@@ -193,6 +193,8 @@ struct BufferGroup {
         Printf(b_obj_hpp->b, "#endif\n");
         Printf(b_obj_hpp->b, "\n");
 
+        Printf(b_obj_cpp->b, "\n");
+
         Printf(b_cpp_hpp->b, "\n");
         Printf(b_cpp_hpp->b, "} // namespace %s\n", addinCppNameSpace);
         Printf(b_cpp_hpp->b, "\n");
@@ -533,7 +535,12 @@ void emitParmList(
     const char *map=0,
     int nomatch=0,       // 0=type, 1=null, 2=exception
     bool skipHidden=false,
-    const char *delim=", ") {
+    const char *delim=", ",
+    const char *prefix=0,
+    bool suffix = false) {
+
+    if (Len(parms) && prefix)
+        Append(buf, prefix);
 
     bool first = true;
 
@@ -560,6 +567,8 @@ void emitParmList(
         else
             Printf(buf, "%s", Char(SwigType_str(type, name)));
     }
+    if (suffix)
+        Append(buf, delim);
 }
 
 String *excelParamCodes(Node *n, SwigType *type, ParmList *parms) {
@@ -642,12 +651,12 @@ void printFunc(Node *n, BufferGroup *bg, bool manual) {
 
     Printf(bg->b_obj_hpp->b,"\n");
     Printf(bg->b_obj_hpp->b,"    %s %s(", type, symname);
-    emitParmList(parms, bg->b_obj_hpp->b, 2);
+    emitParmList(parms, bg->b_obj_hpp->b, 2, 0, 0, false, ",\n        ", "\n        ", false);
     Printf(bg->b_obj_hpp->b,");\n");
 
     if (!manual) {
         Printf(bg->b_obj_cpp->b,"%s %s::%s(", type, module, symname);
-        emitParmList(parms, bg->b_obj_cpp->b, 2);
+        emitParmList(parms, bg->b_obj_cpp->b, 2, 0, 0, false, ",\n        ", "\n        ", false);
         Printf(bg->b_obj_cpp->b,") {\n");
         Printf(bg->b_obj_cpp->b,"    return %s(", name);
         emitParmList(parms, bg->b_obj_cpp->b, 0, 0, 0, true);
@@ -912,10 +921,9 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_obj_hpp->b,"        public ObjectHandler::LibraryObject<%s> {\n", pname);
     Printf(bg->b_obj_hpp->b,"    public:\n");
     Printf(bg->b_obj_hpp->b,"        %s(\n", name);
-    Printf(bg->b_obj_hpp->b,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties,\n");
-    Printf(bg->b_obj_hpp->b,"            ");
-    emitParmList(parms, bg->b_obj_hpp->b, 2);
-    Printf(bg->b_obj_hpp->b,", bool permanent)\n");
+    Printf(bg->b_obj_hpp->b,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties");
+    emitParmList(parms, bg->b_obj_hpp->b, 2, 0, 0, false, ",\n            ", ",\n            ");
+    Printf(bg->b_obj_hpp->b,",\n            bool permanent)\n");
     Printf(bg->b_obj_hpp->b,"        : ObjectHandler::LibraryObject<%s>(properties, permanent) {\n", pname);
     Printf(bg->b_obj_hpp->b,"            libraryObject_ = boost::shared_ptr<%s>(new %s(", pname, pname);
     emitParmList(parms, bg->b_obj_hpp->b, 0, 0, 0, true);
@@ -940,8 +948,8 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_cpp_cpp->b,"            objectID, false));\n");
     Printf(bg->b_cpp_cpp->b,"    boost::shared_ptr<ObjectHandler::Object> object(\n");
     Printf(bg->b_cpp_cpp->b,"        new %s::%s(\n", module, name);
-    Printf(bg->b_cpp_cpp->b,"            valueObject, ");
-    emitParmList(parms, bg->b_cpp_cpp->b, 1, "rp_cpp_call", 2, true);
+    Printf(bg->b_cpp_cpp->b,"            valueObject");
+    emitParmList(parms, bg->b_cpp_cpp->b, 1, "rp_cpp_call", 2, true, ", ", ", ");
     Printf(bg->b_cpp_cpp->b,", false));\n");
     Printf(bg->b_cpp_cpp->b,"    std::string returnValue =\n");
     Printf(bg->b_cpp_cpp->b,"        ObjectHandler::Repository::instance().storeObject(\n");

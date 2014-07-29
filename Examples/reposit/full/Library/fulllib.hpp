@@ -1,6 +1,6 @@
 
 #ifndef full_lib_hpp
-#define fulll_ib_hpp
+#define full_lib_hpp
 
 #include "adder.hpp"
 #include "adder2.hpp"

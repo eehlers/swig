@@ -1,6 +1,6 @@
 
-#ifndef simplelib_adder_hpp
-#define simplelib_adder_hpp
+#ifndef full_lib_adder_hpp
+#define full_lib_adder_hpp
 
 #include <string>
 
