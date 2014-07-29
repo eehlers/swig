@@ -194,7 +194,9 @@ struct BufferGroup {
         Printf(b_obj_hpp->b, "#endif\n");
         Printf(b_obj_hpp->b, "\n");
 
-        Printf(b_obj_cpp->b, "\n");
+        if (!manual_) {
+            Printf(b_obj_cpp->b, "\n");
+        }
 
         Printf(b_cpp_hpp->b, "\n");
         Printf(b_cpp_hpp->b, "} // namespace %s\n", addinCppNameSpace);
