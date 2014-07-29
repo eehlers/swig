@@ -1,5 +1,6 @@
 *.user
 Release
 cpp_*.?pp
+!cpp_includes.hpp
 !Makefile
 Debug
