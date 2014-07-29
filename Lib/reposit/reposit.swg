@@ -28,6 +28,8 @@
 %typemap(rp_excel_get) void "";
 %typemap(rp_excel_get) SWIGTYPE "        $1_type returnValue =\n    ";
 
+%typemap(rp_cpp_ret) SWIGTYPE "$1_type";
+
 %typemap(rp_excel_ret) void %{
         static bool ret = true;
         return &ret;
