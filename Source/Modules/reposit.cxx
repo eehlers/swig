@@ -731,7 +731,8 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(b_wrappers, "// *a3* %s <<\n", Char(ParmList_protostr(parms2)));
     Printf(b_wrappers, "//***ABC\n");
 
-    Printf(bg->b_cpp_hpp->b,"    %s %s(", type, funcName);
+    String *ret = getTypeMap("rp_cpp_ret", n, type);
+    Printf(bg->b_cpp_hpp->b,"    %s %s(", ret, funcName);
     emitParmList(parms2, bg->b_cpp_hpp->b, 2, "rp_cpp_in");
     Printf(bg->b_cpp_hpp->b,");\n");
 
