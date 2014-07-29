@@ -505,8 +505,11 @@ String *getTypeMap(const char *m, Node *n, SwigType *t, int nomatch=2) {
             ret = 0;
             break;
         default:
-            printf("typemap '%s' does not match type '%s'.\n", m, Char(SwigType_str(t, 0)));
-            SWIG_exit(EXIT_FAILURE);
+            printf("*** ERROR : typemap '%s' does not match type '%s'.\n", m, Char(SwigType_str(t, 0)));
+            // Do not exit, instead keep running so that the user can see any other error messages.
+            //SWIG_exit(EXIT_FAILURE);
+            // Return an error string, this will be inserted into the source code.
+            return NewStringf("*** typemap '%s' does not match type '%s' ***", m, SwigType_str(t, 0));
     }
     return ret;
 }
