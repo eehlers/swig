@@ -8,6 +8,7 @@
 
 String *prefix = 0;
 String *module = 0;
+String *addinCppNameSpace = 0;
 
 // FIXME store some defaults in reposit.swg and retrieve them here.
 String *objDir = NewString("AddinObjects");
@@ -131,7 +132,7 @@ struct BufferGroup {
         // FIXME this #include is only needed if a datatype conversion is taking place.
         Printf(b_cpp_hpp->b, "#include <oh/property.hpp>\n");
         Printf(b_cpp_hpp->b, "\n");
-        Printf(b_cpp_hpp->b, "namespace %sCpp {\n", module);
+        Printf(b_cpp_hpp->b, "namespace %s {\n", addinCppNameSpace);
         Printf(b_cpp_hpp->b, "\n");
 
         Printf(b_cpp_cpp->b, "\n");
@@ -193,7 +194,7 @@ struct BufferGroup {
         Printf(b_obj_hpp->b, "\n");
 
         Printf(b_cpp_hpp->b, "\n");
-        Printf(b_cpp_hpp->b, "} // namespace %sCpp\n", module);
+        Printf(b_cpp_hpp->b, "} // namespace %s\n", addinCppNameSpace);
         Printf(b_cpp_hpp->b, "\n");
         Printf(b_cpp_hpp->b, "#endif\n");
         Printf(b_cpp_hpp->b, "\n");
@@ -300,6 +301,7 @@ virtual int top(Node *n) {
 
    /* Get the module name */
    module = Getattr(n, "name");
+    addinCppNameSpace = NewStringf("%sCpp", module);
 
     // Extract some config info.
     Node *n2 = getNode(n, "module");
@@ -310,6 +312,8 @@ virtual int top(Node *n) {
             xlDir = n5;
     }
 
+    printf("module=%s\n", Char(module));
+    printf("addinCppNameSpace=%s\n", Char(addinCppNameSpace));
     printf("rp_obj_dir=%s\n", Char(objDir));
     printf("rp_xl_dir=%s\n", Char(xlDir));
 
@@ -655,7 +659,7 @@ void printFunc(Node *n, BufferGroup *bg, bool manual) {
     emitParmList(parms, bg->b_cpp_hpp->b, 2, "rp_cpp_in");
     Printf(bg->b_cpp_hpp->b,");\n");
 
-    Printf(bg->b_cpp_cpp->b,"%s %sCpp::%s(", type, module, funcName);
+    Printf(bg->b_cpp_cpp->b,"%s %s::%s(", type, addinCppNameSpace, funcName);
     emitParmList(parms, bg->b_cpp_cpp->b, 2, "rp_cpp_in");
     Printf(bg->b_cpp_cpp->b,") {\n");
     emitParmList(parms, bg->b_cpp_cpp->b, 1, "rp_cpp_cnv", 1);
@@ -708,6 +712,7 @@ void printMemb(Node *n, BufferGroup *bg) {
     String   *cls   = Getattr(p,"sym:name");
     String   *pname   = Getattr(p,"name");
     ParmList *parms  = Getattr(n,"parms");
+    String *addinClass = NewStringf("%s::%s", module, cls);
 
     String *temp0 = copyUpper(cls);
     String *temp1 = copyUpper(name);
@@ -719,7 +724,7 @@ void printMemb(Node *n, BufferGroup *bg) {
     // the object ID which is passed in as the first parameter to every member.
     Parm *parms2 = NewHash();
     Setattr(parms2, "name", "objectID");
-    String *nt  = NewStringf("std::string");
+    String *nt  = NewString("std::string");
     SwigType_add_qualifier(nt, "const");
     SwigType_add_reference(nt);
     Setattr(parms2, "type", nt);
@@ -738,11 +743,11 @@ void printMemb(Node *n, BufferGroup *bg) {
     emitParmList(parms2, bg->b_cpp_hpp->b, 2, "rp_cpp_in");
     Printf(bg->b_cpp_hpp->b,");\n");
 
-    Printf(bg->b_cpp_cpp->b,"%s %sCpp::%s(\n", type, module, funcName);
+    Printf(bg->b_cpp_cpp->b,"%s %s::%s(\n", type, addinCppNameSpace, funcName);
     emitParmList(parms2, bg->b_cpp_cpp->b, 2, "rp_cpp_in");
     Printf(bg->b_cpp_cpp->b,") {\n");
     emitParmList(parms, bg->b_cpp_cpp->b, 1, "rp_cpp_cnv", 1);
-    Printf(bg->b_cpp_cpp->b,"    OH_GET_REFERENCE(x, objectID, %s::%s, %s);\n", module, cls, pname);
+    Printf(bg->b_cpp_cpp->b,"    OH_GET_REFERENCE(x, objectID, %s, %s);\n", addinClass, pname);
     Printf(bg->b_cpp_cpp->b,"    return x->%s(", name);
     emitParmList(parms, bg->b_cpp_cpp->b, 1, "rp_cpp_call", 2, true);
     Printf(bg->b_cpp_cpp->b,");\n", name);
@@ -764,7 +769,7 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
     Printf(bg->b_xll_cpp->b, "\n");
     emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_excel_cnv", 1);
-    Printf(bg->b_xll_cpp->b, "        OH_GET_REFERENCE(x, objectID, %s::%s, %s);\n", module, cls, pname);
+    Printf(bg->b_xll_cpp->b, "        OH_GET_REFERENCE(x, objectID, %s, %s);\n", addinClass, pname);
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        static %s ret;\n", type);
     Printf(bg->b_xll_cpp->b, "        ret = x->%s(", name);
@@ -798,7 +803,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     // the object ID which is passed in as the first parameter to every ctor.
     Parm *parms2 = NewHash();
     Setattr(parms2, "name", "objectID");
-    String *nt  = NewStringf("std::string");
+    String *nt  = NewString("std::string");
     SwigType_add_qualifier(nt, "const");
     SwigType_add_reference(nt);
     Setattr(parms2, "type", nt);
@@ -808,7 +813,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     // the object ID which is the return value of addin func that wraps ctor.
     Parm *parms3 = NewHash();
     Setattr(parms3, "name", "");
-    String *nt2  = NewStringf("std::string");
+    String *nt2  = NewString("std::string");
     SwigType_add_qualifier(nt2, "const");
     SwigType_add_reference(nt2);
     Setattr(parms3, "type", nt2);
@@ -923,7 +928,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     emitParmList(parms2, bg->b_cpp_hpp->b, 2, "rp_cpp_in");
     Printf(bg->b_cpp_hpp->b,");\n");
 
-    Printf(bg->b_cpp_cpp->b,"std::string %sCpp::%s(", module, funcName);
+    Printf(bg->b_cpp_cpp->b,"std::string %s::%s(", addinCppNameSpace, funcName);
     emitParmList(parms2, bg->b_cpp_cpp->b, 2, "rp_cpp_in");
     Printf(bg->b_cpp_cpp->b,") {\n");
     Printf(bg->b_cpp_cpp->b,"\n");
