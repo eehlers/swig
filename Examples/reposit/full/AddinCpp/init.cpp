@@ -4,7 +4,7 @@
 #include <oh/processor.hpp>
 #include <oh/enumerations/enumregistry.hpp>
 //#include <qlo/enumerations/register/register_all.hpp>
-//#include <qlo/serialization/serializationfactory.hpp>
+#include "AddinObjects/serialization/serializationfactory.hpp"
 #include "AddinObjects/init.hpp"
 
 void FullLibAddinCpp::initializeAddin() {
@@ -13,10 +13,10 @@ void FullLibAddinCpp::initializeAddin() {
         static ObjectHandler::Repository repository;
 
         //Instantiate the Processor Factory
-        //static ObjectHandler::ProcessorFactory processorFactory;
+        static ObjectHandler::ProcessorFactory processorFactory;
 
         // Instantiate the Serialization Factory
-        //static QuantLibAddin::SerializationFactory factory;
+        static FullLibAddin::SerializationFactory factory;
 
         // Instantiate the Enumerated Type Registry
         static ObjectHandler::EnumTypeRegistry enumTypeRegistry;

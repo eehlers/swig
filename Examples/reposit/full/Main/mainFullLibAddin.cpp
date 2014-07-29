@@ -7,7 +7,8 @@
 #include "AddinCpp/cpp_foo.hpp"
 #include "AddinCpp/cpp_inheritance.hpp"
 #include "AddinCpp/cpp_noparm.hpp"
-#include "AddinCpp/cpp_objecthandler.hpp"
+#include "AddinCpp/cpp_oh_utilities.hpp"
+#include "AddinCpp/cpp_oh_serialization.hpp"
 
 int main() {
     try {
@@ -54,6 +55,12 @@ int main() {
         // Test inheritance
         FullLibAddinCpp::flDerived("derived");
         FullLibAddinCpp::flBaseF("derived");
+
+        // Test serialization
+        FullLibAddinCpp::flAdder("adder100", 100);
+        std::cout << "100 + 1 = " << FullLibAddinCpp::flAdderAdd("adder100", 1) << std::endl;
+        std::string s = FullLibAddinCpp::ohObjectSaveString("adder100");
+        std::cout << "XML = " << std::endl << s << std::endl;
 
         std::cout << "bye" << std::endl;
         return 0;

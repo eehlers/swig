@@ -6,6 +6,7 @@ STATIC_LIBS = \
     enumerations/constructors/libEnumerationConstructors.a \
     enumerations/factories/libEnumerationFactories.a \
     enumerations/register/libEnumerationRegister.a \
+    serialization/libSerialization.a \
     valueobjects/libValueObjects.a
 
 all: $(LIB)
@@ -19,10 +20,12 @@ $(LIB): $(OBJECTS) SubDirs
 .PHONY: SubDirs
 SubDirs:
 	$(MAKE) -C enumerations
+	$(MAKE) -C serialization
 	$(MAKE) -C valueobjects
 
 clean:
 	rm -f $(LIB) $(OBJECTS)
 	$(MAKE) -C enumerations clean
+	$(MAKE) -C serialization clean
 	$(MAKE) -C valueobjects clean
 

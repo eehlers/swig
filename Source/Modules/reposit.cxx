@@ -52,12 +52,12 @@ struct BufferGroup {
     Buffer *b_xll_cpp;
 
     String *name_;
-    bool manual_;
+    bool automatic_;
 
-    BufferGroup(String *name, String *include, bool manual) {
+    BufferGroup(String *name, String *include, bool automatic) {
 
         name_ = Copy(name);
-        manual_ = manual;
+        automatic_ = automatic;
 
         String *s_val_hpp = NewStringf("%s/valueobjects/vo_%s.hpp", objDir, name_);
         String *s_val_cpp = NewStringf("%s/valueobjects/vo_%s.cpp", objDir, name_);
@@ -80,7 +80,7 @@ struct BufferGroup {
         Delete(s_cpp_cpp);
         Delete(s_xll_cpp);
 
-        if (!manual_) {
+        if (automatic_) {
             String *s_obj_cpp = NewStringf("%s/obj_%s.cpp", objDir, name_);
             b_obj_cpp = new Buffer(s_obj_cpp);
             Delete(s_obj_cpp);
@@ -119,7 +119,7 @@ struct BufferGroup {
         Printf(b_obj_hpp->b, "%s\n", include);
         Printf(b_obj_hpp->b,"namespace %s {\n", module);
 
-        if (!manual_) {
+        if (automatic_) {
             Printf(b_obj_cpp->b, "\n");
             Printf(b_obj_cpp->b, "#include \"obj_%s.hpp\"\n", name);
             Printf(b_obj_cpp->b, "\n");
@@ -194,7 +194,7 @@ struct BufferGroup {
         Printf(b_obj_hpp->b, "#endif\n");
         Printf(b_obj_hpp->b, "\n");
 
-        if (!manual_) {
+        if (automatic_) {
             Printf(b_obj_cpp->b, "\n");
         }
 
@@ -209,7 +209,7 @@ struct BufferGroup {
         delete b_val_hpp;
         delete b_val_cpp;
         delete b_obj_hpp;
-        if (!manual_) {
+        if (automatic_) {
             delete b_obj_cpp;
         }
         delete b_cpp_hpp;
@@ -226,10 +226,10 @@ class BufferMap {
 
 public:
 
-    BufferGroup *getBufferGroup(String *name, String *include, bool manual) {
+    BufferGroup *getBufferGroup(String *name, String *include, bool automatic) {
         name_ = Char(name);
         if (bm_.end() == bm_.find(name_))
-            bm_[name_] = new BufferGroup(name, include, manual);
+            bm_[name_] = new BufferGroup(name, include, automatic);
         return bm_[name_];
     }
 
@@ -638,7 +638,7 @@ String *copyUpper(String *s) {
     return ret;
 }
 
-void printFunc(Node *n, BufferGroup *bg, bool manual) {
+void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     Printf(bg->b_cpp_cpp->b,"//****FUNC*****\n");
     String   *name   = Getattr(n,"name");
     SwigType *type   = Getattr(n,"type");
@@ -656,7 +656,7 @@ void printFunc(Node *n, BufferGroup *bg, bool manual) {
     emitParmList(parms, bg->b_obj_hpp->b, 2, 0, 0, false, ",\n        ", "\n        ", false);
     Printf(bg->b_obj_hpp->b,");\n");
 
-    if (!manual) {
+    if (automatic) {
         Printf(bg->b_obj_cpp->b,"%s %s::%s(", type, module, symname);
         emitParmList(parms, bg->b_obj_cpp->b, 2, 0, 0, false, ",\n        ", "\n        ", false);
         Printf(bg->b_obj_cpp->b,") {\n");
@@ -1032,8 +1032,8 @@ int functionWrapper(Node *n) {
     String *group = Getattr(n,"feature:rp:group");
     String *include = Getattr(n,"feature:rp:include");
     prefix = Getattr(n,"feature:rp:prefix");
-    bool manual = checkAttribute(n,"feature:rp:generation","manual");
-    BufferGroup *bg = bm_.getBufferGroup (group, include, manual);
+    bool automatic = checkAttribute(n,"feature:rp:generation","automatic");
+    BufferGroup *bg = bm_.getBufferGroup (group, include, automatic);
 
     // In the *.i files if there is a parameter with no name
     // that would cause a segfault later so trap it here.
@@ -1062,14 +1062,14 @@ int functionWrapper(Node *n) {
     String *nodeType = Getattr(n,"nodeType");
     if (0 == Strcmp("cdecl", nodeType)) {
         if (NULL == Getattr(n, "ismember")) {
-            printFunc(n, bg, manual);
+            printFunc(n, bg, automatic);
         } else {
             printMemb(n, bg);
         }
     } else if (0 == Strcmp("constructor", nodeType)) {
             printCtor(n, bg);
     } else {
-        printf("no handler for this node.\n");
+        printf("no handler for this node - skipping.\n");
     }
 
   return SWIG_OK;
