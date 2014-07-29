@@ -5,6 +5,7 @@
 #include "AddinCpp/cpp_adder2.hpp"
 #include "AddinCpp/cpp_color.hpp"
 #include "AddinCpp/cpp_foo.hpp"
+#include "AddinCpp/cpp_noparm.hpp"
 
 int main() {
     try {
@@ -40,6 +41,11 @@ int main() {
         } catch(const std::exception &e) {
             std::cout << "Error - " << e.what() << std::endl;
         }
+
+        // Test constructors/members/functions that take no arguments and return void.
+        FullLibAddinCpp::slF2();
+        FullLibAddinCpp::slNoParm("noparm");
+        FullLibAddinCpp::slNoParmF("noparm");
 
         std::cout << "bye" << std::endl;
         return 0;

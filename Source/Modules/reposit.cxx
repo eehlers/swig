@@ -658,7 +658,8 @@ void printFunc(Node *n, BufferGroup *bg, bool manual) {
         Printf(bg->b_obj_cpp->b,"%s %s::%s(", type, module, symname);
         emitParmList(parms, bg->b_obj_cpp->b, 2, 0, 0, false, ",\n        ", "\n        ", false);
         Printf(bg->b_obj_cpp->b,") {\n");
-        Printf(bg->b_obj_cpp->b,"    return %s(", name);
+        String *ret = getTypeMap("rp_cpp_ret", n, type);
+        Printf(bg->b_obj_cpp->b,"    %s%s(", ret, name);
         emitParmList(parms, bg->b_obj_cpp->b, 0, 0, 0, true);
         Printf(bg->b_obj_cpp->b,");\n");
         Printf(bg->b_obj_cpp->b,"}\n");
@@ -747,7 +748,7 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(b_wrappers, "// *a3* %s <<\n", Char(ParmList_protostr(parms2)));
     Printf(b_wrappers, "//***ABC\n");
 
-    String *ret = getTypeMap("rp_cpp_ret", n, type);
+    String *ret = getTypeMap("rp_cpp_type", n, type);
     Printf(bg->b_cpp_hpp->b,"    %s %s(", ret, funcName);
     emitParmList(parms2, bg->b_cpp_hpp->b, 2, "rp_cpp_in");
     Printf(bg->b_cpp_hpp->b,");\n");

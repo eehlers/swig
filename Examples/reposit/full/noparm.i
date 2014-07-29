@@ -5,11 +5,11 @@
 %}
 
 namespace FullLib {
-    long f2();
+    void f2();
     class NoParm {
     public:
         NoParm();
-        long f();
+        void f();
     };
 }
 

@@ -7,20 +7,14 @@
 
 namespace FullLib {
 
-    int f2() {
-        std::cout << "f2()" << std::endl;
-        return 0;
-    }
+    void f2() { std::cout << "f2()" << std::endl; }
 
     class NoParm {
     public:
         NoParm() {
             std::cout << "NoParm::NoParm()" << std::endl;
         }
-        int f() {
-            std::cout << "NoParm::f()" << std::endl;
-            return 0;
-        }
+        void f() { std::cout << "NoParm::f()" << std::endl; }
     };
 
 };
