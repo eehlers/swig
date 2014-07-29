@@ -60,9 +60,6 @@ struct BufferGroup {
         String *s_val_hpp = NewStringf("%s/valueobjects/vo_%s.hpp", objDir, name_);
         String *s_val_cpp = NewStringf("%s/valueobjects/vo_%s.cpp", objDir, name_);
         String *s_obj_hpp = NewStringf("%s/obj_%s.hpp", objDir, name_);
-        if (!manual_) {
-            String *s_obj_cpp = NewStringf("%s/obj_%s.cpp", objDir, name_);
-        }
         String *s_cpp_hpp = NewStringf("AddinCpp/cpp_%s.hpp", name_);
         String *s_cpp_cpp = NewStringf("AddinCpp/cpp_%s.cpp", name_);
         String *s_xll_cpp = NewStringf("AddinXl/xl_%s.cpp", name_);
@@ -70,9 +67,6 @@ struct BufferGroup {
         b_val_hpp = new Buffer(s_val_hpp);
         b_val_cpp = new Buffer(s_val_cpp);
         b_obj_hpp = new Buffer(s_obj_hpp);
-        if (!manual_) {
-            b_obj_cpp = new Buffer(s_obj_cpp);
-        }
         b_cpp_hpp = new Buffer(s_cpp_hpp);
         b_cpp_cpp = new Buffer(s_cpp_cpp);
         b_xll_cpp = new Buffer(s_xll_cpp);
@@ -80,12 +74,15 @@ struct BufferGroup {
         Delete(s_val_hpp);
         Delete(s_val_cpp);
         Delete(s_obj_hpp);
-        if (!manual_) {
-            Delete(s_obj_cpp);
-        }
         Delete(s_cpp_hpp);
         Delete(s_cpp_cpp);
         Delete(s_xll_cpp);
+
+        if (!manual_) {
+            String *s_obj_cpp = NewStringf("%s/obj_%s.cpp", objDir, name_);
+            b_obj_cpp = new Buffer(s_obj_cpp);
+            Delete(s_obj_cpp);
+        }
 
         Printf(b_val_hpp->b, "\n");
         Printf(b_val_hpp->b, "#ifndef vo_%s_hpp\n", name);
@@ -784,7 +781,7 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "}\n");
 }
 
-void printCtor(Node *n, BufferGroup *bg, bool manual) {
+void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_cpp_cpp->b,"//****CTOR*****\n");
     String   *name   = Getattr(n,"name");
     //SwigType *type   = Getattr(n,"type");
@@ -1023,7 +1020,7 @@ int functionWrapper(Node *n) {
             printMemb(n, bg);
         }
     } else if (0 == Strcmp("constructor", nodeType)) {
-            printCtor(n, bg, manual);
+            printCtor(n, bg);
     } else {
         printf("no handler for this node.\n");
     }
