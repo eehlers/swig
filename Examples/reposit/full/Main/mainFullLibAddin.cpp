@@ -7,11 +7,14 @@
 #include "AddinCpp/cpp_foo.hpp"
 #include "AddinCpp/cpp_inheritance.hpp"
 #include "AddinCpp/cpp_noparm.hpp"
+#include "AddinCpp/cpp_objecthandler.hpp"
 
 int main() {
     try {
         std::cout << "hi" << std::endl;
         FullLibAddinCpp::initializeAddin();
+        std::cout << "ObjectHandler version = " << FullLibAddinCpp::flVersion() << std::endl;
+
         std::cout << FullLibAddinCpp::flFunc() << std::endl;
         FullLibAddinCpp::flAdder("adder", 1);
         std::cout << "1 + 2 = " << FullLibAddinCpp::flAdderAdd("adder", 2) << std::endl;
