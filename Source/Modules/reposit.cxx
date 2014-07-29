@@ -57,32 +57,35 @@ struct BufferGroup {
         name_ = Copy(name);
         manual_ = manual;
 
-        String *s_val_cpp = NewStringf("%s/valueobjects/vo_%s.cpp", objDir, name_);
         String *s_val_hpp = NewStringf("%s/valueobjects/vo_%s.hpp", objDir, name_);
-        String *s_cpp_cpp = NewStringf("AddinCpp/cpp_%s.cpp", name_);
-        String *s_cpp_hpp = NewStringf("AddinCpp/cpp_%s.hpp", name_);
-        String *s_xll_cpp = NewStringf("AddinXl/xl_%s.cpp", name_);
-
-        b_val_cpp = new Buffer(s_val_cpp);
-        b_val_hpp = new Buffer(s_val_hpp);
-        b_cpp_cpp = new Buffer(s_cpp_cpp);
-        b_cpp_hpp = new Buffer(s_cpp_hpp);
-        b_xll_cpp = new Buffer(s_xll_cpp);
-
-        Delete(s_val_cpp);
-        Delete(s_val_hpp);
-        Delete(s_cpp_cpp);
-        Delete(s_cpp_hpp);
-        Delete(s_xll_cpp);
-
+        String *s_val_cpp = NewStringf("%s/valueobjects/vo_%s.cpp", objDir, name_);
+        String *s_obj_hpp = NewStringf("%s/obj_%s.hpp", objDir, name_);
         if (!manual_) {
             String *s_obj_cpp = NewStringf("%s/obj_%s.cpp", objDir, name_);
-            String *s_obj_hpp = NewStringf("%s/obj_%s.hpp", objDir, name_);
-            b_obj_cpp = new Buffer(s_obj_cpp);
-            b_obj_hpp = new Buffer(s_obj_hpp);
-            Delete(s_obj_cpp);
-            Delete(s_obj_hpp);
         }
+        String *s_cpp_hpp = NewStringf("AddinCpp/cpp_%s.hpp", name_);
+        String *s_cpp_cpp = NewStringf("AddinCpp/cpp_%s.cpp", name_);
+        String *s_xll_cpp = NewStringf("AddinXl/xl_%s.cpp", name_);
+
+        b_val_hpp = new Buffer(s_val_hpp);
+        b_val_cpp = new Buffer(s_val_cpp);
+        b_obj_hpp = new Buffer(s_obj_hpp);
+        if (!manual_) {
+            b_obj_cpp = new Buffer(s_obj_cpp);
+        }
+        b_cpp_hpp = new Buffer(s_cpp_hpp);
+        b_cpp_cpp = new Buffer(s_cpp_cpp);
+        b_xll_cpp = new Buffer(s_xll_cpp);
+
+        Delete(s_val_hpp);
+        Delete(s_val_cpp);
+        Delete(s_obj_hpp);
+        if (!manual_) {
+            Delete(s_obj_cpp);
+        }
+        Delete(s_cpp_hpp);
+        Delete(s_cpp_cpp);
+        Delete(s_xll_cpp);
 
         Printf(b_val_hpp->b, "\n");
         Printf(b_val_hpp->b, "#ifndef vo_%s_hpp\n", name);
@@ -106,7 +109,6 @@ struct BufferGroup {
         Printf(b_val_cpp->b, "namespace ValueObjects {\n");
         Printf(b_val_cpp->b, "\n");
 
-        if (!manual_) {
         Printf(b_obj_hpp->b, "\n");
         Printf(b_obj_hpp->b, "#ifndef obj_%s_hpp\n", name);
         Printf(b_obj_hpp->b, "#define obj_%s_hpp\n", name);
@@ -118,9 +120,10 @@ struct BufferGroup {
         Printf(b_obj_hpp->b, "%s\n", include);
         Printf(b_obj_hpp->b,"namespace %s {\n", module);
 
-        Printf(b_obj_cpp->b, "\n");
-        Printf(b_obj_cpp->b, "#include \"obj_%s.hpp\"\n", name);
-        Printf(b_obj_cpp->b, "\n");
+        if (!manual_) {
+            Printf(b_obj_cpp->b, "\n");
+            Printf(b_obj_cpp->b, "#include \"obj_%s.hpp\"\n", name);
+            Printf(b_obj_cpp->b, "\n");
         }
 
         Printf(b_cpp_hpp->b, "\n");
@@ -173,6 +176,7 @@ struct BufferGroup {
     }
 
     ~BufferGroup() {
+
         Printf(b_val_hpp->b, "} // namespace %s\n", module);
         Printf(b_val_hpp->b, "\n");
         Printf(b_val_hpp->b, "} // namespace ValueObjects\n");
@@ -186,12 +190,10 @@ struct BufferGroup {
         Printf(b_val_cpp->b, "} // namespace ValueObjects\n");
         Printf(b_val_cpp->b, "\n");
 
-        if (!manual_) {
         Printf(b_obj_hpp->b, "} // namespace %s\n", module);
         Printf(b_obj_hpp->b, "\n");
         Printf(b_obj_hpp->b, "#endif\n");
         Printf(b_obj_hpp->b, "\n");
-        }
 
         Printf(b_cpp_hpp->b, "\n");
         Printf(b_cpp_hpp->b, "} // namespace %sCpp\n", module);
@@ -201,14 +203,14 @@ struct BufferGroup {
 
         Printf(b_cpp_cpp->b, "\n");
 
-        delete b_val_cpp;
         delete b_val_hpp;
-        if (!manual_) {
-        delete b_obj_cpp;
+        delete b_val_cpp;
         delete b_obj_hpp;
+        if (!manual_) {
+            delete b_obj_cpp;
         }
-        delete b_cpp_cpp;
         delete b_cpp_hpp;
+        delete b_cpp_cpp;
         delete b_xll_cpp;
     }
 };
@@ -257,6 +259,7 @@ protected:
 public:
 
   virtual void main(int argc, char *argv[]) {
+
     printf("I'm the reposit module.\n");
 
     /* Set language-specific subdirectory in SWIG library */
@@ -636,19 +639,19 @@ void printFunc(Node *n, BufferGroup *bg, bool manual) {
     Setattr(n, "rp:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
-    if (!manual) {
     Printf(bg->b_obj_hpp->b,"\n");
     Printf(bg->b_obj_hpp->b,"    %s %s(", type, symname);
     emitParmList(parms, bg->b_obj_hpp->b, 2);
     Printf(bg->b_obj_hpp->b,");\n");
 
-    Printf(bg->b_obj_cpp->b,"%s %s::%s(", type, module, symname);
-    emitParmList(parms, bg->b_obj_cpp->b, 2);
-    Printf(bg->b_obj_cpp->b,") {\n");
-    Printf(bg->b_obj_cpp->b,"    return %s(", name);
-    emitParmList(parms, bg->b_obj_cpp->b, 0, 0, 0, true);
-    Printf(bg->b_obj_cpp->b,");\n");
-    Printf(bg->b_obj_cpp->b,"}\n");
+    if (!manual) {
+        Printf(bg->b_obj_cpp->b,"%s %s::%s(", type, module, symname);
+        emitParmList(parms, bg->b_obj_cpp->b, 2);
+        Printf(bg->b_obj_cpp->b,") {\n");
+        Printf(bg->b_obj_cpp->b,"    return %s(", name);
+        emitParmList(parms, bg->b_obj_cpp->b, 0, 0, 0, true);
+        Printf(bg->b_obj_cpp->b,");\n");
+        Printf(bg->b_obj_cpp->b,"}\n");
     }
 
     Printf(bg->b_cpp_hpp->b,"    %s %s(", type, funcName);
@@ -669,7 +672,6 @@ void printFunc(Node *n, BufferGroup *bg, bool manual) {
     String *ret_type = getTypeMap("rp_excel_out", n, type);
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "DLLEXPORT %s %s(", ret_type, funcName);
-    //emitParmList(parms, bg->b_xll_cpp->b/*, true*/);
     emitParmList(parms, bg->b_xll_cpp->b, 2, "rp_excel_in");
     Printf(bg->b_xll_cpp->b, ") {\n");
     Printf(bg->b_xll_cpp->b, "\n");
@@ -903,7 +905,6 @@ void printCtor(Node *n, BufferGroup *bg, bool manual) {
     Printf(bg->b_val_cpp->b,"            Permanent_(Permanent) {\n");
     Printf(bg->b_val_cpp->b,"        }\n");
 
-    if (!manual) {
     Printf(bg->b_obj_hpp->b,"\n");
     Printf(bg->b_obj_hpp->b,"    class %s : \n", name);
     Printf(bg->b_obj_hpp->b,"        public ObjectHandler::LibraryObject<%s> {\n", pname);
@@ -920,7 +921,6 @@ void printCtor(Node *n, BufferGroup *bg, bool manual) {
     Printf(bg->b_obj_hpp->b,"        }\n");
     Printf(bg->b_obj_hpp->b,"    };\n");
     Printf(bg->b_obj_hpp->b,"\n");
-    }
 
     Printf(bg->b_cpp_hpp->b,"    std::string %s(", funcName);
     emitParmList(parms2, bg->b_cpp_hpp->b, 2, "rp_cpp_in");
