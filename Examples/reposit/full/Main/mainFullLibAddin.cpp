@@ -1,15 +1,15 @@
 
 #include <iostream>
 #include "AddinCpp/init.hpp"
-#include "AddinCpp/cpp_adder.hpp"
-#include "AddinCpp/cpp_adder2.hpp"
-#include "AddinCpp/cpp_color.hpp"
-#include "AddinCpp/cpp_foo.hpp"
-#include "AddinCpp/cpp_inheritance.hpp"
-#include "AddinCpp/cpp_noparm.hpp"
-#include "AddinCpp/cpp_oh_repository.hpp"
-#include "AddinCpp/cpp_oh_utilities.hpp"
-#include "AddinCpp/cpp_oh_serialization.hpp"
+#include "AddinCpp/add_adder.hpp"
+#include "AddinCpp/add_adder2.hpp"
+#include "AddinCpp/add_color.hpp"
+#include "AddinCpp/add_foo.hpp"
+#include "AddinCpp/add_inheritance.hpp"
+#include "AddinCpp/add_noparm.hpp"
+#include "AddinCpp/add_oh_repository.hpp"
+#include "AddinCpp/add_oh_utilities.hpp"
+#include "AddinCpp/add_oh_serialization.hpp"
 
 int main() {
     try {

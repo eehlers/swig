@@ -4,32 +4,32 @@
 //        valueObject->getProperty("$1_name");
 //%} 
 
-%typemap(rp_cpp_class) FullLib::Base * %{
+%typemap(rp_add_class) FullLib::Base * %{
     OH_LIB_CLASS(Base, FullLib::Base);
 %}
 
-%typemap(rp_cpp_in) FullLib::Long "const ObjectHandler::property_t&";
-%typemap(rp_cpp_in) FullLib::Account::Type "const std::string&";
-%typemap(rp_cpp_in) boost::shared_ptr<FullLib::Color> "const std::string&";
+%typemap(rp_add_in) FullLib::Long "const ObjectHandler::property_t&";
+%typemap(rp_add_in) FullLib::Account::Type "const std::string&";
+%typemap(rp_add_in) boost::shared_ptr<FullLib::Color> "const std::string&";
 
-%typemap(rp_cpp_cnv) FullLib::Long %{
+%typemap(rp_add_cnv) FullLib::Long %{
     FullLib::Long $1_name_cnv =
         ObjectHandler::convert2<FullLib::Long, ObjectHandler::property_t>($1_name);
 %} 
 
-%typemap(rp_cpp_cnv) FullLib::Account::Type %{
+%typemap(rp_add_cnv) FullLib::Account::Type %{
     FullLib::Account::Type $1_name_enum =
         ObjectHandler::Create<$1_type>()($1_name);
 %} 
 
-%typemap(rp_cpp_cnv) boost::shared_ptr<FullLib::Color> %{
+%typemap(rp_add_cnv) boost::shared_ptr<FullLib::Color> %{
     boost::shared_ptr<FullLib::Color> $1_name_enum =
         ObjectHandler::Create<boost::shared_ptr<FullLib::Color> >()($1_name);
 %} 
 
-%typemap(rp_cpp_call) FullLib::Long "$1_name_cnv";
-%typemap(rp_cpp_call) FullLib::Account::Type "$1_name_enum";
-%typemap(rp_cpp_call) boost::shared_ptr<FullLib::Color> "$1_name_enum";
+%typemap(rp_add_call) FullLib::Long "$1_name_cnv";
+%typemap(rp_add_call) FullLib::Account::Type "$1_name_enum";
+%typemap(rp_add_call) boost::shared_ptr<FullLib::Color> "$1_name_enum";
 
 %typemap(rp_vo_declare) FullLib::Long "ObjectHandler::property_t $1_name_";
 %typemap(rp_vo_cnv) FullLib::Long "value";

@@ -158,35 +158,35 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\cpp_adder.cpp"
+			RelativePath=".\add_adder.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\cpp_adder.hpp"
+			RelativePath=".\add_adder.hpp"
 			>
 		</File>
 		<File
-			RelativePath=".\cpp_adder2.cpp"
+			RelativePath=".\add_adder2.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\cpp_adder2.hpp"
+			RelativePath=".\add_adder2.hpp"
 			>
 		</File>
 		<File
-			RelativePath=".\cpp_color.cpp"
+			RelativePath=".\add_color.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\cpp_color.hpp"
+			RelativePath=".\add_color.hpp"
 			>
 		</File>
 		<File
-			RelativePath=".\cpp_foo.cpp"
+			RelativePath=".\add_foo.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\cpp_foo.hpp"
+			RelativePath=".\add_foo.hpp"
 			>
 		</File>
 		<File

@@ -16,8 +16,8 @@
             valueObject->getProperty("$1_name"), "$1_name");
 %}
 
-%typemap(rp_cpp_in) SWIGTYPE "$1_type";
-%typemap(rp_cpp_call) SWIGTYPE "$1_name";
+%typemap(rp_add_in) SWIGTYPE "$1_type";
+%typemap(rp_add_call) SWIGTYPE "$1_name";
 
 %typemap(rp_excel) std::string "C";
 %typemap(rp_excel) std::string& "C";
@@ -45,10 +45,10 @@
 %typemap(rp_excel_get) void "";
 %typemap(rp_excel_get) SWIGTYPE "        $1_type returnValue =\n    ";
 
-%typemap(rp_cpp_ret) void "";
-%typemap(rp_cpp_ret) SWIGTYPE "return ";
+%typemap(rp_add_ret) void "";
+%typemap(rp_add_ret) SWIGTYPE "return ";
 
-%typemap(rp_cpp_type) SWIGTYPE "$1_type";
+%typemap(rp_add_type) SWIGTYPE "$1_type";
 
 %typemap(rp_excel_ret) void %{
         static bool ret = true;
