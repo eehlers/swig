@@ -10,10 +10,21 @@ String *prefix = 0;
 String *module = 0;
 String *addinCppNameSpace = 0;
 String *nmspace = 0;
+long idNum = 4;
 
 // FIXME store some defaults in reposit.swg and retrieve them here.
 String *objDir = NewString("AddinObjects");
 String *xlDir = NewString("AddinXl");
+
+String *cppClass = 0;
+
+struct Buffer;
+
+Buffer *b_cre_reg_cpp=0;
+Buffer *b_cre_all_hpp=0;
+Buffer *b_reg_ser_hpp=0;
+Buffer *b_reg_all_hpp=0;
+Buffer *b_xll_cpp4=0;
 
 File *initFile(String *outfile) {
    File *f = NewFile(outfile, "w", SWIG_output_files());
@@ -27,15 +38,19 @@ File *initFile(String *outfile) {
 struct Buffer {
     String *name_;
     File *b;
+    File *b2;
     Buffer(String *name) {
         name_ = Copy(name);
         b = NewString("");
+        b2 = NewString("");
     }
     ~Buffer() {
         File *f = initFile(name_);
         Delete(name_);
         Dump(b, f);
+        Dump(b2, f);
         Delete(b);
+        Delete(b2);
         Delete(f);
     }
 };
@@ -45,6 +60,10 @@ struct BufferGroup {
     // buffers
     Buffer *b_val_cpp;
     Buffer *b_val_hpp;
+    Buffer *b_cre_hpp;
+    Buffer *b_cre_cpp;
+    Buffer *b_reg_hpp;
+    Buffer *b_reg_cpp;
     Buffer *b_obj_cpp;
     Buffer *b_obj_hpp;
     Buffer *b_cpp_cpp;
@@ -61,6 +80,10 @@ struct BufferGroup {
 
         String *s_val_hpp = NewStringf("%s/valueobjects/vo_%s.hpp", objDir, name_);
         String *s_val_cpp = NewStringf("%s/valueobjects/vo_%s.cpp", objDir, name_);
+        String *s_cre_hpp = NewStringf("%s/serialization/create/create_%s.hpp", objDir, name_);
+        String *s_cre_cpp = NewStringf("%s/serialization/create/create_%s.cpp", objDir, name_);
+        String *s_reg_hpp = NewStringf("%s/serialization/register/serialization_%s.hpp", objDir, name_);
+        String *s_reg_cpp = NewStringf("%s/serialization/register/serialization_%s.cpp", objDir, name_);
         String *s_obj_hpp = NewStringf("%s/obj_%s.hpp", objDir, name_);
         String *s_cpp_hpp = NewStringf("AddinCpp/cpp_%s.hpp", name_);
         String *s_cpp_cpp = NewStringf("AddinCpp/cpp_%s.cpp", name_);
@@ -68,6 +91,10 @@ struct BufferGroup {
 
         b_val_hpp = new Buffer(s_val_hpp);
         b_val_cpp = new Buffer(s_val_cpp);
+        b_cre_hpp = new Buffer(s_cre_hpp);
+        b_cre_cpp = new Buffer(s_cre_cpp);
+        b_reg_hpp = new Buffer(s_reg_hpp);
+        b_reg_cpp = new Buffer(s_reg_cpp);
         b_obj_hpp = new Buffer(s_obj_hpp);
         b_cpp_hpp = new Buffer(s_cpp_hpp);
         b_cpp_cpp = new Buffer(s_cpp_cpp);
@@ -75,6 +102,10 @@ struct BufferGroup {
 
         Delete(s_val_hpp);
         Delete(s_val_cpp);
+        Delete(s_cre_hpp);
+        Delete(s_cre_cpp);
+        Delete(s_reg_hpp);
+        Delete(s_reg_cpp);
         Delete(s_obj_hpp);
         Delete(s_cpp_hpp);
         Delete(s_cpp_cpp);
@@ -90,9 +121,12 @@ struct BufferGroup {
         Printf(b_val_hpp->b, "#ifndef vo_%s_hpp\n", name);
         Printf(b_val_hpp->b, "#define vo_%s_hpp\n", name);
         Printf(b_val_hpp->b, "\n");
-        Printf(b_val_hpp->b, "#include <string>\n");
-        Printf(b_val_hpp->b, "#include <set>\n");
         Printf(b_val_hpp->b, "#include <oh/valueobject.hpp>\n");
+        Printf(b_val_hpp->b, "#include <string>\n");
+        Printf(b_val_hpp->b, "#include <vector>\n");
+        Printf(b_val_hpp->b, "#include <set>\n");
+        Printf(b_val_hpp->b, "#include <boost/serialization/map.hpp>\n");
+        Printf(b_val_hpp->b, "#include <boost/algorithm/string/case_conv.hpp>\n");
         Printf(b_val_hpp->b, "\n");
         Printf(b_val_hpp->b,"namespace %s {\n", module);
         Printf(b_val_hpp->b, "\n");
@@ -107,6 +141,61 @@ struct BufferGroup {
         Printf(b_val_cpp->b, "\n");
         Printf(b_val_cpp->b, "namespace ValueObjects {\n");
         Printf(b_val_cpp->b, "\n");
+
+        Printf(b_cre_hpp->b, "\n");
+        Printf(b_cre_hpp->b, "#ifndef create_%s_hpp\n", name);
+        Printf(b_cre_hpp->b, "#define create_%s_hpp\n", name);
+        Printf(b_cre_hpp->b, "\n");
+        Printf(b_cre_hpp->b, "#include <oh/ohdefines.hpp>\n");
+        Printf(b_cre_hpp->b, "#include <oh/object.hpp>\n");
+        Printf(b_cre_hpp->b, "#include <oh/valueobject.hpp>\n");
+        Printf(b_cre_hpp->b, "\n");
+        Printf(b_cre_hpp->b, "namespace %s {\n", module);
+        Printf(b_cre_hpp->b, "\n");
+
+        Printf(b_cre_cpp->b, "\n");
+        Printf(b_cre_cpp->b, "#include <%s/serialization/create/create_%s.hpp>\n", objDir, name);
+        Printf(b_cre_cpp->b, "//#include <%s/qladdindefines.hpp>\n", objDir);
+        Printf(b_cre_cpp->b, "//#include <%s/handle.hpp>\n", objDir);
+        Printf(b_cre_cpp->b, "\n");
+        Printf(b_cre_cpp->b, "#include <%s/obj_%s.hpp>\n", objDir, name);
+        Printf(b_cre_cpp->b, "#include <%s/valueobjects/vo_%s.hpp>\n", objDir, name);
+        Printf(b_cre_cpp->b, "\n");
+        Printf(b_cre_cpp->b, "//#include <%s/conversions/all.hpp>\n", objDir);
+        Printf(b_cre_cpp->b, "#include <oh/property.hpp>\n");
+        Printf(b_cre_cpp->b, "\n");
+
+        Printf(b_reg_hpp->b, "\n");
+        Printf(b_reg_hpp->b, "#ifndef serialization_%s_hpp\n", name);
+        Printf(b_reg_hpp->b, "#define serialization_%s_hpp\n", name);
+        Printf(b_reg_hpp->b, "\n");
+        Printf(b_reg_hpp->b, "#include <boost/archive/xml_iarchive.hpp>\n");
+        Printf(b_reg_hpp->b, "#include <boost/archive/xml_oarchive.hpp>\n");
+        Printf(b_reg_hpp->b, "\n");
+        Printf(b_reg_hpp->b, "namespace %s {\n", module);
+        Printf(b_reg_hpp->b, "\n");
+        Printf(b_reg_hpp->b, "    void register_%s(boost::archive::xml_oarchive &ar);\n", name);
+        Printf(b_reg_hpp->b, "    void register_%s(boost::archive::xml_iarchive &ar);\n", name);
+        Printf(b_reg_hpp->b, "\n");
+        Printf(b_reg_hpp->b, "} // namespace %s\n", module);
+        Printf(b_reg_hpp->b, "\n");
+        Printf(b_reg_hpp->b, "#endif\n");
+        Printf(b_reg_hpp->b, "\n");
+
+        Printf(b_reg_cpp->b, "\n");
+        Printf(b_reg_cpp->b, "#include <oh/ohdefines.hpp>\n");
+        Printf(b_reg_cpp->b, "#include <%s/serialization/register/serialization_%s.hpp>\n", objDir, name);
+        Printf(b_reg_cpp->b, "#include <%s/valueobjects/vo_%s.hpp>\n", objDir, name);
+        Printf(b_reg_cpp->b, "#include <boost/serialization/shared_ptr.hpp>\n");
+        Printf(b_reg_cpp->b, "#include <boost/serialization/variant.hpp>\n");
+        Printf(b_reg_cpp->b, "#include <boost/serialization/vector.hpp>\n");
+        Printf(b_reg_cpp->b, "\n");
+        Printf(b_reg_cpp->b, "void %s::register_%s(boost::archive::xml_oarchive &ar) {\n", module, name);
+        Printf(b_reg_cpp->b, "\n");
+
+        Printf(b_reg_cpp->b2, "\n");
+        Printf(b_reg_cpp->b2, "void %s::register_%s(boost::archive::xml_iarchive &ar) {\n", module, name);
+        Printf(b_reg_cpp->b2, "\n");
 
         Printf(b_obj_hpp->b, "\n");
         Printf(b_obj_hpp->b, "#ifndef obj_%s_hpp\n", name);
@@ -172,6 +261,16 @@ struct BufferGroup {
         Printf(b_xll_cpp->b, "#endif\n");
         Printf(b_xll_cpp->b, "#include <sstream>\n");
         Printf(b_xll_cpp->b, "\n");
+
+        // write to global buffers
+
+        Printf(b_cre_all_hpp->b, "#include <%s/serialization/create/create_%s.hpp>\n", objDir, name);
+
+        Printf(b_reg_all_hpp->b, "#include <%s/serialization/register/serialization_%s.hpp>\n", objDir, name);
+
+        if (!cppClass) {
+        Printf(b_reg_ser_hpp->b, "        register_%s(ar);\n", name);
+        }
     }
 
     ~BufferGroup() {
@@ -188,6 +287,22 @@ struct BufferGroup {
         Printf(b_val_cpp->b, "\n");
         Printf(b_val_cpp->b, "} // namespace ValueObjects\n");
         Printf(b_val_cpp->b, "\n");
+
+        Printf(b_cre_hpp->b, "\n");
+        Printf(b_cre_hpp->b, "} // namespace %s\n", module);
+        Printf(b_cre_hpp->b, "\n");
+        Printf(b_cre_hpp->b, "#endif\n");
+        Printf(b_cre_hpp->b, "\n");
+
+        Printf(b_cre_cpp->b, "\n");
+
+        Printf(b_reg_hpp->b, "\n");
+
+        Printf(b_reg_cpp->b, "}\n");
+        Printf(b_reg_cpp->b, "\n");
+
+        Printf(b_reg_cpp->b2, "}\n");
+        Printf(b_reg_cpp->b2, "\n");
 
         Printf(b_obj_hpp->b, "} // namespace %s\n", module);
         Printf(b_obj_hpp->b, "\n");
@@ -208,6 +323,10 @@ struct BufferGroup {
 
         delete b_val_hpp;
         delete b_val_cpp;
+        delete b_cre_hpp;
+        delete b_cre_cpp;
+        delete b_reg_hpp;
+        delete b_reg_cpp;
         delete b_obj_hpp;
         if (automatic_) {
             delete b_obj_cpp;
@@ -256,8 +375,6 @@ protected:
 
     // SWIG output files
     File *f_test;
-
-    Buffer *b_xll_cpp4;
 
 public:
 
@@ -341,9 +458,54 @@ virtual int top(Node *n) {
     Swig_register_filebyname("director", b_director);
     Swig_register_filebyname("director_h", b_director_h);
 
+    String *s_cre_reg_cpp = NewStringf("%s/serialization/register_creators.cpp", objDir);
+    b_cre_reg_cpp = new Buffer(s_cre_reg_cpp);
+    Delete(s_cre_reg_cpp);
+
+    String *s_cre_all_hpp = NewStringf("%s/serialization/create/create_all.hpp", objDir);
+    b_cre_all_hpp = new Buffer(s_cre_all_hpp);
+    Delete(s_cre_all_hpp);
+
+    String *s_reg_ser_hpp = NewStringf("%s/serialization/register/serialization_register.hpp", objDir);
+    b_reg_ser_hpp = new Buffer(s_reg_ser_hpp);
+    Delete(s_reg_ser_hpp);
+
+    String *s_reg_all_hpp = NewStringf("%s/serialization/register/serialization_all.hpp", objDir);
+    b_reg_all_hpp = new Buffer(s_reg_all_hpp);
+    Delete(s_reg_all_hpp);
+
     String *s_xll_cpp4 = NewString("AddinXl/xl_addin.cpp");
     b_xll_cpp4 = new Buffer(s_xll_cpp4);
     Delete(s_xll_cpp4);
+
+        Printf(b_cre_reg_cpp->b, "\n");
+        Printf(b_cre_reg_cpp->b, "#include <%s/serialization/serializationfactory.hpp>\n", objDir);
+        Printf(b_cre_reg_cpp->b, "#include <%s/serialization/create/create_all.hpp>\n", objDir);
+        Printf(b_cre_reg_cpp->b, "\n");
+        Printf(b_cre_reg_cpp->b, "void %s::SerializationFactory::registerCreators() {\n", module);
+        Printf(b_cre_reg_cpp->b, "\n");
+
+        Printf(b_cre_all_hpp->b, "\n");
+        Printf(b_cre_all_hpp->b, "#ifndef create_all_hpp\n");
+        Printf(b_cre_all_hpp->b, "#define create_all_hpp\n");
+        Printf(b_cre_all_hpp->b, "\n");
+
+        Printf(b_reg_ser_hpp->b, "\n");
+        Printf(b_reg_ser_hpp->b, "#ifndef serialization_register_hpp\n");
+        Printf(b_reg_ser_hpp->b, "#define serialization_register_hpp\n");
+        Printf(b_reg_ser_hpp->b, "\n");
+        Printf(b_reg_ser_hpp->b, "#include <%s/serialization/register/serialization_all.hpp>\n", objDir);
+        Printf(b_reg_ser_hpp->b, "\n");
+        Printf(b_reg_ser_hpp->b, "namespace %s {\n", module);
+        Printf(b_reg_ser_hpp->b, "\n");
+        Printf(b_reg_ser_hpp->b, "    template<class Archive>\n");
+        Printf(b_reg_ser_hpp->b, "    void tpl_register_classes(Archive& ar) {\n");
+        Printf(b_reg_ser_hpp->b, "\n");
+
+        Printf(b_reg_all_hpp->b, "\n");
+        Printf(b_reg_all_hpp->b, "#ifndef serialization_all_hpp\n");
+        Printf(b_reg_all_hpp->b, "#define serialization_all_hpp\n");
+        Printf(b_reg_all_hpp->b, "\n");
 
         Printf(b_xll_cpp4->b, "\n");
         Printf(b_xll_cpp4->b, "#include <ohxl/objecthandlerxl.hpp>\n");
@@ -382,6 +544,26 @@ virtual int top(Node *n) {
 
    /* Emit code for children */
    Language::top(n);
+
+        Printf(b_cre_reg_cpp->b, "\n");
+        Printf(b_cre_reg_cpp->b, "}\n");
+        Printf(b_cre_reg_cpp->b, "\n");
+
+        Printf(b_cre_all_hpp->b, "\n");
+        Printf(b_cre_all_hpp->b, "#endif\n");
+        Printf(b_cre_all_hpp->b, "\n");
+
+        Printf(b_reg_ser_hpp->b, "\n");
+        Printf(b_reg_ser_hpp->b, "    }\n");
+        Printf(b_reg_ser_hpp->b, "\n");
+        Printf(b_reg_ser_hpp->b, "}\n");
+        Printf(b_reg_ser_hpp->b, "\n");
+        Printf(b_reg_ser_hpp->b, "#endif\n");
+        Printf(b_reg_ser_hpp->b, "\n");
+
+        Printf(b_reg_all_hpp->b, "\n");
+        Printf(b_reg_all_hpp->b, "#endif\n");
+        Printf(b_reg_all_hpp->b, "\n");
 
         Printf(b_xll_cpp4->b, "\n");
         Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
@@ -439,6 +621,10 @@ virtual int top(Node *n) {
         Printf(b_xll_cpp4->b, "\n");
         Printf(b_xll_cpp4->b, "}\n");
 
+    delete b_cre_reg_cpp;
+    delete b_cre_all_hpp;
+    delete b_reg_ser_hpp;
+    delete b_reg_all_hpp;
     delete b_xll_cpp4;
 
     // To help with troubleshooting, create an output file to which all of the
@@ -527,7 +713,6 @@ void emitParmList(
     File *buf,
     int mode=0,         // 0=name, 1=type, 2=both
     const char *map=0,
-    //int nomatch=0,       // 0=type, 1=null, 2=exception
     bool fatal=true,
     bool skipHidden=false,
     const char *delim=", ",
@@ -967,7 +1152,41 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_val_cpp->b,"            Permanent_(Permanent) {\n");
     Printf(bg->b_val_cpp->b,"        }\n");
 
-    String *cppClass = getTypeMap("rp_cpp_class", n, type, false);
+    if (!cppClass) {
+    Printf(bg->b_cre_hpp->b, "\n");
+    Printf(bg->b_cre_hpp->b, "boost::shared_ptr<ObjectHandler::Object> create_%s(\n", funcName);
+    Printf(bg->b_cre_hpp->b, "    const boost::shared_ptr<ObjectHandler::ValueObject>&);\n");
+
+    Printf(bg->b_cre_cpp->b, "\n");
+    Printf(bg->b_cre_cpp->b, "boost::shared_ptr<ObjectHandler::Object> %s::create_%s(\n", module, funcName);
+    Printf(bg->b_cre_cpp->b, "    const boost::shared_ptr<ObjectHandler::ValueObject> &valueObject) {\n");
+    Printf(bg->b_cre_cpp->b, "\n");
+    Printf(bg->b_cre_cpp->b, "    // conversions\n");
+    emitParmList(parms, bg->b_cre_cpp->b, 1, "rp_cre_cnv");
+    Printf(bg->b_cre_cpp->b, "\n");
+    Printf(bg->b_cre_cpp->b, "    bool Permanent =\n");
+    Printf(bg->b_cre_cpp->b, "        ObjectHandler::convert2<bool>(valueObject->getProperty(\"Permanent\"));\n");
+    Printf(bg->b_cre_cpp->b, "\n");
+    Printf(bg->b_cre_cpp->b, "    // construct and return the object\n");
+    Printf(bg->b_cre_cpp->b, "\n");
+    Printf(bg->b_cre_cpp->b, "    boost::shared_ptr<ObjectHandler::Object> object(\n");
+    Printf(bg->b_cre_cpp->b, "        new %s::%s(\n", module, name);
+    Printf(bg->b_cre_cpp->b, "            valueObject");
+    //emitParmList(parms, bg->b_obj_hpp->b, 2, 0, true, false, ",\n            ", ",\n            ", true);
+    emitParmList(parms, bg->b_cre_cpp->b, 0, 0, true, false, ",\n            ", ",\n            ", true);
+    Printf(bg->b_cre_cpp->b, "Permanent));\n");
+    Printf(bg->b_cre_cpp->b, "    return object;\n");
+    Printf(bg->b_cre_cpp->b, "}\n");
+    }
+
+    Printf(bg->b_reg_cpp->b, "    // class ID %d in the boost serialization framework\n", idNum);
+    Printf(bg->b_reg_cpp->b, "    ar.register_type<%s::ValueObjects::%s>();\n", module, funcName);
+
+    Printf(bg->b_reg_cpp->b2, "    // class ID %d in the boost serialization framework\n", idNum);
+    Printf(bg->b_reg_cpp->b2, "    ar.register_type<%s::ValueObjects::%s>();\n", module, funcName);
+
+    idNum++;
+
     if (cppClass) {
         Printf(bg->b_obj_hpp->b,"%s", cppClass);
     } else {
@@ -1023,6 +1242,8 @@ void printCtor(Node *n, BufferGroup *bg) {
         Printf(bg->b_cpp_cpp->b,"            objectID, object, false, valueObject);\n");
         Printf(bg->b_cpp_cpp->b,"    return returnValue;\n");
         Printf(bg->b_cpp_cpp->b,"}\n");
+
+        Printf(b_cre_reg_cpp->b, "    registerCreator(\"%s\", create_%s);\n", funcName, funcName);
     }
 
     excelRegister(n, 0, parms3);
@@ -1069,6 +1290,8 @@ int functionWrapper(Node *n) {
     String *include = Getattr(n,"feature:rp:include");
     prefix = Getattr(n,"feature:rp:prefix");
     bool automatic = checkAttribute(n,"feature:rp:generation","automatic");
+    SwigType *type   = Getattr(n,"type");
+    cppClass = getTypeMap("rp_cpp_class", n, type, false);
     BufferGroup *bg = bm_.getBufferGroup (group, include, automatic);
 
     // In the *.i files if there is a parameter with no name

@@ -1,5 +1,5 @@
 
-/*
+/*  
  Copyright (C) 2014 Eric Ehlers
 
  This file is part of QuantLib, a free-software/open-source library
@@ -16,45 +16,35 @@
  FOR A PARTICULAR PURPOSE.  See the license for more details.
 */
 
-//#if defined(HAVE_CONFIG_H)     // Dynamically created by configure
-//#include <oh/config.hpp>
-//#endif
+#include <AddinObjects/serialization/serializationfactory.hpp>
+#include <AddinObjects/serialization/create/create_all.hpp>
+#include <AddinObjects/serialization/register/serialization_register.hpp>
 
-#include "serializationfactory.hpp"
-#include "creators.hpp"
-#include <AddinObjects/valueobjects/vo_adder.hpp>
-#include <oh/repository.hpp>
-#include <oh/valueobjects/vo_range.hpp>
-
-#include <set>
-#include <fstream>
-
-#include <boost/regex.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/archive/xml_iarchive.hpp>
-#include <boost/archive/xml_oarchive.hpp>
-#include <boost/serialization/variant.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 
 namespace FullLibAddin {
 
-    SerializationFactory::SerializationFactory() {
-        registerCreator("flAdder", createAdder);
+    SerializationFactory::SerializationFactory() {    
+
+        registerCreators();
     }
 
     void SerializationFactory::register_out(boost::archive::xml_oarchive &ar,
-        std::vector<boost::shared_ptr<ObjectHandler::ValueObject> >& valueObjects) {
-        ar.register_type<FullLibAddin::ValueObjects::flAdder>();
-        ar << boost::serialization::make_nvp("object_list", valueObjects);
+        std::vector<boost::shared_ptr<ObjectHandler::ValueObject> >& valueObjects){
+
+            tpl_register_classes(ar);
+            ar << boost::serialization::make_nvp("object_list", valueObjects);
     }
 
+
     void SerializationFactory::register_in(boost::archive::xml_iarchive &ar,
-        std::vector<boost::shared_ptr<ObjectHandler::ValueObject> >& valueObjects) {
-        ar.register_type<FullLibAddin::ValueObjects::flAdder>();
-        ar >> boost::serialization::make_nvp("object_list", valueObjects);
+        std::vector<boost::shared_ptr<ObjectHandler::ValueObject> >& valueObjects){
+
+            tpl_register_classes(ar);
+            ar >> boost::serialization::make_nvp("object_list", valueObjects);
     }
+
 
 }
 

@@ -1,4 +1,9 @@
 
+//%typemap(rp_cre_cnv) FullLib::Long %{
+//    ObjectHandler::property_t $1_name =
+//        valueObject->getProperty("$1_name");
+//%} 
+
 %typemap(rp_cpp_class) FullLib::Base * %{
     OH_LIB_CLASS(Base, FullLib::Base);
 %}

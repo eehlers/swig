@@ -7,6 +7,8 @@ STATIC_LIBS = \
     enumerations/factories/libEnumerationFactories.a \
     enumerations/register/libEnumerationRegister.a \
     serialization/libSerialization.a \
+    serialization/create/libSerializationCreate.a \
+    serialization/register/libSerializationRegister.a \
     valueobjects/libValueObjects.a
 
 all: $(LIB)
