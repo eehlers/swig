@@ -39,8 +39,7 @@ struct Buffer {
     String *name_;
     File *b;
     File *b2;
-    Buffer(String *name) {
-        name_ = Copy(name);
+    Buffer(String *name) : name_(name) {
         b = NewString("");
         b2 = NewString("");
     }
@@ -78,44 +77,19 @@ struct BufferGroup {
         name_ = Copy(name);
         automatic_ = automatic;
 
-        String *s_val_hpp = NewStringf("%s/valueobjects/vo_%s.hpp", objDir, name_);
-        String *s_val_cpp = NewStringf("%s/valueobjects/vo_%s.cpp", objDir, name_);
-        String *s_cre_hpp = NewStringf("%s/serialization/create/create_%s.hpp", objDir, name_);
-        String *s_cre_cpp = NewStringf("%s/serialization/create/create_%s.cpp", objDir, name_);
-        String *s_reg_hpp = NewStringf("%s/serialization/register/serialization_%s.hpp", objDir, name_);
-        String *s_reg_cpp = NewStringf("%s/serialization/register/serialization_%s.cpp", objDir, name_);
-        String *s_obj_hpp = NewStringf("%s/obj_%s.hpp", objDir, name_);
-        String *s_cpp_hpp = NewStringf("AddinCpp/cpp_%s.hpp", name_);
-        String *s_cpp_cpp = NewStringf("AddinCpp/cpp_%s.cpp", name_);
-        String *s_xll_cpp = NewStringf("AddinXl/xl_%s.cpp", name_);
-
-        b_val_hpp = new Buffer(s_val_hpp);
-        b_val_cpp = new Buffer(s_val_cpp);
-        b_cre_hpp = new Buffer(s_cre_hpp);
-        b_cre_cpp = new Buffer(s_cre_cpp);
-        b_reg_hpp = new Buffer(s_reg_hpp);
-        b_reg_cpp = new Buffer(s_reg_cpp);
-        b_obj_hpp = new Buffer(s_obj_hpp);
-        b_cpp_hpp = new Buffer(s_cpp_hpp);
-        b_cpp_cpp = new Buffer(s_cpp_cpp);
-        b_xll_cpp = new Buffer(s_xll_cpp);
-
-        Delete(s_val_hpp);
-        Delete(s_val_cpp);
-        Delete(s_cre_hpp);
-        Delete(s_cre_cpp);
-        Delete(s_reg_hpp);
-        Delete(s_reg_cpp);
-        Delete(s_obj_hpp);
-        Delete(s_cpp_hpp);
-        Delete(s_cpp_cpp);
-        Delete(s_xll_cpp);
-
+        b_val_hpp = new Buffer(NewStringf("%s/valueobjects/vo_%s.hpp", objDir, name_));
+        b_val_cpp = new Buffer(NewStringf("%s/valueobjects/vo_%s.cpp", objDir, name_));
+        b_cre_hpp = new Buffer(NewStringf("%s/serialization/create/create_%s.hpp", objDir, name_));
+        b_cre_cpp = new Buffer(NewStringf("%s/serialization/create/create_%s.cpp", objDir, name_));
+        b_reg_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_%s.hpp", objDir, name_));
+        b_reg_cpp = new Buffer(NewStringf("%s/serialization/register/serialization_%s.cpp", objDir, name_));
+        b_obj_hpp = new Buffer(NewStringf("%s/obj_%s.hpp", objDir, name_));
         if (automatic_) {
-            String *s_obj_cpp = NewStringf("%s/obj_%s.cpp", objDir, name_);
-            b_obj_cpp = new Buffer(s_obj_cpp);
-            Delete(s_obj_cpp);
+        b_obj_cpp = new Buffer(NewStringf("%s/obj_%s.cpp", objDir, name_));
         }
+        b_cpp_hpp = new Buffer(NewStringf("AddinCpp/cpp_%s.hpp", name_));
+        b_cpp_cpp = new Buffer(NewStringf("AddinCpp/cpp_%s.cpp", name_));
+        b_xll_cpp = new Buffer(NewStringf("AddinXl/xl_%s.cpp", name_));
 
         Printf(b_val_hpp->b, "\n");
         Printf(b_val_hpp->b, "#ifndef vo_%s_hpp\n", name);
@@ -458,25 +432,11 @@ virtual int top(Node *n) {
     Swig_register_filebyname("director", b_director);
     Swig_register_filebyname("director_h", b_director_h);
 
-    String *s_cre_reg_cpp = NewStringf("%s/serialization/register_creators.cpp", objDir);
-    b_cre_reg_cpp = new Buffer(s_cre_reg_cpp);
-    Delete(s_cre_reg_cpp);
-
-    String *s_cre_all_hpp = NewStringf("%s/serialization/create/create_all.hpp", objDir);
-    b_cre_all_hpp = new Buffer(s_cre_all_hpp);
-    Delete(s_cre_all_hpp);
-
-    String *s_reg_ser_hpp = NewStringf("%s/serialization/register/serialization_register.hpp", objDir);
-    b_reg_ser_hpp = new Buffer(s_reg_ser_hpp);
-    Delete(s_reg_ser_hpp);
-
-    String *s_reg_all_hpp = NewStringf("%s/serialization/register/serialization_all.hpp", objDir);
-    b_reg_all_hpp = new Buffer(s_reg_all_hpp);
-    Delete(s_reg_all_hpp);
-
-    String *s_xll_cpp4 = NewString("AddinXl/xl_addin.cpp");
-    b_xll_cpp4 = new Buffer(s_xll_cpp4);
-    Delete(s_xll_cpp4);
+    b_cre_reg_cpp = new Buffer(NewStringf("%s/serialization/register_creators.cpp", objDir));
+    b_cre_all_hpp = new Buffer(NewStringf("%s/serialization/create/create_all.hpp", objDir));
+    b_reg_ser_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_register.hpp", objDir));
+    b_reg_all_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_all.hpp", objDir));
+    b_xll_cpp4 = new Buffer(NewString("AddinXl/xl_addin.cpp"));
 
         Printf(b_cre_reg_cpp->b, "\n");
         Printf(b_cre_reg_cpp->b, "#include <%s/serialization/serializationfactory.hpp>\n", objDir);
