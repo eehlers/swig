@@ -12,7 +12,7 @@
 #include "AddinCpp/cpp_oh_serialization.hpp"
 
 int main() {
-//    try {
+    try {
         std::cout << "hi" << std::endl;
         FullLibAddinCpp::initializeAddin();
         std::cout << "ObjectHandler version = " << FullLibAddinCpp::ohVersion() << std::endl;
@@ -79,10 +79,10 @@ int main() {
 
         std::cout << "bye" << std::endl;
         return 0;
-//    } catch(const std::exception &e) {
-//        std::cout << e.what() << std::endl;
-//    } catch(...) {
-//        std::cout << "error" << std::endl;
-//    }
+    } catch(const std::exception &e) {
+        std::cout << e.what() << std::endl;
+    } catch(...) {
+        std::cout << "error" << std::endl;
+    }
 }
 

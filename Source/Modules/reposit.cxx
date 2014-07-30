@@ -1098,6 +1098,8 @@ int functionWrapper(Node *n) {
     printList(Getattr(n, "parms"));
     Printf(b_wrappers,"//*************\n");
 
+    // FIXME instead of this if statement,  would it be possible
+    // just to override functionHandler/memberfunctionHandler/constructorHandler?
     String *nodeType = Getattr(n,"nodeType");
     if (0 == Strcmp("cdecl", nodeType)) {
         if (NULL == Getattr(n, "ismember")) {
