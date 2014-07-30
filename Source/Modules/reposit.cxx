@@ -535,6 +535,9 @@ void emitParmList(
     File *buf,
     int mode=0,         // 0=name, 1=type, 2=both
     const char *map=0,
+    // FIXME is it ever necessary to return the type in the event that there is no match?
+    // To achieve the same effect it would be possible to define a default typemap
+    // %typemap(rp_xxx) SWIGTYPE "$1_type";
     int nomatch=0,       // 0=type, 1=null, 2=exception
     bool skipHidden=false,
     const char *delim=", ",
@@ -631,10 +634,20 @@ void excelRegister(Node *n, SwigType *type, ParmList *parms) {
     Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x07\"\"Example\"));\n");
 }
 
+// return a copy with first character uppercase
 String *copyUpper(String *s) {
     String *ret = Copy(s);
     char *c = Char(ret);
     c[0] = toupper(c[0]);
+    return ret;
+}
+
+// return a copy with all characters uppercase
+String *copyUpper2(String *s) {
+    String *ret = Copy(s);
+    char *c = Char(ret);
+    for (unsigned int i=0; i<strlen(c); i++)
+        c[i] = toupper(c[i]);
     return ret;
 }
 
@@ -798,6 +811,28 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "}\n");
 }
 
+void voConvert(File *f, ParmList *parms) {
+    for (Parm *p = parms; p; p = nextSibling(p)) {
+        String *name = Getattr(p,"name");
+        String *nameUpper = Getattr(p,"nameUpper");
+        Printf(f,
+"            else if(strcmp(nameUpper.c_str(), \"%s\")==0)\n"
+"                return %s_;\n",
+            nameUpper, name);
+    }
+}
+
+void voConvert2(File *f, ParmList *parms) {
+    for (Parm *p = parms; p; p = nextSibling(p)) {
+        String *name = Getattr(p,"name");
+        String *nameUpper = Getattr(p,"nameUpper");
+        SwigType *type = Getattr(p,"type");
+        String *cnv = getTypeMap("rp_vo_cnv", p, type);
+        Printf(f, "            else if(strcmp(nameUpper.c_str(), \"%s\")==0)\n", nameUpper);
+        Printf(f, "                %s_ = %s;\n", name, cnv);
+    }
+}
+
 void printCtor(Node *n, BufferGroup *bg) {
 
     String   *name   = Getattr(n,"name");
@@ -859,8 +894,10 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_val_hpp->b,"        public:\n");
     Printf(bg->b_val_hpp->b,"            %s() {}\n", funcName);
     Printf(bg->b_val_hpp->b,"            %s(\n", funcName);
-    Printf(bg->b_val_hpp->b,"                const std::string& ObjectId,\n");
-    Printf(bg->b_val_hpp->b,"                bool Permanent);\n");
+    Printf(bg->b_val_hpp->b,"                const std::string& ObjectId");
+    //emitParmList(parms, bg->b_val_hpp->b, 2, "rp_vo_in", 2, false, ",\n", "                ", true);
+    emitParmList(parms, bg->b_val_hpp->b, 2, "rp_cpp_in", 0, false, ",\n                ", ",\n                ", true);
+    Printf(bg->b_val_hpp->b,"bool Permanent);\n");
     Printf(bg->b_val_hpp->b,"\n");
     Printf(bg->b_val_hpp->b,"            const std::set<std::string>& getSystemPropertyNames() const;\n");
     Printf(bg->b_val_hpp->b,"            std::vector<std::string> getPropertyNamesVector() const;\n");
@@ -869,13 +906,16 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_val_hpp->b,"\n");
     Printf(bg->b_val_hpp->b,"        protected:\n");
     Printf(bg->b_val_hpp->b,"            static const char* mPropertyNames[];\n");
-    Printf(bg->b_val_hpp->b,"            static std::set<std::string> mSystemPropertyNames;\n");
-    Printf(bg->b_val_hpp->b,"            bool Permanent_;\n");
+    Printf(bg->b_val_hpp->b,"            static std::set<std::string> mSystemPropertyNames");
+    emitParmList(parms, bg->b_val_hpp->b, 1, "rp_vo_declare", 2, false, ";\n            ", ";\n            ", true);
+    Printf(bg->b_val_hpp->b,"bool Permanent_;\n");
     Printf(bg->b_val_hpp->b,"\n");
     Printf(bg->b_val_hpp->b,"            template<class Archive>\n");
     Printf(bg->b_val_hpp->b,"            void serialize(Archive& ar, const unsigned int) {\n");
     Printf(bg->b_val_hpp->b,"            boost::serialization::void_cast_register<%s, ObjectHandler::ValueObject>(this, this);\n", funcName);
     Printf(bg->b_val_hpp->b,"                ar  & boost::serialization::make_nvp(\"ObjectId\", objectId_)\n");
+    Printf(bg->b_val_hpp->b,"                    & boost::serialization::make_nvp(\"ClassName\", className_)\n");
+    emitParmList(parms, bg->b_val_hpp->b, 1, "rp_vo_call", 2, false, 0);
     Printf(bg->b_val_hpp->b,"                    & boost::serialization::make_nvp(\"Permanent\", Permanent_)\n");
     Printf(bg->b_val_hpp->b,"                    & boost::serialization::make_nvp(\"UserProperties\", userProperties);\n");
     Printf(bg->b_val_hpp->b,"            }\n");
@@ -883,6 +923,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_val_hpp->b,"\n");
 
     Printf(bg->b_val_cpp->b,"        const char* %s::mPropertyNames[] = {\n", funcName);
+    emitParmList(parms, bg->b_val_cpp->b, 1, "rp_vo_prop", 2);
     Printf(bg->b_val_cpp->b,"            \"Permanent\"\n");
     Printf(bg->b_val_cpp->b,"        };\n");
     Printf(bg->b_val_cpp->b,"\n");
@@ -908,6 +949,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_val_cpp->b,"                return objectId_;\n");
     Printf(bg->b_val_cpp->b,"            else if(strcmp(nameUpper.c_str(), \"CLASSNAME\")==0)\n");
     Printf(bg->b_val_cpp->b,"                return className_;\n");
+    voConvert(bg->b_val_cpp->b, parms);
     Printf(bg->b_val_cpp->b,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
     Printf(bg->b_val_cpp->b,"                return Permanent_;\n");
     Printf(bg->b_val_cpp->b,"            else\n");
@@ -920,6 +962,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_val_cpp->b,"                objectId_ = boost::get<std::string>(value);\n");
     Printf(bg->b_val_cpp->b,"            else if(strcmp(nameUpper.c_str(), \"CLASSNAME\")==0)\n");
     Printf(bg->b_val_cpp->b,"                className_ = boost::get<std::string>(value);\n");
+    voConvert2(bg->b_val_cpp->b, parms);
     Printf(bg->b_val_cpp->b,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
     Printf(bg->b_val_cpp->b,"                Permanent_ = ObjectHandler::convert2<bool>(value);\n");
     Printf(bg->b_val_cpp->b,"            else\n");
@@ -927,9 +970,12 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_val_cpp->b,"        }\n");
     Printf(bg->b_val_cpp->b,"\n");
     Printf(bg->b_val_cpp->b,"        %s::%s(\n", funcName, funcName);
-    Printf(bg->b_val_cpp->b,"                const std::string& ObjectId,\n");
-    Printf(bg->b_val_cpp->b,"                bool Permanent) :\n");
+    Printf(bg->b_val_cpp->b,"                const std::string& ObjectId");
+    //emitParmList(parms, bg->b_val_cpp->b, 1, "rp_vo_ctor_decl", 2);
+    emitParmList(parms, bg->b_val_cpp->b, 2, "rp_cpp_in", 0, false, ",\n                ", ",\n                ", true);
+    Printf(bg->b_val_cpp->b,"bool Permanent) :\n");
     Printf(bg->b_val_cpp->b,"            ObjectHandler::ValueObject(ObjectId, \"%s\", Permanent),\n", funcName);
+    emitParmList(parms, bg->b_val_cpp->b, 1, "rp_vo_ctor_init", 2);
     Printf(bg->b_val_cpp->b,"            Permanent_(Permanent) {\n");
     Printf(bg->b_val_cpp->b,"        }\n");
 
@@ -952,8 +998,8 @@ void printCtor(Node *n, BufferGroup *bg) {
         Printf(bg->b_obj_hpp->b,"    public:\n");
         Printf(bg->b_obj_hpp->b,"        %s(\n", name);
         Printf(bg->b_obj_hpp->b,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties");
-        emitParmList(parms, bg->b_obj_hpp->b, 2, 0, 0, false, ",\n            ", ",\n            ");
-        Printf(bg->b_obj_hpp->b,",\n            bool permanent)\n");
+        emitParmList(parms, bg->b_obj_hpp->b, 2, 0, 0, false, ",\n            ", ",\n            ", true);
+        Printf(bg->b_obj_hpp->b,"bool permanent)\n");
         Printf(bg->b_obj_hpp->b,"        : %s(properties, permanent) {\n", s0);
         Printf(bg->b_obj_hpp->b,"            libraryObject_ = boost::shared_ptr<%s>(new %s(", s1, pname);
         emitParmList(parms, bg->b_obj_hpp->b, 0, 0, 0, true);
@@ -976,7 +1022,9 @@ void printCtor(Node *n, BufferGroup *bg) {
         Printf(bg->b_cpp_cpp->b,"\n");
         Printf(bg->b_cpp_cpp->b,"    boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
         Printf(bg->b_cpp_cpp->b,"        new %s::ValueObjects::%s(\n", module, funcName);
-        Printf(bg->b_cpp_cpp->b,"            objectID, false));\n");
+        Printf(bg->b_cpp_cpp->b,"            objectID");
+        emitParmList(parms, bg->b_cpp_cpp->b, 0, 0, 0, false, ", ", ", ", true);
+        Printf(bg->b_cpp_cpp->b,"false));\n");
         Printf(bg->b_cpp_cpp->b,"    boost::shared_ptr<ObjectHandler::Object> object(\n");
         Printf(bg->b_cpp_cpp->b,"        new %s::%s(\n", module, name);
         Printf(bg->b_cpp_cpp->b,"            valueObject");
@@ -1042,7 +1090,8 @@ int functionWrapper(Node *n) {
     printf("Group='%s'.\n", Char(group));
     ParmList *parms  = Getattr(n,"parms");
     for (Parm *p = parms; p; p = nextSibling(p)) {
-        if (!Getattr(p,"name")) {
+        String *name = Getattr(p,"name");
+        if (!name) {
             printf("parameter has no name\n");
             SWIG_exit(EXIT_FAILURE);
         }
@@ -1050,6 +1099,8 @@ int functionWrapper(Node *n) {
             printf ("parameter has no type\n");
             SWIG_exit(EXIT_FAILURE);
         }
+        String *nameUpper = copyUpper2(name);
+        Setattr(p, "nameUpper", nameUpper);
     }
 
     Printf(b_wrappers,"//XXX***functionWrapper*******\n");

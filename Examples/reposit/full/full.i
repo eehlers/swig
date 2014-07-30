@@ -26,6 +26,9 @@
 %typemap(rp_cpp_call) FullLib::Account::Type "$1_name_enum";
 %typemap(rp_cpp_call) boost::shared_ptr<FullLib::Color> "$1_name_enum";
 
+%typemap(rp_vo_declare) FullLib::Long "ObjectHandler::property_t $1_name_";
+%typemap(rp_vo_cnv) FullLib::Long "value";
+
 %typemap(rp_excel) FullLib::Long "P";
 %typemap(rp_excel) FullLib::Account::Type "P";
 %typemap(rp_excel) boost::shared_ptr<FullLib::Color> "P";

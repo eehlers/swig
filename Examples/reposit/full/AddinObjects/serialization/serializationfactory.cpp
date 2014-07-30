@@ -41,7 +41,7 @@
 namespace FullLibAddin {
 
     SerializationFactory::SerializationFactory() {
-        registerCreator("Adder", createAdder);
+        registerCreator("flAdder", createAdder);
     }
 
     void SerializationFactory::register_out(boost::archive::xml_oarchive &ar,
@@ -57,3 +57,4 @@ namespace FullLibAddin {
     }
 
 }
+

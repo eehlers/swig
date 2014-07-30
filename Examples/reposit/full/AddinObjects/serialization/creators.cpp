@@ -29,11 +29,11 @@ namespace FullLibAddin {
     boost::shared_ptr<ObjectHandler::Object> createAdder(
         const boost::shared_ptr<ObjectHandler::ValueObject> &valueObject) {
 
-        //long x = ObjectHandler::convert2<long>(valueObject->getProperty("Number"));
-        //bool permanent = ObjectHandler::convert2<bool>(valueObject->getProperty("Permanent"));
+        long x = ObjectHandler::convert2<long>(valueObject->getProperty("X"));
+        bool permanent = ObjectHandler::convert2<bool>(valueObject->getProperty("Permanent"));
 
         boost::shared_ptr<ObjectHandler::Object> object(
-            new Adder(valueObject, 0, false));
+            new Adder(valueObject, x, permanent));
         return object;
     }
 }

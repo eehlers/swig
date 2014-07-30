@@ -7,6 +7,7 @@
 
 namespace ObjectHandler {
     std::string objectSaveString(const std::string &objectId);
+    void loadObjectString(const std::string &xml, bool overwriteExisting);
 }
 
 %feature("rp:generation", "automatic");
