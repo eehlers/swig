@@ -4,8 +4,8 @@
 #include <oh/processor.hpp>
 #include <oh/enumerations/enumregistry.hpp>
 //#include <qlo/enumerations/register/register_all.hpp>
-#include "AddinObjects/serialization/serializationfactory.hpp"
-#include "AddinObjects/init.hpp"
+#include "flo/serialization/serializationfactory.hpp"
+#include "flo/init.hpp"
 
 void FullLibAddinCpp::initializeAddin() {
 

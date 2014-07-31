@@ -1,6 +1,5 @@
 
-IDIR = ../../../../../../../install/include
-ROOT_DIR=../../..
+IDIR = ../../../../../../../../install/include
 LIB = libEnumerationConstructors.a
 OBJECTS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 
@@ -10,7 +9,7 @@ $(LIB): $(OBJECTS)
 	ar rcs $(LIB) $(OBJECTS)
 
 %.o: %.cpp %.hpp
-	g++ -c -fPIC -g -Wall -I$(ROOT_DIR) -I$(IDIR) $< -o $@
+	g++ -c -fPIC -g -Wall -I$(IDIR) -I../../../.. $< -o $@
 
 clean:
 	rm -f $(LIB) $(OBJECTS)

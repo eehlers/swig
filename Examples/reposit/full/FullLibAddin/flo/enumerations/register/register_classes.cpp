@@ -1,8 +1,8 @@
 
 #include <oh/enumerations/typefactory.hpp>
 #include "register_classes.hpp"
-#include "AddinObjects/enumerations/constructors/classes.hpp"
-#include "AddinObjects/enumerations/factories/all.hpp"
+#include "flo/enumerations/constructors/classes.hpp"
+#include "flo/enumerations/factories/all.hpp"
 
 namespace FullLibAddin {
 

@@ -1,7 +1,7 @@
 
 #include <oh/enumerations/typefactory.hpp>
 #include "register_types.hpp"
-#include <Library/color.hpp>
+#include <FullLib/color.hpp>
 
 namespace FullLibAddin {
 

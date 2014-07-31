@@ -16,9 +16,9 @@
  FOR A PARTICULAR PURPOSE.  See the license for more details.
 */
 
-#include <AddinObjects/serialization/serializationfactory.hpp>
-#include <AddinObjects/serialization/create/create_all.hpp>
-#include <AddinObjects/serialization/register/serialization_register.hpp>
+#include <flo/serialization/serializationfactory.hpp>
+#include <flo/serialization/create/create_all.hpp>
+#include <flo/serialization/register/serialization_register.hpp>
 
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/shared_ptr.hpp>
