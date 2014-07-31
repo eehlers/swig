@@ -862,7 +862,7 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     Printf(bg->b_add_cpp->b,"%s %s::%s(\n", type, addinCppNameSpace, funcName);
     emitParmList(parms, bg->b_add_cpp->b, 2, "rp_add_in");
     Printf(bg->b_add_cpp->b,") {\n");
-    emitParmList(parms, bg->b_add_cpp->b, 1, "rp_add_cnv", 1, ',', false);
+    emitParmList(parms, bg->b_add_cpp->b, 1, "rp_add_cnv", 1, 0, false);
     Printf(bg->b_add_cpp->b,"    return %s::%s(\n", module, symname);
     emitParmList(parms, bg->b_add_cpp->b, 1, "rp_add_call", 1, ',', true, true);
     Printf(bg->b_add_cpp->b,");\n");
@@ -946,7 +946,7 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(bg->b_add_cpp->b,"%s %s::%s(\n", type, addinCppNameSpace, funcName);
     emitParmList(parms2, bg->b_add_cpp->b, 2, "rp_add_in", 2);
     Printf(bg->b_add_cpp->b,"    ) {\n\n");
-    emitParmList(parms, bg->b_add_cpp->b, 1, "rp_add_cnv", 1, ',', false);
+    emitParmList(parms, bg->b_add_cpp->b, 1, "rp_add_cnv", 1, 0, false);
     Printf(bg->b_add_cpp->b,"\n");
     Printf(bg->b_add_cpp->b,"    OH_GET_REFERENCE(x, objectID, %s, %s);\n", addinClass, pname);
     Printf(bg->b_add_cpp->b,"    return x->%s(\n", name);
@@ -999,7 +999,7 @@ void voConvert(File *f, ParmList *parms) {
 }
 
 void voConvert2(File *f, ParmList *parms) {
-    Printf(f, "            // BEGIN func voConvert2\n");
+    Printf(f, "            // BEGIN func voConvert2 (using typemap rp_vo_cnv)\n");
     for (Parm *p = parms; p; p = nextSibling(p)) {
         String *name = Getattr(p,"name");
         String *nameUpper = Getattr(p,"nameUpper");
@@ -1008,7 +1008,7 @@ void voConvert2(File *f, ParmList *parms) {
         Printf(f, "            else if(strcmp(nameUpper.c_str(), \"%s\")==0)\n", nameUpper);
         Printf(f, "                %s_ = %s;\n", name, cnv);
     }
-    Printf(f, "            // END   func voConvert2\n");
+    Printf(f, "            // END   func voConvert2 (using typemap rp_vo_cnv)\n");
 }
 
 void printCtor(Node *n, BufferGroup *bg) {
@@ -1190,7 +1190,9 @@ void printCtor(Node *n, BufferGroup *bg) {
     idNum++;
 
     if (cppClass) {
+        Printf(bg->b_obj_hpp->b, "    // BEGIN typemap rp_add_class\n");
         Printf(bg->b_obj_hpp->b,"%s", cppClass);
+        Printf(bg->b_obj_hpp->b, "    // END   typemap rp_add_class\n");
     } else {
         String *s0 = NewString("");
         String *s1 = NewString("");
@@ -1227,7 +1229,7 @@ void printCtor(Node *n, BufferGroup *bg) {
         Printf(bg->b_add_cpp->b,"    ) {\n");
         Printf(bg->b_add_cpp->b,"\n");
         Printf(bg->b_add_cpp->b,"    // Convert input types into Library types\n\n");
-        emitParmList(parms, bg->b_add_cpp->b, 1, "rp_add_cnv", 1, ',', false);
+        emitParmList(parms, bg->b_add_cpp->b, 1, "rp_add_cnv", 1, 0, false);
         Printf(bg->b_add_cpp->b,"\n");
         Printf(bg->b_add_cpp->b,"    boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
         Printf(bg->b_add_cpp->b,"        new %s::ValueObjects::%s(\n", module, funcName);

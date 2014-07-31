@@ -1,12 +1,13 @@
 
-SWIG = ../../../preinst-swig
+SWIG = ../../../swig
+SWIG_LIB = ../../../Lib/reposit
 #SWIG_DEBUG = -debug-top 4
 
 all: SWIG Library AddinObjects AddinCpp Main
 
 .PHONY: SWIG
 SWIG: simple.i ../../../swig
-	$(SWIG) $(SWIG_DEBUG) -prefix sl -c++ -reposit simple.i
+	$(SWIG) $(SWIG_DEBUG) -I$(SWIG_LIB) -prefix sl -c++ -reposit simple.i
 
 .PHONY: Library
 Library:
