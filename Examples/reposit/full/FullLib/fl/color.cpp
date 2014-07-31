@@ -1,5 +1,5 @@
 
-#include "color.hpp"
+#include <fl/color.hpp>
 
 std::string FullLib::Red::name() const {
     return "Red";

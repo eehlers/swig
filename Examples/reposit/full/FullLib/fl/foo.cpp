@@ -1,5 +1,5 @@
 
-#include "foo.hpp"
+#include <fl/foo.hpp>
 
 FullLib::Foo::Foo(long f) : f_(f) {}
 

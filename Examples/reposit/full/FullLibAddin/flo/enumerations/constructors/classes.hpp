@@ -3,7 +3,7 @@
 #define addinobjects_enum_ctor_classes_hpp
 
 #include <boost/shared_ptr.hpp>
-#include <FullLib/color.hpp>
+#include <fl/color.hpp>
 
 namespace FullLibAddin {
 

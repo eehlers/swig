@@ -9,7 +9,7 @@ $(LIB): $(OBJECTS)
 	ar rcs $(LIB) $(OBJECTS)
 
 %.o: %.cpp %.hpp
-	g++ -c -fPIC -g -Wall -I$(IDIR) -I../../../.. $< -o $@
+	g++ -c -fPIC -g -Wall -I$(IDIR) -I../../../../FullLib $< -o $@
 
 clean:
 	rm -f $(LIB) $(OBJECTS)

@@ -2,9 +2,9 @@
 #ifndef full_lib_hpp
 #define full_lib_hpp
 
-#include "adder.hpp"
-#include "adder2.hpp"
-#include "foo.hpp"
+#include <fl/adder.hpp>
+#include <fl/adder2.hpp>
+#include <fl/foo.hpp>
 
 #endif
 

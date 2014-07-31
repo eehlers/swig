@@ -11,7 +11,7 @@ $(LIB): $(OBJECTS) Conversions
 	g++ -shared -fPIC -g -Wall -o $(LIB) $(OBJECTS) $(STATIC_LIBS) -L../../lib -lFullLib -lValueObjects -lAddinObjects $(SYS_LIBS)
 
 %.o: %.cpp %.hpp
-	g++ -c -fPIC -g -Wall -I. -I.. -I../.. -I$(IDIR) $< -o $@
+	g++ -c -fPIC -g -Wall -I$(IDIR) -I. -I.. -I../../FullLib $< -o $@
 
 .PHONY: Conversions
 Conversions:

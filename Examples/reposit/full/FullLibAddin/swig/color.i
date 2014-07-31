@@ -1,7 +1,7 @@
 
 %feature("rp:group", "color");
 %feature("rp:include") %{
-#include "FullLib/color.hpp"
+#include <fl/color.hpp>
 %}
 
 namespace FullLib {

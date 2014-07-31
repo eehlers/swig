@@ -1,7 +1,7 @@
 
 %feature("rp:group", "foo");
 %feature("rp:include") %{
-#include "FullLib/foo.hpp"
+#include <fl/foo.hpp>
 %}
 
 namespace FullLib {

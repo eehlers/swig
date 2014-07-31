@@ -1,7 +1,7 @@
 
 %feature("rp:group", "noparm");
 %feature("rp:include") %{
-#include "FullLib/noparm.hpp"
+#include <fl/noparm.hpp>
 %}
 
 namespace FullLib {
