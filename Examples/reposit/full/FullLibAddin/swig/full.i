@@ -55,9 +55,13 @@
 %typemap(rp_excel_call) boost::shared_ptr<FullLib::Color> "$1_name_enum";
 
 %module(
-    rp_obj_dir="qlo",
-    rp_xl_dir="../QuantLibXL2"
-    ) FullLibAddin
+    rp_obj_dir="../flo",
+    rp_add_dir="../AddinCpp",
+    rp_xll_dir="../../FullLibXL/flxl",
+    rp_obj_inc="flo",
+    rp_add_inc="AddinCpp",
+    rp_xll_inc="flxl"
+) FullLibAddin
 
 %include adder.i
 %include adder2.i

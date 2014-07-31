@@ -14,7 +14,11 @@ long idNum = 4;
 
 // FIXME store some defaults in reposit.swg and retrieve them here.
 String *objDir = NewString("AddinObjects");
-String *xlDir = NewString("AddinXl");
+String *addDir = NewString("AddinCpp");
+String *xllDir = NewString("AddinXl");
+String *objInc = NewString("AddinObjects");
+String *addInc = NewString("AddinCpp");
+String *xllInc = NewString("AddinXl");
 
 String *cppClass = 0;
 
@@ -87,9 +91,9 @@ struct BufferGroup {
         if (automatic_) {
         b_obj_cpp = new Buffer(NewStringf("%s/obj_%s.cpp", objDir, name_));
         }
-        b_add_hpp = new Buffer(NewStringf("AddinCpp/add_%s.hpp", name_));
-        b_add_cpp = new Buffer(NewStringf("AddinCpp/add_%s.cpp", name_));
-        b_xll_cpp = new Buffer(NewStringf("AddinXl/xl_%s.cpp", name_));
+        b_add_hpp = new Buffer(NewStringf("%s/add_%s.hpp", addDir, name_));
+        b_add_cpp = new Buffer(NewStringf("%S/add_%s.cpp", addDir, name_));
+        b_xll_cpp = new Buffer(NewStringf("%s/xl_%s.cpp", xllDir, name_));
 
         Printf(b_val_hpp->b, "\n");
         Printf(b_val_hpp->b, "#ifndef vo_%s_hpp\n", name);
@@ -128,14 +132,14 @@ struct BufferGroup {
         Printf(b_cre_hpp->b, "\n");
 
         Printf(b_cre_cpp->b, "\n");
-        Printf(b_cre_cpp->b, "#include <%s/serialization/create/create_%s.hpp>\n", objDir, name);
-        Printf(b_cre_cpp->b, "//#include <%s/qladdindefines.hpp>\n", objDir);
-        Printf(b_cre_cpp->b, "//#include <%s/handle.hpp>\n", objDir);
+        Printf(b_cre_cpp->b, "#include <%s/serialization/create/create_%s.hpp>\n", objInc, name);
+        Printf(b_cre_cpp->b, "//#include <%s/qladdindefines.hpp>\n", objInc);
+        Printf(b_cre_cpp->b, "//#include <%s/handle.hpp>\n", objInc);
         Printf(b_cre_cpp->b, "\n");
-        Printf(b_cre_cpp->b, "#include <%s/obj_%s.hpp>\n", objDir, name);
-        Printf(b_cre_cpp->b, "#include <%s/valueobjects/vo_%s.hpp>\n", objDir, name);
+        Printf(b_cre_cpp->b, "#include <%s/obj_%s.hpp>\n", objInc, name);
+        Printf(b_cre_cpp->b, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, name);
         Printf(b_cre_cpp->b, "\n");
-        Printf(b_cre_cpp->b, "//#include <%s/conversions/all.hpp>\n", objDir);
+        Printf(b_cre_cpp->b, "//#include <%s/conversions/all.hpp>\n", objInc);
         Printf(b_cre_cpp->b, "#include <oh/property.hpp>\n");
         Printf(b_cre_cpp->b, "\n");
 
@@ -158,8 +162,8 @@ struct BufferGroup {
 
         Printf(b_reg_cpp->b, "\n");
         Printf(b_reg_cpp->b, "#include <oh/ohdefines.hpp>\n");
-        Printf(b_reg_cpp->b, "#include <%s/serialization/register/serialization_%s.hpp>\n", objDir, name);
-        Printf(b_reg_cpp->b, "#include <%s/valueobjects/vo_%s.hpp>\n", objDir, name);
+        Printf(b_reg_cpp->b, "#include <%s/serialization/register/serialization_%s.hpp>\n", objInc, name);
+        Printf(b_reg_cpp->b, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, name);
         Printf(b_reg_cpp->b, "#include <boost/serialization/shared_ptr.hpp>\n");
         Printf(b_reg_cpp->b, "#include <boost/serialization/variant.hpp>\n");
         Printf(b_reg_cpp->b, "#include <boost/serialization/vector.hpp>\n");
@@ -206,10 +210,10 @@ struct BufferGroup {
         // FIXME this #include is only required if the file contains enumerations.
         //Printf(b_add_cpp->b, "#include <oh/enumerations/typefactory.hpp>\n");
         // FIXME this #include is only required if the file contains constructors.
-        Printf(b_add_cpp->b, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objDir, name);
-        Printf(b_add_cpp->b, "#include \"%s/obj_%s.hpp\"\n", objDir, name);
+        Printf(b_add_cpp->b, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, name);
+        Printf(b_add_cpp->b, "#include \"%s/obj_%s.hpp\"\n", objInc, name);
         // FIXME include only factories for types used in the current file.
-        Printf(b_add_cpp->b, "#include \"%s/enumerations/factories/all.hpp\"\n", objDir);
+        Printf(b_add_cpp->b, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_add_cpp->b, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_add_cpp->b, "#include <oh/repository.hpp>\n");
         Printf(b_add_cpp->b, "#include \"add_includes.hpp\"\n");
@@ -221,8 +225,8 @@ struct BufferGroup {
         Printf(b_xll_cpp->b, "#include <ohxl/functions/export.hpp>\n");
         Printf(b_xll_cpp->b, "#include <ohxl/utilities/xlutilities.hpp>\n");
         Printf(b_xll_cpp->b, "#include <ohxl/objectwrapperxl.hpp>\n");
-        Printf(b_xll_cpp->b, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objDir, name);
-        Printf(b_xll_cpp->b, "#include \"%s/obj_%s.hpp\"\n", objDir, name);
+        Printf(b_xll_cpp->b, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, name);
+        Printf(b_xll_cpp->b, "#include \"%s/obj_%s.hpp\"\n", objInc, name);
         Printf(b_xll_cpp->b, "#include \"conversions/convert2.hpp\"\n");
         Printf(b_xll_cpp->b, "\n");
         Printf(b_xll_cpp->b, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
@@ -238,9 +242,9 @@ struct BufferGroup {
 
         // write to global buffers
 
-        Printf(b_cre_all_hpp->b, "#include <%s/serialization/create/create_%s.hpp>\n", objDir, name);
+        Printf(b_cre_all_hpp->b, "#include <%s/serialization/create/create_%s.hpp>\n", objInc, name);
 
-        Printf(b_reg_all_hpp->b, "#include <%s/serialization/register/serialization_%s.hpp>\n", objDir, name);
+        Printf(b_reg_all_hpp->b, "#include <%s/serialization/register/serialization_%s.hpp>\n", objInc, name);
 
         if (!cppClass) {
         Printf(b_reg_ser_hpp->b, "        register_%s(ar);\n", name);
@@ -403,14 +407,26 @@ virtual int top(Node *n) {
     if (Node *n3 = Getattr(n2, "options")) {
         if (String *n4 = getNode(n3, "rp_obj_dir"))
             objDir = n4;
-        if (String *n5 = getNode(n3, "rp_xl_dir"))
-            xlDir = n5;
+        if (String *n5 = getNode(n3, "rp_add_dir"))
+            addDir = n5;
+        if (String *n6 = getNode(n3, "rp_xll_dir"))
+            xllDir = n6;
+        if (String *n7 = getNode(n3, "rp_obj_inc"))
+            objInc = n7;
+        if (String *n8 = getNode(n3, "rp_add_inc"))
+            addInc = n8;
+        if (String *n9 = getNode(n3, "rp_xll_inc"))
+            xllInc = n9;
     }
 
     printf("module=%s\n", Char(module));
     printf("addinCppNameSpace=%s\n", Char(addinCppNameSpace));
     printf("rp_obj_dir=%s\n", Char(objDir));
-    printf("rp_xl_dir=%s\n", Char(xlDir));
+    printf("rp_add_dir=%s\n", Char(addDir));
+    printf("rp_xll_dir=%s\n", Char(xllDir));
+    printf("rp_obj_inc=%s\n", Char(objInc));
+    printf("rp_add_inc=%s\n", Char(addInc));
+    printf("rp_xll_inc=%s\n", Char(xllInc));
 
    /* Initialize I/O */
     b_runtime = NewString("");
@@ -436,7 +452,7 @@ virtual int top(Node *n) {
     b_cre_all_hpp = new Buffer(NewStringf("%s/serialization/create/create_all.hpp", objDir));
     b_reg_ser_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_register.hpp", objDir));
     b_reg_all_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_all.hpp", objDir));
-    b_xll_cpp4 = new Buffer(NewString("AddinXl/xl_addin.cpp"));
+    b_xll_cpp4 = new Buffer(NewString("%s/xl_addin.cpp", xllDir));
 
         Printf(b_cre_reg_cpp->b, "\n");
         Printf(b_cre_reg_cpp->b, "#include <%s/serialization/serializationfactory.hpp>\n", objDir);
@@ -532,7 +548,7 @@ virtual int top(Node *n) {
         Printf(b_xll_cpp4->b, "    } catch (const std::exception &e) {\n");
         Printf(b_xll_cpp4->b, "\n");
         Printf(b_xll_cpp4->b, "        std::ostringstream err;\n");
-        Printf(b_xll_cpp4->b, "        err << \"Error loading AddinXl: \" << e.what();\n");
+        Printf(b_xll_cpp4->b, "        err << \"Error loading XLL: \" << e.what();\n");
         Printf(b_xll_cpp4->b, "        Excel(xlcAlert, 0, 1, TempStrStl(err.str()));\n");
         Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
         Printf(b_xll_cpp4->b, "        return 0;\n");
@@ -561,7 +577,7 @@ virtual int top(Node *n) {
         Printf(b_xll_cpp4->b, "    } catch (const std::exception &e) {\n");
         Printf(b_xll_cpp4->b, "\n");
         Printf(b_xll_cpp4->b, "        std::ostringstream err;\n");
-        Printf(b_xll_cpp4->b, "        err << \"Error unloading AddinXl: \" << e.what();\n");
+        Printf(b_xll_cpp4->b, "        err << \"Error unloading XLL: \" << e.what();\n");
         Printf(b_xll_cpp4->b, "        Excel(xlcAlert, 0, 1, TempStrStl(err.str()));\n");
         Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
         Printf(b_xll_cpp4->b, "        return 0;\n");
