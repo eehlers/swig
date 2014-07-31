@@ -5,16 +5,16 @@
         ObjectHandler::convert2<$1_type>(valueObject->getProperty("$1_name"));
 %}
 
-%typemap(rp_cre_cnv) XXX %{
-    ObjectHandler::property_t $1_name =
-        valueObject->getProperty("$1_name");
-%}
-
-%typemap(rp_cre_cnv) YYY %{
-    QuantLib::Date $1_name =
-        ObjectHandler::convert2<$1_type>(
-            valueObject->getProperty("$1_name"), "$1_name");
-%}
+//%typemap(rp_cre_cnv) XXX %{
+//    ObjectHandler::property_t $1_name =
+//        valueObject->getProperty("$1_name");
+//%}
+//
+//%typemap(rp_cre_cnv) YYY %{
+//    QuantLib::Date $1_name =
+//        ObjectHandler::convert2<$1_type>(
+//            valueObject->getProperty("$1_name"), "$1_name");
+//%}
 
 %typemap(rp_add_in) SWIGTYPE "$1_type";
 %typemap(rp_add_call) SWIGTYPE "$1_name";
@@ -83,17 +83,14 @@
 
 %typemap(rp_vo_declare) SWIGTYPE "$1_type $1_name_";
 
-%typemap(rp_vo_call) SWIGTYPE %{                    & boost::serialization::make_nvp("$1_name", $1_name_)
-%}
+%typemap(rp_vo_call) SWIGTYPE "& boost::serialization::make_nvp(\"$1_name\", $1_name_)";
 
-%typemap(rp_vo_prop) SWIGTYPE %{            "$1_name",
-%}
+%typemap(rp_vo_prop) SWIGTYPE "\"$1_name\"";
 
 //%typemap(rp_vo_ctor_decl) SWIGTYPE %{                $1_type $1_name,
 //%}
 
-%typemap(rp_vo_ctor_init) SWIGTYPE %{            $1_name_($1_name),
-%}
+%typemap(rp_vo_ctor_init) SWIGTYPE "$1_name_($1_name)";
 
 %typemap(rp_vo_cnv) SWIGTYPE "ObjectHandler::convert2<$1_type>(value)";
 
