@@ -7,15 +7,13 @@
 #include "AddinCpp/add_foo.hpp"
 #include "AddinCpp/add_inheritance.hpp"
 #include "AddinCpp/add_noparm.hpp"
-#include "AddinCpp/add_oh_repository.hpp"
-#include "AddinCpp/add_oh_utilities.hpp"
-#include "AddinCpp/add_oh_serialization.hpp"
+#include "oh/addin.hpp"
 
 int main() {
     try {
         std::cout << "hi" << std::endl;
         FullLibAddinCpp::initializeAddin();
-        std::cout << "ObjectHandler version = " << FullLibAddinCpp::ohVersion() << std::endl;
+        std::cout << "ObjectHandler version = " << ObjectHandler::ohVersion() << std::endl;
 
         std::cout << FullLibAddinCpp::flFunc() << std::endl;
         FullLibAddinCpp::flAdder("adder", 1);
@@ -63,17 +61,17 @@ int main() {
         // Test it
         std::cout << "100 + 1 = " << FullLibAddinCpp::flAdderAdd("adder100", 1) << std::endl;
         //Serialize it
-        std::string xml = FullLibAddinCpp::ohObjectSaveString("adder100");
+        std::string xml = ObjectHandler::ohObjectSaveString("adder100");
         std::cout << "XML = " << std::endl << xml << std::endl;
         // Delete it
-        FullLibAddinCpp::ohDeleteObject("adder100");
+        ObjectHandler::ohDeleteObject("adder100");
         try {
             std::cout << "100 + 1 = " << FullLibAddinCpp::flAdderAdd("adder100", 1) << std::endl;
         } catch(const std::exception &e) {
             std::cout << "Error - " << e.what() << std::endl;
         }
         // Deserialize it
-        FullLibAddinCpp::ohLoadObjectString(xml, false);
+        ObjectHandler::ohLoadObjectString(xml, false);
         // Test it
         std::cout << "100 + 1 = " << FullLibAddinCpp::flAdderAdd("adder100", 1) << std::endl;
 

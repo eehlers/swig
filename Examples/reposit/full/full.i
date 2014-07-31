@@ -55,7 +55,6 @@
 %typemap(rp_excel_call) boost::shared_ptr<FullLib::Color> "$1_name_enum";
 
 %module FullLibAddin
-%feature("rp:prefix", "fl");
 %include adder.i
 %include adder2.i
 %include color.i

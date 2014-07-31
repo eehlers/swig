@@ -368,18 +368,18 @@ public:
    /* Set typemap language (historical) */
    SWIG_typemap_lang("reposit");
 
-//    for (int i = 1; i < argc; i++) {
-//        if (strcmp(argv[i], "-prefix") == 0) {
-//            if (argv[i + 1]) {
-//                prefix = NewString(argv[i + 1]);
-//                Swig_mark_arg(i);
-//                Swig_mark_arg(i + 1);
-//                i++;
-//            } else {
-//                Swig_arg_error();
-//            }
-//        }
-//    }
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-prefix") == 0) {
+            if (argv[i + 1]) {
+                prefix = NewString(argv[i + 1]);
+                Swig_mark_arg(i);
+                Swig_mark_arg(i + 1);
+                i++;
+            } else {
+                Swig_arg_error();
+            }
+        }
+    }
   }
 
 Node *getNode(Node *n, const char *c) {
@@ -1248,7 +1248,6 @@ void printCtor(Node *n, BufferGroup *bg) {
 int functionWrapper(Node *n) {
     String *group = Getattr(n,"feature:rp:group");
     String *include = Getattr(n,"feature:rp:include");
-    prefix = Getattr(n,"feature:rp:prefix");
     bool automatic = checkAttribute(n,"feature:rp:generation","automatic");
     SwigType *type   = Getattr(n,"type");
     cppClass = getTypeMap("rp_add_class", n, type, false);

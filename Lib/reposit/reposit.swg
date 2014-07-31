@@ -97,5 +97,3 @@
 
 %typemap(rp_vo_cnv) SWIGTYPE "ObjectHandler::convert2<$1_type>(value)";
 
-%include oh.i
-

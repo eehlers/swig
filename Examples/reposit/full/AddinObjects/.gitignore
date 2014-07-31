@@ -1,6 +1,5 @@
 *.user
 Release
 obj_*.?pp
-!obj_oh_*.cpp
 !Makefile
 Debug

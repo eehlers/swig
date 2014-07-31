@@ -1,5 +1,3 @@
 serialization_*.?pp
-!serialization_oh.?pp
 *.o
 *.a
-serialization_*.?pp

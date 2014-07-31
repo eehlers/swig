@@ -7,7 +7,7 @@ all: Library AddinObjects AddinCpp Main
 
 .PHONY: SWIG
 SWIG: full.i ../../../swig
-	$(SWIG) $(SWIG_DEBUG) -I$(SWIG_LIB) -c++ -reposit full.i
+	$(SWIG) $(SWIG_DEBUG) -I$(SWIG_LIB) -c++ -reposit -prefix fl full.i
 
 .PHONY: Library
 Library:
