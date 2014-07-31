@@ -1,17 +1,17 @@
 
-IDIR = ../../../../../install/include
-SYS_LIBS = -L../../../../../install/lib -lObjectHandler -lboost_regex -lboost_serialization -lboost_system -lboost_filesystem
-LIB = ../lib/libAddinCpp.so
+IDIR = ../../../../../../install/include
+SYS_LIBS = -L../../../../../../install/lib -lObjectHandler -lboost_regex -lboost_serialization -lboost_system -lboost_filesystem
+LIB = ../../lib/libAddinCpp.so
 OBJECTS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 STATIC_LIBS = conversions/libConversions.a
 
 all: $(LIB)
 
 $(LIB): $(OBJECTS) Conversions
-	g++ -shared -fPIC -g -Wall -o $(LIB) $(OBJECTS) $(STATIC_LIBS) -L../lib -lFullLib -lValueObjects -lAddinObjects $(SYS_LIBS)
+	g++ -shared -fPIC -g -Wall -o $(LIB) $(OBJECTS) $(STATIC_LIBS) -L../../lib -lFullLib -lValueObjects -lAddinObjects $(SYS_LIBS)
 
 %.o: %.cpp %.hpp
-	g++ -c -fPIC -g -Wall -I. -I.. -I$(IDIR) $< -o $@
+	g++ -c -fPIC -g -Wall -I. -I.. -I../.. -I$(IDIR) $< -o $@
 
 .PHONY: Conversions
 Conversions:

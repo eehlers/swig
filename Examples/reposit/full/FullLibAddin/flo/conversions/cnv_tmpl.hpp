@@ -5,7 +5,7 @@
 // This file contains some templates common to AddinObjects and AddinXl.
 // This file should be #included only by AddinXxx/conversions/xxx.cpp,
 
-#include <Library/adder2.hpp>
+#include <FullLib/adder2.hpp>
 #include <boost/lexical_cast.hpp>
 
 namespace ObjectHandler {

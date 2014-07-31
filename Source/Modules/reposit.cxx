@@ -48,6 +48,7 @@ struct Buffer {
         b2 = NewString("");
     }
     ~Buffer() {
+        printf("Generating file '%s'\n", Char(name_));
         File *f = initFile(name_);
         Delete(name_);
         Dump(b, f);
@@ -92,7 +93,7 @@ struct BufferGroup {
         b_obj_cpp = new Buffer(NewStringf("%s/obj_%s.cpp", objDir, name_));
         }
         b_add_hpp = new Buffer(NewStringf("%s/add_%s.hpp", addDir, name_));
-        b_add_cpp = new Buffer(NewStringf("%S/add_%s.cpp", addDir, name_));
+        b_add_cpp = new Buffer(NewStringf("%s/add_%s.cpp", addDir, name_));
         b_xll_cpp = new Buffer(NewStringf("%s/xl_%s.cpp", xllDir, name_));
 
         Printf(b_val_hpp->b, "\n");
@@ -452,11 +453,11 @@ virtual int top(Node *n) {
     b_cre_all_hpp = new Buffer(NewStringf("%s/serialization/create/create_all.hpp", objDir));
     b_reg_ser_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_register.hpp", objDir));
     b_reg_all_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_all.hpp", objDir));
-    b_xll_cpp4 = new Buffer(NewString("%s/xl_addin.cpp", xllDir));
+    b_xll_cpp4 = new Buffer(NewStringf("%s/xl_addin.cpp", xllDir));
 
         Printf(b_cre_reg_cpp->b, "\n");
-        Printf(b_cre_reg_cpp->b, "#include <%s/serialization/serializationfactory.hpp>\n", objDir);
-        Printf(b_cre_reg_cpp->b, "#include <%s/serialization/create/create_all.hpp>\n", objDir);
+        Printf(b_cre_reg_cpp->b, "#include <%s/serialization/serializationfactory.hpp>\n", objInc);
+        Printf(b_cre_reg_cpp->b, "#include <%s/serialization/create/create_all.hpp>\n", objInc);
         Printf(b_cre_reg_cpp->b, "\n");
         Printf(b_cre_reg_cpp->b, "void %s::SerializationFactory::registerCreators() {\n", module);
         Printf(b_cre_reg_cpp->b, "\n");
@@ -470,7 +471,7 @@ virtual int top(Node *n) {
         Printf(b_reg_ser_hpp->b, "#ifndef serialization_register_hpp\n");
         Printf(b_reg_ser_hpp->b, "#define serialization_register_hpp\n");
         Printf(b_reg_ser_hpp->b, "\n");
-        Printf(b_reg_ser_hpp->b, "#include <%s/serialization/register/serialization_all.hpp>\n", objDir);
+        Printf(b_reg_ser_hpp->b, "#include <%s/serialization/register/serialization_all.hpp>\n", objInc);
         Printf(b_reg_ser_hpp->b, "\n");
         Printf(b_reg_ser_hpp->b, "namespace %s {\n", module);
         Printf(b_reg_ser_hpp->b, "\n");

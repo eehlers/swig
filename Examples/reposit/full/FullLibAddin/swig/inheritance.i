@@ -1,7 +1,7 @@
 
 %feature("rp:group", "inheritance");
 %feature("rp:include") %{
-#include "Library/inheritance.hpp"
+#include "FullLib/inheritance.hpp"
 %}
 
 namespace FullLib {

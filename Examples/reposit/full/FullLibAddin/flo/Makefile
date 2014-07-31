@@ -1,6 +1,6 @@
 
-IDIR = ../../../../../install/include
-LIB = ../lib/libAddinObjects.so
+IDIR = ../../../../../../install/include
+LIB = ../../lib/libAddinObjects.so
 OBJECTS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 STATIC_LIBS = \
     enumerations/constructors/libEnumerationConstructors.a \
@@ -17,7 +17,7 @@ $(LIB): $(OBJECTS) SubDirs
 	g++ -shared -fPIC -g -Wall -o $(LIB) $(OBJECTS) -Wl,-whole-archive $(STATIC_LIBS) -Wl,-no-whole-archive
 
 %.o: %.cpp %.hpp
-	g++ -c -fPIC -g -Wall -I. -I.. -I$(IDIR) $< -o $@
+	g++ -c -fPIC -g -Wall -I. -I.. -I../.. -I$(IDIR) $< -o $@
 
 .PHONY: SubDirs
 SubDirs:

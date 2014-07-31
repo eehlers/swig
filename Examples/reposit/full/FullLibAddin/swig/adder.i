@@ -1,7 +1,7 @@
 
 %feature("rp:group", "adder");
 %feature("rp:include") %{
-#include "Library/adder.hpp"
+#include "FullLib/adder.hpp"
 %}
 
 namespace FullLib {

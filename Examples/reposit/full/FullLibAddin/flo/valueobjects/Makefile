@@ -1,5 +1,5 @@
 
-IDIR = ../../../../../../install/include
+IDIR = ../../../../../../../install/include
 LIB = libValueObjects.a
 OBJECTS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 
