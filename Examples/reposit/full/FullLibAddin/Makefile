@@ -12,3 +12,7 @@ clean :
 	$(MAKE) -C AddinCpp clean
 	$(MAKE) -C Main clean
 
+.PHONY: SWIG
+SWIG:
+	$(MAKE) -C swig SWIG
+

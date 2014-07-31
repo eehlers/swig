@@ -10,3 +10,7 @@ clean :
 	$(MAKE) -C FullLib clean
 	$(MAKE) -C FullLibAddin clean
 
+.PHONY: SWIG
+SWIG:
+	$(MAKE) -C FullLibAddin SWIG
+
