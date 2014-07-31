@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include "AddinCpp/init.hpp"
-#include "AddinCpp/cpp_adder.hpp"
+#include "AddinCpp/add_adder.hpp"
 
 int main() {
     try {

@@ -1,6 +1,5 @@
 *.user
 Release
-cpp_*.?pp
-!cpp_hw*.?pp
+add_*.?pp
 !Makefile
 Debug
