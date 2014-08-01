@@ -28,9 +28,9 @@
 //    ObjectHandler::property_t $1_name =
 //        valueObject->getProperty("$1_name");
 //%}
-//
+
 //%typemap(rp_ser_cnv) YYY %{
-//    QuantLib::Date $1_name =
+//    NameSpace::Type $1_name =
 //        ObjectHandler::convert2<$1_type>(
 //            valueObject->getProperty("$1_name"), "$1_name");
 //%}
