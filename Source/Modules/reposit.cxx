@@ -515,7 +515,7 @@ virtual int top(Node *n) {
         Printf(b_xll_cpp4->b, "\n");
         Printf(b_xll_cpp4->b, "        ObjectHandler::Configuration::instance().init();\n");
         Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "        registerOhFunctions(xDll);\n");
+        Printf(b_xll_cpp4->b, "        registerOhFunctions(xDll);\n\n");
 
    /* Output module initialization code */
    Swig_banner(b_begin);
@@ -543,7 +543,6 @@ virtual int top(Node *n) {
         Printf(b_reg_all_hpp->b, "#endif\n");
         Printf(b_reg_all_hpp->b, "\n");
 
-        Printf(b_xll_cpp4->b, "\n");
         Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
         Printf(b_xll_cpp4->b, "        return 1;\n");
         Printf(b_xll_cpp4->b, "\n");
@@ -695,8 +694,11 @@ void emitTypeMap(File *buf, const char *m, Node *n, SwigType *t, int indent=0, b
     printIndent(buf, indent);
     Printf(buf, "// BEGIN typemap %s\n", m);
     printIndent(buf, indent);
-    Printf(buf, "%s\n", getTypeMap(m, n, t, fatal));
-    printIndent(buf, indent);
+    String *s = getTypeMap(m, n, t, fatal);
+    if (Len(s)) {
+        Printf(buf, "%s\n", s);
+        printIndent(buf, indent);
+    }
     Printf(buf, "// END   typemap %s\n", m);
 }
 
@@ -879,6 +881,7 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     emitParmList(parms, bg->b_add_cpp->b, 2, "rp_add_in");
     Printf(bg->b_add_cpp->b,") {\n");
     emitParmList(parms, bg->b_add_cpp->b, 1, "rp_add_cnv", 1, 0, false);
+    Printf(bg->b_add_cpp->b,"\n");
     Printf(bg->b_add_cpp->b,"    return %s::%s(\n", module, symname);
     emitParmList(parms, bg->b_add_cpp->b, 1, "rp_add_call", 2, ',', true, true);
     Printf(bg->b_add_cpp->b,"    );\n");
@@ -902,12 +905,10 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 2, ',', false);
     Printf(bg->b_xll_cpp->b, "\n");
     emitTypeMap(bg->b_xll_cpp->b, "rp_xll_get", n, type, 2);
-    Printf(bg->b_xll_cpp->b, "            %s::%s(\n", module, symname);
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call", 4, ',', true, true);
-    Printf(bg->b_xll_cpp->b, "            );\n");
-
-    String *tm = getTypeMap("rp_xll_ret", n, type);
-    Printf(bg->b_xll_cpp->b, Char(tm));
+    Printf(bg->b_xll_cpp->b, "        %s::%s(\n", module, symname);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call_obj", 3, ',', true, true);
+    Printf(bg->b_xll_cpp->b, "        );\n\n");
+    emitTypeMap(bg->b_xll_cpp->b, "rp_xll_ret", n, type, 2);
 
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "    } catch (const std::exception &e) {\n");
@@ -989,11 +990,11 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        OH_GET_REFERENCE(x, objectID, %s, %s);\n", addinClass, pname);
     Printf(bg->b_xll_cpp->b, "\n");
-    Printf(bg->b_xll_cpp->b, "        static %s ret;\n", type);
-    Printf(bg->b_xll_cpp->b, "        ret = x->%s(\n", name);
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call", 3, ',', true, true);
-    Printf(bg->b_xll_cpp->b, "        );\n");
-    Printf(bg->b_xll_cpp->b, "        return &ret;\n");
+    emitTypeMap(bg->b_xll_cpp->b, "rp_xll_get", n, type, 2);
+    Printf(bg->b_xll_cpp->b, "        x->%s(\n", name);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call_obj", 3, ',', true, true);
+    Printf(bg->b_xll_cpp->b, "        );\n\n");
+    emitTypeMap(bg->b_xll_cpp->b, "rp_xll_ret", n, type, 2);
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "    } catch (const std::exception &e) {\n");
     Printf(bg->b_xll_cpp->b, "\n");
@@ -1084,6 +1085,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(b_wrappers, "// *a3* %s <<\n", Char(ParmList_protostr(parms2)));
     Printf(b_wrappers, "//***DEF\n");
 
+    if (!cppClass) {
     Printf(bg->b_val_hpp->b,"        class %s : public ObjectHandler::ValueObject {\n", funcName);
     Printf(bg->b_val_hpp->b,"            friend class boost::serialization::access;\n");
     Printf(bg->b_val_hpp->b,"        public:\n");
@@ -1171,6 +1173,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     emitParmList(parms, bg->b_val_cpp->b, 1, "rp_val_ctor_init", 3, ',', true, false, true);
     Printf(bg->b_val_cpp->b,"            Permanent_(Permanent) {\n");
     Printf(bg->b_val_cpp->b,"        }\n");
+    }
 
     if (!cppClass) {
     Printf(bg->b_cre_hpp->b, "\n");
@@ -1198,11 +1201,13 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_cre_cpp->b, "}\n");
     }
 
+    if (!cppClass) {
     Printf(bg->b_reg_cpp->b, "    // class ID %d in the boost serialization framework\n", idNum);
     Printf(bg->b_reg_cpp->b, "    ar.register_type<%s::ValueObjects::%s>();\n", module, funcName);
 
     Printf(bg->b_reg_cpp->b2, "    // class ID %d in the boost serialization framework\n", idNum);
     Printf(bg->b_reg_cpp->b2, "    ar.register_type<%s::ValueObjects::%s>();\n", module, funcName);
+    }
 
     idNum++;
 
@@ -1270,6 +1275,7 @@ void printCtor(Node *n, BufferGroup *bg) {
 
     excelRegister(n, 0, parms3);
 
+    if (!cppClass) {
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "DLLEXPORT char *%s(\n", funcName);
     emitParmList(parms2, bg->b_xll_cpp->b, 2, "rp_xll_in");
@@ -1287,13 +1293,13 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "        boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
     Printf(bg->b_xll_cpp->b, "            new %s::ValueObjects::%s(\n", module, funcName);
     Printf(bg->b_xll_cpp->b, "                objectID,\n");
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call", 4, ',', true, true, true);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call_val", 4, ',', true, true, true);
     Printf(bg->b_xll_cpp->b, "                false));\n");
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        boost::shared_ptr<ObjectHandler::Object> object(\n");
     Printf(bg->b_xll_cpp->b, "            new %s::%s(\n", module, name);
     Printf(bg->b_xll_cpp->b, "                valueObject,\n");
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call", 4, ',', true, true, true);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call_obj", 4, ',', true, true, true);
     Printf(bg->b_xll_cpp->b, "                false));\n");
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        std::string returnValue =\n");
@@ -1310,6 +1316,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "    }\n");
     Printf(bg->b_xll_cpp->b, "}\n");
+    }
 }
 
 int functionWrapper(Node *n) {

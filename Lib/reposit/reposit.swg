@@ -65,9 +65,13 @@
 %typemap(rp_xll_in) std::string& "char*";
 %typemap(rp_xll_in) std::string const & "char*";
 
-%typemap(rp_xll_call) SWIGTYPE "$1_name";
-%typemap(rp_xll_call) long "*$1_name";
-%typemap(rp_xll_call) double "*$1_name";
+%typemap(rp_xll_call_obj) SWIGTYPE "$1_name";
+%typemap(rp_xll_call_obj) long "*$1_name";
+%typemap(rp_xll_call_obj) double "*$1_name";
+
+%typemap(rp_xll_call_val) SWIGTYPE "$1_name";
+%typemap(rp_xll_call_val) long "*$1_name";
+%typemap(rp_xll_call_val) double "*$1_name";
 
 %typemap(rp_xll_out) bool "bool*";
 %typemap(rp_xll_out) long "long*";

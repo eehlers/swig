@@ -1,7 +1,7 @@
 
 SWIG = ../../../swig
 SWIG_LIB = ../../../Lib/reposit
-#SWIG_DEBUG = -debug-top 4
+#SWIG_DEBUG = -debug-top 4 -debug-tmsearch
 
 all: SWIG Library AddinObjects AddinCpp Main
 
