@@ -47,11 +47,15 @@
 %typemap(rp_xll) boost::shared_ptr<FullLib::Color> "P";
 
 %typemap(rp_xll_in) FullLib::Long "OPER*";
+%typemap(rp_xll_in) FullLib::Account::Type "const char*";
 %typemap(rp_xll_in) boost::shared_ptr<FullLib::Color> "const char*";
 
 %typemap(rp_xll_cnv) FullLib::Long %{
         FullLib::Long $1_name_cnv = ObjectHandler::convert2<FullLib::Long>(
             ObjectHandler::ConvertOper(*$1_name), "$1_name", FullLib::Long());
+
+        ObjectHandler::property_t $1_name_any = ObjectHandler::convert2<ObjectHandler::property_t>(
+            ObjectHandler::ConvertOper(*$1_name));
 %} 
 
 %typemap(rp_xll_cnv) boost::shared_ptr<FullLib::Color> %{
@@ -59,6 +63,14 @@
             ObjectHandler::Create<boost::shared_ptr<FullLib::Color> >()($1_name);
 %} 
 
-%typemap(rp_xll_call) FullLib::Long "$1_name_cnv";
-%typemap(rp_xll_call) boost::shared_ptr<FullLib::Color> "$1_name_enum";
+%typemap(rp_xll_cnv) FullLib::Account::Type %{
+        FullLib::Account::Type $1_name_enum =
+            ObjectHandler::Create<$1_type>()($1_name);
+%} 
+
+%typemap(rp_xll_call_val) FullLib::Long "$1_name_any";
+
+%typemap(rp_xll_call_obj) FullLib::Long "$1_name_cnv";
+%typemap(rp_xll_call_obj) FullLib::Account::Type "$1_name_enum";
+%typemap(rp_xll_call_obj) boost::shared_ptr<FullLib::Color> "$1_name_enum";
 

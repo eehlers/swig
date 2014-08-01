@@ -1,7 +1,7 @@
 
 #include <fl/noparm.hpp>
 
-void FullLib::f2() {
-    std::cout << "f2()" << std::endl;
+void FullLib::func2() {
+    std::cout << "func2()" << std::endl;
 }
 

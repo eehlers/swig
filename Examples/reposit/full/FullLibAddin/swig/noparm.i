@@ -5,7 +5,7 @@
 %}
 
 namespace FullLib {
-    void f2();
+    void func2();
     class NoParm {
     public:
         NoParm();
