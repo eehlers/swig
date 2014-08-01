@@ -7,5 +7,5 @@ all:
 
 .PHONY: SWIG
 SWIG: full.i
-	$(SWIG) $(SWIG_DEBUG) -I$(SWIG_LIB) -I../.. -c++ -reposit -prefix fl full.i
+	$(SWIG) $(SWIG_DEBUG) -I$(SWIG_LIB) -c++ -reposit -prefix fl full.i
 

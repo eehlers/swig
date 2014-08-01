@@ -6,8 +6,8 @@ SWIG_LIB = ../../../Lib/reposit
 all: SWIG Library AddinObjects AddinCpp Main
 
 .PHONY: SWIG
-SWIG: simple.i ../../../swig
-	$(SWIG) $(SWIG_DEBUG) -I$(SWIG_LIB) -prefix sl -c++ -reposit simple.i
+SWIG: simple.i
+	$(SWIG) $(SWIG_DEBUG) -I$(SWIG_LIB) -c++ -reposit -prefix sl simple.i
 
 .PHONY: Library
 Library:

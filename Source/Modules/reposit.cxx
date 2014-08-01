@@ -135,6 +135,7 @@ struct BufferGroup {
         Printf(b_cre_cpp->b, "\n");
         Printf(b_cre_cpp->b, "#include <%s/serialization/create/create_%s.hpp>\n", objInc, name);
         Printf(b_cre_cpp->b, "//#include <%s/qladdindefines.hpp>\n", objInc);
+        Printf(b_cre_cpp->b, "#include <%s/conversions/convert2.hpp>\n", objInc);
         Printf(b_cre_cpp->b, "//#include <%s/handle.hpp>\n", objInc);
         Printf(b_cre_cpp->b, "\n");
         Printf(b_cre_cpp->b, "#include <%s/obj_%s.hpp>\n", objInc, name);
@@ -207,7 +208,7 @@ struct BufferGroup {
         Printf(b_add_cpp->b, "\n");
         Printf(b_add_cpp->b, "#include \"add_%s.hpp\"\n", name);
         // FIXME this #include is only required if the file contains conversions.
-        Printf(b_add_cpp->b, "#include \"conversions/convert2.hpp\"\n");
+        Printf(b_add_cpp->b, "#include <%s/conversions/convert2.hpp>\n", objInc);
         // FIXME this #include is only required if the file contains enumerations.
         //Printf(b_add_cpp->b, "#include <oh/enumerations/typefactory.hpp>\n");
         // FIXME this #include is only required if the file contains constructors.
