@@ -690,6 +690,15 @@ void printIndent(File *buf, int indent) {
         Printf(buf, "    ");
 }
 
+void emitTypeMap(File *buf, const char *m, Node *n, SwigType *t, int indent=0, bool fatal = true) {
+    printIndent(buf, indent);
+    Printf(buf, "// BEGIN typemap %s\n", m);
+    printIndent(buf, indent);
+    Printf(buf, "%s\n", getTypeMap(m, n, t, fatal));
+    printIndent(buf, indent);
+    Printf(buf, "// END   typemap %s\n", m);
+}
+
 void printComment(File *buf, const char *comment, const char *map) {
     Printf(buf, "// %s typemap ", comment);
     if (map)
@@ -840,32 +849,36 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     printf("funcName=%s\n", Char(funcName));
 
     Printf(bg->b_obj_hpp->b,"\n");
-    Printf(bg->b_obj_hpp->b,"    %s %s(\n", type, symname);
+    emitTypeMap(bg->b_obj_hpp->b, "rp_obj_typ", n, type, 1);
+    Printf(bg->b_obj_hpp->b,"    %s(\n", symname);
     emitParmList(parms, bg->b_obj_hpp->b, 2, 0, 2);
     Printf(bg->b_obj_hpp->b,"    );\n");
 
     if (automatic) {
-        Printf(bg->b_obj_cpp->b,"%s %s::%s(", type, module, symname);
-        emitParmList(parms, bg->b_obj_cpp->b, 2);
-        Printf(bg->b_obj_cpp->b,") {\n");
-        String *ret = getTypeMap("rp_obj_ret", n, type);
-        Printf(bg->b_obj_cpp->b,"    %s%s(", ret, name);
-        emitParmList(parms, bg->b_obj_cpp->b, 0, 0, 1, ',', true, true);
-        Printf(bg->b_obj_cpp->b,");\n");
+        emitTypeMap(bg->b_obj_cpp->b, "rp_obj_typ", n, type);
+        Printf(bg->b_obj_cpp->b,"%s::%s(\n", module, symname);
+        emitParmList(parms, bg->b_obj_cpp->b, 2, 0, 2);
+        Printf(bg->b_obj_cpp->b,"    ) {\n");
+        emitTypeMap(bg->b_obj_cpp->b, "rp_obj_ret", n, type, 2);
+        Printf(bg->b_obj_cpp->b,"        %s(\n", name);
+        emitParmList(parms, bg->b_obj_cpp->b, 0, 0, 3, ',', true, true);
+        Printf(bg->b_obj_cpp->b,"        );\n");
         Printf(bg->b_obj_cpp->b,"}\n");
     }
 
-    Printf(bg->b_add_hpp->b,"    %s %s(\n", type, funcName);
+    emitTypeMap(bg->b_add_hpp->b, "rp_add_typ", n, type, 1);
+    Printf(bg->b_add_hpp->b,"    %s(\n", funcName);
     emitParmList(parms, bg->b_add_hpp->b, 2, "rp_add_in", 2);
-    Printf(bg->b_add_hpp->b,");\n");
+    Printf(bg->b_add_hpp->b,"    );\n");
 
-    Printf(bg->b_add_cpp->b,"%s %s::%s(\n", type, addinCppNameSpace, funcName);
+    emitTypeMap(bg->b_add_cpp->b, "rp_add_typ", n, type);
+    Printf(bg->b_add_cpp->b,"%s::%s(\n", addinCppNameSpace, funcName);
     emitParmList(parms, bg->b_add_cpp->b, 2, "rp_add_in");
     Printf(bg->b_add_cpp->b,") {\n");
     emitParmList(parms, bg->b_add_cpp->b, 1, "rp_add_cnv", 1, 0, false);
     Printf(bg->b_add_cpp->b,"    return %s::%s(\n", module, symname);
-    emitParmList(parms, bg->b_add_cpp->b, 1, "rp_add_call", 1, ',', true, true);
-    Printf(bg->b_add_cpp->b,");\n");
+    emitParmList(parms, bg->b_add_cpp->b, 1, "rp_add_call", 2, ',', true, true);
+    Printf(bg->b_add_cpp->b,"    );\n");
     Printf(bg->b_add_cpp->b,"}\n");
 
     excelRegister(n, type, parms);
@@ -938,12 +951,13 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(b_wrappers, "// *a3* %s <<\n", Char(ParmList_protostr(parms2)));
     Printf(b_wrappers, "//***ABC\n");
 
-    String *ret = getTypeMap("rp_add_type", n, type);
-    Printf(bg->b_add_hpp->b,"    %s %s(\n", ret, funcName);
+    emitTypeMap(bg->b_add_hpp->b, "rp_add_typ", n, type, 1);
+    Printf(bg->b_add_hpp->b,"    %s(\n", funcName);
     emitParmList(parms2, bg->b_add_hpp->b, 2, "rp_add_in", 2);
     Printf(bg->b_add_hpp->b,"    );\n\n");
 
-    Printf(bg->b_add_cpp->b,"%s %s::%s(\n", type, addinCppNameSpace, funcName);
+    emitTypeMap(bg->b_add_cpp->b, "rp_add_typ", n, type);
+    Printf(bg->b_add_cpp->b,"%s::%s(\n", addinCppNameSpace, funcName);
     emitParmList(parms2, bg->b_add_cpp->b, 2, "rp_add_in", 2);
     Printf(bg->b_add_cpp->b,"    ) {\n\n");
     emitParmList(parms, bg->b_add_cpp->b, 1, "rp_add_cnv", 1, 0, false);
@@ -1219,6 +1233,7 @@ void printCtor(Node *n, BufferGroup *bg) {
         Printf(bg->b_obj_hpp->b,"    };\n");
         Printf(bg->b_obj_hpp->b,"\n");
 
+        Printf(bg->b_add_hpp->b,"\n");
         Printf(bg->b_add_hpp->b,"    std::string %s(\n", funcName);
         emitParmList(parms2, bg->b_add_hpp->b, 2, "rp_add_in", 2);
         Printf(bg->b_add_hpp->b,"    );\n\n");
@@ -1295,7 +1310,7 @@ int functionWrapper(Node *n) {
     String *include = Getattr(n,"feature:rp:include");
     bool automatic = checkAttribute(n,"feature:rp:generation","automatic");
     SwigType *type   = Getattr(n,"type");
-    cppClass = getTypeMap("rp_add_class", n, type, false);
+    cppClass = getTypeMap("rp_obj_class", n, type, false);
     BufferGroup *bg = bm_.getBufferGroup (group, include, automatic);
 
     // In the *.i files if there is a parameter with no name

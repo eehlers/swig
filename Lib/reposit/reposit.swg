@@ -37,12 +37,13 @@
 
 // rp_obj_* - addin objects
 
+%typemap(rp_obj_typ) SWIGTYPE "$1_type";
 %typemap(rp_obj_ret) SWIGTYPE "return ";
 %typemap(rp_obj_ret) void "";
 
 // rp_add_* - C++ addin
 
-%typemap(rp_add_type) SWIGTYPE "$1_type";
+%typemap(rp_add_typ) SWIGTYPE "$1_type";
 %typemap(rp_add_in) SWIGTYPE "$1_type";
 %typemap(rp_add_call) SWIGTYPE "$1_name";
 
