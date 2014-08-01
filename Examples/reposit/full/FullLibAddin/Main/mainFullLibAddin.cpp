@@ -41,7 +41,7 @@ int main() {
         }
 
         // Test constructors/members/functions that take no arguments and return void.
-        FullLibAddinCpp::flF2();
+        FullLibAddinCpp::flFunc2();
         FullLibAddinCpp::flNoParm("noparm");
         FullLibAddinCpp::flNoParmF("noparm");
 
