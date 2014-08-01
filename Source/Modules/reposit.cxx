@@ -754,13 +754,13 @@ void emitParmList(
 String *excelParamCodes(Node *n, SwigType *type, ParmList *parms) {
     String *s = NewString("");
     if (type) {
-        String *tm = getTypeMap("rp_excel", n, type);
+        String *tm = getTypeMap("rp_xll", n, type);
         Append(s, tm);
     }
     for (Parm *p = parms; p; p = nextSibling(p)) {
         //if (Getattr(p, "hidden")) continue;
         SwigType *t  = Getattr(p, "type");
-        String *tm = getTypeMap("rp_excel", p, t);
+        String *tm = getTypeMap("rp_xll", p, t);
         Append(s, tm);
     }
     Append(s, "#");
@@ -848,7 +848,7 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
         Printf(bg->b_obj_cpp->b,"%s %s::%s(", type, module, symname);
         emitParmList(parms, bg->b_obj_cpp->b, 2);
         Printf(bg->b_obj_cpp->b,") {\n");
-        String *ret = getTypeMap("rp_add_ret", n, type);
+        String *ret = getTypeMap("rp_obj_ret", n, type);
         Printf(bg->b_obj_cpp->b,"    %s%s(", ret, name);
         emitParmList(parms, bg->b_obj_cpp->b, 0, 0, 1, ',', true, true);
         Printf(bg->b_obj_cpp->b,");\n");
@@ -870,10 +870,10 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
 
     excelRegister(n, type, parms);
 
-    String *ret_type = getTypeMap("rp_excel_out", n, type);
+    String *ret_type = getTypeMap("rp_xll_out", n, type);
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "DLLEXPORT %s %s(\n", ret_type, funcName);
-    emitParmList(parms, bg->b_xll_cpp->b, 2, "rp_excel_in");
+    emitParmList(parms, bg->b_xll_cpp->b, 2, "rp_xll_in");
     Printf(bg->b_xll_cpp->b, ") {\n");
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
@@ -883,15 +883,15 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     Printf(bg->b_xll_cpp->b, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
     Printf(bg->b_xll_cpp->b, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
     Printf(bg->b_xll_cpp->b, "\n");
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_excel_cnv", 1, ',', false);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 1, ',', false);
     Printf(bg->b_xll_cpp->b, "\n");
-    String *tm2 = getTypeMap("rp_excel_get", n, type);
+    String *tm2 = getTypeMap("rp_xll_get", n, type);
     Printf(bg->b_xll_cpp->b, Char(tm2));
     Printf(bg->b_xll_cpp->b, "        %s::%s(\n", module, symname);
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_excel_call", 1, ',', true, true);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call", 1, ',', true, true);
     Printf(bg->b_xll_cpp->b, ");\n");
 
-    String *tm = getTypeMap("rp_excel_ret", n, type);
+    String *tm = getTypeMap("rp_xll_ret", n, type);
     Printf(bg->b_xll_cpp->b, Char(tm));
 
     Printf(bg->b_xll_cpp->b, "\n");
@@ -956,10 +956,10 @@ void printMemb(Node *n, BufferGroup *bg) {
 
     excelRegister(n, type, parms2);
 
-    String *ret_type = getTypeMap("rp_excel_out", n, type);
+    String *ret_type = getTypeMap("rp_xll_out", n, type);
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "DLLEXPORT %s %s(\n", ret_type, funcName);
-    emitParmList(parms2, bg->b_xll_cpp->b, 2, "rp_excel_in");
+    emitParmList(parms2, bg->b_xll_cpp->b, 2, "rp_xll_in");
     Printf(bg->b_xll_cpp->b, ") {\n");
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
@@ -969,12 +969,12 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
     Printf(bg->b_xll_cpp->b, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
     Printf(bg->b_xll_cpp->b, "\n");
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_excel_cnv", 1, ',', false);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 1, ',', false);
     Printf(bg->b_xll_cpp->b, "        OH_GET_REFERENCE(x, objectID, %s, %s);\n", addinClass, pname);
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        static %s ret;\n", type);
     Printf(bg->b_xll_cpp->b, "        ret = x->%s(\n", name);
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_excel_call", 3, ',', true, true);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call", 3, ',', true, true);
     Printf(bg->b_xll_cpp->b, ");\n");
     Printf(bg->b_xll_cpp->b, "        return &ret;\n");
     Printf(bg->b_xll_cpp->b, "\n");
@@ -999,16 +999,16 @@ void voConvert(File *f, ParmList *parms) {
 }
 
 void voConvert2(File *f, ParmList *parms) {
-    Printf(f, "            // BEGIN func voConvert2 (using typemap rp_vo_cnv)\n");
+    Printf(f, "            // BEGIN func voConvert2 (using typemap rp_val_cnv)\n");
     for (Parm *p = parms; p; p = nextSibling(p)) {
         String *name = Getattr(p,"name");
         String *nameUpper = Getattr(p,"nameUpper");
         SwigType *type = Getattr(p,"type");
-        String *cnv = getTypeMap("rp_vo_cnv", p, type);
+        String *cnv = getTypeMap("rp_val_cnv", p, type);
         Printf(f, "            else if(strcmp(nameUpper.c_str(), \"%s\")==0)\n", nameUpper);
         Printf(f, "                %s_ = %s;\n", name, cnv);
     }
-    Printf(f, "            // END   func voConvert2 (using typemap rp_vo_cnv)\n");
+    Printf(f, "            // END   func voConvert2 (using typemap rp_val_cnv)\n");
 }
 
 void printCtor(Node *n, BufferGroup *bg) {
@@ -1073,7 +1073,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_val_hpp->b,"            %s() {}\n", funcName);
     Printf(bg->b_val_hpp->b,"            %s(\n", funcName);
     Printf(bg->b_val_hpp->b,"                const std::string& ObjectId,\n");
-    emitParmList(parms, bg->b_val_hpp->b, 2, "rp_add_in", 4, ',', true, false, true);
+    emitParmList(parms, bg->b_val_hpp->b, 2, "rp_val_in", 4, ',', true, false, true);
     Printf(bg->b_val_hpp->b,"                bool Permanent);\n");
     Printf(bg->b_val_hpp->b,"\n");
     Printf(bg->b_val_hpp->b,"            const std::set<std::string>& getSystemPropertyNames() const;\n");
@@ -1084,7 +1084,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_val_hpp->b,"        protected:\n");
     Printf(bg->b_val_hpp->b,"            static const char* mPropertyNames[];\n");
     Printf(bg->b_val_hpp->b,"            static std::set<std::string> mSystemPropertyNames;\n");
-    emitParmList(parms, bg->b_val_hpp->b, 1, "rp_vo_declare", 3, ';', true, false, true);
+    emitParmList(parms, bg->b_val_hpp->b, 1, "rp_val_declare", 3, ';', true, false, true);
     Printf(bg->b_val_hpp->b,"            bool Permanent_;\n");
     Printf(bg->b_val_hpp->b,"\n");
     Printf(bg->b_val_hpp->b,"            template<class Archive>\n");
@@ -1092,7 +1092,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_val_hpp->b,"            boost::serialization::void_cast_register<%s, ObjectHandler::ValueObject>(this, this);\n", funcName);
     Printf(bg->b_val_hpp->b,"                ar  & boost::serialization::make_nvp(\"ObjectId\", objectId_)\n");
     Printf(bg->b_val_hpp->b,"                    & boost::serialization::make_nvp(\"ClassName\", className_)\n");
-    emitParmList(parms, bg->b_val_hpp->b, 1, "rp_vo_call", 5, 0);
+    emitParmList(parms, bg->b_val_hpp->b, 1, "rp_val_call", 5, 0);
     Printf(bg->b_val_hpp->b,"                    & boost::serialization::make_nvp(\"Permanent\", Permanent_)\n");
     Printf(bg->b_val_hpp->b,"                    & boost::serialization::make_nvp(\"UserProperties\", userProperties);\n");
     Printf(bg->b_val_hpp->b,"            }\n");
@@ -1100,7 +1100,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_val_hpp->b,"\n");
 
     Printf(bg->b_val_cpp->b,"        const char* %s::mPropertyNames[] = {\n", funcName);
-    emitParmList(parms, bg->b_val_cpp->b, 1, "rp_vo_prop", 3, ',', true, false, true);
+    emitParmList(parms, bg->b_val_cpp->b, 1, "rp_val_prop", 3, ',', true, false, true);
     Printf(bg->b_val_cpp->b,"            \"Permanent\"\n");
     Printf(bg->b_val_cpp->b,"        };\n");
     Printf(bg->b_val_cpp->b,"\n");
@@ -1148,10 +1148,10 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_val_cpp->b,"\n");
     Printf(bg->b_val_cpp->b,"        %s::%s(\n", funcName, funcName);
     Printf(bg->b_val_cpp->b,"                const std::string& ObjectId,\n");
-    emitParmList(parms, bg->b_val_cpp->b, 2, "rp_add_in", 4, ',', true, false, true);
+    emitParmList(parms, bg->b_val_cpp->b, 2, "rp_val_in", 4, ',', true, false, true);
     Printf(bg->b_val_cpp->b,"                bool Permanent) :\n");
     Printf(bg->b_val_cpp->b,"            ObjectHandler::ValueObject(ObjectId, \"%s\", Permanent),\n", funcName);
-    emitParmList(parms, bg->b_val_cpp->b, 1, "rp_vo_ctor_init", 3, ',', true, false, true);
+    emitParmList(parms, bg->b_val_cpp->b, 1, "rp_val_ctor_init", 3, ',', true, false, true);
     Printf(bg->b_val_cpp->b,"            Permanent_(Permanent) {\n");
     Printf(bg->b_val_cpp->b,"        }\n");
 
@@ -1165,7 +1165,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_cre_cpp->b, "    const boost::shared_ptr<ObjectHandler::ValueObject> &valueObject) {\n");
     Printf(bg->b_cre_cpp->b, "\n");
     Printf(bg->b_cre_cpp->b, "    // conversions\n\n");
-    emitParmList(parms, bg->b_cre_cpp->b, 1, "rp_cre_cnv", 1, 0);
+    emitParmList(parms, bg->b_cre_cpp->b, 1, "rp_ser_cnv", 1, 0);
     Printf(bg->b_cre_cpp->b, "\n");
     Printf(bg->b_cre_cpp->b, "    bool Permanent =\n");
     Printf(bg->b_cre_cpp->b, "        ObjectHandler::convert2<bool>(valueObject->getProperty(\"Permanent\"));\n");
@@ -1190,9 +1190,9 @@ void printCtor(Node *n, BufferGroup *bg) {
     idNum++;
 
     if (cppClass) {
-        Printf(bg->b_obj_hpp->b, "    // BEGIN typemap rp_add_class\n");
+        Printf(bg->b_obj_hpp->b, "    // BEGIN typemap rp_obj_class\n");
         Printf(bg->b_obj_hpp->b,"%s", cppClass);
-        Printf(bg->b_obj_hpp->b, "    // END   typemap rp_add_class\n");
+        Printf(bg->b_obj_hpp->b, "    // END   typemap rp_obj_class\n");
     } else {
         String *s0 = NewString("");
         String *s1 = NewString("");
@@ -1254,7 +1254,7 @@ void printCtor(Node *n, BufferGroup *bg) {
 
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "DLLEXPORT char *%s(\n", funcName);
-    emitParmList(parms2, bg->b_xll_cpp->b, 2, "rp_excel_in");
+    emitParmList(parms2, bg->b_xll_cpp->b, 2, "rp_xll_in");
     Printf(bg->b_xll_cpp->b, ") {\n");
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
@@ -1264,14 +1264,14 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
     Printf(bg->b_xll_cpp->b, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
     Printf(bg->b_xll_cpp->b, "\n");
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_excel_cnv", 1, ',', false);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 1, ',', false);
     Printf(bg->b_xll_cpp->b, "        boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
     Printf(bg->b_xll_cpp->b, "            new %s::ValueObjects::%s(objectID, false));\n", module, funcName);
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        boost::shared_ptr<ObjectHandler::Object> object(\n");
     Printf(bg->b_xll_cpp->b, "            new %s::%s(", module, name);
     Printf(bg->b_xll_cpp->b, "                valueObject,\n");
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_excel_call", 4, ',', true, true, true);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call", 4, ',', true, true, true);
     Printf(bg->b_xll_cpp->b, "                false));\n");
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        std::string returnValue =\n");
