@@ -105,7 +105,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..,..\..\..\..\..\quantlib\ObjectHandler"
+				AdditionalIncludeDirectories="..,..\..\FullLib,..\..\..\..\..\..\quantlib\ObjectHandler"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -180,6 +180,22 @@
 				RelativePath=".\valueobjects\vo_foo.hpp"
 				>
 			</File>
+			<File
+				RelativePath=".\valueobjects\vo_inheritance.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_inheritance.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_noparm.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_noparm.hpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="enumerations"
@@ -232,6 +248,146 @@
 				RelativePath=".\conversions\cnv_tmpl.hpp"
 				>
 			</File>
+			<File
+				RelativePath=".\conversions\convert2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\conversions\convert2.hpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="serialization"
+			>
+			<File
+				RelativePath=".\serialization\register_creators.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\serialization\serializationfactory.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\serialization\serializationfactory.hpp"
+				>
+			</File>
+			<Filter
+				Name="create"
+				>
+				<File
+					RelativePath=".\serialization\create\create_adder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_adder.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_adder2.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_adder2.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_all.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_color.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_color.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_foo.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_foo.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_inheritance.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_inheritance.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_noparm.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_noparm.hpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="register"
+				>
+				<File
+					RelativePath=".\serialization\register\serialization_adder.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_adder.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_adder2.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_adder2.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_all.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_color.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_color.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_foo.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_foo.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_inheritance.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_inheritance.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_noparm.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_noparm.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_register.hpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\init.cpp"
@@ -271,6 +427,22 @@
 		</File>
 		<File
 			RelativePath=".\obj_foo.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\obj_inheritance.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\obj_inheritance.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\obj_noparm.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\obj_noparm.hpp"
 			>
 		</File>
 	</Files>

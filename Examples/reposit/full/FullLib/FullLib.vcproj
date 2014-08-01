@@ -104,6 +104,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="."
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -143,42 +144,58 @@
 	<References>
 	</References>
 	<Files>
-		<File
-			RelativePath=".\adder.cpp"
+		<Filter
+			Name="fl"
 			>
-		</File>
-		<File
-			RelativePath=".\adder.hpp"
-			>
-		</File>
-		<File
-			RelativePath=".\adder2.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\adder2.hpp"
-			>
-		</File>
-		<File
-			RelativePath=".\color.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\color.hpp"
-			>
-		</File>
-		<File
-			RelativePath=".\foo.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\foo.hpp"
-			>
-		</File>
-		<File
-			RelativePath=".\simplelib.hpp"
-			>
-		</File>
+			<File
+				RelativePath=".\fl\adder.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\fl\adder.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\fl\adder2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\fl\adder2.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\fl\color.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\fl\color.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\fl\foo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\fl\foo.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\fl\full_lib.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\fl\inheritance.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\fl\noparm.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\fl\noparm.hpp"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

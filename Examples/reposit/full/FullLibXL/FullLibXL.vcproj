@@ -118,7 +118,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..,..\..\..\..\..\quantlib\ObjectHandler"
+				AdditionalIncludeDirectories="..\FullLib,..\FullLibAddin,..\..\..\..\..\quantlib\ObjectHandler"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;ADDINXL_EXPORTS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -177,34 +177,46 @@
 			Name="conversions"
 			>
 			<File
-				RelativePath=".\conversions\convert2.cpp"
+				RelativePath=".\flxl\conversions\convert2.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\conversions\convert2.hpp"
+				RelativePath=".\flxl\conversions\convert2.hpp"
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\xl_adder.cpp"
+		<Filter
+			Name="flxl"
 			>
-		</File>
-		<File
-			RelativePath=".\xl_adder2.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\xl_addin.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\xl_color.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\xl_foo.cpp"
-			>
-		</File>
+			<File
+				RelativePath=".\flxl\xl_adder.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\flxl\xl_adder2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\flxl\xl_addin.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\flxl\xl_color.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\flxl\xl_foo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\flxl\xl_inheritance.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\flxl\xl_noparm.cpp"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

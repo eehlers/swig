@@ -4,6 +4,8 @@
 
 // Test inheritance and polymorphism.
 
+#include <iostream>
+
 namespace FullLib {
 
     class Base {

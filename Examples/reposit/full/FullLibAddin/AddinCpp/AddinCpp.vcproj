@@ -105,7 +105,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..,..\..\..\..\..\quantlib\ObjectHandler"
+				AdditionalIncludeDirectories="..,..\..\FullLib,..\..\..\..\..\..\quantlib\ObjectHandler"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -187,6 +187,30 @@
 		</File>
 		<File
 			RelativePath=".\add_foo.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_includes.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_inheritance.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_inheritance.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_noparm.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_noparm.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\all.hpp"
 			>
 		</File>
 		<File
