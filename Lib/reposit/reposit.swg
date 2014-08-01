@@ -75,7 +75,7 @@
 %typemap(rp_xll_out) std::string "char*";
 %typemap(rp_xll_out) void "bool*";
 
-%typemap(rp_xll_get) SWIGTYPE "        $1_type returnValue =\n    ";
+%typemap(rp_xll_get) SWIGTYPE "$1_type returnValue =";
 %typemap(rp_xll_get) void "";
 
 %typemap(rp_xll_ret) SWIGTYPE %{

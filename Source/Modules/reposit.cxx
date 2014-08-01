@@ -801,7 +801,7 @@ std::string hexLen(String *c) {
 
 void excelRegister(Node *n, SwigType *type, ParmList *parms) {
     String *funcName   = Getattr(n, "rp:funcName");
-    Printf(b_xll_cpp4->b, "\n");
+    Printf(b_xll_cpp4->b, "        // BEGIN function excelRegister\n");
     Printf(b_xll_cpp4->b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
     Printf(b_xll_cpp4->b, "            // function code name\n");
     Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
@@ -816,7 +816,9 @@ void excelRegister(Node *n, SwigType *type, ParmList *parms) {
     Printf(b_xll_cpp4->b, "            // function type (0 = hidden function, 1 = worksheet function, 2 = command macro)\n");
     Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x01\"\"1\"),\n");
     Printf(b_xll_cpp4->b, "            // function category\n");
-    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x07\"\"Example\"));\n");
+    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x07\"\"Example\")\n");
+    Printf(b_xll_cpp4->b, "        );\n");
+    Printf(b_xll_cpp4->b, "        // END   function excelRegister\n\n");
 }
 
 // return a copy with first character uppercase
@@ -887,8 +889,8 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     String *ret_type = getTypeMap("rp_xll_out", n, type);
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "DLLEXPORT %s %s(\n", ret_type, funcName);
-    emitParmList(parms, bg->b_xll_cpp->b, 2, "rp_xll_in", 3);
-    Printf(bg->b_xll_cpp->b, "    ) {\n");
+    emitParmList(parms, bg->b_xll_cpp->b, 2, "rp_xll_in", 1);
+    Printf(bg->b_xll_cpp->b, ") {\n");
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
     Printf(bg->b_xll_cpp->b, "\n");
@@ -899,11 +901,10 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     Printf(bg->b_xll_cpp->b, "\n");
     emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 2, ',', false);
     Printf(bg->b_xll_cpp->b, "\n");
-    String *tm2 = getTypeMap("rp_xll_get", n, type);
-    Printf(bg->b_xll_cpp->b, Char(tm2));
-    Printf(bg->b_xll_cpp->b, "        %s::%s(\n", module, symname);
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call", 3, ',', true, true);
-    Printf(bg->b_xll_cpp->b, "        );\n");
+    emitTypeMap(bg->b_xll_cpp->b, "rp_xll_get", n, type, 2);
+    Printf(bg->b_xll_cpp->b, "            %s::%s(\n", module, symname);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call", 4, ',', true, true);
+    Printf(bg->b_xll_cpp->b, "            );\n");
 
     String *tm = getTypeMap("rp_xll_ret", n, type);
     Printf(bg->b_xll_cpp->b, Char(tm));
@@ -991,7 +992,7 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "        static %s ret;\n", type);
     Printf(bg->b_xll_cpp->b, "        ret = x->%s(\n", name);
     emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call", 3, ',', true, true);
-    Printf(bg->b_xll_cpp->b, ");\n");
+    Printf(bg->b_xll_cpp->b, "        );\n");
     Printf(bg->b_xll_cpp->b, "        return &ret;\n");
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "    } catch (const std::exception &e) {\n");
