@@ -146,11 +146,11 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\cpp_adder.cpp"
+			RelativePath=".\add_adder.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\cpp_adder.hpp"
+			RelativePath=".\add_adder.hpp"
 			>
 		</File>
 		<File

@@ -172,7 +172,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\mainSimpleAddin.cpp"
+			RelativePath=".\mainSimpleLibAddin.cpp"
 			>
 		</File>
 	</Files>
