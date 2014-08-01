@@ -886,8 +886,8 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     String *ret_type = getTypeMap("rp_xll_out", n, type);
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "DLLEXPORT %s %s(\n", ret_type, funcName);
-    emitParmList(parms, bg->b_xll_cpp->b, 2, "rp_xll_in");
-    Printf(bg->b_xll_cpp->b, ") {\n");
+    emitParmList(parms, bg->b_xll_cpp->b, 2, "rp_xll_in", 3);
+    Printf(bg->b_xll_cpp->b, "    ) {\n");
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
     Printf(bg->b_xll_cpp->b, "\n");
@@ -896,13 +896,13 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     Printf(bg->b_xll_cpp->b, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
     Printf(bg->b_xll_cpp->b, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
     Printf(bg->b_xll_cpp->b, "\n");
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 1, ',', false);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 2, ',', false);
     Printf(bg->b_xll_cpp->b, "\n");
     String *tm2 = getTypeMap("rp_xll_get", n, type);
     Printf(bg->b_xll_cpp->b, Char(tm2));
     Printf(bg->b_xll_cpp->b, "        %s::%s(\n", module, symname);
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call", 1, ',', true, true);
-    Printf(bg->b_xll_cpp->b, ");\n");
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call", 3, ',', true, true);
+    Printf(bg->b_xll_cpp->b, "        );\n");
 
     String *tm = getTypeMap("rp_xll_ret", n, type);
     Printf(bg->b_xll_cpp->b, Char(tm));
@@ -983,7 +983,8 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
     Printf(bg->b_xll_cpp->b, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
     Printf(bg->b_xll_cpp->b, "\n");
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 1, ',', false);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 2, ',', false);
+    Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        OH_GET_REFERENCE(x, objectID, %s, %s);\n", addinClass, pname);
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        static %s ret;\n", type);
@@ -1279,12 +1280,16 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
     Printf(bg->b_xll_cpp->b, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
     Printf(bg->b_xll_cpp->b, "\n");
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 1, ',', false);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 2, ',', false);
+    Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
-    Printf(bg->b_xll_cpp->b, "            new %s::ValueObjects::%s(objectID, false));\n", module, funcName);
+    Printf(bg->b_xll_cpp->b, "            new %s::ValueObjects::%s(\n", module, funcName);
+    Printf(bg->b_xll_cpp->b, "                objectID,\n");
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call", 4, ',', true, true, true);
+    Printf(bg->b_xll_cpp->b, "                false));\n");
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        boost::shared_ptr<ObjectHandler::Object> object(\n");
-    Printf(bg->b_xll_cpp->b, "            new %s::%s(", module, name);
+    Printf(bg->b_xll_cpp->b, "            new %s::%s(\n", module, name);
     Printf(bg->b_xll_cpp->b, "                valueObject,\n");
     emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_call", 4, ',', true, true, true);
     Printf(bg->b_xll_cpp->b, "                false));\n");
