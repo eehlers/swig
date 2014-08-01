@@ -8,8 +8,6 @@
     rp_xll_inc="flxl"
 ) FullLibAddin
 
-%feature("rp:generation", "automatic");
-
 %include typemaps.i
 %include functions.i
 

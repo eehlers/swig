@@ -1308,7 +1308,14 @@ void printCtor(Node *n, BufferGroup *bg) {
 int functionWrapper(Node *n) {
     String *group = Getattr(n,"feature:rp:group");
     String *include = Getattr(n,"feature:rp:include");
-    bool automatic = checkAttribute(n,"feature:rp:generation","automatic");
+
+    // Check whether to generate all source code, or to omit some code to be handwritten by the user.
+    // For the user writing the config file, it is easier to assume automatic (default)
+    // unless overridden with '%feature("rp:generation", "manual");' :
+    bool manual = checkAttribute(n, "feature:rp:generation", "manual");
+    // The source code for this SWIG module is cleaner if we think of it the opposite way:
+    bool automatic = !manual;
+
     SwigType *type   = Getattr(n,"type");
     cppClass = getTypeMap("rp_obj_class", n, type, false);
     BufferGroup *bg = bm_.getBufferGroup (group, include, automatic);
