@@ -255,10 +255,10 @@ struct BufferGroup {
         Printf(b_xll_reg->b, "\n");
         Printf(b_xll_reg->b, "#include <xlsdk/xlsdkdefines.hpp>\n");
         Printf(b_xll_reg->b, "\n");
-        Printf(b_xll_reg->b, "void register%s(const XLOPER &xDll) {\n", name);
+        Printf(b_xll_reg->b, "void register_%s(const XLOPER &xDll) {\n", name);
         Printf(b_xll_reg->b, "\n");
         Printf(b_xll_reg->b2, "\n");
-        Printf(b_xll_reg->b2, "void unregister%s(const XLOPER &xDll) {\n", name);
+        Printf(b_xll_reg->b2, "void unregister_%s(const XLOPER &xDll) {\n", name);
         Printf(b_xll_reg->b2, "\n");
         Printf(b_xll_reg->b2, "    XLOPER xlRegID;\n");
         Printf(b_xll_reg->b2, "\n");
@@ -273,10 +273,10 @@ struct BufferGroup {
         Printf(b_reg_ser_hpp->b, "        register_%s(ar);\n", name);
         }
 
-        Printf(b_xll_cpp4->b, "extern void register%s(const XLOPER&);\n", name);
-        Printf(b_xll_cpp4->b2, "extern void unregister%s(const XLOPER&);\n", name);
-        Printf(b_xll_cpp4->b3, "register%s(xDll);\n", name);
-        Printf(b_xll_cpp4->b4, "unregister%s(xDll);\n", name);
+        Printf(b_xll_cpp4->b, "extern void register_%s(const XLOPER&);\n", name);
+        Printf(b_xll_cpp4->b2, "extern void unregister_%s(const XLOPER&);\n", name);
+        Printf(b_xll_cpp4->b3, "    register_%s(xDll);\n", name);
+        Printf(b_xll_cpp4->b4, "    unregister_%s(xDll);\n", name);
     }
 
     ~BufferGroup() {
