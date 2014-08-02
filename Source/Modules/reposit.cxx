@@ -43,9 +43,13 @@ struct Buffer {
     String *name_;
     File *b;
     File *b2;
+    File *b3;
+    File *b4;
     Buffer(String *name) : name_(name) {
         b = NewString("");
         b2 = NewString("");
+        b3 = NewString("");
+        b4 = NewString("");
     }
     ~Buffer() {
         printf("Generating file '%s'\n", Char(name_));
@@ -53,8 +57,12 @@ struct Buffer {
         Delete(name_);
         Dump(b, f);
         Dump(b2, f);
+        Dump(b3, f);
+        Dump(b4, f);
         Delete(b);
         Delete(b2);
+        Delete(b3);
+        Delete(b4);
         Delete(f);
     }
 };
@@ -73,6 +81,7 @@ struct BufferGroup {
     Buffer *b_add_cpp;
     Buffer *b_add_hpp;
     Buffer *b_xll_cpp;
+    Buffer *b_xll_reg;
 
     String *name_;
     bool automatic_;
@@ -94,7 +103,8 @@ struct BufferGroup {
         }
         b_add_hpp = new Buffer(NewStringf("%s/add_%s.hpp", addDir, name_));
         b_add_cpp = new Buffer(NewStringf("%s/add_%s.cpp", addDir, name_));
-        b_xll_cpp = new Buffer(NewStringf("%s/xl_%s.cpp", xllDir, name_));
+        b_xll_cpp = new Buffer(NewStringf("%s/functions/function_%s.cpp", xllDir, name_));
+        b_xll_reg = new Buffer(NewStringf("%s/register/register_%s.cpp", xllDir, name_));
 
         Printf(b_val_hpp->b, "\n");
         Printf(b_val_hpp->b, "#ifndef vo_%s_hpp\n", name);
@@ -242,6 +252,17 @@ struct BufferGroup {
         Printf(b_xll_cpp->b, "#include <sstream>\n");
         Printf(b_xll_cpp->b, "\n");
 
+        Printf(b_xll_reg->b, "\n");
+        Printf(b_xll_reg->b, "#include <xlsdk/xlsdkdefines.hpp>\n");
+        Printf(b_xll_reg->b, "\n");
+        Printf(b_xll_reg->b, "void register%s(const XLOPER &xDll) {\n", name);
+        Printf(b_xll_reg->b, "\n");
+        Printf(b_xll_reg->b2, "\n");
+        Printf(b_xll_reg->b2, "void unregister%s(const XLOPER &xDll) {\n", name);
+        Printf(b_xll_reg->b2, "\n");
+        Printf(b_xll_reg->b2, "    XLOPER xlRegID;\n");
+        Printf(b_xll_reg->b2, "\n");
+
         // write to global buffers
 
         Printf(b_cre_all_hpp->b, "#include <%s/serialization/create/create_%s.hpp>\n", objInc, name);
@@ -251,6 +272,11 @@ struct BufferGroup {
         if (!cppClass) {
         Printf(b_reg_ser_hpp->b, "        register_%s(ar);\n", name);
         }
+
+        Printf(b_xll_cpp4->b, "extern void register%s(const XLOPER&);\n", name);
+        Printf(b_xll_cpp4->b2, "extern void unregister%s(const XLOPER&);\n", name);
+        Printf(b_xll_cpp4->b3, "register%s(xDll);\n", name);
+        Printf(b_xll_cpp4->b4, "unregister%s(xDll);\n", name);
     }
 
     ~BufferGroup() {
@@ -301,6 +327,9 @@ struct BufferGroup {
 
         Printf(b_add_cpp->b, "\n");
 
+        Printf(b_xll_reg->b, "}\n");
+        Printf(b_xll_reg->b2, "}\n");
+
         delete b_val_hpp;
         delete b_val_cpp;
         delete b_cre_hpp;
@@ -314,6 +343,7 @@ struct BufferGroup {
         delete b_add_hpp;
         delete b_add_cpp;
         delete b_xll_cpp;
+        delete b_xll_reg;
     }
 };
 
@@ -454,7 +484,7 @@ virtual int top(Node *n) {
     b_cre_all_hpp = new Buffer(NewStringf("%s/serialization/create/create_all.hpp", objDir));
     b_reg_ser_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_register.hpp", objDir));
     b_reg_all_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_all.hpp", objDir));
-    b_xll_cpp4 = new Buffer(NewStringf("%s/xl_addin.cpp", xllDir));
+    b_xll_cpp4 = new Buffer(NewStringf("%s/register/register_all.cpp", xllDir));
 
         Printf(b_cre_reg_cpp->b, "\n");
         Printf(b_cre_reg_cpp->b, "#include <%s/serialization/serializationfactory.hpp>\n", objInc);
@@ -486,36 +516,16 @@ virtual int top(Node *n) {
         Printf(b_reg_all_hpp->b, "\n");
 
         Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "#include <ohxl/objecthandlerxl.hpp>\n");
-        Printf(b_xll_cpp4->b, "#include <ohxl/register/register_all.hpp>\n");
-        Printf(b_xll_cpp4->b, "#include <ohxl/functions/export.hpp>\n");
-        Printf(b_xll_cpp4->b, "#include <ohxl/utilities/xlutilities.hpp>\n");
-        Printf(b_xll_cpp4->b, "#include <ohxl/objectwrapperxl.hpp>\n");
+        Printf(b_xll_cpp4->b, "#include <register/register_all.hpp>\n");
         Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
-        Printf(b_xll_cpp4->b, "   for example) also #define _MSC_VER\n");
-        Printf(b_xll_cpp4->b, "*/\n");
-        Printf(b_xll_cpp4->b, "#ifdef BOOST_MSVC\n");
-        Printf(b_xll_cpp4->b, "#  define BOOST_LIB_DIAGNOSTIC\n");
-        Printf(b_xll_cpp4->b, "#  include <oh/auto_link.hpp>\n");
-        Printf(b_xll_cpp4->b, "#  undef BOOST_LIB_DIAGNOSTIC\n");
-        Printf(b_xll_cpp4->b, "#endif\n");
-        Printf(b_xll_cpp4->b, "#include <sstream>\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "DLLEXPORT int xlAutoOpen() {\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "    // Instantiate the ObjectHandler Repository\n");
-        Printf(b_xll_cpp4->b, "    static ObjectHandler::RepositoryXL repositoryXL;\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "    static XLOPER xDll;\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "    try {\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "        Excel(xlGetName, &xDll, 0);\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "        ObjectHandler::Configuration::instance().init();\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "        registerOhFunctions(xDll);\n\n");
+
+        Printf(b_xll_cpp4->b3, "\n");
+        Printf(b_xll_cpp4->b3, "void registerFunctions(const XLOPER& xDll) {\n");
+        Printf(b_xll_cpp4->b3, "\n");
+
+        Printf(b_xll_cpp4->b4, "\n");
+        Printf(b_xll_cpp4->b4, "void unregisterFunctions(const XLOPER& xDll) {\n");
+        Printf(b_xll_cpp4->b4, "\n");
 
    /* Output module initialization code */
    Swig_banner(b_begin);
@@ -543,60 +553,13 @@ virtual int top(Node *n) {
         Printf(b_reg_all_hpp->b, "#endif\n");
         Printf(b_reg_all_hpp->b, "\n");
 
-        Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
-        Printf(b_xll_cpp4->b, "        return 1;\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "    } catch (const std::exception &e) {\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "        std::ostringstream err;\n");
-        Printf(b_xll_cpp4->b, "        err << \"Error loading XLL: \" << e.what();\n");
-        Printf(b_xll_cpp4->b, "        Excel(xlcAlert, 0, 1, TempStrStl(err.str()));\n");
-        Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
-        Printf(b_xll_cpp4->b, "        return 0;\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "    } catch (...) {\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
-        Printf(b_xll_cpp4->b, "        return 0;\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "    }\n");
-        Printf(b_xll_cpp4->b, "}\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "DLLEXPORT int xlAutoClose() {\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "    static XLOPER xDll;\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "    try {\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "        Excel(xlGetName, &xDll, 0);\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "        unregisterOhFunctions(xDll);\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
-        Printf(b_xll_cpp4->b, "        return 1;\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "    } catch (const std::exception &e) {\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "        std::ostringstream err;\n");
-        Printf(b_xll_cpp4->b, "        err << \"Error unloading XLL: \" << e.what();\n");
-        Printf(b_xll_cpp4->b, "        Excel(xlcAlert, 0, 1, TempStrStl(err.str()));\n");
-        Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
-        Printf(b_xll_cpp4->b, "        return 0;\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "    } catch (...) {\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "        Excel(xlFree, 0, 1, &xDll);\n");
-        Printf(b_xll_cpp4->b, "        return 0;\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "    }\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "}\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "DLLEXPORT void xlAutoFree(XLOPER *px) {\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "    freeOper(px);\n");
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "}\n");
+        Printf(b_xll_cpp4->b3, "\n");
+        Printf(b_xll_cpp4->b3, "}\n");
+        Printf(b_xll_cpp4->b3, "\n");
+
+        Printf(b_xll_cpp4->b4, "\n");
+        Printf(b_xll_cpp4->b4, "}\n");
+        Printf(b_xll_cpp4->b4, "\n");
 
     delete b_cre_reg_cpp;
     delete b_cre_all_hpp;
@@ -801,34 +764,68 @@ std::string hexLen(String *c) {
     return s.str();
 }
 
-void excelRegister(Node *n, SwigType *type, ParmList *parms) {
+void excelRegister(File *b, Node *n, SwigType *type, ParmList *parms) {
     String *funcName   = Getattr(n, "rp:funcName");
-    Printf(b_xll_cpp4->b, "        // BEGIN function excelRegister\n");
-    Printf(b_xll_cpp4->b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
-    Printf(b_xll_cpp4->b, "            // function code name\n");
-    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
-    Printf(b_xll_cpp4->b, "            // parameter codes\n");
+    Printf(b, "        // BEGIN function excelRegister\n");
+    Printf(b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
+    Printf(b, "            // function code name\n");
+    Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
+    Printf(b, "            // parameter codes\n");
     String *xlParamCodes = excelParamCodes(n, type, parms);
-    Printf(b_xll_cpp4->b, "            TempStrNoSize(\n");
-    Printf(b_xll_cpp4->b, "            // BEGIN func excelParamCodes (using typemap rp_xll)\n");
-    Printf(b_xll_cpp4->b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamCodes).c_str(), xlParamCodes);
-    Printf(b_xll_cpp4->b, "            // END   func excelParamCodes (using typemap rp_xll)\n");
-    Printf(b_xll_cpp4->b, "            ),\n");
-    Printf(b_xll_cpp4->b, "            // function display name\n");
-    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
-    Printf(b_xll_cpp4->b, "            // comma-delimited list of parameters\n");
+    Printf(b, "            TempStrNoSize(\n");
+    Printf(b, "            // BEGIN func excelParamCodes (using typemap rp_xll)\n");
+    Printf(b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamCodes).c_str(), xlParamCodes);
+    Printf(b, "            // END   func excelParamCodes (using typemap rp_xll)\n");
+    Printf(b, "            ),\n");
+    Printf(b, "            // function display name\n");
+    Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
+    Printf(b, "            // comma-delimited list of parameters\n");
     String *xlParamList = excelParamList(parms);
-    Printf(b_xll_cpp4->b, "            TempStrNoSize(\n");
-    Printf(b_xll_cpp4->b, "            // BEGIN func excelParamList\n");
-    Printf(b_xll_cpp4->b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamList).c_str(), xlParamList);
-    Printf(b_xll_cpp4->b, "            // END   func excelParamList\n");
-    Printf(b_xll_cpp4->b, "            ),\n");
-    Printf(b_xll_cpp4->b, "            // function type (0 = hidden function, 1 = worksheet function, 2 = command macro)\n");
-    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x01\"\"1\"),\n");
-    Printf(b_xll_cpp4->b, "            // function category\n");
-    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x07\"\"Example\")\n");
-    Printf(b_xll_cpp4->b, "        );\n");
-    Printf(b_xll_cpp4->b, "        // END   function excelRegister\n\n");
+    Printf(b, "            TempStrNoSize(\n");
+    Printf(b, "            // BEGIN func excelParamList\n");
+    Printf(b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamList).c_str(), xlParamList);
+    Printf(b, "            // END   func excelParamList\n");
+    Printf(b, "            ),\n");
+    Printf(b, "            // function type (0 = hidden function, 1 = worksheet function, 2 = command macro)\n");
+    Printf(b, "            TempStrNoSize(\"\\x01\"\"1\"),\n");
+    Printf(b, "            // function category\n");
+    Printf(b, "            TempStrNoSize(\"\\x07\"\"Example\")\n");
+    Printf(b, "        );\n");
+    Printf(b, "        // END   function excelRegister\n\n");
+}
+
+void excelUnregister(File *b, Node *n, SwigType *type, ParmList *parms) {
+    String *funcName   = Getattr(n, "rp:funcName");
+    Printf(b, "        // BEGIN function excelUnregister\n");
+    Printf(b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
+    Printf(b, "            // function code name\n");
+    Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
+    Printf(b, "            // parameter codes\n");
+    String *xlParamCodes = excelParamCodes(n, type, parms);
+    Printf(b, "            TempStrNoSize(\n");
+    Printf(b, "            // BEGIN func excelParamCodes (using typemap rp_xll)\n");
+    Printf(b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamCodes).c_str(), xlParamCodes);
+    Printf(b, "            // END   func excelParamCodes (using typemap rp_xll)\n");
+    Printf(b, "            ),\n");
+    Printf(b, "            // function display name\n");
+    Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
+    Printf(b, "            // comma-delimited list of parameters\n");
+    String *xlParamList = excelParamList(parms);
+    Printf(b, "            TempStrNoSize(\n");
+    Printf(b, "            // BEGIN func excelParamList\n");
+    Printf(b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamList).c_str(), xlParamList);
+    Printf(b, "            // END   func excelParamList\n");
+    Printf(b, "            ),\n");
+    Printf(b, "            // function type (0 = hidden function, 1 = worksheet function, 2 = command macro)\n");
+    Printf(b, "            TempStrNoSize(\"\\x01\"\"0\"),\n");
+    Printf(b, "            // function category\n");
+    Printf(b, "            TempStrNoSize(\"\\x07\"\"Example\")\n");
+    Printf(b, "        );\n");
+    Printf(b, "\n");
+    Printf(b, "        Excel4(xlfRegisterId, &xlRegID, 2, &xDll,\n");
+    Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"));\n", hexLen(funcName).c_str(), funcName);
+    Printf(b, "        Excel4(xlfUnregister, 0, 1, &xlRegID);\n");
+    Printf(b, "        // END   function excelUnregister\n\n");
 }
 
 // return a copy with first character uppercase
@@ -895,7 +892,8 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     Printf(bg->b_add_cpp->b,"    );\n");
     Printf(bg->b_add_cpp->b,"}\n");
 
-    excelRegister(n, type, parms);
+    excelRegister(bg->b_xll_reg->b, n, type, parms);
+    excelUnregister(bg->b_xll_reg->b2, n, type, parms);
 
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "DLLEXPORT\n");
@@ -980,7 +978,8 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(bg->b_add_cpp->b,"        );\n", name);
     Printf(bg->b_add_cpp->b,"}\n");
 
-    excelRegister(n, type, parms2);
+    excelRegister(bg->b_xll_reg->b, n, type, parms2);
+    excelUnregister(bg->b_xll_reg->b2, n, type, parms2);
 
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "DLLEXPORT\n");
@@ -1283,7 +1282,8 @@ void printCtor(Node *n, BufferGroup *bg) {
         Printf(b_cre_reg_cpp->b, "    registerCreator(\"%s\", create_%s);\n", funcName, funcName);
     }
 
-    excelRegister(n, 0, parms3);
+    excelRegister(bg->b_xll_reg->b, n, 0, parms3);
+    excelRegister(bg->b_xll_reg->b2, n, 0, parms3);
 
     if (!cppClass) {
     Printf(bg->b_xll_cpp->b, "\n");
