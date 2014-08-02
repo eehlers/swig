@@ -809,12 +809,20 @@ void excelRegister(Node *n, SwigType *type, ParmList *parms) {
     Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
     Printf(b_xll_cpp4->b, "            // parameter codes\n");
     String *xlParamCodes = excelParamCodes(n, type, parms);
-    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(xlParamCodes).c_str(), xlParamCodes);
+    Printf(b_xll_cpp4->b, "            TempStrNoSize(\n");
+    Printf(b_xll_cpp4->b, "            // BEGIN func excelParamCodes (using typemap rp_xll)\n");
+    Printf(b_xll_cpp4->b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamCodes).c_str(), xlParamCodes);
+    Printf(b_xll_cpp4->b, "            // END   func excelParamCodes (using typemap rp_xll)\n");
+    Printf(b_xll_cpp4->b, "            ),\n");
     Printf(b_xll_cpp4->b, "            // function display name\n");
     Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
     Printf(b_xll_cpp4->b, "            // comma-delimited list of parameters\n");
     String *xlParamList = excelParamList(parms);
-    Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(xlParamList).c_str(), xlParamList);
+    Printf(b_xll_cpp4->b, "            TempStrNoSize(\n");
+    Printf(b_xll_cpp4->b, "            // BEGIN func excelParamList\n");
+    Printf(b_xll_cpp4->b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamList).c_str(), xlParamList);
+    Printf(b_xll_cpp4->b, "            // END   func excelParamList\n");
+    Printf(b_xll_cpp4->b, "            ),\n");
     Printf(b_xll_cpp4->b, "            // function type (0 = hidden function, 1 = worksheet function, 2 = command macro)\n");
     Printf(b_xll_cpp4->b, "            TempStrNoSize(\"\\x01\"\"1\"),\n");
     Printf(b_xll_cpp4->b, "            // function category\n");
@@ -889,9 +897,10 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
 
     excelRegister(n, type, parms);
 
-    String *ret_type = getTypeMap("rp_xll_out", n, type);
     Printf(bg->b_xll_cpp->b, "\n");
-    Printf(bg->b_xll_cpp->b, "DLLEXPORT %s %s(\n", ret_type, funcName);
+    Printf(bg->b_xll_cpp->b, "DLLEXPORT\n");
+    emitTypeMap(bg->b_xll_cpp->b, "rp_xll_out", n, type);
+    Printf(bg->b_xll_cpp->b, "%s(\n", funcName);
     emitParmList(parms, bg->b_xll_cpp->b, 2, "rp_xll_in", 1);
     Printf(bg->b_xll_cpp->b, ") {\n");
     Printf(bg->b_xll_cpp->b, "\n");
@@ -973,9 +982,10 @@ void printMemb(Node *n, BufferGroup *bg) {
 
     excelRegister(n, type, parms2);
 
-    String *ret_type = getTypeMap("rp_xll_out", n, type);
     Printf(bg->b_xll_cpp->b, "\n");
-    Printf(bg->b_xll_cpp->b, "DLLEXPORT %s %s(\n", ret_type, funcName);
+    Printf(bg->b_xll_cpp->b, "DLLEXPORT\n");
+    emitTypeMap(bg->b_xll_cpp->b, "rp_xll_out", n, type);
+    Printf(bg->b_xll_cpp->b, "%s(\n", funcName);
     emitParmList(parms2, bg->b_xll_cpp->b, 2, "rp_xll_in");
     Printf(bg->b_xll_cpp->b, ") {\n");
     Printf(bg->b_xll_cpp->b, "\n");
