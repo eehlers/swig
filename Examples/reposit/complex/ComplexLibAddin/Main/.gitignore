@@ -1,0 +1,5 @@
+mainComplexLibAddin
+Release
+*.user
+!Makefile
+Debug

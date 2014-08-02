@@ -1,5 +1,0 @@
-mainFullLibAddin
-Release
-*.user
-!Makefile
-Debug
