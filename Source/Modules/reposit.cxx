@@ -123,7 +123,7 @@ struct BufferGroup {
         Printf(b_val_hpp->b, "\n");
 
         Printf(b_val_cpp->b, "\n");
-        Printf(b_val_cpp->b, "#include \"vo_%s.hpp\"\n", name);
+        Printf(b_val_cpp->b, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, name);
         Printf(b_val_cpp->b, "#include <boost/algorithm/string/case_conv.hpp>\n");
         Printf(b_val_cpp->b, "\n");
         Printf(b_val_cpp->b,"namespace %s {\n", module);
@@ -200,7 +200,7 @@ struct BufferGroup {
 
         if (automatic_) {
             Printf(b_obj_cpp->b, "\n");
-            Printf(b_obj_cpp->b, "#include \"obj_%s.hpp\"\n", name);
+            Printf(b_obj_cpp->b, "#include <%s/obj_%s.hpp>\n", objInc, name);
             Printf(b_obj_cpp->b, "\n");
         }
 
@@ -216,7 +216,7 @@ struct BufferGroup {
         Printf(b_add_hpp->b, "\n");
 
         Printf(b_add_cpp->b, "\n");
-        Printf(b_add_cpp->b, "#include \"add_%s.hpp\"\n", name);
+        Printf(b_add_cpp->b, "#include <AddinCpp/add_%s.hpp>\n", name);
         // FIXME this #include is only required if the file contains conversions.
         Printf(b_add_cpp->b, "#include <%s/conversions/convert2.hpp>\n", objInc);
         // FIXME this #include is only required if the file contains enumerations.
@@ -228,7 +228,7 @@ struct BufferGroup {
         Printf(b_add_cpp->b, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_add_cpp->b, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_add_cpp->b, "#include <oh/repository.hpp>\n");
-        Printf(b_add_cpp->b, "#include \"add_includes.hpp\"\n");
+        Printf(b_add_cpp->b, "#include <AddinCpp/add_includes.hpp>\n");
         Printf(b_add_cpp->b, "\n");
 
         Printf(b_xll_cpp->b, "\n");
