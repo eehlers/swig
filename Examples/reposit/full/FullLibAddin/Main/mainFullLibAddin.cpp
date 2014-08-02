@@ -69,6 +69,7 @@ int main() {
         // Test it
         std::cout << "100 + 1 = " << FullLibAddinCpp::flAdderAdd("adder100", 1) << std::endl;
 
+        FullLibAddinCpp::closeAddin();
         std::cout << "bye" << std::endl;
         return 0;
     } catch(const std::exception &e) {

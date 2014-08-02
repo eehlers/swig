@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..,..\..\..\..\..\quantlib\ObjectHandler"
+				AdditionalIncludeDirectories=".\flxl,..\FullLib,..\FullLibAddin,..\..\..\..\..\quantlib\ObjectHandler"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;ADDINXL_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -118,7 +118,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\FullLib,..\FullLibAddin,..\..\..\..\..\quantlib\ObjectHandler"
+				AdditionalIncludeDirectories=".\flxl,..\FullLib,..\FullLibAddin,..\..\..\..\..\quantlib\ObjectHandler"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;ADDINXL_EXPORTS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -186,37 +186,73 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="flxl"
+			Name="functions"
 			>
 			<File
-				RelativePath=".\flxl\xl_adder.cpp"
+				RelativePath=".\flxl\functions\function_adder.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\flxl\xl_adder2.cpp"
+				RelativePath=".\flxl\functions\function_adder2.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\flxl\xl_addin.cpp"
+				RelativePath=".\flxl\functions\function_color.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\flxl\xl_color.cpp"
+				RelativePath=".\flxl\functions\function_foo.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\flxl\xl_foo.cpp"
+				RelativePath=".\flxl\functions\function_inheritance.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\flxl\xl_inheritance.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\flxl\xl_noparm.cpp"
+				RelativePath=".\flxl\functions\function_noparm.cpp"
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="register"
+			>
+			<File
+				RelativePath=".\flxl\register\register_adder.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\flxl\register\register_adder2.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\flxl\register\register_all.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\flxl\register\register_all.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\flxl\register\register_color.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\flxl\register\register_foo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\flxl\register\register_inheritance.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\flxl\register\register_noparm.cpp"
+				>
+			</File>
+		</Filter>
+		<File
+			RelativePath=".\flxl\addin.cpp"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

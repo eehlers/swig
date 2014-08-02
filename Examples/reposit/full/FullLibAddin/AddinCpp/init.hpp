@@ -5,7 +5,7 @@
 namespace FullLibAddinCpp {
 
     void initializeAddin();
-
+    void closeAddin();
 }
 
 #endif

@@ -31,3 +31,7 @@ void FullLibAddinCpp::initializeAddin() {
         FullLibAddin::initializeAddin();
 }
 
+void FullLibAddinCpp::closeAddin() {
+    // Clear the Enumeration Registry
+    FullLibAddin::initializeAddin();
+}
