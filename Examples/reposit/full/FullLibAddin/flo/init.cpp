@@ -15,3 +15,9 @@ void FullLibAddin::initializeAddin() {
         registerEnumeratedClasses();
 }
 
+void FullLibAddin::closeAddin() {
+
+        // Clear the Enumeration Registry
+        unregisterEnumeratedTypes();
+}
+
