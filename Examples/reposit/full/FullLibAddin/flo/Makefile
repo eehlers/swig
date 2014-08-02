@@ -3,6 +3,7 @@ IDIR = ../../../../../../install/include
 LIB = ../../lib/libAddinObjects.so
 OBJECTS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 STATIC_LIBS = \
+    conversions/libConversions.a \
     enumerations/constructors/libEnumerationConstructors.a \
     enumerations/factories/libEnumerationFactories.a \
     enumerations/register/libEnumerationRegister.a \
@@ -21,12 +22,14 @@ $(LIB): $(OBJECTS) SubDirs
 
 .PHONY: SubDirs
 SubDirs:
+	$(MAKE) -C conversions
 	$(MAKE) -C enumerations
 	$(MAKE) -C serialization
 	$(MAKE) -C valueobjects
 
 clean:
 	rm -f $(LIB) $(OBJECTS)
+	$(MAKE) -C conversions clean
 	$(MAKE) -C enumerations clean
 	$(MAKE) -C serialization clean
 	$(MAKE) -C valueobjects clean
