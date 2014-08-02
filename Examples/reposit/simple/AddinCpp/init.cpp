@@ -16,7 +16,7 @@ void SimpleLibAddinCpp::initializeAddin() {
         //static ObjectHandler::ProcessorFactory processorFactory;
 
         // Instantiate the Serialization Factory
-        //static QuantLibAddin::SerializationFactory factory;
+        //static SimpleLibAddin::SerializationFactory factory;
 
         // Instantiate the Enumerated Type Registry
         //static ObjectHandler::EnumTypeRegistry enumTypeRegistry;

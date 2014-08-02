@@ -121,7 +121,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..,..\..\..\..\..\quantlib\ObjectHandler"
+				AdditionalIncludeDirectories=".,..,..\..\..\..\..\quantlib\ObjectHandler"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;ADDINXL_EXPORTS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -176,12 +176,40 @@
 	<References>
 	</References>
 	<Files>
-		<File
-			RelativePath=".\xl_adder.cpp"
+		<Filter
+			Name="conversions"
 			>
-		</File>
+			<File
+				RelativePath=".\conversions\convert2.hpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="functions"
+			>
+			<File
+				RelativePath=".\functions\function_adder.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="register"
+			>
+			<File
+				RelativePath=".\register\register_adder.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\register\register_all.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\register\register_all.hpp"
+				>
+			</File>
+		</Filter>
 		<File
-			RelativePath=".\xl_addin.cpp"
+			RelativePath=".\addin.cpp"
 			>
 		</File>
 	</Files>
