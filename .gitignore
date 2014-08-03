@@ -130,3 +130,8 @@ Examples/test-suite/uffi/*/
 Examples/scratch
 
 tags
+*.ncb
+*.suo
+*.user
+Release
+Debug

@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "swig", "swig_vc9.vcproj", "{1BCA73BB-0CAD-4653-89E0-99C04C989CEC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1BCA73BB-0CAD-4653-89E0-99C04C989CEC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1BCA73BB-0CAD-4653-89E0-99C04C989CEC}.Debug|Win32.Build.0 = Debug|Win32
+		{1BCA73BB-0CAD-4653-89E0-99C04C989CEC}.Release|Win32.ActiveCfg = Release|Win32
+		{1BCA73BB-0CAD-4653-89E0-99C04C989CEC}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
