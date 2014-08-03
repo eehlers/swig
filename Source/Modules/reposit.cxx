@@ -30,6 +30,8 @@ Buffer *b_reg_ser_hpp=0;
 Buffer *b_reg_all_hpp=0;
 Buffer *b_xll_cpp4=0;
 
+List *errorList = NewList();
+
 File *initFile(String *outfile) {
    File *f = NewFile(outfile, "w", SWIG_output_files());
    if (!f) {
@@ -362,7 +364,7 @@ public:
         return bm_[name_];
     }
 
-    ~BufferMap() {
+    void clear() {
         for (BM::const_iterator i=bm_.begin(); i!=bm_.end(); ++i)
             delete i->second;
     }
@@ -609,6 +611,14 @@ virtual int top(Node *n) {
     //Close(f_test);
     Delete(f_test);
 
+    bm_.clear();
+
+    for (int i=0; i<Len(errorList); ++i) {
+        String *errorMessage = Getitem(errorList, i);
+        printf(Char(errorMessage));
+    }
+    Delete(errorList);//FIXME also delete each item individually
+
    return SWIG_OK;
   }
 
@@ -631,11 +641,11 @@ String *getTypeMap(const char *m, Node *n, SwigType *t, bool fatal = true) {
     if (String *tm = Swig_typemap_lookup(m, n, t, 0))
         return tm;
     if (fatal) {
-        printf("*** ERROR : typemap '%s' does not match type '%s'.\n", m, Char(SwigType_str(t, 0)));
+        Append(errorList, NewStringf("*** ERROR : typemap '%s' does not match type '%s'.\n", m, Char(SwigType_str(t, 0))));
         // Do not exit, instead keep running so that the user can see any other error messages.
         //SWIG_exit(EXIT_FAILURE);
         // Return an error string, this will be inserted into the source code.
-        return NewStringf("*** typemap '%s' does not match type '%s' ***", m, SwigType_str(t, 0));
+        return NewStringf("#error *** typemap '%s' does not match type '%s' ***", m, SwigType_str(t, 0));
     }
     return 0;
 }
@@ -909,7 +919,7 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     Printf(bg->b_xll_cpp->b, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
     Printf(bg->b_xll_cpp->b, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
     Printf(bg->b_xll_cpp->b, "\n");
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 2, ',', false);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 2, 0, false);
     Printf(bg->b_xll_cpp->b, "\n");
     emitTypeMap(bg->b_xll_cpp->b, "rp_xll_get", n, type, 2);
     Printf(bg->b_xll_cpp->b, "        %s::%s(\n", module, symname);
@@ -995,7 +1005,7 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
     Printf(bg->b_xll_cpp->b, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
     Printf(bg->b_xll_cpp->b, "\n");
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 2, ',', false);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 2, 0, false);
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        OH_GET_REFERENCE(x, objectID, %s, %s);\n", addinClass, pname);
     Printf(bg->b_xll_cpp->b, "\n");
@@ -1283,7 +1293,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     }
 
     excelRegister(bg->b_xll_reg->b, n, 0, parms3);
-    excelRegister(bg->b_xll_reg->b2, n, 0, parms3);
+    excelUnregister(bg->b_xll_reg->b2, n, type, parms3);
 
     if (!cppClass) {
     Printf(bg->b_xll_cpp->b, "\n");
@@ -1298,7 +1308,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
     Printf(bg->b_xll_cpp->b, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
     Printf(bg->b_xll_cpp->b, "\n");
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 2, ',', false);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_xll_cnv", 2, 0, false);
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "        boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
     Printf(bg->b_xll_cpp->b, "            new %s::ValueObjects::%s(\n", module, funcName);
@@ -1336,7 +1346,7 @@ int functionWrapper(Node *n) {
     // Check whether to generate all source code, or to omit some code to be handwritten by the user.
     // For the user writing the config file, it is easier to assume automatic (default)
     // unless overridden with '%feature("rp:generation", "manual");' :
-    bool manual = checkAttribute(n, "feature:rp:generation", "manual");
+    bool manual = 0 != checkAttribute(n, "feature:rp:generation", "manual");
     // The source code for this SWIG module is cleaner if we think of it the opposite way:
     bool automatic = !manual;
 
