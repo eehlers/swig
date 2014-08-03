@@ -8,10 +8,10 @@ OBJECTS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 all: $(LIB)
 
 #$(LIB): $(OBJECTS) Conversions
-#	g++ -shared -fPIC -g -Wall -o $(LIB) $(OBJECTS) $(STATIC_LIBS) -L../../lib -lComplexLib -lValueObjects -lAddinObjects $(SYS_LIBS)
+#	g++ -shared -fPIC -g -Wall -o $(LIB) $(OBJECTS) $(STATIC_LIBS) -L../../lib -lComplexLib -lAddinObjects $(SYS_LIBS)
 
 $(LIB): $(OBJECTS)
-	g++ -shared -fPIC -g -Wall -o $(LIB) $(OBJECTS) -L../../lib -lComplexLib -lValueObjects -lAddinObjects $(SYS_LIBS)
+	g++ -shared -fPIC -g -Wall -o $(LIB) $(OBJECTS) -L../../lib -lComplexLib -lAddinObjects $(SYS_LIBS)
 
 %.o: %.cpp %.hpp
 	g++ -c -fPIC -g -Wall -I$(IDIR) -I. -I.. -I../../ComplexLib $< -o $@
