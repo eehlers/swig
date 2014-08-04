@@ -617,7 +617,7 @@ virtual int top(Node *n) {
 
     for (int i=0; i<Len(errorList); ++i) {
         String *errorMessage = Getitem(errorList, i);
-        printf(Char(errorMessage));
+        printf("%s", Char(errorMessage));
     }
     Delete(errorList);//FIXME also delete each item individually
 

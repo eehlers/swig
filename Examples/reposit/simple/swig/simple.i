@@ -1,4 +1,6 @@
 
+%typemap(rp_xll) SimpleLib::Adder * "C";
+
 %module(
     rp_obj_dir="../AddinObjects",
     rp_add_dir="../AddinCpp",
