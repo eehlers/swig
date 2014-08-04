@@ -240,7 +240,8 @@ struct BufferGroup {
         Printf(b_xll_cpp->b, "#include <ohxl/utilities/xlutilities.hpp>\n");
         Printf(b_xll_cpp->b, "#include <ohxl/objectwrapperxl.hpp>\n");
         Printf(b_xll_cpp->b, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, name);
-        Printf(b_xll_cpp->b, "#include \"%s/obj_%s.hpp\"\n", objInc, name);
+        Printf(b_xll_cpp->b, "//#include \"%s/obj_%s.hpp\"\n", objInc, name);
+        Printf(b_xll_cpp->b, "#include \"%s/obj_all.hpp\"\n", objInc);
         Printf(b_xll_cpp->b, "#include \"conversions/convert2.hpp\"\n");
         Printf(b_xll_cpp->b, "\n");
         Printf(b_xll_cpp->b, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
@@ -645,7 +646,8 @@ String *getTypeMap(const char *m, Node *n, SwigType *t, bool fatal = true) {
         // Do not exit, instead keep running so that the user can see any other error messages.
         //SWIG_exit(EXIT_FAILURE);
         // Return an error string, this will be inserted into the source code.
-        return NewStringf("#error *** typemap '%s' does not match type '%s' ***", m, SwigType_str(t, 0));
+        //return NewStringf("#error *** typemap '%s' does not match type '%s' ***", m, SwigType_str(t, 0));
+        return NewStringf("#error NEED THIS TYPEMAP: >>> %%typemap(%s) %s \"XXX\"; <<<", m, SwigType_str(t, 0));
     }
     return 0;
 }
