@@ -3,11 +3,11 @@
 SWIG = ../../../preinst-swig
 #SWIG_DEBUG = -debug-top 4 -debug-tmsearch
 
-all: SWIG Library AddinObjects AddinCpp Main
+all: Library AddinObjects AddinCpp Main
 
 .PHONY: SWIG
-SWIG: simple.i
-	$(SWIG) $(SWIG_DEBUG) -c++ -reposit -prefix sl simple.i
+SWIG:
+	$(MAKE) -C swig
 
 .PHONY: Library
 Library:
@@ -30,3 +30,4 @@ clean :
 	$(MAKE) -C AddinObjects clean
 	$(MAKE) -C AddinCpp clean
 	$(MAKE) -C Main clean
+

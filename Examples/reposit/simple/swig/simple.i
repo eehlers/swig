@@ -2,10 +2,10 @@
 %module(
     rp_obj_dir="../AddinObjects",
     rp_add_dir="../AddinCpp",
-    rp_xll_dir="../AddinXL",
+    rp_xll_dir="../AddinXl",
     rp_obj_inc="AddinObjects",
     rp_add_inc="AddinCpp",
-    rp_xll_inc="AddinXL"
+    rp_xll_inc="AddinXl"
 ) SimpleLibAddin
 
 %feature("rp:group", "adder");
