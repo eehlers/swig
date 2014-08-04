@@ -28,7 +28,8 @@ Buffer *b_cre_reg_cpp=0;
 Buffer *b_cre_all_hpp=0;
 Buffer *b_reg_ser_hpp=0;
 Buffer *b_reg_all_hpp=0;
-Buffer *b_xll_cpp4=0;
+Buffer *b_xll_cpp4=0;// FIXME standardize name
+//Buffer *b_obj_all=0;// FIXME file to #include all addin objects
 
 List *errorList = NewList();
 
@@ -72,16 +73,16 @@ struct Buffer {
 struct BufferGroup {
 
     // buffers
-    Buffer *b_val_cpp;
     Buffer *b_val_hpp;
+    Buffer *b_val_cpp;
     Buffer *b_cre_hpp;
     Buffer *b_cre_cpp;
     Buffer *b_reg_hpp;
     Buffer *b_reg_cpp;
-    Buffer *b_obj_cpp;
     Buffer *b_obj_hpp;
-    Buffer *b_add_cpp;
+    Buffer *b_obj_cpp;
     Buffer *b_add_hpp;
+    Buffer *b_add_cpp;
     Buffer *b_xll_cpp;
     Buffer *b_xll_reg;
 
