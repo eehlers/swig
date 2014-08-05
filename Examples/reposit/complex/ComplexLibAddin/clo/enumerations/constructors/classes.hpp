@@ -7,8 +7,8 @@
 
 namespace ComplexLibAddin {
 
-    boost::shared_ptr<ComplexLib::Color> RED_Color();
-    boost::shared_ptr<ComplexLib::Color> BLUE_Color();
+//    boost::shared_ptr<ComplexLib::Color> RED_Color();
+//    boost::shared_ptr<ComplexLib::Color> BLUE_Color();
 
 }
 

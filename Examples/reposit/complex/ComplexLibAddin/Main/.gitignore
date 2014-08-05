@@ -3,3 +3,4 @@ Release
 *.user
 !Makefile
 Debug
+!mainComplexLibAddin.cpp.bak

@@ -15,7 +15,7 @@ STATIC_LIBS = \
 all: $(LIB)
 
 $(LIB): $(OBJECTS) SubDirs
-	g++ -shared -fPIC -g -Wall -o $(LIB) $(OBJECTS) -Wl,-whole-archive $(STATIC_LIBS) -Wl,-no-whole-archive
+	g++ -shared -fPIC -g -Wall -o $(LIB) $(OBJECTS) -L../../lib -lComplexLib -Wl,-whole-archive $(STATIC_LIBS) -Wl,-no-whole-archive
 
 %.o: %.cpp %.hpp
 	g++ -c -fPIC -g -Wall -I$(IDIR) -I. -I.. -I../../ComplexLib $< -o $@

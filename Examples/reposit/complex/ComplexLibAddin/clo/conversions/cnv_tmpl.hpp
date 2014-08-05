@@ -19,20 +19,20 @@ namespace ObjectHandler {
         }
     }
 
-    template<class container_t>
-    ComplexLib::Long convertLong(const container_t& c) {
-        if(c.type() == typeid(long))
-            return ComplexLib::Long(c.operator long());
-        else if(c.type() == typeid(std::string)) {
-            std::string s = c.operator std::string();
-            long l;
-            if (is_numeric(s, l))
-                return ComplexLib::Long(l);
-            else
-                OH_FAIL("unable to convert string '" << s << "' to type 'ComplexLib::Long'");
-        }
-        OH_FAIL("unable to convert type '" << c.type().name() << "' to type 'ComplexLib::Long'");
-    }
+//    template<class container_t>
+//    ComplexLib::Long convertLong(const container_t& c) {
+//        if(c.type() == typeid(long))
+//            return ComplexLib::Long(c.operator long());
+//        else if(c.type() == typeid(std::string)) {
+//            std::string s = c.operator std::string();
+//            long l;
+//            if (is_numeric(s, l))
+//                return ComplexLib::Long(l);
+//            else
+//                OH_FAIL("unable to convert string '" << s << "' to type 'ComplexLib::Long'");
+//        }
+//        OH_FAIL("unable to convert type '" << c.type().name() << "' to type 'ComplexLib::Long'");
+//    }
 }
 
 #endif

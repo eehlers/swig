@@ -7,8 +7,8 @@
 
 namespace ObjectHandler {
 
-    template<> 
-    ComplexLib::Long convert2<ComplexLib::Long, property_t>(const property_t& c);
+//    template<> 
+//    ComplexLib::Long convert2<ComplexLib::Long, property_t>(const property_t& c);
 }
 
 #endif
