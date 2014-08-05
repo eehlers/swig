@@ -1,6 +1,8 @@
 
 #include <iostream>
-#include "AddinCpp/all.hpp"
+#include "AddinCpp/init.hpp"
+#include "AddinCpp/add_functions.hpp"
+#include "AddinCpp/add_echo.hpp"
 #include "oh/addin.hpp"
 
 int main() {
@@ -10,6 +12,13 @@ int main() {
         std::cout << "ObjectHandler version = " << ObjectHandler::ohVersion() << std::endl;
 
         std::cout << ComplexLibAddinCpp::clFunc1() << std::endl;
+
+        ComplexLibAddinCpp::clEchoVoid();
+        std::cout << ComplexLibAddinCpp::clEchoBool(true) << std::endl;
+        std::cout << ComplexLibAddinCpp::clEchoLong(42) << std::endl;
+        std::cout << ComplexLibAddinCpp::clEchoDouble(123.456) << std::endl;
+        std::cout << ComplexLibAddinCpp::clEchoCharStar("hello") << std::endl;
+        std::cout << ComplexLibAddinCpp::clEchoString("test") << std::endl;
 
         ComplexLibAddinCpp::closeAddin();
         std::cout << "bye" << std::endl;

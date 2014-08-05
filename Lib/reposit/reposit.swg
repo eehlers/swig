@@ -55,13 +55,17 @@
 %typemap(rp_tm_xll_cod) bool "L";
 %typemap(rp_tm_xll_cod) long "N";
 %typemap(rp_tm_xll_cod) double "E";
+%typemap(rp_tm_xll_cod) char* "C";
 %typemap(rp_tm_xll_cod) std::string "C";
 %typemap(rp_tm_xll_cod) std::string& "C";
 %typemap(rp_tm_xll_cod) std::string const & "C";
 %typemap(rp_tm_xll_cod) void "L";
 
+%typemap(rp_tm_xll_prm) bool "bool*";
 %typemap(rp_tm_xll_prm) long "long*";
 %typemap(rp_tm_xll_prm) double "double*";
+%typemap(rp_tm_xll_prm) char* "char*";
+%typemap(rp_tm_xll_prm) std::string "char*";
 %typemap(rp_tm_xll_prm) std::string& "char*";
 %typemap(rp_tm_xll_prm) std::string const & "char*";
 
@@ -76,6 +80,7 @@
 %typemap(rp_tm_xll_ret) bool "bool*";
 %typemap(rp_tm_xll_ret) long "long*";
 %typemap(rp_tm_xll_ret) double "double*";
+%typemap(rp_tm_xll_ret) char* "char*";
 %typemap(rp_tm_xll_ret) std::string "char*";
 %typemap(rp_tm_xll_ret) void "bool*";
 
