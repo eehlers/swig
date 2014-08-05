@@ -617,7 +617,7 @@ virtual int top(Node *n) {
 
     for (int i=0; i<Len(errorList); ++i) {
         String *errorMessage = Getitem(errorList, i);
-        printf(Char(errorMessage));
+        printf("%s", Char(errorMessage));
     }
     Delete(errorList);//FIXME also delete each item individually
 
@@ -655,10 +655,10 @@ String *getTypeMap(const char *m, Node *n, SwigType *t, bool fatal = true) {
 
 String *getType(Parm *p, const char *m, bool fatal) {
     SwigType *t  = Getattr(p, "type");
-    if (m)
-        return getTypeMap(m, p, t, fatal);
-    else
+    if (0==strcmp(m, "rp_default"))
         return t;
+    else
+        return getTypeMap(m, p, t, fatal);
 }
 
 void printIndent(File *buf, int indent) {
@@ -678,20 +678,11 @@ void emitTypeMap(File *buf, const char *m, Node *n, SwigType *t, int indent=0, b
     Printf(buf, "// END   typemap %s\n", m);
 }
 
-void printComment(File *buf, const char *comment, const char *map) {
-    Printf(buf, "// %s typemap ", comment);
-    if (map)
-        Printf(buf, "%s", map);
-    else
-        Printf(buf, "default");
-    Printf(buf, "\n");
-}
-
 void emitParmList(
     ParmList *parms,
     File *buf,
     int mode=0,         // 0=name, 1=type, 2=both
-    const char *map=0,
+    const char *map="rp_default",
     int indent=1,
     char delim=',',
     bool fatal=true,
@@ -701,7 +692,7 @@ void emitParmList(
     bool first = true;
 
     printIndent(buf, indent);
-    printComment(buf, "BEGIN", map);
+    Printf(buf, "// BEGIN typemap %s\n", map);
     printIndent(buf, indent);
 
     for (Parm *p = parms; p; p = nextSibling(p)) {
@@ -736,7 +727,7 @@ void emitParmList(
         Printf(buf, "\n");
         printIndent(buf, indent);
     }
-    printComment(buf, "END  ", map);
+    Printf(buf, "// END   typemap %s\n", map);
 }
 
 String *excelParamCodes(Node *n, SwigType *type, ParmList *parms) {
@@ -874,17 +865,17 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     Printf(bg->b_obj_hpp->b,"\n");
     emitTypeMap(bg->b_obj_hpp->b, "rp_obj_typ", n, type, 1);
     Printf(bg->b_obj_hpp->b,"    %s(\n", symname);
-    emitParmList(parms, bg->b_obj_hpp->b, 2, 0, 2);
+    emitParmList(parms, bg->b_obj_hpp->b, 2, "rp_default", 2);
     Printf(bg->b_obj_hpp->b,"    );\n");
 
     if (automatic) {
         emitTypeMap(bg->b_obj_cpp->b, "rp_obj_typ", n, type);
         Printf(bg->b_obj_cpp->b,"%s::%s(\n", module, symname);
-        emitParmList(parms, bg->b_obj_cpp->b, 2, 0, 2);
+        emitParmList(parms, bg->b_obj_cpp->b, 2, "rp_default", 2);
         Printf(bg->b_obj_cpp->b,"    ) {\n");
         emitTypeMap(bg->b_obj_cpp->b, "rp_obj_ret", n, type, 2);
         Printf(bg->b_obj_cpp->b,"        %s(\n", name);
-        emitParmList(parms, bg->b_obj_cpp->b, 0, 0, 3, ',', true, true);
+        emitParmList(parms, bg->b_obj_cpp->b, 0, "rp_default", 3, ',', true, true);
         Printf(bg->b_obj_cpp->b,"        );\n");
         Printf(bg->b_obj_cpp->b,"}\n");
     }
@@ -1217,7 +1208,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_cre_cpp->b, "    boost::shared_ptr<ObjectHandler::Object> object(\n");
     Printf(bg->b_cre_cpp->b, "        new %s::%s(\n", module, name);
     Printf(bg->b_cre_cpp->b, "            valueObject,\n");
-    emitParmList(parms, bg->b_cre_cpp->b, 0, 0, 3, ',', true, false, true);
+    emitParmList(parms, bg->b_cre_cpp->b, 0, "rp_default", 3, ',', true, false, true);
     Printf(bg->b_cre_cpp->b, "            Permanent));\n");
     Printf(bg->b_cre_cpp->b, "    return object;\n");
     Printf(bg->b_cre_cpp->b, "}\n");
@@ -1253,11 +1244,11 @@ void printCtor(Node *n, BufferGroup *bg) {
         Printf(bg->b_obj_hpp->b,"    public:\n");
         Printf(bg->b_obj_hpp->b,"        %s(\n", name);
         Printf(bg->b_obj_hpp->b,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties,\n");
-        emitParmList(parms, bg->b_obj_hpp->b, 2, 0, 3, ',', true, false, true);
+        emitParmList(parms, bg->b_obj_hpp->b, 2, "rp_default", 3, ',', true, false, true);
         Printf(bg->b_obj_hpp->b,"            bool permanent)\n");
         Printf(bg->b_obj_hpp->b,"        : %s(properties, permanent) {\n", s0);
         Printf(bg->b_obj_hpp->b,"            libraryObject_ = boost::shared_ptr<%s>(new %s(\n", s1, pname);
-        emitParmList(parms, bg->b_obj_hpp->b, 0, 0, 4);
+        emitParmList(parms, bg->b_obj_hpp->b, 0, "rp_default", 4);
         Printf(bg->b_obj_hpp->b,"            ));\n");
         Printf(bg->b_obj_hpp->b,"        }\n");
         Printf(bg->b_obj_hpp->b,"    };\n");
@@ -1279,7 +1270,7 @@ void printCtor(Node *n, BufferGroup *bg) {
         Printf(bg->b_add_cpp->b,"    boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
         Printf(bg->b_add_cpp->b,"        new %s::ValueObjects::%s(\n", module, funcName);
         Printf(bg->b_add_cpp->b,"            objectID,\n");
-        emitParmList(parms, bg->b_add_cpp->b, 0, 0, 3, ',', true, false, true);
+        emitParmList(parms, bg->b_add_cpp->b, 0, "rp_default", 3, ',', true, false, true);
         Printf(bg->b_add_cpp->b,"            false));\n");
         Printf(bg->b_add_cpp->b,"    boost::shared_ptr<ObjectHandler::Object> object(\n");
         Printf(bg->b_add_cpp->b,"        new %s::%s(\n", module, name);

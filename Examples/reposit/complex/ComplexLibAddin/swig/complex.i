@@ -1,4 +1,11 @@
 
+%typemap(rp_xll) ComplexLib::Adder * "C";
+%typemap(rp_xll) ComplexLib::Adder2 * "C";
+%typemap(rp_xll) ComplexLib::Foo * "C";
+%typemap(rp_xll) ComplexLib::Base * "C";
+%typemap(rp_xll) ComplexLib::Derived * "C";
+%typemap(rp_xll) ComplexLib::NoParm * "C";
+
 %module(
     rp_obj_dir="../clo",
     rp_add_dir="../AddinCpp",
