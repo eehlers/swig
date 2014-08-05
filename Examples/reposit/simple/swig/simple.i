@@ -1,5 +1,5 @@
 
-%typemap(rp_xll) SimpleLib::Adder * "C";
+%typemap(rp_tm_xll_cod) SimpleLib::Adder * "C";
 
 %module(
     rp_obj_dir="../AddinObjects",
