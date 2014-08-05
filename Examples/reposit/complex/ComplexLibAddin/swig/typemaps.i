@@ -18,9 +18,9 @@
 //
 //// rp_obj_* - addin objects
 //
-//%typemap(rp_tm_obj_cls) ComplexLib::Base * %{
-//    OH_LIB_CLASS(Base, ComplexLib::Base);
-//%}
+%typemap(rp_tm_obj_cls) ComplexLib::Base * %{
+    OH_LIB_CLASS(Base, ComplexLib::Base);
+%}
 //
 //// rp_add_* - C++ addin
 //
