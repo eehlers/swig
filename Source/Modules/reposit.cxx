@@ -868,13 +868,13 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     printf("funcName=%s\n", Char(funcName));
 
     Printf(bg->b_obj_hpp->b,"\n");
-    emitTypeMap(bg->b_obj_hpp->b, "rp_tm_obj_prm", n, type, 1);
+    emitTypeMap(bg->b_obj_hpp->b, "rp_tm_obj_ret", n, type, 1);
     Printf(bg->b_obj_hpp->b,"    %s(\n", symname);
     emitParmList(parms, bg->b_obj_hpp->b, 2, "rp_tm_default", 2);
     Printf(bg->b_obj_hpp->b,"    );\n");
 
     if (automatic) {
-        emitTypeMap(bg->b_obj_cpp->b, "rp_tm_obj_prm", n, type);
+        emitTypeMap(bg->b_obj_cpp->b, "rp_tm_obj_ret", n, type);
         Printf(bg->b_obj_cpp->b,"%s::%s(\n", module, symname);
         emitParmList(parms, bg->b_obj_cpp->b, 2, "rp_tm_default", 2);
         Printf(bg->b_obj_cpp->b,"    ) {\n");

@@ -37,7 +37,7 @@
 
 // rp_obj_* - addin objects
 
-%typemap(rp_tm_obj_prm) SWIGTYPE "$1_type";
+%typemap(rp_tm_obj_ret) SWIGTYPE "$1_type";
 %typemap(rp_tm_obj_rdc) SWIGTYPE "return ";
 %typemap(rp_tm_obj_rdc) void "";
 
