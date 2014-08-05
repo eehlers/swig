@@ -24,12 +24,15 @@ String *cppClass = 0;
 
 struct Buffer;
 
+// global buffers
+
+//Buffer *b_add_all_hpp=0;//FIXME is this file needed?
 Buffer *b_cre_reg_cpp=0;
 Buffer *b_cre_all_hpp=0;
 Buffer *b_reg_ser_hpp=0;
 Buffer *b_reg_all_hpp=0;
-Buffer *b_xll_cpp4=0;// FIXME standardize name
-//Buffer *b_obj_all=0;// FIXME file to #include all addin objects
+Buffer *b_add_all_hpp=0;
+Buffer *b_xll_reg_cpp=0;// FIXME standardize name
 
 List *errorList = NewList();
 
@@ -231,7 +234,7 @@ struct BufferGroup {
         Printf(b_add_cpp->b, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_add_cpp->b, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_add_cpp->b, "#include <oh/repository.hpp>\n");
-        Printf(b_add_cpp->b, "#include <AddinCpp/add_includes.hpp>\n");
+        Printf(b_add_cpp->b, "#include <AddinCpp/add_all.hpp>\n");
         Printf(b_add_cpp->b, "\n");
 
         Printf(b_xll_cpp->b, "\n");
@@ -277,10 +280,12 @@ struct BufferGroup {
         Printf(b_reg_ser_hpp->b, "        register_%s(ar);\n", name);
         }
 
-        Printf(b_xll_cpp4->b, "extern void register_%s(const XLOPER&);\n", name);
-        Printf(b_xll_cpp4->b2, "extern void unregister_%s(const XLOPER&);\n", name);
-        Printf(b_xll_cpp4->b3, "    register_%s(xDll);\n", name);
-        Printf(b_xll_cpp4->b4, "    unregister_%s(xDll);\n", name);
+        Printf(b_add_all_hpp->b, "#include <%s/add_%s.hpp>\n", addInc, name);
+
+        Printf(b_xll_reg_cpp->b, "extern void register_%s(const XLOPER&);\n", name);
+        Printf(b_xll_reg_cpp->b2, "extern void unregister_%s(const XLOPER&);\n", name);
+        Printf(b_xll_reg_cpp->b3, "    register_%s(xDll);\n", name);
+        Printf(b_xll_reg_cpp->b4, "    unregister_%s(xDll);\n", name);
     }
 
     ~BufferGroup() {
@@ -488,7 +493,8 @@ virtual int top(Node *n) {
     b_cre_all_hpp = new Buffer(NewStringf("%s/serialization/create/create_all.hpp", objDir));
     b_reg_ser_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_register.hpp", objDir));
     b_reg_all_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_all.hpp", objDir));
-    b_xll_cpp4 = new Buffer(NewStringf("%s/register/register_all.cpp", xllDir));
+    b_add_all_hpp = new Buffer(NewStringf("%s/add_all.hpp", addDir));
+    b_xll_reg_cpp = new Buffer(NewStringf("%s/register/register_all.cpp", xllDir));
 
         Printf(b_cre_reg_cpp->b, "\n");
         Printf(b_cre_reg_cpp->b, "#include <%s/serialization/serializationfactory.hpp>\n", objInc);
@@ -519,17 +525,23 @@ virtual int top(Node *n) {
         Printf(b_reg_all_hpp->b, "#define serialization_all_hpp\n");
         Printf(b_reg_all_hpp->b, "\n");
 
-        Printf(b_xll_cpp4->b, "\n");
-        Printf(b_xll_cpp4->b, "#include <register/register_all.hpp>\n");
-        Printf(b_xll_cpp4->b, "\n");
+        Printf(b_add_all_hpp->b, "\n");
+        Printf(b_add_all_hpp->b, "#ifndef add_all_hpp\n");
+        Printf(b_add_all_hpp->b, "#define add_all_hpp\n");
+        Printf(b_add_all_hpp->b, "\n");
+        Printf(b_add_all_hpp->b, "#include <%s/init.hpp>\n", addInc);
 
-        Printf(b_xll_cpp4->b3, "\n");
-        Printf(b_xll_cpp4->b3, "void registerFunctions(const XLOPER& xDll) {\n");
-        Printf(b_xll_cpp4->b3, "\n");
+        Printf(b_xll_reg_cpp->b, "\n");
+        Printf(b_xll_reg_cpp->b, "#include <register/register_all.hpp>\n");
+        Printf(b_xll_reg_cpp->b, "\n");
 
-        Printf(b_xll_cpp4->b4, "\n");
-        Printf(b_xll_cpp4->b4, "void unregisterFunctions(const XLOPER& xDll) {\n");
-        Printf(b_xll_cpp4->b4, "\n");
+        Printf(b_xll_reg_cpp->b3, "\n");
+        Printf(b_xll_reg_cpp->b3, "void registerFunctions(const XLOPER& xDll) {\n");
+        Printf(b_xll_reg_cpp->b3, "\n");
+
+        Printf(b_xll_reg_cpp->b4, "\n");
+        Printf(b_xll_reg_cpp->b4, "void unregisterFunctions(const XLOPER& xDll) {\n");
+        Printf(b_xll_reg_cpp->b4, "\n");
 
    /* Output module initialization code */
    Swig_banner(b_begin);
@@ -557,19 +569,24 @@ virtual int top(Node *n) {
         Printf(b_reg_all_hpp->b, "#endif\n");
         Printf(b_reg_all_hpp->b, "\n");
 
-        Printf(b_xll_cpp4->b3, "\n");
-        Printf(b_xll_cpp4->b3, "}\n");
-        Printf(b_xll_cpp4->b3, "\n");
+        Printf(b_add_all_hpp->b, "\n");
+        Printf(b_add_all_hpp->b, "#endif\n");
+        Printf(b_add_all_hpp->b, "\n");
 
-        Printf(b_xll_cpp4->b4, "\n");
-        Printf(b_xll_cpp4->b4, "}\n");
-        Printf(b_xll_cpp4->b4, "\n");
+        Printf(b_xll_reg_cpp->b3, "\n");
+        Printf(b_xll_reg_cpp->b3, "}\n");
+        Printf(b_xll_reg_cpp->b3, "\n");
+
+        Printf(b_xll_reg_cpp->b4, "\n");
+        Printf(b_xll_reg_cpp->b4, "}\n");
+        Printf(b_xll_reg_cpp->b4, "\n");
 
     delete b_cre_reg_cpp;
     delete b_cre_all_hpp;
     delete b_reg_ser_hpp;
     delete b_reg_all_hpp;
-    delete b_xll_cpp4;
+    delete b_add_all_hpp;
+    delete b_xll_reg_cpp;
 
     // To help with troubleshooting, create an output file to which all of the
     // SWIG buffers will be written.  We are not going to compile this file but

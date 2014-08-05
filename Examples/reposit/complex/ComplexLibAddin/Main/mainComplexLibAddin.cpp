@@ -1,8 +1,6 @@
 
 #include <iostream>
-#include "AddinCpp/init.hpp"
-#include "AddinCpp/add_functions.hpp"
-#include "AddinCpp/add_echo.hpp"
+#include "AddinCpp/add_all.hpp"
 #include "oh/addin.hpp"
 
 int main() {

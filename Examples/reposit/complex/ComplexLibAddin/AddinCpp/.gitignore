@@ -1,6 +1,5 @@
 *.user
 Release
 add_*.?pp
-!add_includes.hpp
 !Makefile
 Debug
