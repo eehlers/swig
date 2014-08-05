@@ -26,7 +26,7 @@ struct Buffer;
 
 // global buffers
 
-//Buffer *b_add_all_hpp=0;//FIXME is this file needed?
+//Buffer *b_obj_all_hpp=0;//FIXME is this file needed?
 Buffer *b_cre_reg_cpp=0;
 Buffer *b_cre_all_hpp=0;
 Buffer *b_reg_ser_hpp=0;
@@ -35,6 +35,9 @@ Buffer *b_add_all_hpp=0;
 Buffer *b_xll_reg_cpp=0;// FIXME standardize name
 
 List *errorList = NewList();
+
+bool generateXllAddin = false;
+bool generateCppAddin = false;
 
 File *initFile(String *outfile) {
    File *f = NewFile(outfile, "w", SWIG_output_files());
@@ -107,10 +110,14 @@ struct BufferGroup {
         if (automatic_) {
         b_obj_cpp = new Buffer(NewStringf("%s/obj_%s.cpp", objDir, name_));
         }
+        if (generateCppAddin) {
         b_add_hpp = new Buffer(NewStringf("%s/add_%s.hpp", addDir, name_));
         b_add_cpp = new Buffer(NewStringf("%s/add_%s.cpp", addDir, name_));
+        }
+        if (generateXllAddin) {
         b_xll_cpp = new Buffer(NewStringf("%s/functions/function_%s.cpp", xllDir, name_));
         b_xll_reg = new Buffer(NewStringf("%s/register/register_%s.cpp", xllDir, name_));
+        }
 
         Printf(b_val_hpp->b, "\n");
         Printf(b_val_hpp->b, "#ifndef vo_%s_hpp\n", name);
@@ -210,6 +217,7 @@ struct BufferGroup {
             Printf(b_obj_cpp->b, "\n");
         }
 
+        if (generateCppAddin) {
         Printf(b_add_hpp->b, "\n");
         Printf(b_add_hpp->b, "#ifndef add_%s_hpp\n", name);
         Printf(b_add_hpp->b, "#define add_%s_hpp\n", name);
@@ -236,7 +244,9 @@ struct BufferGroup {
         Printf(b_add_cpp->b, "#include <oh/repository.hpp>\n");
         Printf(b_add_cpp->b, "#include <AddinCpp/add_all.hpp>\n");
         Printf(b_add_cpp->b, "\n");
+        }
 
+        if (generateXllAddin) {
         Printf(b_xll_cpp->b, "\n");
         Printf(b_xll_cpp->b, "#include <ohxl/objecthandlerxl.hpp>\n");
         Printf(b_xll_cpp->b, "#include <ohxl/register/register_all.hpp>\n");
@@ -269,6 +279,7 @@ struct BufferGroup {
         Printf(b_xll_reg->b2, "\n");
         Printf(b_xll_reg->b2, "    XLOPER xlRegID;\n");
         Printf(b_xll_reg->b2, "\n");
+        }
 
         // write to global buffers
 
@@ -280,12 +291,16 @@ struct BufferGroup {
         Printf(b_reg_ser_hpp->b, "        register_%s(ar);\n", name);
         }
 
+        if (generateCppAddin) {
         Printf(b_add_all_hpp->b, "#include <%s/add_%s.hpp>\n", addInc, name);
+        }
 
+        if (generateXllAddin) {
         Printf(b_xll_reg_cpp->b, "extern void register_%s(const XLOPER&);\n", name);
         Printf(b_xll_reg_cpp->b2, "extern void unregister_%s(const XLOPER&);\n", name);
         Printf(b_xll_reg_cpp->b3, "    register_%s(xDll);\n", name);
         Printf(b_xll_reg_cpp->b4, "    unregister_%s(xDll);\n", name);
+        }
     }
 
     ~BufferGroup() {
@@ -328,6 +343,7 @@ struct BufferGroup {
             Printf(b_obj_cpp->b, "\n");
         }
 
+        if (generateCppAddin) {
         Printf(b_add_hpp->b, "\n");
         Printf(b_add_hpp->b, "} // namespace %s\n", addinCppNameSpace);
         Printf(b_add_hpp->b, "\n");
@@ -335,9 +351,12 @@ struct BufferGroup {
         Printf(b_add_hpp->b, "\n");
 
         Printf(b_add_cpp->b, "\n");
+        }
 
+        if (generateXllAddin) {
         Printf(b_xll_reg->b, "}\n");
         Printf(b_xll_reg->b2, "}\n");
+        }
 
         delete b_val_hpp;
         delete b_val_cpp;
@@ -349,10 +368,14 @@ struct BufferGroup {
         if (automatic_) {
             delete b_obj_cpp;
         }
+        if (generateCppAddin) {
         delete b_add_hpp;
         delete b_add_cpp;
+        }
+        if (generateXllAddin) {
         delete b_xll_cpp;
         delete b_xll_reg;
+        }
     }
 };
 
@@ -414,7 +437,13 @@ public:
    SWIG_typemap_lang("reposit");
 
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-prefix") == 0) {
+        if ( (strcmp(argv[i],"-gencpp") == 0)) {
+            generateCppAddin = true;
+            Swig_mark_arg(i);
+        } else if ( (strcmp(argv[i],"-genxll") == 0)) {
+            generateXllAddin = true;
+            Swig_mark_arg(i);
+        } else if (strcmp(argv[i], "-prefix") == 0) {
             if (argv[i + 1]) {
                 prefix = NewString(argv[i + 1]);
                 Swig_mark_arg(i);
@@ -493,8 +522,12 @@ virtual int top(Node *n) {
     b_cre_all_hpp = new Buffer(NewStringf("%s/serialization/create/create_all.hpp", objDir));
     b_reg_ser_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_register.hpp", objDir));
     b_reg_all_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_all.hpp", objDir));
+    if (generateCppAddin) {
     b_add_all_hpp = new Buffer(NewStringf("%s/add_all.hpp", addDir));
+    }
+    if (generateXllAddin) {
     b_xll_reg_cpp = new Buffer(NewStringf("%s/register/register_all.cpp", xllDir));
+    }
 
         Printf(b_cre_reg_cpp->b, "\n");
         Printf(b_cre_reg_cpp->b, "#include <%s/serialization/serializationfactory.hpp>\n", objInc);
@@ -525,12 +558,15 @@ virtual int top(Node *n) {
         Printf(b_reg_all_hpp->b, "#define serialization_all_hpp\n");
         Printf(b_reg_all_hpp->b, "\n");
 
+        if (generateCppAddin) {
         Printf(b_add_all_hpp->b, "\n");
         Printf(b_add_all_hpp->b, "#ifndef add_all_hpp\n");
         Printf(b_add_all_hpp->b, "#define add_all_hpp\n");
         Printf(b_add_all_hpp->b, "\n");
         Printf(b_add_all_hpp->b, "#include <%s/init.hpp>\n", addInc);
+        }
 
+        if (generateXllAddin) {
         Printf(b_xll_reg_cpp->b, "\n");
         Printf(b_xll_reg_cpp->b, "#include <register/register_all.hpp>\n");
         Printf(b_xll_reg_cpp->b, "\n");
@@ -542,6 +578,7 @@ virtual int top(Node *n) {
         Printf(b_xll_reg_cpp->b4, "\n");
         Printf(b_xll_reg_cpp->b4, "void unregisterFunctions(const XLOPER& xDll) {\n");
         Printf(b_xll_reg_cpp->b4, "\n");
+        }
 
    /* Output module initialization code */
    Swig_banner(b_begin);
@@ -569,10 +606,13 @@ virtual int top(Node *n) {
         Printf(b_reg_all_hpp->b, "#endif\n");
         Printf(b_reg_all_hpp->b, "\n");
 
+        if (generateCppAddin) {
         Printf(b_add_all_hpp->b, "\n");
         Printf(b_add_all_hpp->b, "#endif\n");
         Printf(b_add_all_hpp->b, "\n");
+        }
 
+        if (generateXllAddin) {
         Printf(b_xll_reg_cpp->b3, "\n");
         Printf(b_xll_reg_cpp->b3, "}\n");
         Printf(b_xll_reg_cpp->b3, "\n");
@@ -580,13 +620,18 @@ virtual int top(Node *n) {
         Printf(b_xll_reg_cpp->b4, "\n");
         Printf(b_xll_reg_cpp->b4, "}\n");
         Printf(b_xll_reg_cpp->b4, "\n");
+        }
 
     delete b_cre_reg_cpp;
     delete b_cre_all_hpp;
     delete b_reg_ser_hpp;
     delete b_reg_all_hpp;
+    if (generateCppAddin) {
     delete b_add_all_hpp;
+    }
+    if (generateXllAddin) {
     delete b_xll_reg_cpp;
+    }
 
     // To help with troubleshooting, create an output file to which all of the
     // SWIG buffers will be written.  We are not going to compile this file but
@@ -872,7 +917,9 @@ String *copyUpper2(String *s) {
 }
 
 void printFunc(Node *n, BufferGroup *bg, bool automatic) {
+    if (generateCppAddin) {
     Printf(bg->b_add_cpp->b,"//****FUNC*****\n");
+    }
     String   *name   = Getattr(n,"name");
     SwigType *type   = Getattr(n,"type");
     ParmList *parms  = Getattr(n,"parms");
@@ -902,6 +949,7 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
         Printf(bg->b_obj_cpp->b,"}\n");
     }
 
+    if (generateCppAddin) {
     emitTypeMap(bg->b_add_hpp->b, "rp_tm_add_ret", n, type, 1);
     Printf(bg->b_add_hpp->b,"    %s(\n", funcName);
     emitParmList(parms, bg->b_add_hpp->b, 2, "rp_tm_add_prm", 2);
@@ -917,7 +965,9 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     emitParmList(parms, bg->b_add_cpp->b, 1, "rp_tm_add_cll", 2, ',', true, true);
     Printf(bg->b_add_cpp->b,"    );\n");
     Printf(bg->b_add_cpp->b,"}\n");
+    }
 
+    if (generateXllAddin) {
     excelRegister(bg->b_xll_reg->b, n, type, parms);
     excelUnregister(bg->b_xll_reg->b2, n, type, parms);
 
@@ -951,10 +1001,13 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "    }\n");
     Printf(bg->b_xll_cpp->b, "}\n");
+    }
 }
 
 void printMemb(Node *n, BufferGroup *bg) {
+    if (generateCppAddin) {
     Printf(bg->b_add_cpp->b,"//****MEMB*****\n");
+    }
     String   *name   = Getattr(n,"name");
     SwigType *type   = Getattr(n,"type");
     Node *p = Getattr(n,"parentNode");
@@ -987,6 +1040,7 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(b_wrappers, "// *a3* %s <<\n", Char(ParmList_protostr(parms2)));
     Printf(b_wrappers, "//***ABC\n");
 
+    if (generateCppAddin) {
     emitTypeMap(bg->b_add_hpp->b, "rp_tm_add_ret", n, type, 1);
     Printf(bg->b_add_hpp->b,"    %s(\n", funcName);
     emitParmList(parms2, bg->b_add_hpp->b, 2, "rp_tm_add_prm", 2);
@@ -1003,7 +1057,9 @@ void printMemb(Node *n, BufferGroup *bg) {
     emitParmList(parms, bg->b_add_cpp->b, 1, "rp_tm_add_cll", 3, ',', true, true);
     Printf(bg->b_add_cpp->b,"        );\n", name);
     Printf(bg->b_add_cpp->b,"}\n");
+    }
 
+    if (generateXllAddin) {
     excelRegister(bg->b_xll_reg->b, n, type, parms2);
     excelUnregister(bg->b_xll_reg->b2, n, type, parms2);
 
@@ -1038,6 +1094,7 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "    }\n");
     Printf(bg->b_xll_cpp->b, "}\n");
+    }
 }
 
 void voGetProp(File *f, ParmList *parms) {
@@ -1276,6 +1333,7 @@ void printCtor(Node *n, BufferGroup *bg) {
         Printf(bg->b_obj_hpp->b,"    };\n");
         Printf(bg->b_obj_hpp->b,"\n");
 
+        if (generateCppAddin) {
         Printf(bg->b_add_hpp->b,"\n");
         Printf(bg->b_add_hpp->b,"    std::string %s(\n", funcName);
         emitParmList(parms2, bg->b_add_hpp->b, 2, "rp_tm_add_prm", 2);
@@ -1304,10 +1362,12 @@ void printCtor(Node *n, BufferGroup *bg) {
         Printf(bg->b_add_cpp->b,"            objectID, object, false, valueObject);\n");
         Printf(bg->b_add_cpp->b,"    return returnValue;\n");
         Printf(bg->b_add_cpp->b,"}\n\n");
+        }
 
         Printf(b_cre_reg_cpp->b, "    registerCreator(\"%s\", create_%s);\n", funcName, funcName);
     }
 
+    if (generateXllAddin) {
     excelRegister(bg->b_xll_reg->b, n, 0, parms3);
     excelUnregister(bg->b_xll_reg->b2, n, type, parms3);
 
@@ -1352,6 +1412,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "    }\n");
     Printf(bg->b_xll_cpp->b, "}\n");
+    }
     }
 }
 

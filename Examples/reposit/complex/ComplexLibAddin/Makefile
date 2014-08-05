@@ -16,3 +16,7 @@ clean :
 SWIG:
 	$(MAKE) -C swig SWIG
 
+.PHONY: SWIGCPP
+SWIGCPP:
+	$(MAKE) -C swig SWIGCPP
+
