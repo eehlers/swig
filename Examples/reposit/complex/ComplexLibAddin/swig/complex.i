@@ -1,10 +1,10 @@
 
-%typemap(rp_xll) ComplexLib::Adder * "C";
-%typemap(rp_xll) ComplexLib::Adder2 * "C";
-%typemap(rp_xll) ComplexLib::Foo * "C";
-%typemap(rp_xll) ComplexLib::Base * "C";
-%typemap(rp_xll) ComplexLib::Derived * "C";
-%typemap(rp_xll) ComplexLib::NoParm * "C";
+%typemap(rp_tm_xll_cod) ComplexLib::Adder * "C";
+%typemap(rp_tm_xll_cod) ComplexLib::Adder2 * "C";
+%typemap(rp_tm_xll_cod) ComplexLib::Foo * "C";
+%typemap(rp_tm_xll_cod) ComplexLib::Base * "C";
+%typemap(rp_tm_xll_cod) ComplexLib::Derived * "C";
+%typemap(rp_tm_xll_cod) ComplexLib::NoParm * "C";
 
 %module(
     rp_obj_dir="../clo",
