@@ -689,6 +689,11 @@ void emitParmList(
     bool skipHidden=false,
     bool append=false) {
 
+    if (0==map) {
+        printf ("Function emitParmList called with null type map.\n");
+        SWIG_exit(EXIT_FAILURE);
+    }
+
     bool first = true;
 
     printIndent(buf, indent);
@@ -1018,19 +1023,19 @@ void printMemb(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "}\n");
 }
 
-void voConvert(File *f, ParmList *parms) {
-    Printf(f, "            // BEGIN func voConvert\n");
+void voGetProp(File *f, ParmList *parms) {
+    Printf(f, "            // BEGIN func voGetProp\n");
     for (Parm *p = parms; p; p = nextSibling(p)) {
         String *name = Getattr(p,"name");
         String *nameUpper = Getattr(p,"nameUpper");
         Printf(f, "            else if(strcmp(nameUpper.c_str(), \"%s\")==0)\n", nameUpper);
         Printf(f, "                return %s_;\n", name);
     }
-    Printf(f, "            // END   func voConvert\n");
+    Printf(f, "            // END   func voGetProp\n");
 }
 
-void voConvert2(File *f, ParmList *parms) {
-    Printf(f, "            // BEGIN func voConvert2 (using typemap rp_val_cnv)\n");
+void voSetProp(File *f, ParmList *parms) {
+    Printf(f, "            // BEGIN func voSetProp (using typemap rp_val_cnv)\n");
     for (Parm *p = parms; p; p = nextSibling(p)) {
         String *name = Getattr(p,"name");
         String *nameUpper = Getattr(p,"nameUpper");
@@ -1039,7 +1044,7 @@ void voConvert2(File *f, ParmList *parms) {
         Printf(f, "            else if(strcmp(nameUpper.c_str(), \"%s\")==0)\n", nameUpper);
         Printf(f, "                %s_ = %s;\n", name, cnv);
     }
-    Printf(f, "            // END   func voConvert2 (using typemap rp_val_cnv)\n");
+    Printf(f, "            // END   func voSetProp (using typemap rp_val_cnv)\n");
 }
 
 void printCtor(Node *n, BufferGroup *bg) {
@@ -1158,7 +1163,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_val_cpp->b,"                return objectId_;\n");
     Printf(bg->b_val_cpp->b,"            else if(strcmp(nameUpper.c_str(), \"CLASSNAME\")==0)\n");
     Printf(bg->b_val_cpp->b,"                return className_;\n");
-    voConvert(bg->b_val_cpp->b, parms);
+    voGetProp(bg->b_val_cpp->b, parms);
     Printf(bg->b_val_cpp->b,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
     Printf(bg->b_val_cpp->b,"                return Permanent_;\n");
     Printf(bg->b_val_cpp->b,"            else\n");
@@ -1171,7 +1176,7 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_val_cpp->b,"                objectId_ = boost::get<std::string>(value);\n");
     Printf(bg->b_val_cpp->b,"            else if(strcmp(nameUpper.c_str(), \"CLASSNAME\")==0)\n");
     Printf(bg->b_val_cpp->b,"                className_ = boost::get<std::string>(value);\n");
-    voConvert2(bg->b_val_cpp->b, parms);
+    voSetProp(bg->b_val_cpp->b, parms);
     Printf(bg->b_val_cpp->b,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
     Printf(bg->b_val_cpp->b,"                Permanent_ = ObjectHandler::convert2<bool>(value);\n");
     Printf(bg->b_val_cpp->b,"            else\n");
