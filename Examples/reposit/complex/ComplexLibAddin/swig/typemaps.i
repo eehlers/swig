@@ -49,7 +49,7 @@
 //
 // rp_xll_* - Excel addin
 
-%typemap(rp_tm_xll_cod) ComplexLib::Test * "C";
+//%typemap(rp_tm_xll_cod) ComplexLib::Test * "C";
 //%typemap(rp_tm_xll_cod) ComplexLib::Long "P";
 //%typemap(rp_tm_xll_cod) ComplexLib::Account::Type "P";
 //%typemap(rp_tm_xll_cod) boost::shared_ptr<ComplexLib::Color> "P";
