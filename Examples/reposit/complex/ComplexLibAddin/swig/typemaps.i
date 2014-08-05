@@ -1,3 +1,10 @@
+// old typemaps?
+//%typemap(rp_tm_xll_cod) ComplexLib::Adder * "C";
+//%typemap(rp_tm_xll_cod) ComplexLib::Adder2 * "C";
+//%typemap(rp_tm_xll_cod) ComplexLib::Foo * "C";
+//%typemap(rp_tm_xll_cod) ComplexLib::Base * "C";
+//%typemap(rp_tm_xll_cod) ComplexLib::Derived * "C";
+//%typemap(rp_tm_xll_cod) ComplexLib::NoParm * "C";
 //
 //// rp_val_* - valueobjects
 //
@@ -40,8 +47,9 @@
 //%typemap(rp_tm_add_cll) ComplexLib::Account::Type "$1_name_enum";
 //%typemap(rp_tm_add_cll) boost::shared_ptr<ComplexLib::Color> "$1_name_enum";
 //
-//// rp_xll_* - Excel addin
-//
+// rp_xll_* - Excel addin
+
+%typemap(rp_tm_xll_cod) ComplexLib::Test * "C";
 //%typemap(rp_tm_xll_cod) ComplexLib::Long "P";
 //%typemap(rp_tm_xll_cod) ComplexLib::Account::Type "P";
 //%typemap(rp_tm_xll_cod) boost::shared_ptr<ComplexLib::Color> "P";

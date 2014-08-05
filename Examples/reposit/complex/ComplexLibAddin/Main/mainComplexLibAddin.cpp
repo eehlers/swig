@@ -18,6 +18,9 @@ int main() {
         std::cout << ComplexLibAddinCpp::clEchoCharStar("hello") << std::endl;
         std::cout << ComplexLibAddinCpp::clEchoString("test") << std::endl;
 
+        ComplexLibAddinCpp::clTest("my_test", 42);
+        std::cout << ComplexLibAddinCpp::clTestGetInput("my_test") << std::endl;
+
         ComplexLibAddinCpp::closeAddin();
         std::cout << "bye" << std::endl;
         return 0;

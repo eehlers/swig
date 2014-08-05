@@ -60,6 +60,7 @@
 %typemap(rp_tm_xll_cod) std::string& "C";
 %typemap(rp_tm_xll_cod) std::string const & "C";
 %typemap(rp_tm_xll_cod) void "L";
+%typemap(rp_tm_xll_cod) SWIGTYPE * "C";
 
 %typemap(rp_tm_xll_prm) bool "bool*";
 %typemap(rp_tm_xll_prm) long "long*";
