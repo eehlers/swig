@@ -5,5 +5,5 @@ SWIG = ../../../../preinst-swig
 
 .PHONY: SWIG
 SWIG: simple.i
-	$(SWIG) $(SWIG_DEBUG) -c++ -reposit -prefix sl simple.i
+	$(SWIG) $(SWIG_DEBUG) -c++ -reposit -gencpp -prefix sl simple.i
 
