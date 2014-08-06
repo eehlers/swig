@@ -742,6 +742,27 @@ int namespaceDeclaration(Node *n) {
     return ret;
 }
 
+//BEGIN functionHandler - node name='SimpleLib::func'.  functionHandlerImpl - set functionType=0
+//.BEGIN functionWrapper - node name='SimpleLib::func'. functionWrapperImpl - call functionWrapperImplAll then functionWrapperImplFunc
+//.END   functionWrapper - node name='SimpleLib::func'.
+//END   functionHandler - node name='SimpleLib::func'.
+//BEGIN classDeclaration - node name='SimpleLib::Adder'.
+//.BEGIN classHandler - node name='SimpleLib::Adder'.
+//..BEGIN constructorDeclaration - node name='Adder'.
+//...BEGIN constructorHandler - node name='Adder'.      constructorHandlerImpl - set functionType=1
+//....BEGIN functionWrapper - node name='Adder'.        functionWrapperImpl - call functionWrapperImplAll then functionWrapperImplCtor
+//....END   functionWrapper - node name='Adder'.
+//...END   constructorHandler - node name='Adder'.
+//..END   constructorDeclaration - node name='Adder'.
+//..BEGIN functionHandler - node name='add'.
+//...BEGIN memberfunctionHandler - node name='add'.     memberfunctionHandlerImpl - set functionType=2
+//....BEGIN functionWrapper - node name='add'.          functionWrapperImpl - call functionWrapperImplAll then functionWrapperImplMemb
+//....END   functionWrapper - node name='add'.
+//...END   memberfunctionHandler - node name='add'.
+//..END   functionHandler - node name='add'.
+//.END   classHandler - node name='SimpleLib::Adder'.
+//END   classDeclaration - node name='Adder'.
+
 int functionHandler(Node *n) {
     String *nodename = Getattr(n, "name");
     Printf(b_director, "BEGIN functionHandler - node name='%s'.\n", Char(nodename));
