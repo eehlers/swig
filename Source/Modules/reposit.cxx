@@ -26,13 +26,13 @@ struct Buffer;
 
 // global buffers
 
-//Buffer *b_obj_all_hpp=0;//FIXME is this file needed?
+//Buffer *b_obj_all_hpp=0;//FIXME should generate this file too
 Buffer *b_cre_reg_cpp=0;
 Buffer *b_cre_all_hpp=0;
 Buffer *b_reg_ser_hpp=0;
 Buffer *b_reg_all_hpp=0;
 Buffer *b_add_all_hpp=0;
-Buffer *b_xll_reg_cpp=0;// FIXME standardize name
+Buffer *b_xll_reg_cpp=0;
 
 List *errorList = NewList();
 
@@ -403,6 +403,9 @@ public:
 class REPOSIT : public Language {
 
     BufferMap bm_;
+    BufferGroup *bg;
+    bool automatic;
+    int functionType;//0=function, 1=constructor, 2=member
 
 protected:
 
@@ -463,6 +466,16 @@ Node *getNode(Node *n, const char *c) {
         SWIG_exit(EXIT_FAILURE);
     }
     return ret;
+}
+
+void printNode(Node *n, File *f=0) {
+    if (0==f)
+        f=b_wrappers;
+    List *list1 = Keys(n);
+    for(int i=0; i<Len(list1); ++i) {
+        String *key = Getitem(list1, i);
+        Printf(f,"/* %d %s %s */\n", i, key, Getattr(n, key));
+    }
 }
 
 virtual int top(Node *n) {
@@ -684,15 +697,105 @@ virtual int top(Node *n) {
     Delete(errorList);//FIXME also delete each item individually
 
    return SWIG_OK;
-  }
-
-void printNode(Node *n) {
-    List *list1 = Keys(n);
-    for(int i=0; i<Len(list1); ++i) {
-        String *key = Getitem(list1, i);
-        Printf(b_wrappers,"/* %d %s %s */\n", i, key, Getattr(n, key));
-    }
 }
+
+// overrride base class members, write debug info to b_director,
+// and possibly pass control to a handler.
+
+int moduleDirective(Node *n) {
+    nmspace = Getattr(n, "name");
+    Printf(b_director, "BEGIN moduleDirective - node name='%s'.\n", Char(nmspace));
+    printNode(n, b_director);
+    Printf(b_director, "call parent\n");
+    int ret=Language::moduleDirective(n);
+    Printf(b_director, "END   moduleDirective - node name='%s'.\n", Char(nmspace));
+    return ret;
+}
+
+int classDeclaration(Node *n) {
+    nmspace = Getattr(n, "name");
+    Printf(b_director, "BEGIN classDeclaration - node name='%s'.\n", Char(nmspace));
+    printNode(n, b_director);
+    Printf(b_director, "call parent\n");
+    int ret=Language::classDeclaration(n);
+    Printf(b_director, "END   classDeclaration - node name='%s'.\n", Char(nmspace));
+    return ret;
+}
+
+int constructorDeclaration(Node *n) {
+    nmspace = Getattr(n, "name");
+    Printf(b_director, "BEGIN constructorDeclaration - node name='%s'.\n", Char(nmspace));
+    printNode(n, b_director);
+    Printf(b_director, "call parent\n");
+    int ret=Language::constructorDeclaration(n);
+    Printf(b_director, "END   constructorDeclaration - node name='%s'.\n", Char(nmspace));
+    return ret;
+}
+
+int namespaceDeclaration(Node *n) {
+    nmspace = Getattr(n, "name");
+    Printf(b_director, "BEGIN namespaceDeclaration - node name='%s'.\n", Char(nmspace));
+    printNode(n, b_director);
+    Printf(b_director, "call parent\n");
+    int ret=Language::namespaceDeclaration(n);
+    Printf(b_director, "END   namespaceDeclaration - node name='%s'.\n", Char(nmspace));
+    return ret;
+}
+
+int functionHandler(Node *n) {
+    String *nodename = Getattr(n, "name");
+    Printf(b_director, "BEGIN functionHandler - node name='%s'.\n", Char(nodename));
+    printNode(n, b_director);
+    Printf(b_director, "call parent\n");
+    //int ret=Language::functionHandler(n);
+    int ret=functionHandlerImpl(n);
+    Printf(b_director, "END   functionHandler - node name='%s'.\n", Char(nodename));
+    return ret;
+}
+
+int memberfunctionHandler(Node *n) {
+    String *nodename = Getattr(n, "name");
+    Printf(b_director, "BEGIN memberfunctionHandler - node name='%s'.\n", Char(nodename));
+    printNode(n, b_director);
+    Printf(b_director, "call parent\n");
+    //int ret=Language::memberfunctionHandler(n);
+    int ret=memberfunctionHandlerImpl(n);
+    Printf(b_director, "END   memberfunctionHandler - node name='%s'.\n", Char(nodename));
+    return ret;
+}
+
+int constructorHandler(Node *n) {
+    String *nodename = Getattr(n, "name");
+    Printf(b_director, "BEGIN constructorHandler - node name='%s'.\n", Char(nodename));
+    printNode(n, b_director);
+    Printf(b_director, "call parent\n");
+    //int ret=Language::constructorHandler(n);
+    int ret=constructorHandlerImpl(n);
+    Printf(b_director, "END   constructorHandler - node name='%s'.\n", Char(nodename));
+    return ret;
+}
+
+int functionWrapper(Node *n) {
+    String *nodename = Getattr(n, "name");
+    Printf(b_director, "BEGIN functionWrapper - node name='%s'.\n", Char(nodename));
+    printNode(n, b_director);
+    Printf(b_director, "call parent\n");
+    //int ret=Language::functionWrapper(n);
+    int ret=functionWrapperImpl(n);
+    Printf(b_director, "END   functionWrapper - node name='%s'.\n", Char(nodename));
+    return ret;
+}
+
+int classHandler(Node *n) {
+    String *nodename = Getattr(n, "name");
+    Printf(b_director, "BEGIN classHandler - node name='%s'.\n", Char(nodename));
+    printNode(n, b_director);
+    Printf(b_director, "call parent\n");
+    int ret=Language::classHandler(n);
+    Printf(b_director, "END   classHandler - node name='%s'.\n", Char(nodename));
+    return ret;
+}
+
 
 void printList(Node *n) {
     while (n) {
@@ -916,7 +1019,27 @@ String *copyUpper2(String *s) {
     return ret;
 }
 
-void printFunc(Node *n, BufferGroup *bg, bool automatic) {
+int functionWrapperImpl(Node *n) {
+    int ret;
+    if (0==functionType)
+        ret = functionWrapperImplFunc(n);
+    else if (1==functionType)
+        ret = functionWrapperImplCtor(n);
+    else if (2==functionType)
+        ret = functionWrapperImplMemb(n);
+    else
+        ret = SWIG_OK;
+    functionType=-1;
+    return ret;
+}
+
+int functionHandlerImpl(Node *n) {
+    xyz(n);
+    functionType=0;
+    return Language::functionHandler(n);
+}
+
+int functionWrapperImplFunc(Node *n) {
     if (generateCppAddin) {
     Printf(bg->b_add_cpp->b,"//****FUNC*****\n");
     }
@@ -1002,99 +1125,7 @@ void printFunc(Node *n, BufferGroup *bg, bool automatic) {
     Printf(bg->b_xll_cpp->b, "    }\n");
     Printf(bg->b_xll_cpp->b, "}\n");
     }
-}
-
-void printMemb(Node *n, BufferGroup *bg) {
-    if (generateCppAddin) {
-    Printf(bg->b_add_cpp->b,"//****MEMB*****\n");
-    }
-    String   *name   = Getattr(n,"name");
-    SwigType *type   = Getattr(n,"type");
-    Node *p = Getattr(n,"parentNode");
-    String   *cls   = Getattr(p,"sym:name");
-    String   *pname   = Getattr(p,"name");
-    ParmList *parms  = Getattr(n,"parms");
-    String *addinClass = NewStringf("%s::%s", module, cls);
-
-    String *temp0 = copyUpper(cls);
-    String *temp1 = copyUpper(name);
-    String *funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
-    Setattr(n, "rp:funcName", funcName);
-    printf("funcName=%s\n", Char(funcName));
-
-    // Create from parms another list parms2 - prepend an argument to represent
-    // the object ID which is passed in as the first parameter to every member.
-    Parm *parms2 = NewHash();
-    Setattr(parms2, "name", "objectID");
-    String *nt  = NewString("std::string");
-    SwigType_add_qualifier(nt, "const");
-    SwigType_add_reference(nt);
-    Setattr(parms2, "type", nt);
-    Setattr(parms2, "nextSibling", Getattr(parms, "nextSibling"));
-
-    Printf(b_wrappers, "//***ABC\n");
-    printList(parms2);
-    Printf(b_wrappers, "// *a0* %s <<\n", Char(ParmList_str(parms)));
-    Printf(b_wrappers, "// *a1* %s <<\n", Char(ParmList_protostr(parms)));
-    Printf(b_wrappers, "// *a2* %s <<\n", Char(ParmList_str(parms2)));
-    Printf(b_wrappers, "// *a3* %s <<\n", Char(ParmList_protostr(parms2)));
-    Printf(b_wrappers, "//***ABC\n");
-
-    if (generateCppAddin) {
-    emitTypeMap(bg->b_add_hpp->b, "rp_tm_add_ret", n, type, 1);
-    Printf(bg->b_add_hpp->b,"    %s(\n", funcName);
-    emitParmList(parms2, bg->b_add_hpp->b, 2, "rp_tm_add_prm", 2);
-    Printf(bg->b_add_hpp->b,"    );\n\n");
-
-    emitTypeMap(bg->b_add_cpp->b, "rp_tm_add_ret", n, type);
-    Printf(bg->b_add_cpp->b,"%s::%s(\n", addinCppNameSpace, funcName);
-    emitParmList(parms2, bg->b_add_cpp->b, 2, "rp_tm_add_prm", 2);
-    Printf(bg->b_add_cpp->b,"    ) {\n\n");
-    emitParmList(parms, bg->b_add_cpp->b, 1, "rp_tm_add_cnv", 1, 0, false);
-    Printf(bg->b_add_cpp->b,"\n");
-    Printf(bg->b_add_cpp->b,"    OH_GET_REFERENCE(x, objectID, %s, %s);\n", addinClass, pname);
-    Printf(bg->b_add_cpp->b,"    return x->%s(\n", name);
-    emitParmList(parms, bg->b_add_cpp->b, 1, "rp_tm_add_cll", 3, ',', true, true);
-    Printf(bg->b_add_cpp->b,"        );\n", name);
-    Printf(bg->b_add_cpp->b,"}\n");
-    }
-
-    if (generateXllAddin) {
-    excelRegister(bg->b_xll_reg->b, n, type, parms2);
-    excelUnregister(bg->b_xll_reg->b2, n, type, parms2);
-
-    Printf(bg->b_xll_cpp->b, "\n");
-    Printf(bg->b_xll_cpp->b, "DLLEXPORT\n");
-    emitTypeMap(bg->b_xll_cpp->b, "rp_tm_xll_ret", n, type);
-    Printf(bg->b_xll_cpp->b, "%s(\n", funcName);
-    emitParmList(parms2, bg->b_xll_cpp->b, 2, "rp_tm_xll_prm");
-    Printf(bg->b_xll_cpp->b, ") {\n");
-    Printf(bg->b_xll_cpp->b, "\n");
-    Printf(bg->b_xll_cpp->b, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
-    Printf(bg->b_xll_cpp->b, "\n");
-    Printf(bg->b_xll_cpp->b, "    try {\n");
-    Printf(bg->b_xll_cpp->b, "\n");
-    Printf(bg->b_xll_cpp->b, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
-    Printf(bg->b_xll_cpp->b, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
-    Printf(bg->b_xll_cpp->b, "\n");
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_tm_xll_cnv", 2, 0, false);
-    Printf(bg->b_xll_cpp->b, "\n");
-    Printf(bg->b_xll_cpp->b, "        OH_GET_REFERENCE(x, objectID, %s, %s);\n", addinClass, pname);
-    Printf(bg->b_xll_cpp->b, "\n");
-    emitTypeMap(bg->b_xll_cpp->b, "rp_xll_get", n, type, 2);
-    Printf(bg->b_xll_cpp->b, "        x->%s(\n", name);
-    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_tm_xll_cll_obj", 3, ',', true, true);
-    Printf(bg->b_xll_cpp->b, "        );\n\n");
-    emitTypeMap(bg->b_xll_cpp->b, "rp_tm_xll_rdc", n, type, 2);
-    Printf(bg->b_xll_cpp->b, "\n");
-    Printf(bg->b_xll_cpp->b, "    } catch (const std::exception &e) {\n");
-    Printf(bg->b_xll_cpp->b, "\n");
-    Printf(bg->b_xll_cpp->b, "        ObjectHandler::RepositoryXL::instance().logError(e.what(), functionCall);\n");
-    Printf(bg->b_xll_cpp->b, "        return 0;\n");
-    Printf(bg->b_xll_cpp->b, "\n");
-    Printf(bg->b_xll_cpp->b, "    }\n");
-    Printf(bg->b_xll_cpp->b, "}\n");
-    }
+    return SWIG_OK;
 }
 
 void voGetProp(File *f, ParmList *parms) {
@@ -1121,8 +1152,13 @@ void voSetProp(File *f, ParmList *parms) {
     Printf(f, "            // END   func voSetProp (using typemap rp_tm_val_cnv)\n");
 }
 
-void printCtor(Node *n, BufferGroup *bg) {
+int constructorHandlerImpl(Node *n) {
+    xyz(n);
+    functionType=1;
+    return Language::constructorHandler(n);
+}
 
+int functionWrapperImplCtor(Node *n) {
     String   *name   = Getattr(n,"name");
     SwigType *type   = Getattr(n,"type");
     ParmList *parms  = Getattr(n,"parms");
@@ -1414,9 +1450,110 @@ void printCtor(Node *n, BufferGroup *bg) {
     Printf(bg->b_xll_cpp->b, "}\n");
     }
     }
+    return SWIG_OK;
 }
 
-int functionWrapper(Node *n) {
+int memberfunctionHandlerImpl(Node *n) {
+    xyz(n);
+    functionType=2;
+    return Language::memberfunctionHandler(n);
+}
+
+int functionWrapperImplMemb(Node *n) {
+    if (generateCppAddin) {
+    Printf(bg->b_add_cpp->b,"//****MEMB*****\n");
+    }
+    String   *name   = Getattr(n,"name");
+    SwigType *type   = Getattr(n,"type");
+    Node *p = Getattr(n,"parentNode");
+    String   *cls   = Getattr(p,"sym:name");
+    String   *pname   = Getattr(p,"name");
+    ParmList *parms  = Getattr(n,"parms");
+    String *addinClass = NewStringf("%s::%s", module, cls);
+
+    String *temp0 = copyUpper(cls);
+    String *temp1 = copyUpper(name);
+    String *funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
+    Setattr(n, "rp:funcName", funcName);
+    printf("funcName=%s\n", Char(funcName));
+
+    // Create from parms another list parms2 - prepend an argument to represent
+    // the object ID which is passed in as the first parameter to every member.
+    Parm *parms2 = NewHash();
+    Setattr(parms2, "name", "objectID");
+    String *nt  = NewString("std::string");
+    SwigType_add_qualifier(nt, "const");
+    SwigType_add_reference(nt);
+    Setattr(parms2, "type", nt);
+    Setattr(parms2, "nextSibling", Getattr(parms, "nextSibling"));
+
+    Printf(b_wrappers, "//***ABC\n");
+    printList(parms2);
+    Printf(b_wrappers, "// *a0* %s <<\n", Char(ParmList_str(parms)));
+    Printf(b_wrappers, "// *a1* %s <<\n", Char(ParmList_protostr(parms)));
+    Printf(b_wrappers, "// *a2* %s <<\n", Char(ParmList_str(parms2)));
+    Printf(b_wrappers, "// *a3* %s <<\n", Char(ParmList_protostr(parms2)));
+    Printf(b_wrappers, "//***ABC\n");
+
+    if (generateCppAddin) {
+    emitTypeMap(bg->b_add_hpp->b, "rp_tm_add_ret", n, type, 1);
+    Printf(bg->b_add_hpp->b,"    %s(\n", funcName);
+    emitParmList(parms2, bg->b_add_hpp->b, 2, "rp_tm_add_prm", 2);
+    Printf(bg->b_add_hpp->b,"    );\n\n");
+
+    emitTypeMap(bg->b_add_cpp->b, "rp_tm_add_ret", n, type);
+    Printf(bg->b_add_cpp->b,"%s::%s(\n", addinCppNameSpace, funcName);
+    emitParmList(parms2, bg->b_add_cpp->b, 2, "rp_tm_add_prm", 2);
+    Printf(bg->b_add_cpp->b,"    ) {\n\n");
+    emitParmList(parms, bg->b_add_cpp->b, 1, "rp_tm_add_cnv", 1, 0, false);
+    Printf(bg->b_add_cpp->b,"\n");
+    Printf(bg->b_add_cpp->b,"    OH_GET_REFERENCE(x, objectID, %s, %s);\n", addinClass, pname);
+    Printf(bg->b_add_cpp->b,"    return x->%s(\n", name);
+    emitParmList(parms, bg->b_add_cpp->b, 1, "rp_tm_add_cll", 3, ',', true, true);
+    Printf(bg->b_add_cpp->b,"        );\n", name);
+    Printf(bg->b_add_cpp->b,"}\n");
+    }
+
+    if (generateXllAddin) {
+    excelRegister(bg->b_xll_reg->b, n, type, parms2);
+    excelUnregister(bg->b_xll_reg->b2, n, type, parms2);
+
+    Printf(bg->b_xll_cpp->b, "\n");
+    Printf(bg->b_xll_cpp->b, "DLLEXPORT\n");
+    emitTypeMap(bg->b_xll_cpp->b, "rp_tm_xll_ret", n, type);
+    Printf(bg->b_xll_cpp->b, "%s(\n", funcName);
+    emitParmList(parms2, bg->b_xll_cpp->b, 2, "rp_tm_xll_prm");
+    Printf(bg->b_xll_cpp->b, ") {\n");
+    Printf(bg->b_xll_cpp->b, "\n");
+    Printf(bg->b_xll_cpp->b, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
+    Printf(bg->b_xll_cpp->b, "\n");
+    Printf(bg->b_xll_cpp->b, "    try {\n");
+    Printf(bg->b_xll_cpp->b, "\n");
+    Printf(bg->b_xll_cpp->b, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
+    Printf(bg->b_xll_cpp->b, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
+    Printf(bg->b_xll_cpp->b, "\n");
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_tm_xll_cnv", 2, 0, false);
+    Printf(bg->b_xll_cpp->b, "\n");
+    Printf(bg->b_xll_cpp->b, "        OH_GET_REFERENCE(x, objectID, %s, %s);\n", addinClass, pname);
+    Printf(bg->b_xll_cpp->b, "\n");
+    emitTypeMap(bg->b_xll_cpp->b, "rp_xll_get", n, type, 2);
+    Printf(bg->b_xll_cpp->b, "        x->%s(\n", name);
+    emitParmList(parms, bg->b_xll_cpp->b, 1, "rp_tm_xll_cll_obj", 3, ',', true, true);
+    Printf(bg->b_xll_cpp->b, "        );\n\n");
+    emitTypeMap(bg->b_xll_cpp->b, "rp_tm_xll_rdc", n, type, 2);
+    Printf(bg->b_xll_cpp->b, "\n");
+    Printf(bg->b_xll_cpp->b, "    } catch (const std::exception &e) {\n");
+    Printf(bg->b_xll_cpp->b, "\n");
+    Printf(bg->b_xll_cpp->b, "        ObjectHandler::RepositoryXL::instance().logError(e.what(), functionCall);\n");
+    Printf(bg->b_xll_cpp->b, "        return 0;\n");
+    Printf(bg->b_xll_cpp->b, "\n");
+    Printf(bg->b_xll_cpp->b, "    }\n");
+    Printf(bg->b_xll_cpp->b, "}\n");
+    }
+    return SWIG_OK;
+}
+
+void xyz(Node *n) {
     String *group = Getattr(n,"feature:rp:group");
     String *include = Getattr(n,"feature:rp:include");
 
@@ -1425,14 +1562,14 @@ int functionWrapper(Node *n) {
     // unless overridden with '%feature("rp:generation", "manual");' :
     bool manual = 0 != checkAttribute(n, "feature:rp:generation", "manual");
     // The source code for this SWIG module is cleaner if we think of it the opposite way:
-    bool automatic = !manual;
+    automatic = !manual;
 
     SwigType *type   = Getattr(n,"type");
     cppClass = getTypeMap("rp_tm_obj_cls", n, type, false);
-    BufferGroup *bg = bm_.getBufferGroup (group, include, automatic);
+    bg = bm_.getBufferGroup (group, include, automatic);
 
-    // In the *.i files if there is a parameter with no name
-    // that would cause a segfault later so trap it here.
+    // In the *.i files, if there is a parameter with no name,
+    // that would cause a segfault later, so trap it here.
     String *nodeName = Getattr(n, "name");
     printf("Processing node name '%s'.\n", Char(nodeName));
     printf("Group='%s'.\n", Char(group));
@@ -1457,31 +1594,7 @@ int functionWrapper(Node *n) {
     printNode(n);
     printList(Getattr(n, "parms"));
     Printf(b_wrappers,"//*************\n");
-
-    // FIXME instead of this if statement,  would it be possible
-    // just to override functionHandler/memberfunctionHandler/constructorHandler?
-    String *nodeType = Getattr(n,"nodeType");
-    if (0 == Strcmp("cdecl", nodeType)) {
-        if (NULL == Getattr(n, "ismember")) {
-            printFunc(n, bg, automatic);
-        } else {
-            printMemb(n, bg);
-        }
-    } else if (0 == Strcmp("constructor", nodeType)) {
-            printCtor(n, bg);
-    } else {
-        printf("no handler for this node - skipping.\n");
-    }
-
-  return SWIG_OK;
 }
-
-int namespaceDeclaration(Node *n) {
-    nmspace = Getattr(n, "name");
-    printf("Processing namespace node '%s'.\n", Char(nmspace));
-    return Language::namespaceDeclaration(n);
-}
-
 }; // class REPOSIT
 
 extern "C" Language *
