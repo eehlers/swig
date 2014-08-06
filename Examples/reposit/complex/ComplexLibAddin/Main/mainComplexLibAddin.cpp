@@ -18,12 +18,15 @@ int main() {
 //        std::cout << ComplexLibAddinCpp::clEchoCharStar("hello") << std::endl;
 //        std::cout << ComplexLibAddinCpp::clEchoString("test") << std::endl;
 
-        ComplexLibAddinCpp::clTest("my_test", 42);
-        std::cout << ComplexLibAddinCpp::clTestGetInput("my_test") << std::endl;
+//        ComplexLibAddinCpp::clTest("my_test", 42);
+//        std::cout << ComplexLibAddinCpp::clTestGetInput("my_test") << std::endl;
 
         // Test inheritance
-        ComplexLibAddinCpp::clB("b");
-        std::cout << ComplexLibAddinCpp::clAF("b") << std::endl;
+        ComplexLibAddinCpp::clA("a");
+        std::cout << ComplexLibAddinCpp::clAF("a") << std::endl;
+
+        ComplexLibAddinCpp::clC("c");
+        std::cout << ComplexLibAddinCpp::clBF("c") << std::endl;
 
         ComplexLibAddinCpp::closeAddin();
         std::cout << "bye" << std::endl;

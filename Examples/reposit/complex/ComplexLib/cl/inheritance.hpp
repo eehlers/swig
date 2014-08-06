@@ -10,12 +10,17 @@ namespace ComplexLib {
 
     class A {
     public:
-        virtual std::string f();
-        virtual ~A() {}
-        //virtual ~A()=0;
+        std::string f();
     };
 
-    class B : public A {};
+    class B {
+    public:
+        virtual std::string f();
+        //virtual ~B()=0;
+        virtual ~B() {}
+    };
+
+    class C : public B {};
 };
 
 #endif

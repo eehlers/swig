@@ -5,14 +5,21 @@
 %}
 
 namespace ComplexLib {
+
     class A {
+    public:
+        A();
+        std::string f();
+    };
+
+    class B {
     public:
         virtual std::string f();
     };
 
-    class B : public A {
+    class C : public B {
     public:
-        B();
+        C();
     };
 }
 

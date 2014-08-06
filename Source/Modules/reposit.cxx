@@ -10,7 +10,9 @@ String *prefix = 0;
 String *module = 0;
 String *addinCppNameSpace = 0;
 String *nmspace = 0;
+String *libraryClass = 0;
 long idNum = 4;
+bool defaultCtor = false;
 
 // FIXME store some defaults in reposit.swg and retrieve them here.
 String *objDir = NewString("AddinObjects");
@@ -20,7 +22,6 @@ String *objInc = NewString("AddinObjects");
 String *addInc = NewString("AddinCpp");
 String *xllInc = NewString("AddinXl");
 
-bool defaultCtor = false;
 
 struct Buffer;
 
@@ -1178,6 +1179,8 @@ void voSetProp(File *f, ParmList *parms) {
 
 int constructorHandlerImpl(Node *n) {
     defaultCtor = Getattr(n, "default_constructor");
+    Node *p = Getattr(n, "parentNode");
+    libraryClass = Getattr(p, "name");
     functionType=1;
     return Language::constructorHandler(n);
 }
@@ -1365,8 +1368,7 @@ int functionWrapperImplCtor(Node *n) {
 
     if (defaultCtor) {
         Printf(bg->b_obj_hpp->b, "    // BEGIN typemap rp_tm_obj_cls\n");
-        //Printf(bg->b_obj_hpp->b,"%s", defaultCtor);
-        Printf(bg->b_obj_hpp->b,"OH_LIB_CLASS(A, ComplexLib::A);");
+        Printf(bg->b_obj_hpp->b,"OH_LIB_CLASS(%s, %s);\n", name, libraryClass);
         Printf(bg->b_obj_hpp->b, "    // END   typemap rp_tm_obj_cls\n");
     } else {
         String *s0 = NewString("");
