@@ -18,6 +18,7 @@ SubDirs:
 
 clean:
 	rm -f $(LIB) $(OBJECTS)
+	rm register_creators.cpp
 	$(MAKE) -C create clean
 	$(MAKE) -C register clean
 

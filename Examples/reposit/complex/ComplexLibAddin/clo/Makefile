@@ -29,6 +29,7 @@ SubDirs:
 
 clean:
 	rm -f $(LIB) $(OBJECTS)
+	rm obj_*.?pp
 	$(MAKE) -C conversions clean
 	$(MAKE) -C enumerations clean
 	$(MAKE) -C serialization clean

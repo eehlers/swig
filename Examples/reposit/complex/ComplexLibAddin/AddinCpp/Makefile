@@ -22,5 +22,6 @@ $(LIB): $(OBJECTS)
 
 clean:
 	rm -f $(LIB) $(OBJECTS)
+	rm add_*.?pp
 #	$(MAKE) -C conversions clean
 
