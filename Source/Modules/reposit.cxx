@@ -703,32 +703,32 @@ virtual int top(Node *n) {
 // and possibly pass control to a handler.
 
 int moduleDirective(Node *n) {
-    nmspace = Getattr(n, "name");
-    Printf(b_director, "BEGIN moduleDirective - node name='%s'.\n", Char(nmspace));
+    String *nodename = Getattr(n, "name");
+    Printf(b_director, "BEGIN moduleDirective - node name='%s'.\n", Char(nodename));
     printNode(n, b_director);
     Printf(b_director, "call parent\n");
     int ret=Language::moduleDirective(n);
-    Printf(b_director, "END   moduleDirective - node name='%s'.\n", Char(nmspace));
+    Printf(b_director, "END   moduleDirective - node name='%s'.\n", Char(nodename));
     return ret;
 }
 
 int classDeclaration(Node *n) {
-    nmspace = Getattr(n, "name");
-    Printf(b_director, "BEGIN classDeclaration - node name='%s'.\n", Char(nmspace));
+    String *nodename = Getattr(n, "name");
+    Printf(b_director, "BEGIN classDeclaration - node name='%s'.\n", Char(nodename));
     printNode(n, b_director);
     Printf(b_director, "call parent\n");
     int ret=Language::classDeclaration(n);
-    Printf(b_director, "END   classDeclaration - node name='%s'.\n", Char(nmspace));
+    Printf(b_director, "END   classDeclaration - node name='%s'.\n", Char(nodename));
     return ret;
 }
 
 int constructorDeclaration(Node *n) {
-    nmspace = Getattr(n, "name");
-    Printf(b_director, "BEGIN constructorDeclaration - node name='%s'.\n", Char(nmspace));
+    String *nodename = Getattr(n, "name");
+    Printf(b_director, "BEGIN constructorDeclaration - node name='%s'.\n", Char(nodename));
     printNode(n, b_director);
     Printf(b_director, "call parent\n");
     int ret=Language::constructorDeclaration(n);
-    Printf(b_director, "END   constructorDeclaration - node name='%s'.\n", Char(nmspace));
+    Printf(b_director, "END   constructorDeclaration - node name='%s'.\n", Char(nodename));
     return ret;
 }
 
