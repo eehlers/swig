@@ -1,6 +1,6 @@
 
-%include functions.i
-%include echo.i
+//%include functions.i
+//%include echo.i
 %include objects.i
 %include inheritance.i
 //%include adder.i

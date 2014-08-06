@@ -7,7 +7,6 @@
 namespace ComplexLib {
     class A {
     public:
-        //A();
         virtual std::string f();
     };
 

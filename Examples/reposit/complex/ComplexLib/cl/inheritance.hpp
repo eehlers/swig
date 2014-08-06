@@ -11,7 +11,8 @@ namespace ComplexLib {
     class A {
     public:
         virtual std::string f();
-        virtual ~A()/*=0;*/ {}
+        virtual ~A() {}
+        //virtual ~A()=0;
     };
 
     class B : public A {};

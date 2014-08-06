@@ -9,14 +9,14 @@ int main() {
         ComplexLibAddinCpp::initializeAddin();
         std::cout << "ObjectHandler version = " << ObjectHandler::ohVersion() << std::endl;
 
-        std::cout << ComplexLibAddinCpp::clFunc1() << std::endl;
-
-        ComplexLibAddinCpp::clEchoVoid();
-        std::cout << ComplexLibAddinCpp::clEchoBool(true) << std::endl;
-        std::cout << ComplexLibAddinCpp::clEchoLong(42) << std::endl;
-        std::cout << ComplexLibAddinCpp::clEchoDouble(123.456) << std::endl;
-        std::cout << ComplexLibAddinCpp::clEchoCharStar("hello") << std::endl;
-        std::cout << ComplexLibAddinCpp::clEchoString("test") << std::endl;
+//        std::cout << ComplexLibAddinCpp::clFunc1() << std::endl;
+//
+//        ComplexLibAddinCpp::clEchoVoid();
+//        std::cout << ComplexLibAddinCpp::clEchoBool(true) << std::endl;
+//        std::cout << ComplexLibAddinCpp::clEchoLong(42) << std::endl;
+//        std::cout << ComplexLibAddinCpp::clEchoDouble(123.456) << std::endl;
+//        std::cout << ComplexLibAddinCpp::clEchoCharStar("hello") << std::endl;
+//        std::cout << ComplexLibAddinCpp::clEchoString("test") << std::endl;
 
         ComplexLibAddinCpp::clTest("my_test", 42);
         std::cout << ComplexLibAddinCpp::clTestGetInput("my_test") << std::endl;

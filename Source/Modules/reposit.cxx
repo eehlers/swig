@@ -20,7 +20,7 @@ String *objInc = NewString("AddinObjects");
 String *addInc = NewString("AddinCpp");
 String *xllInc = NewString("AddinXl");
 
-String *cppClass = 0;
+bool defaultCtor = false;
 
 struct Buffer;
 
@@ -287,7 +287,7 @@ struct BufferGroup {
 
         Printf(b_reg_all_hpp->b, "#include <%s/serialization/register/serialization_%s.hpp>\n", objInc, name);
 
-        if (!cppClass) {
+        if (!defaultCtor) {
         Printf(b_reg_ser_hpp->b, "        register_%s(ar);\n", name);
         }
 
@@ -1177,6 +1177,7 @@ void voSetProp(File *f, ParmList *parms) {
 }
 
 int constructorHandlerImpl(Node *n) {
+    defaultCtor = Getattr(n, "default_constructor");
     functionType=1;
     return Language::constructorHandler(n);
 }
@@ -1236,7 +1237,7 @@ int functionWrapperImplCtor(Node *n) {
     Printf(b_wrappers, "// *a3* %s <<\n", Char(ParmList_protostr(parms2)));
     Printf(b_wrappers, "//***DEF\n");
 
-    if (!cppClass) {
+    if (!defaultCtor) {
     Printf(bg->b_val_hpp->b,"        class %s : public ObjectHandler::ValueObject {\n", funcName);
     Printf(bg->b_val_hpp->b,"            friend class boost::serialization::access;\n");
     Printf(bg->b_val_hpp->b,"        public:\n");
@@ -1326,7 +1327,7 @@ int functionWrapperImplCtor(Node *n) {
     Printf(bg->b_val_cpp->b,"        }\n");
     }
 
-    if (!cppClass) {
+    if (!defaultCtor) {
     Printf(bg->b_cre_hpp->b, "\n");
     Printf(bg->b_cre_hpp->b, "boost::shared_ptr<ObjectHandler::Object> create_%s(\n", funcName);
     Printf(bg->b_cre_hpp->b, "    const boost::shared_ptr<ObjectHandler::ValueObject>&);\n");
@@ -1352,7 +1353,7 @@ int functionWrapperImplCtor(Node *n) {
     Printf(bg->b_cre_cpp->b, "}\n");
     }
 
-    if (!cppClass) {
+    if (!defaultCtor) {
     Printf(bg->b_reg_cpp->b, "    // class ID %d in the boost serialization framework\n", idNum);
     Printf(bg->b_reg_cpp->b, "    ar.register_type<%s::ValueObjects::%s>();\n", module, funcName);
 
@@ -1362,9 +1363,10 @@ int functionWrapperImplCtor(Node *n) {
 
     idNum++;
 
-    if (cppClass) {
+    if (defaultCtor) {
         Printf(bg->b_obj_hpp->b, "    // BEGIN typemap rp_tm_obj_cls\n");
-        Printf(bg->b_obj_hpp->b,"%s", cppClass);
+        //Printf(bg->b_obj_hpp->b,"%s", defaultCtor);
+        Printf(bg->b_obj_hpp->b,"OH_LIB_CLASS(A, ComplexLib::A);");
         Printf(bg->b_obj_hpp->b, "    // END   typemap rp_tm_obj_cls\n");
     } else {
         String *s0 = NewString("");
@@ -1430,7 +1432,7 @@ int functionWrapperImplCtor(Node *n) {
     excelRegister(bg->b_xll_reg->b, n, 0, parms3);
     excelUnregister(bg->b_xll_reg->b2, n, type, parms3);
 
-    if (!cppClass) {
+    if (!defaultCtor) {
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "DLLEXPORT char *%s(\n", funcName);
     emitParmList(parms2, bg->b_xll_cpp->b, 2, "rp_tm_xll_prm");
@@ -1586,8 +1588,8 @@ void functionWrapperImplAll(Node *n) {
     // The source code for this SWIG module is cleaner if we think of it the opposite way:
     automatic = !manual;
 
-    SwigType *type   = Getattr(n,"type");
-    cppClass = getTypeMap("rp_tm_obj_cls", n, type, false);
+    //SwigType *type   = Getattr(n,"type");
+    //xxx = getTypeMap("rp_tm_obj_cls", n, type, false);
     bg = bm_.getBufferGroup (group, include, automatic);
 
     // In the *.i files, if there is a parameter with no name,
