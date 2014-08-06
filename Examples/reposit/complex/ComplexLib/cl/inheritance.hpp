@@ -8,19 +8,44 @@
 
 namespace ComplexLib {
 
+    // A) Base case - one class.
+
     class A {
     public:
-        std::string f();
+        std::string func() { return "ComplexLib::A::func()"; }
     };
 
-    class B {
+    // B) One base class, one derived.
+
+    class BA {
     public:
-        virtual std::string f();
-        //virtual ~B()=0;
-        virtual ~B() {}
+        virtual std::string func()=0;
+        virtual ~BA() {}
     };
 
-    class C : public B {};
+    class BB : public BA {
+    public:
+        virtual std::string func() { return "ComplexLib::BB::func()"; }
+    };
+
+    // C) Hierarchy of 3 classes.
+
+    class CA {
+    public:
+        virtual std::string func()=0;
+        virtual ~CA() {}
+    };
+
+    class CB : public CA {
+    public:
+        virtual std::string func()=0;
+    };
+
+    class CC : public CB {
+    public:
+        virtual std::string func() { return "ComplexLib::CC::func()"; }
+    };
+
 };
 
 #endif

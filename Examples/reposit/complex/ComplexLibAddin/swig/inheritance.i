@@ -6,20 +6,43 @@
 
 namespace ComplexLib {
 
+    // A
+
     class A {
     public:
         A();
-        std::string f();
+        virtual std::string func();
     };
 
-    class B {
+    // B
+
+    class BA {
     public:
-        virtual std::string f();
+        virtual std::string func();
     };
 
-    class C : public B {
+    class BB : public BA {
     public:
-        C();
+        BB();
+        virtual std::string func();
+    };
+
+    // C
+
+    class CA {
+    public:
+        virtual std::string func();
+    };
+
+    class CB : public CA {
+    public:
+        virtual std::string func();
+    };
+
+    class CC : public CB {
+    public:
+        CC();
+        virtual std::string func();
     };
 }
 

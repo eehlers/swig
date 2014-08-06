@@ -23,10 +23,16 @@ int main() {
 
         // Test inheritance
         ComplexLibAddinCpp::clA("a");
-        std::cout << ComplexLibAddinCpp::clAF("a") << std::endl;
+        std::cout << ComplexLibAddinCpp::clAFunc("a") << std::endl;
 
-        ComplexLibAddinCpp::clC("c");
-        std::cout << ComplexLibAddinCpp::clBF("c") << std::endl;
+        ComplexLibAddinCpp::clBB("bb");
+        std::cout << ComplexLibAddinCpp::clBAFunc("bb") << std::endl;
+        std::cout << ComplexLibAddinCpp::clBBFunc("bb") << std::endl;
+
+        ComplexLibAddinCpp::clCC("cc");
+        std::cout << ComplexLibAddinCpp::clCAFunc("cc") << std::endl;
+        std::cout << ComplexLibAddinCpp::clCBFunc("cc") << std::endl;
+        std::cout << ComplexLibAddinCpp::clCCFunc("cc") << std::endl;
 
         ComplexLibAddinCpp::closeAddin();
         std::cout << "bye" << std::endl;

@@ -13,6 +13,7 @@ String *nmspace = 0;
 String *libraryClass = 0;
 long idNum = 4;
 bool generateCtor = false;
+String *parent = 0;
 
 // FIXME store some defaults in reposit.swg and retrieve them here.
 String *objDir = NewString("AddinObjects");
@@ -1184,8 +1185,14 @@ int constructorHandlerImpl(Node *n) {
     // For our purposes if no ctor was configured then we don't generate one:
     generateCtor = !defaultCtor;
 
-    Node *p = Getattr(n, "parentNode");
-    libraryClass = Getattr(p, "name");
+
+    Node *p=Getattr(n, "parentNode");
+    libraryClass=Getattr(p, "name");
+    if (Node *l=Getattr(p, "baselist")) {
+        parent=Getitem(l, 0);
+    } else {
+        parent=0;
+    }
     functionType=1;
     return Language::constructorHandler(n);
 }
@@ -1429,9 +1436,13 @@ int functionWrapperImplCtor(Node *n) {
         }
 
         Printf(b_cre_reg_cpp->b, "    registerCreator(\"%s\", create_%s);\n", funcName, funcName);
-    } else {
+    } else { //!generateCtor
         Printf(bg->b_obj_hpp->b, "    // BEGIN typemap rp_tm_obj_cls\n");
-        Printf(bg->b_obj_hpp->b, "    OH_LIB_CLASS(%s, %s);\n", name, libraryClass);
+        if (parent) {
+            Printf(bg->b_obj_hpp->b, "    OH_OBJ_CLASS(%s, %s);\n", name, parent);
+        } else {
+            Printf(bg->b_obj_hpp->b, "    OH_LIB_CLASS(%s, %s);\n", name, libraryClass);
+        }
         Printf(bg->b_obj_hpp->b, "    // END   typemap rp_tm_obj_cls\n");
     }
 
