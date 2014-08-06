@@ -12,7 +12,7 @@ String *addinCppNameSpace = 0;
 String *nmspace = 0;
 String *libraryClass = 0;
 long idNum = 4;
-bool defaultCtor = false;
+bool generateCtor = false;
 
 // FIXME store some defaults in reposit.swg and retrieve them here.
 String *objDir = NewString("AddinObjects");
@@ -288,7 +288,7 @@ struct BufferGroup {
 
         Printf(b_reg_all_hpp->b, "#include <%s/serialization/register/serialization_%s.hpp>\n", objInc, name);
 
-        if (!defaultCtor) {
+        if (generateCtor) {
         Printf(b_reg_ser_hpp->b, "        register_%s(ar);\n", name);
         }
 
@@ -1178,7 +1178,12 @@ void voSetProp(File *f, ParmList *parms) {
 }
 
 int constructorHandlerImpl(Node *n) {
-    defaultCtor = Getattr(n, "default_constructor");
+
+    // If no ctor was defined in the *.i file then SWIG sets the following flag:
+    bool defaultCtor = Getattr(n, "default_constructor");
+    // For our purposes if no ctor was configured then we don't generate one:
+    generateCtor = !defaultCtor;
+
     Node *p = Getattr(n, "parentNode");
     libraryClass = Getattr(p, "name");
     functionType=1;
@@ -1240,7 +1245,7 @@ int functionWrapperImplCtor(Node *n) {
     Printf(b_wrappers, "// *a3* %s <<\n", Char(ParmList_protostr(parms2)));
     Printf(b_wrappers, "//***DEF\n");
 
-    if (!defaultCtor) {
+    if (generateCtor) {
     Printf(bg->b_val_hpp->b,"        class %s : public ObjectHandler::ValueObject {\n", funcName);
     Printf(bg->b_val_hpp->b,"            friend class boost::serialization::access;\n");
     Printf(bg->b_val_hpp->b,"        public:\n");
@@ -1330,7 +1335,7 @@ int functionWrapperImplCtor(Node *n) {
     Printf(bg->b_val_cpp->b,"        }\n");
     }
 
-    if (!defaultCtor) {
+    if (generateCtor) {
     Printf(bg->b_cre_hpp->b, "\n");
     Printf(bg->b_cre_hpp->b, "boost::shared_ptr<ObjectHandler::Object> create_%s(\n", funcName);
     Printf(bg->b_cre_hpp->b, "    const boost::shared_ptr<ObjectHandler::ValueObject>&);\n");
@@ -1356,7 +1361,7 @@ int functionWrapperImplCtor(Node *n) {
     Printf(bg->b_cre_cpp->b, "}\n");
     }
 
-    if (!defaultCtor) {
+    if (generateCtor) {
     Printf(bg->b_reg_cpp->b, "    // class ID %d in the boost serialization framework\n", idNum);
     Printf(bg->b_reg_cpp->b, "    ar.register_type<%s::ValueObjects::%s>();\n", module, funcName);
 
@@ -1366,11 +1371,7 @@ int functionWrapperImplCtor(Node *n) {
 
     idNum++;
 
-    if (defaultCtor) {
-        Printf(bg->b_obj_hpp->b, "    // BEGIN typemap rp_tm_obj_cls\n");
-        Printf(bg->b_obj_hpp->b,"OH_LIB_CLASS(%s, %s);\n", name, libraryClass);
-        Printf(bg->b_obj_hpp->b, "    // END   typemap rp_tm_obj_cls\n");
-    } else {
+    if (generateCtor) {
         String *s0 = NewString("");
         String *s1 = NewString("");
         if (base) {
@@ -1428,13 +1429,17 @@ int functionWrapperImplCtor(Node *n) {
         }
 
         Printf(b_cre_reg_cpp->b, "    registerCreator(\"%s\", create_%s);\n", funcName, funcName);
+    } else {
+        Printf(bg->b_obj_hpp->b, "    // BEGIN typemap rp_tm_obj_cls\n");
+        Printf(bg->b_obj_hpp->b, "    OH_LIB_CLASS(%s, %s);\n", name, libraryClass);
+        Printf(bg->b_obj_hpp->b, "    // END   typemap rp_tm_obj_cls\n");
     }
 
     if (generateXllAddin) {
     excelRegister(bg->b_xll_reg->b, n, 0, parms3);
     excelUnregister(bg->b_xll_reg->b2, n, type, parms3);
 
-    if (!defaultCtor) {
+    if (generateCtor) {
     Printf(bg->b_xll_cpp->b, "\n");
     Printf(bg->b_xll_cpp->b, "DLLEXPORT char *%s(\n", funcName);
     emitParmList(parms2, bg->b_xll_cpp->b, 2, "rp_tm_xll_prm");
