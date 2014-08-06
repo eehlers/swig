@@ -1020,6 +1020,10 @@ String *copyUpper2(String *s) {
 }
 
 int functionWrapperImpl(Node *n) {
+    // Perform some processing common to all function types
+    functionWrapperImplAll(n);
+
+    // Generate outpu appropriate to the given function type
     int ret;
     if (0==functionType)
         ret = functionWrapperImplFunc(n);
@@ -1034,7 +1038,6 @@ int functionWrapperImpl(Node *n) {
 }
 
 int functionHandlerImpl(Node *n) {
-    xyz(n);
     functionType=0;
     return Language::functionHandler(n);
 }
@@ -1153,7 +1156,6 @@ void voSetProp(File *f, ParmList *parms) {
 }
 
 int constructorHandlerImpl(Node *n) {
-    xyz(n);
     functionType=1;
     return Language::constructorHandler(n);
 }
@@ -1454,7 +1456,6 @@ int functionWrapperImplCtor(Node *n) {
 }
 
 int memberfunctionHandlerImpl(Node *n) {
-    xyz(n);
     functionType=2;
     return Language::memberfunctionHandler(n);
 }
@@ -1553,7 +1554,7 @@ int functionWrapperImplMemb(Node *n) {
     return SWIG_OK;
 }
 
-void xyz(Node *n) {
+void functionWrapperImplAll(Node *n) {
     String *group = Getattr(n,"feature:rp:group");
     String *include = Getattr(n,"feature:rp:include");
 
