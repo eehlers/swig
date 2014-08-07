@@ -11,6 +11,8 @@
 %apply rp_tp_double { ComplexLib::Double };
 %apply const rp_tp_double & { const ComplexLib::Double & };
 
+%apply rp_tp_cnv { ComplexLib::Grade };
+
 %include typemaps.i
 %include all_functions.i
 

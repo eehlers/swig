@@ -5,20 +5,28 @@
 // This file contains some templates common to AddinObjects and AddinXl.
 // This file should be #included only by AddinXxx/conversions/xxx.cpp.
 
-#include <cl/adder2.hpp>
+#include <cl/conversions.hpp>
 #include <boost/lexical_cast.hpp>
 
 namespace ObjectHandler {
 
-    inline bool is_numeric(const std::string &s, long &l) {
-        try {
-            l = boost::lexical_cast<long>(s);
-            return true;
-        } catch(...) {
-            return false;
-        }
+    template<class container_t>
+    ComplexLib::Grade convertGrade(const container_t& c) {
+        if(c.type() == typeid(long))
+            return ComplexLib::Grade(c.operator long());
+        else
+            OH_FAIL("unable to convert type '" << c.type().name() << "' to type 'ComplexLib::Grade'");
     }
 
+//    inline bool is_numeric(const std::string &s, long &l) {
+//        try {
+//            l = boost::lexical_cast<long>(s);
+//            return true;
+//        } catch(...) {
+//            return false;
+//        }
+//    }
+//
 //    template<class container_t>
 //    ComplexLib::Long convertLong(const container_t& c) {
 //        if(c.type() == typeid(long))
@@ -36,3 +44,4 @@ namespace ObjectHandler {
 }
 
 #endif
+

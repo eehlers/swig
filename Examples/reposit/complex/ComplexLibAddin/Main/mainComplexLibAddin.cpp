@@ -21,25 +21,33 @@ int main() {
 //        ComplexLibAddinCpp::clTest("my_test", 42);
 //        std::cout << ComplexLibAddinCpp::clTestGetInput("my_test") << std::endl;
 
-        // Test inheritance
-
-        ComplexLibAddinCpp::clBase("base");
-        std::cout << ComplexLibAddinCpp::clBaseF("base") << std::endl;
-        ComplexLibAddinCpp::clDerived("derived");
-        std::cout << ComplexLibAddinCpp::clBaseF("derived") << std::endl;
-        std::cout << ComplexLibAddinCpp::clDerivedF("derived") << std::endl;
-        try {
-            std::cout << ComplexLibAddinCpp::clDerivedF("base") << std::endl;
-        } catch(const std::exception &e) {
-            std::cout << "Error : " << e.what() << std::endl;
-        }
-
-        ComplexLibAddinCpp::clC("c");
-        std::cout << ComplexLibAddinCpp::clAF0("c") << std::endl;
-        std::cout << ComplexLibAddinCpp::clBF1("c") << std::endl;
+//        // Test inheritance
+//
+//        ComplexLibAddinCpp::clBase("base");
+//        std::cout << ComplexLibAddinCpp::clBaseF("base") << std::endl;
+//        ComplexLibAddinCpp::clDerived("derived");
+//        std::cout << ComplexLibAddinCpp::clBaseF("derived") << std::endl;
+//        std::cout << ComplexLibAddinCpp::clDerivedF("derived") << std::endl;
+//        try {
+//            std::cout << ComplexLibAddinCpp::clDerivedF("base") << std::endl;
+//        } catch(const std::exception &e) {
+//            std::cout << "Error : " << e.what() << std::endl;
+//        }
+//
+//        ComplexLibAddinCpp::clC("c");
+//        std::cout << ComplexLibAddinCpp::clAF0("c") << std::endl;
+//        std::cout << ComplexLibAddinCpp::clBF1("c") << std::endl;
 
 //        // Test typedefs
 //        std::cout << ComplexLibAddinCpp::clDoubleToString(123.456) << std::endl;
+
+        // Test conversions
+        std::cout << ComplexLibAddinCpp::clShowGrade(75L) << std::endl;
+        try {
+            std::cout << ComplexLibAddinCpp::clShowGrade(75.) << std::endl;
+        } catch(const std::exception &e) {
+            std::cout << "Error : " << e.what() << std::endl;
+        }
 
         ComplexLibAddinCpp::closeAddin();
         std::cout << "bye" << std::endl;
