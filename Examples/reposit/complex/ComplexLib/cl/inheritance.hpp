@@ -12,7 +12,7 @@ namespace ComplexLib {
 
     class Base {
     public:
-        virtual std::string f()=0;
+        virtual std::string f() { return "ComplexLib::Base::f()"; }
         virtual ~Base() {}
     };
 

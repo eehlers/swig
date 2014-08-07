@@ -10,12 +10,14 @@ namespace ComplexLib {
 
     class Base {
     public:
+        Base();
         virtual std::string f();
     };
 
     class Derived : public Base {
     public:
         Derived();
+        virtual std::string f();
     };
 
     // Hierarchy of 3 classes.
