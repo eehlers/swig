@@ -8,6 +8,9 @@
     rp_xll_inc="clxl"
 ) ComplexLibAddin
 
+%apply rp_tp_double { ComplexLib::Double };
+%apply const rp_tp_double & { const ComplexLib::Double & };
+
 %include typemaps.i
 %include all_functions.i
 

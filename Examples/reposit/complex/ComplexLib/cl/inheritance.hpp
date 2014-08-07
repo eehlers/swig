@@ -4,7 +4,7 @@
 
 // Test inheritance and polymorphism.
 
-#include <iostream>
+#include <string>
 
 namespace ComplexLib {
 
