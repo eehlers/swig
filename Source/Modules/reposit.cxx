@@ -235,6 +235,7 @@ struct BufferGroup {
         Printf(b_add_cpp->b, "#include <AddinCpp/add_%s.hpp>\n", name);
         // FIXME this #include is only required if the file contains conversions.
         Printf(b_add_cpp->b, "#include <%s/conversions/convert2.hpp>\n", objInc);
+        Printf(b_add_cpp->b, "#include <%s/coercions/all.hpp>\n", objInc);
         // FIXME this #include is only required if the file contains enumerations.
         //Printf(b_add_cpp->b, "#include <oh/enumerations/typefactory.hpp>\n");
         // FIXME this #include is only required if the file contains constructors.

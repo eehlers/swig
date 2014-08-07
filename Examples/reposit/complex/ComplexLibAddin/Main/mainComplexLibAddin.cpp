@@ -41,10 +41,19 @@ int main() {
 //        // Test typedefs
 //        std::cout << ComplexLibAddinCpp::clDoubleToString(123.456) << std::endl;
 
-        // Test conversions
-        std::cout << ComplexLibAddinCpp::clShowGrade(75L) << std::endl;
+//        // Test conversions
+//        std::cout << ComplexLibAddinCpp::clShowGrade(75L) << std::endl;
+//        try {
+//            std::cout << ComplexLibAddinCpp::clShowGrade(75.) << std::endl;
+//        } catch(const std::exception &e) {
+//            std::cout << "Error : " << e.what() << std::endl;
+//        }
+
+        // Test coercions
+        std::cout << ComplexLibAddinCpp::clShowGrade2(75L) << std::endl;
+        std::cout << ComplexLibAddinCpp::clShowGrade2("90") << std::endl;
         try {
-            std::cout << ComplexLibAddinCpp::clShowGrade(75.) << std::endl;
+            std::cout << ComplexLibAddinCpp::clShowGrade2(75.) << std::endl;
         } catch(const std::exception &e) {
             std::cout << "Error : " << e.what() << std::endl;
         }

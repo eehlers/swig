@@ -13,6 +13,13 @@
 
 %apply rp_tp_cnv { ComplexLib::Grade };
 
+%typemap(rp_tm_add_cnv) rp_tp_crc %{
+    $1_type $1_name_crc =
+        ComplexLibAddin::CoerceGrade2()(
+            $1_name);
+%}
+%apply rp_tp_crc { ComplexLib::Grade2 };
+
 %include typemaps.i
 %include all_functions.i
 

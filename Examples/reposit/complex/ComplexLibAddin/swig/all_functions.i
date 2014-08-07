@@ -4,7 +4,8 @@
 //%include objects.i
 //%include inheritance.i
 //%include typedefs.i
-%include conversions.i
+//%include conversions.i
+%include coercions.i
 //%include adder.i
 //%include adder2.i
 //%include color.i
