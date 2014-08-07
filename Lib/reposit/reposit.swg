@@ -56,6 +56,12 @@
         ObjectHandler::convert2<$1_type, ObjectHandler::property_t>($1_name);
 %}
 
+%typemap(rp_tm_add_cnv) rp_tp_crc %{
+    $1_type $1_name_crc = ObjectHandler::CoerceImpl<
+        const ObjectHandler::property_t&,
+        $1_type>()($1_name);
+%}
+
 %typemap(rp_tm_add_cll) SWIGTYPE "$1_name";
 %typemap(rp_tm_add_cll) rp_tp_cnv "$1_name_cnv";
 %typemap(rp_tm_add_cll) rp_tp_crc "$1_name_crc";

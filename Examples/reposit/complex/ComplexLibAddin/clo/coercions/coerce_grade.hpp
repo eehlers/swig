@@ -7,7 +7,7 @@
 #include <cl/coercions.hpp>
 #include <sstream>
 
-namespace ComplexLibAddin {
+namespace ObjectHandler {
 
     bool longToGrade2(
         const ObjectHandler::property_t &in,
@@ -38,7 +38,13 @@ namespace ComplexLibAddin {
         }
     }
 
-    class CoerceGrade2 : public ObjectHandler::Coerce<
+    template <class TypeIn, class TypeOut>
+    class CoerceImpl : public ObjectHandler::Coerce<
+        TypeIn, TypeOut> {};
+
+    template <>
+    class CoerceImpl<const ObjectHandler::property_t &, 
+        ComplexLib::Grade2> : public ObjectHandler::Coerce<
         const ObjectHandler::property_t &, 
         ComplexLib::Grade2> {
 
