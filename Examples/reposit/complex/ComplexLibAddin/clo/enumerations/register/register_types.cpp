@@ -1,7 +1,7 @@
 
 #include <oh/enumerations/typefactory.hpp>
 #include <clo/enumerations/register/register_types.hpp>
-#include <cl/color.hpp>
+#include <cl/enumerated_types.hpp>
 
 namespace ComplexLibAddin {
 
@@ -11,12 +11,17 @@ namespace ComplexLibAddin {
 //        create.registerType("Current", new ComplexLib::Account::Type(ComplexLib::Account::Current));
 //        create.registerType("Savings", new ComplexLib::Account::Type(ComplexLib::Account::Savings));
 
+        ObjectHandler::Create<ComplexLib::AccountType> create;
+        create.registerType("Current", new ComplexLib::AccountType(ComplexLib::Current));
+        create.registerType("Savings", new ComplexLib::AccountType(ComplexLib::Savings));
+
     }
 
     void unregisterEnumeratedTypes() {
 
 //        ObjectHandler::Create<ComplexLib::Account::Type>().unregisterTypes();
 
+        ObjectHandler::Create<ComplexLib::AccountType>().unregisterTypes();
     }
 }
 

@@ -49,11 +49,20 @@ int main() {
 //            std::cout << "Error : " << e.what() << std::endl;
 //        }
 
-        // Test coercions
-        std::cout << ComplexLibAddinCpp::clShowGrade2(75L) << std::endl;
-        std::cout << ComplexLibAddinCpp::clShowGrade2("90") << std::endl;
+//        // Test coercions
+//        std::cout << ComplexLibAddinCpp::clShowGrade2(75L) << std::endl;
+//        std::cout << ComplexLibAddinCpp::clShowGrade2("90") << std::endl;
+//        try {
+//            std::cout << ComplexLibAddinCpp::clShowGrade2(75.) << std::endl;
+//        } catch(const std::exception &e) {
+//            std::cout << "Error : " << e.what() << std::endl;
+//        }
+
+        // Test enumerated types
+        std::cout << "Interest rate current = " << ComplexLibAddinCpp::clGetInterestRate("Current") << std::endl;
+        std::cout << "Interest rate savings = " << ComplexLibAddinCpp::clGetInterestRate("SAVINGS") << std::endl;
         try {
-            std::cout << ComplexLibAddinCpp::clShowGrade2(75.) << std::endl;
+            std::cout << "Interest rate xyz = " << ComplexLibAddinCpp::clGetInterestRate("xyz") << std::endl;
         } catch(const std::exception &e) {
             std::cout << "Error : " << e.what() << std::endl;
         }

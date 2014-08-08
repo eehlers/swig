@@ -49,6 +49,7 @@
 %typemap(rp_tm_add_prm) rp_tp_double const & "const double&";
 %typemap(rp_tm_add_prm) rp_tp_cnv "const ObjectHandler::property_t&";
 %typemap(rp_tm_add_prm) rp_tp_crc "const ObjectHandler::property_t&";
+%typemap(rp_tm_add_prm) rp_tp_enm "const std::string&";
 %typemap(rp_tm_add_prm) SWIGTYPE "$1_type";
 
 %typemap(rp_tm_add_cnv) rp_tp_cnv %{
@@ -62,9 +63,15 @@
         $1_type>()($1_name);
 %}
 
+%typemap(rp_tm_add_cnv) rp_tp_enm %{
+    $1_type $1_name_enm =
+        ObjectHandler::Create<$1_type>()($1_name);
+%}
+
 %typemap(rp_tm_add_cll) SWIGTYPE "$1_name";
 %typemap(rp_tm_add_cll) rp_tp_cnv "$1_name_cnv";
 %typemap(rp_tm_add_cll) rp_tp_crc "$1_name_crc";
+%typemap(rp_tm_add_cll) rp_tp_enm "$1_name_enm";
 
 %typemap(rp_add_ret) SWIGTYPE "return ";
 %typemap(rp_add_ret) void "";
