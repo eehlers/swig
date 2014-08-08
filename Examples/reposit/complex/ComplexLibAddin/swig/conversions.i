@@ -1,5 +1,5 @@
 
-%feature("rp:group", "typedefs");
+//%feature("rp:group", "conversions");
 %feature("rp:include") %{
 #include <cl/conversions.hpp>
 %}

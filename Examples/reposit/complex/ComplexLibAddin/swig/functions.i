@@ -1,5 +1,5 @@
 
-%feature("rp:group", "functions");
+//%feature("rp:group", "functions");
 %feature("rp:include") %{
 #include <cl/functions.hpp>
 %}

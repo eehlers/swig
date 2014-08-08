@@ -3,7 +3,6 @@
 #define addinobjects_enum_factories_hpp
 
 #include <oh/enumerations/typefactory.hpp>
-#include <cl/color.hpp>
 
 namespace ObjectHandler {
 

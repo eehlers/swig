@@ -13,5 +13,5 @@ $(LIB): $(OBJECTS)
 
 clean:
 	rm -f $(LIB) $(OBJECTS)
-	rm vo_*.?pp
+	rm -f vo_*.?pp
 

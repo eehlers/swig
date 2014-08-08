@@ -3,7 +3,7 @@
 #define addinobjects_enum_ctor_classes_hpp
 
 #include <boost/shared_ptr.hpp>
-#include <cl/color.hpp>
+//#include <cl/color.hpp>
 
 namespace ComplexLibAddin {
 

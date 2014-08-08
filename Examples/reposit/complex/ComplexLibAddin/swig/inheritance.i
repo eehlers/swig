@@ -1,5 +1,5 @@
 
-%feature("rp:group", "inheritance");
+//%feature("rp:group", "inheritance");
 %feature("rp:include") %{
 #include <cl/inheritance.hpp>
 %}

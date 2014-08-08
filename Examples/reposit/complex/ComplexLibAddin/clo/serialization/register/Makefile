@@ -13,5 +13,5 @@ $(LIB): $(OBJECTS)
 
 clean:
 	rm -f $(LIB) $(OBJECTS)
-	rm serialization_*.?pp
+	rm -f serialization_*.?pp
 

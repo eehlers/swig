@@ -13,5 +13,5 @@ $(LIB): $(OBJECTS)
 
 clean:
 	rm -f $(LIB) $(OBJECTS)
-	rm create_*.?pp
+	rm -f create_*.?pp
 

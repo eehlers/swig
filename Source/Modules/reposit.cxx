@@ -11,6 +11,7 @@ String *module = 0;
 String *addinCppNameSpace = 0;
 String *nmspace = 0;
 String *libraryClass = 0;
+String *group = 0;
 long idNum = 4;
 bool generateCtor = false;
 String *parent = 0;
@@ -820,6 +821,17 @@ int classHandler(Node *n) {
     return ret;
 }
 
+int includeDirective(Node *n) {
+    String *nodename = Getattr(n, "name");
+    group = Getattr(n, "name");
+    Replaceall(group, ".i", "");
+    Printf(b_director, "BEGIN includeDirective - node name='%s'.\n", Char(nodename));
+    printNode(n, b_director);
+    Printf(b_director, "call parent\n");
+    int ret=Language::includeDirective(n);
+    Printf(b_director, "END   includeDirective - node name='%s'.\n", Char(nodename));
+    return ret;
+}
 
 void printList(Node *n) {
     while (n) {
@@ -1597,7 +1609,7 @@ int functionWrapperImplMemb(Node *n) {
 }
 
 void functionWrapperImplAll(Node *n) {
-    String *group = Getattr(n,"feature:rp:group");
+    //String *group = Getattr(n,"feature:rp:group");
     String *include = Getattr(n,"feature:rp:include");
 
     // Check whether to generate all source code, or to omit some code to be handwritten by the user.

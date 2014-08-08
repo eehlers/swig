@@ -9,7 +9,7 @@
 
 namespace ObjectHandler {
 
-    bool longToGrade2(
+    inline bool longToGrade2(
         const ObjectHandler::property_t &in,
         ComplexLib::Grade2 &out) {
 
@@ -21,7 +21,7 @@ namespace ObjectHandler {
         }
     }
 
-    bool stringToGrade2(
+    inline bool stringToGrade2(
         const ObjectHandler::property_t &in,
         ComplexLib::Grade2 &out) {
 

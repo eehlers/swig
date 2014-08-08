@@ -1,5 +1,5 @@
 
-%feature("rp:group", "objects");
+//%feature("rp:group", "objects");
 %feature("rp:include") %{
 #include <cl/objects.hpp>
 %}
