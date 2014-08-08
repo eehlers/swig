@@ -7,8 +7,8 @@
 namespace ComplexLib {
 
     typedef double Double;
-    std::string doubleToString(const ComplexLib::Double &d);
+    std::string doubleToString(const Double &d);
 
-    std::string longDoubleToString(const ComplexLib::LongDouble &d);
+    std::string longDoubleToString(const LongDouble &d);
 }
 

@@ -5,6 +5,6 @@
 %}
 
 namespace ComplexLib {
-    std::string showGrade(ComplexLib::Grade score);
+    std::string showGrade(Grade score);
 }
 

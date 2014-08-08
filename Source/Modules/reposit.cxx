@@ -212,6 +212,9 @@ struct BufferGroup {
         Printf(b_obj_hpp->b, "#include <oh/valueobject.hpp>\n");
         Printf(b_obj_hpp->b, "#include <boost/shared_ptr.hpp>");
         Printf(b_obj_hpp->b, "%s\n", include);
+        Printf(b_obj_hpp->b, "\n");
+        Printf(b_obj_hpp->b, "using namespace %s;\n\n", nmspace);
+        Printf(b_obj_hpp->b, "\n");
         Printf(b_obj_hpp->b,"namespace %s {\n", module);
 
         if (automatic_) {

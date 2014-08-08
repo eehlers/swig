@@ -5,7 +5,7 @@
 %}
 
 namespace ComplexLib {
-    long getInterestRate(ComplexLib::AccountType accountType);
-    long getInterestRate2(ComplexLib::Account2::Type2 accountType2);
+    long getInterestRate(AccountType accountType);
+    long getInterestRate2(Account2::Type2 accountType2);
 }
 
