@@ -45,12 +45,13 @@
 
 %typemap(rp_tm_add_ret) SWIGTYPE "$1_type";
 
-%typemap(rp_tm_add_prm) rp_tp_double "double";
-%typemap(rp_tm_add_prm) rp_tp_double const & "const double&";
+//%typemap(rp_tm_add_prm) rp_tp_double "double";
+//%typemap(rp_tm_add_prm) rp_tp_double const & "const double&";
 %typemap(rp_tm_add_prm) rp_tp_cnv "const ObjectHandler::property_t&";
 %typemap(rp_tm_add_prm) rp_tp_crc "const ObjectHandler::property_t&";
 %typemap(rp_tm_add_prm) rp_tp_enm "const std::string&";
-%typemap(rp_tm_add_prm) SWIGTYPE "$1_type";
+//%typemap(rp_tm_add_prm) SWIGTYPE "$1_type";
+%typemap(rp_tm_add_prm) SWIGTYPE "$rp_typedef_resolved";
 
 %typemap(rp_tm_add_cnv) rp_tp_cnv %{
     $1_type $1_name_cnv =
@@ -80,7 +81,8 @@
 
 %typemap(rp_tm_xll_cod) bool "L";
 %typemap(rp_tm_xll_cod) long "N";
-%typemap(rp_tm_xll_cod) rp_tp_double "E";
+//%typemap(rp_tm_xll_cod) rp_tp_double "E";
+%typemap(rp_tm_xll_cod) double "E";
 %typemap(rp_tm_xll_cod) char* "C";
 %typemap(rp_tm_xll_cod) std::string "C";
 %typemap(rp_tm_xll_cod) std::string& "C";
@@ -90,7 +92,8 @@
 
 %typemap(rp_tm_xll_prm) bool "bool*";
 %typemap(rp_tm_xll_prm) long "long*";
-%typemap(rp_tm_xll_prm) rp_tp_double "double*";
+//%typemap(rp_tm_xll_prm) rp_tp_double "double*";
+%typemap(rp_tm_xll_prm) double "double*";
 %typemap(rp_tm_xll_prm) char* "char*";
 %typemap(rp_tm_xll_prm) std::string "char*";
 %typemap(rp_tm_xll_prm) std::string& "char*";
@@ -98,15 +101,18 @@
 
 %typemap(rp_tm_xll_cll_obj) SWIGTYPE "$1_name";
 %typemap(rp_tm_xll_cll_obj) long "*$1_name";
-%typemap(rp_tm_xll_cll_obj) rp_tp_double "*$1_name";
+//%typemap(rp_tm_xll_cll_obj) rp_tp_double "*$1_name";
+%typemap(rp_tm_xll_cll_obj) double "*$1_name";
 
 %typemap(rp_tm_xll_cll_val) SWIGTYPE "$1_name";
 %typemap(rp_tm_xll_cll_val) long "*$1_name";
-%typemap(rp_tm_xll_cll_val) rp_tp_double "*$1_name";
+//%typemap(rp_tm_xll_cll_val) rp_tp_double "*$1_name";
+%typemap(rp_tm_xll_cll_val) double "*$1_name";
 
 %typemap(rp_tm_xll_ret) bool "bool*";
 %typemap(rp_tm_xll_ret) long "long*";
-%typemap(rp_tm_xll_ret) rp_tp_double "double*";
+//%typemap(rp_tm_xll_ret) rp_tp_double "double*";
+%typemap(rp_tm_xll_ret) double "double*";
 %typemap(rp_tm_xll_ret) char* "char*";
 %typemap(rp_tm_xll_ret) std::string "char*";
 %typemap(rp_tm_xll_ret) void "bool*";
@@ -131,6 +137,6 @@
         return ret;
 %}
 
-%apply rp_tp_double { double };
+//%apply rp_tp_double { double };
 //%apply rp_tp_double const & { double const & };
 

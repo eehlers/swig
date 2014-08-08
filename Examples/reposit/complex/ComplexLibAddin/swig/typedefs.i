@@ -5,6 +5,7 @@
 %}
 
 namespace ComplexLib {
+    typedef double Double;
     std::string doubleToString(const ComplexLib::Double &d);
 }
 

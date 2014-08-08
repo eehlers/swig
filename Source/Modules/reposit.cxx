@@ -246,7 +246,7 @@ struct BufferGroup {
         Printf(b_add_cpp->b, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_add_cpp->b, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_add_cpp->b, "#include <oh/repository.hpp>\n");
-        Printf(b_add_cpp->b, "#include <AddinCpp/add_all.hpp>\n");
+        //Printf(b_add_cpp->b, "#include <AddinCpp/add_all.hpp>\n");
         Printf(b_add_cpp->b, "\n");
         }
 
@@ -858,8 +858,16 @@ String *getType(Parm *p, const char *m, bool fatal) {
     SwigType *t  = Getattr(p, "type");
     if (0==strcmp(m, "rp_tm_default"))
         return t;
-    else
-        return getTypeMap(m, p, t, fatal);
+    //else
+    //    return getTypeMap(m, p, t, fatal);
+    else {
+        String *s = getTypeMap(m, p, t, fatal);
+        //printf("s=%s\n", Char(s));
+        Replaceall(s, "$rp_typedef_resolved", Getattr(p, "rp_typedef_resolved"));
+        //printf("s=%s\n", Char(s));
+        //printf("s=%s\n", Char(SwigType_str(s, 0)));
+        return s;
+    }
 }
 
 void printIndent(File *buf, int indent) {
@@ -1210,6 +1218,12 @@ int constructorHandlerImpl(Node *n) {
     return Language::constructorHandler(n);
 }
 
+void setTypedefResolved(Parm *p) {
+    SwigType *t  = Getattr(p, "type");
+    SwigType *t2 = SwigType_str(SwigType_typedef_resolve_all(t), 0);
+    Setattr(p, "rp_typedef_resolved", t2);
+}
+
 int functionWrapperImplCtor(Node *n) {
     String   *name   = Getattr(n,"name");
     SwigType *type   = Getattr(n,"type");
@@ -1244,6 +1258,7 @@ int functionWrapperImplCtor(Node *n) {
     SwigType_add_qualifier(nt, "const");
     SwigType_add_reference(nt);
     Setattr(parms2, "type", nt);
+    setTypedefResolved(parms2);
     Setattr(parms2, "nextSibling", parms);
 
     // Create from parms2 another list parms3 - prepend an argument to represent
@@ -1255,6 +1270,7 @@ int functionWrapperImplCtor(Node *n) {
     SwigType_add_reference(nt2);
     Setattr(parms3, "type", nt2);
     Setattr(parms3, "hidden", "1");
+    setTypedefResolved(parms3);
     Setattr(parms3, "nextSibling", parms2);
 
     Printf(b_wrappers, "//***DEF\n");
@@ -1540,6 +1556,7 @@ int functionWrapperImplMemb(Node *n) {
     SwigType_add_qualifier(nt, "const");
     SwigType_add_reference(nt);
     Setattr(parms2, "type", nt);
+    setTypedefResolved(parms2);
     Setattr(parms2, "nextSibling", Getattr(parms, "nextSibling"));
 
     Printf(b_wrappers, "//***ABC\n");
@@ -1641,6 +1658,8 @@ void functionWrapperImplAll(Node *n) {
         }
         String *nameUpper = copyUpper2(name);
         Setattr(p, "nameUpper", nameUpper);
+
+        setTypedefResolved(p);
     }
 
     Printf(b_wrappers,"//XXX***functionWrapper*******\n");
