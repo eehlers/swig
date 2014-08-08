@@ -11,14 +11,10 @@ namespace ComplexLib {
     enum AccountType { Current, Savings };
     long getInterestRate(AccountType accountType);
 
-//    enum Compounding { Simple = 0,
-//                       Compounded = 1,
-//                       Continuous = 2
-//    };
-//
-//    struct Position {
-//        enum Type { Long, Short };
-//    };
+    struct Account2 {
+        enum Type2 { Current2=0, Savings2=1 };
+    };
+    long getInterestRate2(Account2::Type2 accountType2);
 };
 
 #endif

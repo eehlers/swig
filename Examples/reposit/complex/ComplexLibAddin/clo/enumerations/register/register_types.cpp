@@ -7,19 +7,20 @@ namespace ComplexLibAddin {
 
     void registerEnumeratedTypes() {
 
-//        ObjectHandler::Create<ComplexLib::Account::Type> create;
-//        create.registerType("Current", new ComplexLib::Account::Type(ComplexLib::Account::Current));
-//        create.registerType("Savings", new ComplexLib::Account::Type(ComplexLib::Account::Savings));
+        {
+            ObjectHandler::Create<ComplexLib::AccountType> create;
+            create.registerType("Current", new ComplexLib::AccountType(ComplexLib::Current));
+            create.registerType("Savings", new ComplexLib::AccountType(ComplexLib::Savings));
+        }
 
-        ObjectHandler::Create<ComplexLib::AccountType> create;
-        create.registerType("Current", new ComplexLib::AccountType(ComplexLib::Current));
-        create.registerType("Savings", new ComplexLib::AccountType(ComplexLib::Savings));
-
+        {
+            ObjectHandler::Create<ComplexLib::Account2::Type2> create;
+            create.registerType("Current2", new ComplexLib::Account2::Type2(ComplexLib::Account2::Current2));
+            create.registerType("Savings2", new ComplexLib::Account2::Type2(ComplexLib::Account2::Savings2));
+        }
     }
 
     void unregisterEnumeratedTypes() {
-
-//        ObjectHandler::Create<ComplexLib::Account::Type>().unregisterTypes();
 
         ObjectHandler::Create<ComplexLib::AccountType>().unregisterTypes();
     }

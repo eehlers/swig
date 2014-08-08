@@ -67,6 +67,14 @@ int main() {
             std::cout << "Error : " << e.what() << std::endl;
         }
 
+        std::cout << "Interest rate current = " << ComplexLibAddinCpp::clGetInterestRate2("Current2") << std::endl;
+        std::cout << "Interest rate savings = " << ComplexLibAddinCpp::clGetInterestRate2("SAVINGS2") << std::endl;
+        try {
+            std::cout << "Interest rate xyz = " << ComplexLibAddinCpp::clGetInterestRate2("xyz") << std::endl;
+        } catch(const std::exception &e) {
+            std::cout << "Error : " << e.what() << std::endl;
+        }
+
         ComplexLibAddinCpp::closeAddin();
         std::cout << "bye" << std::endl;
         return 0;

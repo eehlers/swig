@@ -6,5 +6,6 @@
 
 namespace ComplexLib {
     long getInterestRate(ComplexLib::AccountType accountType);
+    long getInterestRate2(ComplexLib::Account2::Type2 accountType2);
 }
 

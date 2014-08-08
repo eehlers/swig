@@ -16,6 +16,7 @@
 %apply rp_tp_crc { ComplexLib::Grade2 };
 
 %apply rp_tp_enm { ComplexLib::AccountType };
+%apply rp_tp_enm { ComplexLib::Account2::Type2 };
 
 %include typemaps.i
 %include all_functions.i
