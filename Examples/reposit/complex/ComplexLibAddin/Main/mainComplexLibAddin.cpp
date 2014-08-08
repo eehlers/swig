@@ -40,6 +40,7 @@ int main() {
 
         // Test typedefs
         std::cout << ComplexLibAddinCpp::clDoubleToString(123.456) << std::endl;
+        std::cout << ComplexLibAddinCpp::clLongDoubleToString(123.456) << std::endl;
 
         // Test conversions
         std::cout << ComplexLibAddinCpp::clShowGrade(75L) << std::endl;

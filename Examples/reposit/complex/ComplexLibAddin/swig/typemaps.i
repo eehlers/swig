@@ -1,6 +1,6 @@
 
-//%apply rp_tp_double { ComplexLib::Double };
-//%apply const rp_tp_double & { const ComplexLib::Double & };
+%apply rp_tp_double { ComplexLib::LongDouble };
+%apply const rp_tp_double & { const ComplexLib::LongDouble & };
 
 %apply rp_tp_cnv { ComplexLib::Grade };
 
