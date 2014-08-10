@@ -57,25 +57,41 @@ struct Buffer {
     File *b2;
     File *b3;
     File *b4;
+    String *outputBuffer_;
     Buffer(String *name) : name_(name) {
         b = NewString("");
         b2 = NewString("");
         b3 = NewString("");
         b4 = NewString("");
     }
+    bool fileChanged() {
+        FILE *f = Swig_open(name_);
+        if (!f)
+            return true;
+        String *s = Swig_read_file(f);
+        return (0!=Strcmp(s, outputBuffer_));
+    }
     ~Buffer() {
-        printf("Generating file '%s'\n", Char(name_));
-        File *f = initFile(name_);
-        Delete(name_);
-        Dump(b, f);
-        Dump(b2, f);
-        Dump(b3, f);
-        Dump(b4, f);
+        printf("Generating file '%s'...", Char(name_));
+        outputBuffer_ = NewString("");
+        Dump(b, outputBuffer_);
+        Dump(b2, outputBuffer_);
+        Dump(b3, outputBuffer_);
+        Dump(b4, outputBuffer_);
         Delete(b);
         Delete(b2);
         Delete(b3);
         Delete(b4);
-        Delete(f);
+        if (fileChanged()) {
+            File *f = initFile(name_);
+            Dump(outputBuffer_, f);
+            Delete(f);
+            printf("Done.\n");
+        } else {
+            printf("Unchanged.\n");
+        }
+        Delete(outputBuffer_);
+        Delete(name_);
     }
 };
 
