@@ -422,12 +422,9 @@ protected:
     File *b_runtime;
     File *b_header;
     File *b_wrappers;
-    File *b_director;
-    File *b_director_h;
     File *b_init;
-
-    // SWIG output files
-    File *f_test;
+    //File *b_director;
+    //File *b_director_h;
 
 public:
 
@@ -520,24 +517,24 @@ virtual int top(Node *n) {
     printf("rp_xll_inc=%s\n", Char(xllInc));
 
    /* Initialize I/O */
+    b_begin = NewString("");
     b_runtime = NewString("");
-    b_init = NewString("");
     b_header = NewString("");
     b_wrappers = NewString("");
-    b_director_h = NewString("");
-    b_director = NewString("");
-    b_begin = NewString("");
+    b_init = NewString("");
+    //b_director_h = NewString("");
+    //b_director = NewString("");
 
         printNode(n);
 
    /* Register file targets with the SWIG file handler */
-    Swig_register_filebyname("header", b_header);
-    Swig_register_filebyname("wrapper", b_wrappers);
     Swig_register_filebyname("begin", b_begin);
     Swig_register_filebyname("runtime", b_runtime);
+    Swig_register_filebyname("header", b_header);
+    Swig_register_filebyname("wrapper", b_wrappers);
     Swig_register_filebyname("init", b_init);
-    Swig_register_filebyname("director", b_director);
-    Swig_register_filebyname("director_h", b_director_h);
+    //Swig_register_filebyname("director", b_director);
+    //Swig_register_filebyname("director_h", b_director_h);
 
     b_obj_all_hpp = new Buffer(NewStringf("%s/obj_all.hpp", objDir));
     b_cre_reg_cpp = new Buffer(NewStringf("%s/serialization/register_creators.cpp", objDir));
@@ -670,7 +667,7 @@ virtual int top(Node *n) {
     // we give it a cpp extension so that the editor will apply syntax
     // highlighting.
     String *s_test = NewString("test.cpp");
-    f_test = initFile(s_test);
+    File *f_test = initFile(s_test);
     Delete(s_test);
 
     // Write all of the SWIG buffers to the dummy output file.
@@ -686,24 +683,25 @@ virtual int top(Node *n) {
     Printf(f_test, "//**********begin b_wrappers\n");
     Dump(b_wrappers, f_test);
     Printf(f_test, "//**********end b_wrappers\n");
-    Printf(f_test, "//**********begin b_director\n");
-    Dump(b_director, f_test);
-    Printf(f_test, "//**********end b_director\n");
-    Printf(f_test, "//**********begin b_director_h\n");
-    Dump(b_director_h, f_test);
-    Printf(f_test, "//**********end b_director_h\n");
     Printf(f_test, "//**********begin b_init\n");
     Dump(b_init, f_test);
     Printf(f_test, "//**********end b_init\n");
+//    Printf(f_test, "//**********begin b_director\n");
+//    Dump(b_director, f_test);
+//    Printf(f_test, "//**********end b_director\n");
+//    Printf(f_test, "//**********begin b_director_h\n");
+//    Dump(b_director_h, f_test);
+//    Printf(f_test, "//**********end b_director_h\n");
 
    /* Cleanup files */
+    Delete(b_begin);
+    Delete(b_runtime);
     Delete(b_header);
     Delete(b_wrappers);
     Delete(b_init);
-    Delete(b_director);
-    Delete(b_director_h);
-    Delete(b_runtime);
-    Delete(b_begin);
+    //Delete(b_director);
+    //Delete(b_director_h);
+    // The line below is from the SWIG example but it does not compile?
     //Close(f_test);
     Delete(f_test);
 
@@ -718,46 +716,46 @@ virtual int top(Node *n) {
    return SWIG_OK;
 }
 
-// overrride base class members, write debug info to b_director,
+// overrride base class members, write debug info to b_init,
 // and possibly pass control to a handler.
 
 int moduleDirective(Node *n) {
     String *nodename = Getattr(n, "name");
-    Printf(b_director, "BEGIN moduleDirective - node name='%s'.\n", Char(nodename));
-    printNode(n, b_director);
-    Printf(b_director, "call parent\n");
+    Printf(b_init, "BEGIN moduleDirective - node name='%s'.\n", Char(nodename));
+    printNode(n, b_init);
+    Printf(b_init, "call parent\n");
     int ret=Language::moduleDirective(n);
-    Printf(b_director, "END   moduleDirective - node name='%s'.\n", Char(nodename));
+    Printf(b_init, "END   moduleDirective - node name='%s'.\n", Char(nodename));
     return ret;
 }
 
 int classDeclaration(Node *n) {
     String *nodename = Getattr(n, "name");
-    Printf(b_director, "BEGIN classDeclaration - node name='%s'.\n", Char(nodename));
-    printNode(n, b_director);
-    Printf(b_director, "call parent\n");
+    Printf(b_init, "BEGIN classDeclaration - node name='%s'.\n", Char(nodename));
+    printNode(n, b_init);
+    Printf(b_init, "call parent\n");
     int ret=Language::classDeclaration(n);
-    Printf(b_director, "END   classDeclaration - node name='%s'.\n", Char(nodename));
+    Printf(b_init, "END   classDeclaration - node name='%s'.\n", Char(nodename));
     return ret;
 }
 
 int constructorDeclaration(Node *n) {
     String *nodename = Getattr(n, "name");
-    Printf(b_director, "BEGIN constructorDeclaration - node name='%s'.\n", Char(nodename));
-    printNode(n, b_director);
-    Printf(b_director, "call parent\n");
+    Printf(b_init, "BEGIN constructorDeclaration - node name='%s'.\n", Char(nodename));
+    printNode(n, b_init);
+    Printf(b_init, "call parent\n");
     int ret=Language::constructorDeclaration(n);
-    Printf(b_director, "END   constructorDeclaration - node name='%s'.\n", Char(nodename));
+    Printf(b_init, "END   constructorDeclaration - node name='%s'.\n", Char(nodename));
     return ret;
 }
 
 int namespaceDeclaration(Node *n) {
     nmspace = Getattr(n, "name");
-    Printf(b_director, "BEGIN namespaceDeclaration - node name='%s'.\n", Char(nmspace));
-    printNode(n, b_director);
-    Printf(b_director, "call parent\n");
+    Printf(b_init, "BEGIN namespaceDeclaration - node name='%s'.\n", Char(nmspace));
+    printNode(n, b_init);
+    Printf(b_init, "call parent\n");
     int ret=Language::namespaceDeclaration(n);
-    Printf(b_director, "END   namespaceDeclaration - node name='%s'.\n", Char(nmspace));
+    Printf(b_init, "END   namespaceDeclaration - node name='%s'.\n", Char(nmspace));
     return ret;
 }
 
@@ -784,55 +782,55 @@ int namespaceDeclaration(Node *n) {
 
 int functionHandler(Node *n) {
     String *nodename = Getattr(n, "name");
-    Printf(b_director, "BEGIN functionHandler - node name='%s'.\n", Char(nodename));
-    printNode(n, b_director);
-    Printf(b_director, "call parent\n");
+    Printf(b_init, "BEGIN functionHandler - node name='%s'.\n", Char(nodename));
+    printNode(n, b_init);
+    Printf(b_init, "call parent\n");
     //int ret=Language::functionHandler(n);
     int ret=functionHandlerImpl(n);
-    Printf(b_director, "END   functionHandler - node name='%s'.\n", Char(nodename));
+    Printf(b_init, "END   functionHandler - node name='%s'.\n", Char(nodename));
     return ret;
 }
 
 int memberfunctionHandler(Node *n) {
     String *nodename = Getattr(n, "name");
-    Printf(b_director, "BEGIN memberfunctionHandler - node name='%s'.\n", Char(nodename));
-    printNode(n, b_director);
-    Printf(b_director, "call parent\n");
+    Printf(b_init, "BEGIN memberfunctionHandler - node name='%s'.\n", Char(nodename));
+    printNode(n, b_init);
+    Printf(b_init, "call parent\n");
     //int ret=Language::memberfunctionHandler(n);
     int ret=memberfunctionHandlerImpl(n);
-    Printf(b_director, "END   memberfunctionHandler - node name='%s'.\n", Char(nodename));
+    Printf(b_init, "END   memberfunctionHandler - node name='%s'.\n", Char(nodename));
     return ret;
 }
 
 int constructorHandler(Node *n) {
     String *nodename = Getattr(n, "name");
-    Printf(b_director, "BEGIN constructorHandler - node name='%s'.\n", Char(nodename));
-    printNode(n, b_director);
-    Printf(b_director, "call parent\n");
+    Printf(b_init, "BEGIN constructorHandler - node name='%s'.\n", Char(nodename));
+    printNode(n, b_init);
+    Printf(b_init, "call parent\n");
     //int ret=Language::constructorHandler(n);
     int ret=constructorHandlerImpl(n);
-    Printf(b_director, "END   constructorHandler - node name='%s'.\n", Char(nodename));
+    Printf(b_init, "END   constructorHandler - node name='%s'.\n", Char(nodename));
     return ret;
 }
 
 int functionWrapper(Node *n) {
     String *nodename = Getattr(n, "name");
-    Printf(b_director, "BEGIN functionWrapper - node name='%s'.\n", Char(nodename));
-    printNode(n, b_director);
-    Printf(b_director, "call parent\n");
+    Printf(b_init, "BEGIN functionWrapper - node name='%s'.\n", Char(nodename));
+    printNode(n, b_init);
+    Printf(b_init, "call parent\n");
     //int ret=Language::functionWrapper(n);
     int ret=functionWrapperImpl(n);
-    Printf(b_director, "END   functionWrapper - node name='%s'.\n", Char(nodename));
+    Printf(b_init, "END   functionWrapper - node name='%s'.\n", Char(nodename));
     return ret;
 }
 
 int classHandler(Node *n) {
     String *nodename = Getattr(n, "name");
-    Printf(b_director, "BEGIN classHandler - node name='%s'.\n", Char(nodename));
-    printNode(n, b_director);
-    Printf(b_director, "call parent\n");
+    Printf(b_init, "BEGIN classHandler - node name='%s'.\n", Char(nodename));
+    printNode(n, b_init);
+    Printf(b_init, "call parent\n");
     int ret=Language::classHandler(n);
-    Printf(b_director, "END   classHandler - node name='%s'.\n", Char(nodename));
+    Printf(b_init, "END   classHandler - node name='%s'.\n", Char(nodename));
     return ret;
 }
 
@@ -840,11 +838,11 @@ int includeDirective(Node *n) {
     String *nodename = Getattr(n, "name");
     group = Getattr(n, "name");
     Replaceall(group, ".i", "");
-    Printf(b_director, "BEGIN includeDirective - node name='%s'.\n", Char(nodename));
-    printNode(n, b_director);
-    Printf(b_director, "call parent\n");
+    Printf(b_init, "BEGIN includeDirective - node name='%s'.\n", Char(nodename));
+    printNode(n, b_init);
+    Printf(b_init, "call parent\n");
     int ret=Language::includeDirective(n);
-    Printf(b_director, "END   includeDirective - node name='%s'.\n", Char(nodename));
+    Printf(b_init, "END   includeDirective - node name='%s'.\n", Char(nodename));
     return ret;
 }
 
