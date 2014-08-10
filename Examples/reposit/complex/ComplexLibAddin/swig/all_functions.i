@@ -1,6 +1,6 @@
 
 %include functions.i
-//%include objects.i
+%include objects.i
 //%include inheritance.i
 //%include typedefs.i
 //%include conversions.i

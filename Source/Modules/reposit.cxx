@@ -29,7 +29,7 @@ struct Buffer;
 
 // global buffers
 
-//Buffer *b_obj_all_hpp=0;//FIXME should generate this file too
+Buffer *b_obj_all_hpp=0;
 Buffer *b_cre_reg_cpp=0;
 Buffer *b_cre_all_hpp=0;
 Buffer *b_reg_ser_hpp=0;
@@ -289,6 +289,8 @@ struct BufferGroup {
 
         // write to global buffers
 
+        Printf(b_obj_all_hpp->b, "#include <%s/obj_%s.hpp>\n", objInc, name);
+
         Printf(b_cre_all_hpp->b, "#include <%s/serialization/create/create_%s.hpp>\n", objInc, name);
 
         Printf(b_reg_all_hpp->b, "#include <%s/serialization/register/serialization_%s.hpp>\n", objInc, name);
@@ -537,6 +539,7 @@ virtual int top(Node *n) {
     Swig_register_filebyname("director", b_director);
     Swig_register_filebyname("director_h", b_director_h);
 
+    b_obj_all_hpp = new Buffer(NewStringf("%s/obj_all.hpp", objDir));
     b_cre_reg_cpp = new Buffer(NewStringf("%s/serialization/register_creators.cpp", objDir));
     b_cre_all_hpp = new Buffer(NewStringf("%s/serialization/create/create_all.hpp", objDir));
     b_reg_ser_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_register.hpp", objDir));
@@ -554,6 +557,11 @@ virtual int top(Node *n) {
         Printf(b_cre_reg_cpp->b, "\n");
         Printf(b_cre_reg_cpp->b, "void %s::SerializationFactory::registerCreators() {\n", module);
         Printf(b_cre_reg_cpp->b, "\n");
+
+        Printf(b_obj_all_hpp->b, "\n");
+        Printf(b_obj_all_hpp->b, "#ifndef obj_all_hpp\n");
+        Printf(b_obj_all_hpp->b, "#define obj_all_hpp\n");
+        Printf(b_obj_all_hpp->b, "\n");
 
         Printf(b_cre_all_hpp->b, "\n");
         Printf(b_cre_all_hpp->b, "#ifndef create_all_hpp\n");
@@ -609,6 +617,10 @@ virtual int top(Node *n) {
         Printf(b_cre_reg_cpp->b, "}\n");
         Printf(b_cre_reg_cpp->b, "\n");
 
+        Printf(b_obj_all_hpp->b, "\n");
+        Printf(b_obj_all_hpp->b, "#endif\n");
+        Printf(b_obj_all_hpp->b, "\n");
+
         Printf(b_cre_all_hpp->b, "\n");
         Printf(b_cre_all_hpp->b, "#endif\n");
         Printf(b_cre_all_hpp->b, "\n");
@@ -641,6 +653,7 @@ virtual int top(Node *n) {
         Printf(b_xll_reg_cpp->b4, "\n");
         }
 
+    delete b_obj_all_hpp;
     delete b_cre_reg_cpp;
     delete b_cre_all_hpp;
     delete b_reg_ser_hpp;
