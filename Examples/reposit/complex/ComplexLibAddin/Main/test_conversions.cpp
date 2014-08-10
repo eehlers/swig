@@ -4,6 +4,8 @@
 #include "oh/addin.hpp"
 #include "test_all.hpp"
 
+#ifdef TEST_CONVERSIONS
+
 void testConversions() {
     std::cout << std::endl;
     std::cout << "Testing conversions" << std::endl;
@@ -16,4 +18,6 @@ void testConversions() {
         std::cout << "Expected error : " << e.what() << std::endl;
     }
 }
+
+#endif
 

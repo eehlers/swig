@@ -12,12 +12,12 @@ int main() {
         std::cout << "ObjectHandler version = " << ObjectHandler::ohVersion() << std::endl;
 
         testFunctions();
-        testObjects();
-        testInheritance();
-        testTypedefs();
-        testConversions();
-        testCoercions();
-        testEnumeratedTypes();
+//        testObjects();
+//        testInheritance();
+//        testTypedefs();
+//        testConversions();
+//        testCoercions();
+//        testEnumeratedTypes();
 
         ComplexLibAddinCpp::closeAddin();
 

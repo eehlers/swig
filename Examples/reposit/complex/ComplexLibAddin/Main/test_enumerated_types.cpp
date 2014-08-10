@@ -4,6 +4,8 @@
 #include "oh/addin.hpp"
 #include "test_all.hpp"
 
+#ifdef TEST_ENUMERATED_TYPES
+
 void testEnumeratedTypes() {
     std::cout << std::endl;
     std::cout << "Testing enumerated types" << std::endl;
@@ -25,4 +27,6 @@ void testEnumeratedTypes() {
         std::cout << "Expected error : " << e.what() << std::endl;
     }
 }
+
+#endif
 

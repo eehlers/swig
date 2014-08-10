@@ -4,6 +4,8 @@
 #include "oh/addin.hpp"
 #include "test_all.hpp"
 
+#ifdef TEST_INHERITANCE
+
 void testInheritance() {
     std::cout << std::endl;
     std::cout << "Testing inheritance" << std::endl;
@@ -24,4 +26,6 @@ void testInheritance() {
     std::cout << ComplexLibAddinCpp::clAF0("c") << std::endl;
     std::cout << ComplexLibAddinCpp::clBF1("c") << std::endl;
 }
+
+#endif
 

@@ -4,6 +4,8 @@
 #include "oh/addin.hpp"
 #include "test_all.hpp"
 
+#ifdef TEST_FUNCTIONS
+
 void testFunctions() {
     std::cout << std::endl;
     std::cout << "Testing functions" << std::endl;
@@ -18,4 +20,6 @@ void testFunctions() {
 //    std::cout << ComplexLibAddinCpp::clEchoCharStar("hello") << std::endl;
 //    std::cout << ComplexLibAddinCpp::clEchoString("test") << std::endl;
 }
+
+#endif
 

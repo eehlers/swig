@@ -4,6 +4,8 @@
 #include "oh/addin.hpp"
 #include "test_all.hpp"
 
+#ifdef TEST_OBJECTS
+
 void testObjects() {
     std::cout << std::endl;
     std::cout << "Testing objects" << std::endl;
@@ -12,4 +14,6 @@ void testObjects() {
     ComplexLibAddinCpp::clTest("my_test", 42);
     std::cout << ComplexLibAddinCpp::clTestGetInput("my_test") << std::endl;
 }
+
+#endif
 

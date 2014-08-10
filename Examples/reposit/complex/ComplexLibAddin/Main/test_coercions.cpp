@@ -4,6 +4,8 @@
 #include "oh/addin.hpp"
 #include "test_all.hpp"
 
+#ifdef TEST_COERCIONS
+
 void testCoercions() {
     std::cout << std::endl;
     std::cout << "Testing coercions" << std::endl;
@@ -17,4 +19,6 @@ void testCoercions() {
         std::cout << "Expected error : " << e.what() << std::endl;
     }
 }
+
+#endif
 
