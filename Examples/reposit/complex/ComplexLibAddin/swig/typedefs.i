@@ -1,5 +1,5 @@
 
-//%feature("rp:group", "typedefs");
+%feature("rp:group", "typedefs");
 %feature("rp:include") %{
 #include <cl/typedefs.hpp>
 %}
@@ -11,4 +11,6 @@ namespace ComplexLib {
 
     std::string longDoubleToString(const LongDouble &d);
 }
+
+%feature("rp:group", "");
 

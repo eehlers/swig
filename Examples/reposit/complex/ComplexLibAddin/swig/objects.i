@@ -1,5 +1,5 @@
 
-//%feature("rp:group", "objects");
+%feature("rp:group", "objects");
 %feature("rp:include") %{
 #include <cl/objects.hpp>
 %}
@@ -11,4 +11,6 @@ namespace ComplexLib {
         long getInput() const;
     };
 }
+
+%feature("rp:group", "");
 

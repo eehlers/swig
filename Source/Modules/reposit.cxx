@@ -11,7 +11,6 @@ String *module = 0;
 String *addinCppNameSpace = 0;
 String *nmspace = 0;
 String *libraryClass = 0;
-String *group = 0;
 long idNum = 4;
 bool generateCtor = false;
 String *parent = 0;
@@ -852,8 +851,6 @@ int classHandler(Node *n) {
 
 int includeDirective(Node *n) {
     String *nodename = Getattr(n, "name");
-    group = Getattr(n, "name");
-    Replaceall(group, ".i", "");
     Printf(b_init, "BEGIN includeDirective - node name='%s'.\n", Char(nodename));
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
@@ -1090,18 +1087,22 @@ String *copyUpper2(String *s) {
 
 int functionWrapperImpl(Node *n) {
     // Perform some processing common to all function types
-    functionWrapperImplAll(n);
+    //functionWrapperImplAll(n);
 
     // Generate outpu appropriate to the given function type
     int ret;
-    if (0==functionType)
+    if (0==functionType) {
+        functionWrapperImplAll(n);
         ret = functionWrapperImplFunc(n);
-    else if (1==functionType)
+    } else if (1==functionType) {
+        functionWrapperImplAll(n);
         ret = functionWrapperImplCtor(n);
-    else if (2==functionType)
+    } else if (2==functionType) {
+        functionWrapperImplAll(n);
         ret = functionWrapperImplMemb(n);
-    else
+    } else {
         ret = SWIG_OK;
+    }
     functionType=-1;
     return ret;
 }
@@ -1673,7 +1674,9 @@ int functionWrapperImplMemb(Node *n) {
 }
 
 void functionWrapperImplAll(Node *n) {
-    //String *group = Getattr(n,"feature:rp:group");
+    String *nodeName = Getattr(n, "name");
+    printf("Processing node name '%s'.\n", Char(nodeName));
+
     String *include = Getattr(n,"feature:rp:include");
 
     // Check whether to generate all source code, or to omit some code to be handwritten by the user.
@@ -1683,19 +1686,17 @@ void functionWrapperImplAll(Node *n) {
     // The source code for this SWIG module is cleaner if we think of it the opposite way:
     automatic = !manual;
 
-    //SwigType *type   = Getattr(n,"type");
-    //xxx = getTypeMap("rp_tm_obj_cls", n, type, false);
-    bg = bm_.getBufferGroup (group, include, automatic);
-
-    // In the *.i files, if there is a parameter with no name,
-    // that would cause a segfault later, so trap it here.
-    String *nodeName = Getattr(n, "name");
-    printf("Processing node name '%s'.\n", Char(nodeName));
+    String *group = Getattr(n,"feature:rp:group");
     printf("Group='%s'.\n", Char(group));
+    if (group)
+        bg = bm_.getBufferGroup(group, include, automatic);
+
+    // Process the parameter list.
     ParmList *parms  = Getattr(n,"parms");
     for (Parm *p = parms; p; p = nextSibling(p))
         processParm(p);
 
+    // Write some debug info to the b_wrappers buffer (test.cpp).
     Printf(b_wrappers,"//XXX***functionWrapper*******\n");
     Printf(b_wrappers,"//module=%s\n", module);
     Printf(b_wrappers,"//group=%s\n", group);

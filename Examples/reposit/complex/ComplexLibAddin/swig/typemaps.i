@@ -8,7 +8,5 @@
 
 %apply rp_tp_enm { AccountType };
 %apply rp_tp_enm { Account2::Type2 };
-//%apply rp_tp_enm_cls { TimeZone };
-//%apply rp_tp_enm_cls { const TimeZone & };
 %apply rp_tp_enm_cls { boost::shared_ptr<TimeZone> };
 
