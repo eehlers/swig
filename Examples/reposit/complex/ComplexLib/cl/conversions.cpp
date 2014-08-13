@@ -2,7 +2,7 @@
 #include <cl/conversions.hpp>
 #include <sstream>
 
-ComplexLib::Grade::Grade(int score)
+ComplexLib::Grade::Grade(long score)
     : score_(score) {}
 
 ComplexLib::Grade::operator char() {

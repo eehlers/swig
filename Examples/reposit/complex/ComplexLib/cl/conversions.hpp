@@ -9,10 +9,10 @@
 namespace ComplexLib {
 
     struct Grade {
-        Grade(int);
+        Grade(long);
         operator char();
     private:
-        int score_;
+        long score_;
     };
 
     std::string showGrade(Grade);
