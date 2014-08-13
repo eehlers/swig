@@ -9,5 +9,5 @@
 ) ComplexLibAddin
 
 %include typemaps.i
-%include all_functions.i
+%include functions/all.i
 
