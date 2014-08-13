@@ -8,6 +8,6 @@
     rp_xll_inc="clxl"
 ) ComplexLibAddin
 
-%include typemaps.i
+%include typemaps/all.i
 %include functions/all.i
 
