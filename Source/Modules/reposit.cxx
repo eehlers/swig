@@ -887,14 +887,10 @@ String *getType(Parm *p, const char *m, bool fatal) {
     SwigType *t  = Getattr(p, "type");
     if (0==strcmp(m, "rp_tm_default"))
         return t;
-    //else
-    //    return getTypeMap(m, p, t, fatal);
     else {
         String *s = getTypeMap(m, p, t, fatal);
-        //printf("s=%s\n", Char(s));
         Replaceall(s, "$rp_typedef_resolved", Getattr(p, "rp_typedef_resolved"));
-        //printf("s=%s\n", Char(s));
-        //printf("s=%s\n", Char(SwigType_str(s, 0)));
+        Replaceall(s, "$rp_typedef_raw", Getattr(p, "rp_typedef_raw"));
         return s;
     }
 }
@@ -1208,7 +1204,7 @@ void voGetProp(File *f, ParmList *parms) {
     Printf(f, "            // BEGIN func voGetProp\n");
     for (Parm *p = parms; p; p = nextSibling(p)) {
         String *name = Getattr(p,"name");
-        String *nameUpper = Getattr(p,"nameUpper");
+        String *nameUpper = Getattr(p,"rp_name_upper");
         Printf(f, "            else if(strcmp(nameUpper.c_str(), \"%s\")==0)\n", nameUpper);
         Printf(f, "                return %s_;\n", name);
     }
@@ -1219,7 +1215,7 @@ void voSetProp(File *f, ParmList *parms) {
     Printf(f, "            // BEGIN func voSetProp (using typemap rp_tm_val_cnv)\n");
     for (Parm *p = parms; p; p = nextSibling(p)) {
         String *name = Getattr(p,"name");
-        String *nameUpper = Getattr(p,"nameUpper");
+        String *nameUpper = Getattr(p,"rp_name_upper");
         SwigType *type = Getattr(p,"type");
         String *cnv = getTypeMap("rp_tm_val_cnv", p, type);
         Printf(f, "            else if(strcmp(nameUpper.c_str(), \"%s\")==0)\n", nameUpper);
@@ -1247,10 +1243,32 @@ int constructorHandlerImpl(Node *n) {
     return Language::constructorHandler(n);
 }
 
-void setTypedefResolved(Parm *p) {
-    SwigType *t  = Getattr(p, "type");
+void processParm(Parm *p) {
+
+    String *name = Getattr(p,"name");
+    if (!name) {
+        printf("parameter has no name\n");
+        SWIG_exit(EXIT_FAILURE);
+    }
+
+    SwigType *t = Getattr(p, "type");
+    if (!t) {
+        printf("parameter has no type\n");
+        SWIG_exit(EXIT_FAILURE);
+    }
+
+    String *nameUpper = copyUpper2(name);
+    Setattr(p, "rp_name_upper", nameUpper);
+
     SwigType *t2 = SwigType_str(SwigType_typedef_resolve_all(t), 0);
     Setattr(p, "rp_typedef_resolved", t2);
+
+////  From "const T&" extract "T"
+//    Parm *p2 = CopyParm(p);
+//    SwigType *t3 = Getattr(p2, "type");
+//    SwigType_del_reference(t3);
+//    SwigType_del_qualifier(t3);
+//    Setattr(p, "rp_typedef_raw", SwigType_str(t3, 0));
 }
 
 int functionWrapperImplCtor(Node *n) {
@@ -1287,7 +1305,7 @@ int functionWrapperImplCtor(Node *n) {
     SwigType_add_qualifier(nt, "const");
     SwigType_add_reference(nt);
     Setattr(parms2, "type", nt);
-    setTypedefResolved(parms2);
+    processParm(parms2);
     Setattr(parms2, "nextSibling", parms);
 
     // Create from parms2 another list parms3 - prepend an argument to represent
@@ -1299,7 +1317,7 @@ int functionWrapperImplCtor(Node *n) {
     SwigType_add_reference(nt2);
     Setattr(parms3, "type", nt2);
     Setattr(parms3, "hidden", "1");
-    setTypedefResolved(parms3);
+    processParm(parms3);
     Setattr(parms3, "nextSibling", parms2);
 
     Printf(b_wrappers, "//***DEF\n");
@@ -1585,7 +1603,7 @@ int functionWrapperImplMemb(Node *n) {
     SwigType_add_qualifier(nt, "const");
     SwigType_add_reference(nt);
     Setattr(parms2, "type", nt);
-    setTypedefResolved(parms2);
+    processParm(parms2);
     Setattr(parms2, "nextSibling", Getattr(parms, "nextSibling"));
 
     Printf(b_wrappers, "//***ABC\n");
@@ -1675,21 +1693,8 @@ void functionWrapperImplAll(Node *n) {
     printf("Processing node name '%s'.\n", Char(nodeName));
     printf("Group='%s'.\n", Char(group));
     ParmList *parms  = Getattr(n,"parms");
-    for (Parm *p = parms; p; p = nextSibling(p)) {
-        String *name = Getattr(p,"name");
-        if (!name) {
-            printf("parameter has no name\n");
-            SWIG_exit(EXIT_FAILURE);
-        }
-        if (!Getattr(p, "type")) {
-            printf ("parameter has no type\n");
-            SWIG_exit(EXIT_FAILURE);
-        }
-        String *nameUpper = copyUpper2(name);
-        Setattr(p, "nameUpper", nameUpper);
-
-        setTypedefResolved(p);
-    }
+    for (Parm *p = parms; p; p = nextSibling(p))
+        processParm(p);
 
     Printf(b_wrappers,"//XXX***functionWrapper*******\n");
     Printf(b_wrappers,"//module=%s\n", module);

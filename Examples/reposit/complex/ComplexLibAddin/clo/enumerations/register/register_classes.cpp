@@ -8,16 +8,15 @@ namespace ComplexLibAddin {
 
     void registerEnumeratedClasses() {
 
-//        ObjectHandler::Create<boost::shared_ptr<ComplexLib::Color> > create;
-//        create.registerType("Red", reinterpret_cast<void*>(RED_Color));
-//        create.registerType("Blue", reinterpret_cast<void*>(BLUE_Color));
-
+        ObjectHandler::Create<boost::shared_ptr<ComplexLib::TimeZone> > create;
+        create.registerType("EST", reinterpret_cast<void*>(TimeZone_EST));
+        create.registerType("UTC", reinterpret_cast<void*>(TimeZone_UTC));
+        create.registerType("CST", reinterpret_cast<void*>(TimeZone_CST));
     }
 
     void unregisterEnumeratedClasses() {
 
-        //ObjectHandler::Create<ComplexLib::Color>().unregisterTypes();
-
+        ObjectHandler::Create<ComplexLib::TimeZone>().unregisterTypes();
     }
 }
 

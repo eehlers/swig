@@ -3,12 +3,13 @@
 #define addinobjects_enum_ctor_classes_hpp
 
 #include <boost/shared_ptr.hpp>
-//#include <cl/color.hpp>
+#include <cl/enumerated_classes.hpp>
 
 namespace ComplexLibAddin {
 
-//    boost::shared_ptr<ComplexLib::Color> RED_Color();
-//    boost::shared_ptr<ComplexLib::Color> BLUE_Color();
+    boost::shared_ptr<ComplexLib::TimeZone> TimeZone_EST();
+    boost::shared_ptr<ComplexLib::TimeZone> TimeZone_UTC();
+    boost::shared_ptr<ComplexLib::TimeZone> TimeZone_CST();
 
 }
 
