@@ -12,9 +12,9 @@ STATIC_LIBS = \
     serialization/register/libSerializationRegister.a \
     valueobjects/libValueObjects.a
 
-all: $(LIB)
+all: SubDirs $(LIB)
 
-$(LIB): $(OBJECTS) SubDirs
+$(LIB): $(OBJECTS)
 	g++ -shared -fPIC -g -Wall -o $(LIB) $(OBJECTS) -L../../lib -lComplexLib -Wl,-whole-archive $(STATIC_LIBS) -Wl,-no-whole-archive
 
 %.o: %.cpp %.hpp
@@ -28,8 +28,7 @@ SubDirs:
 	$(MAKE) -C valueobjects
 
 clean:
-	rm -f $(LIB) $(OBJECTS)
-	rm -f obj_*.?pp
+	rm -f $(LIB) $(OBJECTS) obj_*.?pp
 	$(MAKE) -C conversions clean
 	$(MAKE) -C enumerations clean
 	$(MAKE) -C serialization clean
