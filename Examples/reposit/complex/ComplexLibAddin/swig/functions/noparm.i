@@ -1,6 +1,6 @@
 //
 //%feature("rp:group", "noparm");
-//%feature("rp:include") %{
+//%feature("rp:obj_include") %{
 //#include <cl/noparm.hpp>
 //%}
 //

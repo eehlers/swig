@@ -1,6 +1,6 @@
 
 %feature("rp:group", "coercions");
-%feature("rp:include") %{
+%feature("rp:obj_include") %{
 #include <cl/coercions.hpp>
 %}
 

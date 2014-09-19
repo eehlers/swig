@@ -11,7 +11,7 @@
 ) SimpleLibAddin
 
 %feature("rp:group", "adder");
-%feature("rp:include") %{
+%feature("rp:obj_include") %{
 #include "Library/adder.hpp"
 %}
 

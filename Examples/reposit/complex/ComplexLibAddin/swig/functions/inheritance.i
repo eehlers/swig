@@ -1,6 +1,6 @@
 
 %feature("rp:group", "inheritance");
-%feature("rp:include") %{
+%feature("rp:obj_include") %{
 #include <cl/inheritance.hpp>
 %}
 

@@ -1,6 +1,6 @@
 
 %feature("rp:group", "conversions");
-%feature("rp:include") %{
+%feature("rp:obj_include") %{
 #include <cl/conversions.hpp>
 %}
 

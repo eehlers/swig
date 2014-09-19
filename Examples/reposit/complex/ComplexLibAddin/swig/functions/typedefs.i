@@ -1,6 +1,6 @@
 
 %feature("rp:group", "typedefs");
-%feature("rp:include") %{
+%feature("rp:obj_include") %{
 #include <cl/typedefs.hpp>
 %}
 

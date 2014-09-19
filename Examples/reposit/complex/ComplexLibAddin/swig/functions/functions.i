@@ -1,6 +1,6 @@
 
 %feature("rp:group", "functions");
-%feature("rp:include") %{
+%feature("rp:obj_include") %{
 #include <cl/functions.hpp>
 %}
 
