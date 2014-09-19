@@ -149,35 +149,43 @@
 			Name="valueobjects"
 			>
 			<File
-				RelativePath=".\valueobjects\vo_adder.cpp"
+				RelativePath=".\valueobjects\vo_coercions.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\valueobjects\vo_adder.hpp"
+				RelativePath=".\valueobjects\vo_coercions.hpp"
 				>
 			</File>
 			<File
-				RelativePath=".\valueobjects\vo_adder2.cpp"
+				RelativePath=".\valueobjects\vo_conversions.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\valueobjects\vo_adder2.hpp"
+				RelativePath=".\valueobjects\vo_conversions.hpp"
 				>
 			</File>
 			<File
-				RelativePath=".\valueobjects\vo_color.cpp"
+				RelativePath=".\valueobjects\vo_enumerated_classes.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\valueobjects\vo_color.hpp"
+				RelativePath=".\valueobjects\vo_enumerated_classes.hpp"
 				>
 			</File>
 			<File
-				RelativePath=".\valueobjects\vo_foo.cpp"
+				RelativePath=".\valueobjects\vo_enumerated_types.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\valueobjects\vo_foo.hpp"
+				RelativePath=".\valueobjects\vo_enumerated_types.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_functions.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_functions.hpp"
 				>
 			</File>
 			<File
@@ -189,11 +197,27 @@
 				>
 			</File>
 			<File
-				RelativePath=".\valueobjects\vo_noparm.cpp"
+				RelativePath=".\valueobjects\vo_objects.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\valueobjects\vo_noparm.hpp"
+				RelativePath=".\valueobjects\vo_objects.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_overrides.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_overrides.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_typedefs.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_typedefs.hpp"
 				>
 			</File>
 		</Filter>
@@ -217,6 +241,10 @@
 				>
 				<File
 					RelativePath=".\enumerations\factories\all.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\enumerations\factories\timezone.hpp"
 					>
 				</File>
 			</Filter>
@@ -276,39 +304,47 @@
 				Name="create"
 				>
 				<File
-					RelativePath=".\serialization\create\create_adder.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\create\create_adder.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\create\create_adder2.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\create\create_adder2.hpp"
-					>
-				</File>
-				<File
 					RelativePath=".\serialization\create\create_all.hpp"
 					>
 				</File>
 				<File
-					RelativePath=".\serialization\create\create_color.cpp"
+					RelativePath=".\serialization\create\create_coercions.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\serialization\create\create_color.hpp"
+					RelativePath=".\serialization\create\create_coercions.hpp"
 					>
 				</File>
 				<File
-					RelativePath=".\serialization\create\create_foo.cpp"
+					RelativePath=".\serialization\create\create_conversions.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\serialization\create\create_foo.hpp"
+					RelativePath=".\serialization\create\create_conversions.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_enumerated_classes.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_enumerated_classes.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_enumerated_types.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_enumerated_types.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_functions.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_functions.hpp"
 					>
 				</File>
 				<File
@@ -320,11 +356,27 @@
 					>
 				</File>
 				<File
-					RelativePath=".\serialization\create\create_noparm.cpp"
+					RelativePath=".\serialization\create\create_objects.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\serialization\create\create_noparm.hpp"
+					RelativePath=".\serialization\create\create_objects.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_overrides.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_overrides.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_typedefs.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_typedefs.hpp"
 					>
 				</File>
 			</Filter>
@@ -332,39 +384,47 @@
 				Name="register"
 				>
 				<File
-					RelativePath=".\serialization\register\serialization_adder.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\register\serialization_adder.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\register\serialization_adder2.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\register\serialization_adder2.hpp"
-					>
-				</File>
-				<File
 					RelativePath=".\serialization\register\serialization_all.hpp"
 					>
 				</File>
 				<File
-					RelativePath=".\serialization\register\serialization_color.cpp"
+					RelativePath=".\serialization\register\serialization_coercions.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\serialization\register\serialization_color.hpp"
+					RelativePath=".\serialization\register\serialization_coercions.hpp"
 					>
 				</File>
 				<File
-					RelativePath=".\serialization\register\serialization_foo.cpp"
+					RelativePath=".\serialization\register\serialization_conversions.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\serialization\register\serialization_foo.hpp"
+					RelativePath=".\serialization\register\serialization_conversions.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_enumerated_classes.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_enumerated_classes.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_enumerated_types.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_enumerated_types.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_functions.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_functions.hpp"
 					>
 				</File>
 				<File
@@ -376,18 +436,46 @@
 					>
 				</File>
 				<File
-					RelativePath=".\serialization\register\serialization_noparm.cpp"
+					RelativePath=".\serialization\register\serialization_objects.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\serialization\register\serialization_noparm.hpp"
+					RelativePath=".\serialization\register\serialization_objects.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_overrides.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_overrides.hpp"
 					>
 				</File>
 				<File
 					RelativePath=".\serialization\register\serialization_register.hpp"
 					>
 				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_typedefs.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_typedefs.hpp"
+					>
+				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="coercions"
+			>
+			<File
+				RelativePath=".\coercions\all.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\coercions\coerce_grade.hpp"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\init.cpp"
@@ -398,35 +486,47 @@
 			>
 		</File>
 		<File
-			RelativePath=".\obj_adder.cpp"
+			RelativePath=".\obj_all.hpp"
 			>
 		</File>
 		<File
-			RelativePath=".\obj_adder.hpp"
+			RelativePath=".\obj_coercions.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\obj_adder2.cpp"
+			RelativePath=".\obj_coercions.hpp"
 			>
 		</File>
 		<File
-			RelativePath=".\obj_adder2.hpp"
+			RelativePath=".\obj_conversions.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\obj_color.cpp"
+			RelativePath=".\obj_conversions.hpp"
 			>
 		</File>
 		<File
-			RelativePath=".\obj_color.hpp"
+			RelativePath=".\obj_enumerated_classes.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\obj_foo.cpp"
+			RelativePath=".\obj_enumerated_classes.hpp"
 			>
 		</File>
 		<File
-			RelativePath=".\obj_foo.hpp"
+			RelativePath=".\obj_enumerated_types.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\obj_enumerated_types.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\obj_functions.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\obj_functions.hpp"
 			>
 		</File>
 		<File
@@ -438,11 +538,27 @@
 			>
 		</File>
 		<File
-			RelativePath=".\obj_noparm.cpp"
+			RelativePath=".\obj_objects.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\obj_noparm.hpp"
+			RelativePath=".\obj_objects.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\obj_typedefs.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\obj_typedefs.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\objmanual_overrides.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\objmanual_overrides.hpp"
 			>
 		</File>
 	</Files>

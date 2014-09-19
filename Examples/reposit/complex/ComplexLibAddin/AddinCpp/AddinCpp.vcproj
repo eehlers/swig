@@ -158,39 +158,47 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\add_adder.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\add_adder.hpp"
-			>
-		</File>
-		<File
-			RelativePath=".\add_adder2.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\add_adder2.hpp"
-			>
-		</File>
-		<File
-			RelativePath=".\add_color.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\add_color.hpp"
-			>
-		</File>
-		<File
-			RelativePath=".\add_foo.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\add_foo.hpp"
-			>
-		</File>
-		<File
 			RelativePath=".\add_all.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_coercions.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_coercions.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_conversions.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_conversions.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_enumerated_classes.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_enumerated_classes.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_enumerated_types.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_enumerated_types.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_functions.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_functions.hpp"
 			>
 		</File>
 		<File
@@ -202,15 +210,27 @@
 			>
 		</File>
 		<File
-			RelativePath=".\add_noparm.cpp"
+			RelativePath=".\add_objects.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\add_noparm.hpp"
+			RelativePath=".\add_objects.hpp"
 			>
 		</File>
 		<File
-			RelativePath=".\all.hpp"
+			RelativePath=".\add_overrides.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_overrides.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_typedefs.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_typedefs.hpp"
 			>
 		</File>
 		<File

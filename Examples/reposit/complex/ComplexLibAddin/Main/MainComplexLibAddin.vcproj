@@ -175,6 +175,46 @@
 			RelativePath=".\mainComplexLibAddin.cpp"
 			>
 		</File>
+		<File
+			RelativePath=".\test_all.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\test_coercions.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\test_conversions.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\test_enumerated_classes.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\test_enumerated_types.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\test_functions.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\test_inheritance.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\test_objects.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\test_overrides.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\test_typedefs.cpp"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

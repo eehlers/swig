@@ -2,6 +2,7 @@
 #ifndef clo_conversions_coerce_grade_hpp
 #define clo_conversions_coerce_grade_hpp
 
+#include <oh/property.hpp>
 #include <oh/conversions/coerce.hpp>
 #include <oh/exception.hpp>
 #include <cl/coercions.hpp>
@@ -45,7 +46,7 @@ namespace ObjectHandler {
     template <>
     class CoerceImpl<const ObjectHandler::property_t &, 
         ComplexLib::Grade2> : public ObjectHandler::Coerce<
-        const ObjectHandler::property_t &, 
+        ObjectHandler::property_t, 
         ComplexLib::Grade2> {
 
         Conversion *getConversions() {

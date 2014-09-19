@@ -149,39 +149,55 @@
 			Name="cl"
 			>
 			<File
-				RelativePath=".\cl\adder.cpp"
+				RelativePath=".\cl\coercions.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\cl\adder.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\cl\adder2.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\cl\adder2.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\cl\color.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\cl\color.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\cl\foo.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\cl\foo.hpp"
+				RelativePath=".\cl\coercions.hpp"
 				>
 			</File>
 			<File
 				RelativePath=".\cl\complexlib.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\conversions.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\conversions.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\echo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\echo.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\enumerated_classes.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\enumerated_classes.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\enumerated_types.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\enumerated_types.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\functions.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\functions.hpp"
 				>
 			</File>
 			<File
@@ -194,6 +210,26 @@
 			</File>
 			<File
 				RelativePath=".\cl\noparm.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\objects.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\objects.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\overrides.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\typedefs.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\typedefs.hpp"
 				>
 			</File>
 		</Filter>
