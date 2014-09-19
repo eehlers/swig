@@ -873,7 +873,7 @@ void printList(Node *n) {
 }
 
 String *getTypeMap(const char *m, Node *n, SwigType *t, bool fatal = true) {
-    if (String *tm = Swig_typemap_lookup(m, n, t, 0)) {
+    if (String *tm = Swig_typemap_lookup(m, n, "", 0)) {
         Replaceall(tm, "$rp_typedef_resolved", Getattr(n, "rp_typedef_resolved"));
         Replaceall(tm, "$rp_typedef_raw", Getattr(n, "rp_typedef_raw"));
         Replaceall(tm, "$rp_typedef_obj_add", Getattr(n, "rp_typedef_obj_add"));
