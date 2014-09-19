@@ -1619,9 +1619,6 @@ int functionWrapperImplMemb(Node *n) {
     processParm(parms2);
     Setattr(parms2, "nextSibling", Getattr(parms, "nextSibling"));
 
-    //Setattr(n, "rp_typedef_foo1", addinClass);
-    //Setattr(n, "rp_typedef_foo2", pname);
-
     Printf(b_wrappers, "//***ABC\n");
     printList(parms2);
     Printf(b_wrappers, "// *a0* %s <<\n", Char(ParmList_str(parms)));
@@ -1650,7 +1647,7 @@ int functionWrapperImplMemb(Node *n) {
     Node *node = NewHash();
     Setfile(node, Getfile(n));
     Setline(node, Getline(n));
-    Setattr(node, "type", NewString("ComplexLib::Test2"));
+    Setattr(node, "type", pname);
     // Attach to the node some values that might be referenced by the typemap:
     Setattr(node, "rp_typedef_obj_add", addinClass);    // The type of the addin wrapper object
     Setattr(node, "rp_typedef_obj_lib", pname);         // The type of the library object
