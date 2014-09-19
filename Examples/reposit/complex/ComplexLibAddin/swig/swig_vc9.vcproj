@@ -40,45 +40,69 @@
 	</References>
 	<Files>
 		<Filter
-			Name="swig"
+			Name="functions"
 			>
 			<File
-				RelativePath=".\adder.i"
+				RelativePath=".\functions\all.i"
 				>
 			</File>
 			<File
-				RelativePath=".\adder2.i"
+				RelativePath=".\functions\coercions.i"
 				>
 			</File>
 			<File
-				RelativePath=".\color.i"
+				RelativePath=".\functions\conversions.i"
 				>
 			</File>
 			<File
-				RelativePath=".\complex.i"
+				RelativePath=".\functions\echo.i"
 				>
 			</File>
 			<File
-				RelativePath=".\foo.i"
+				RelativePath=".\functions\enumerated_classes.i"
 				>
 			</File>
 			<File
-				RelativePath=".\functions.i"
+				RelativePath=".\functions\enumerated_types.i"
 				>
 			</File>
 			<File
-				RelativePath=".\inheritance.i"
+				RelativePath=".\functions\functions.i"
 				>
 			</File>
 			<File
-				RelativePath=".\noparm.i"
+				RelativePath=".\functions\inheritance.i"
 				>
 			</File>
 			<File
-				RelativePath=".\typemaps.i"
+				RelativePath=".\functions\noparm.i"
+				>
+			</File>
+			<File
+				RelativePath=".\functions\objects.i"
+				>
+			</File>
+			<File
+				RelativePath=".\functions\overrides.i"
+				>
+			</File>
+			<File
+				RelativePath=".\functions\typedefs.i"
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="typemaps"
+			>
+			<File
+				RelativePath=".\typemaps\all.i"
+				>
+			</File>
+		</Filter>
+		<File
+			RelativePath=".\complex.i"
+			>
+		</File>
 		<File
 			RelativePath="Makefile.vc"
 			>

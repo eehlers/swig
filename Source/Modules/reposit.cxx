@@ -1711,7 +1711,7 @@ void functionWrapperImplAll(Node *n) {
     String *add_include = Getattr(n,"feature:rp:add_include");
 
     String *x = Getattr(n,"feature:rp:override_obj");
-    printf(">>>>>'%s'<<<<<\n", Char(x));
+    //printf(">>>>>'%s'<<<<<\n", Char(x));
 
     // Check whether to generate all source code, or to omit some code to be handwritten by the user.
     // For the user writing the config file, it is easier to assume automatic (default)
