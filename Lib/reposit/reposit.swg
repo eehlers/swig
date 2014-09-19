@@ -142,9 +142,8 @@
 
 //NEW
 %typemap(rp_tm_xll_cnv) rp_tp_cnv %{
-//    $1_type $1_name_cnv =
-//        ObjectHandler::convert2<$1_type>(ObjectHandler::ConvertOper(*$1_name));
-        $1_type $1_name_cnv = $1_type(0);
+        $1_type $1_name_cnv = ObjectHandler::convert2<$1_type, ObjectHandler::ConvertOper>(
+            ObjectHandler::ConvertOper(*$1_name));      
 %}
 
 %typemap(rp_tm_xll_cnv) rp_tp_crc %{
