@@ -1,6 +1,6 @@
 
-#ifndef objmanual_overrides_hpp
-#define objmanual_overrides_hpp
+#ifndef obj_overrides_hpp
+#define obj_overrides_hpp
 
 #include <string>
 #include <oh/libraryobject.hpp>

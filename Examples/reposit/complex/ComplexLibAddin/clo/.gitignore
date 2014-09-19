@@ -1,6 +1,6 @@
 *.user
 Release
 obj_*.?pp
-obj_*.?pp.manual
+objmanual_*.?pp.template
 !Makefile
 Debug

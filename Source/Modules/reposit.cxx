@@ -128,8 +128,8 @@ struct BufferGroup {
         b_obj_hpp = new Buffer(NewStringf("%s/obj_%s.hpp", objDir, name_));
         b_obj_cpp = new Buffer(NewStringf("%s/obj_%s.cpp", objDir, name_));
         } else {
-        b_obj_hpp = new Buffer(NewStringf("%s/obj_%s.hpp.manual", objDir, name_));
-        b_obj_cpp = new Buffer(NewStringf("%s/obj_%s.cpp.manual", objDir, name_));
+        b_obj_hpp = new Buffer(NewStringf("%s/objmanual_%s.hpp.template", objDir, name_));
+        b_obj_cpp = new Buffer(NewStringf("%s/objmanual_%s.cpp.template", objDir, name_));
         }
         if (generateCppAddin) {
         b_add_hpp = new Buffer(NewStringf("%s/add_%s.hpp", addDir, name_));
@@ -239,7 +239,11 @@ struct BufferGroup {
         Printf(b_obj_hpp->b0,"namespace %s {\n", module);
 
         Printf(b_obj_cpp->b0, "\n");
+        if (automatic_) {
         Printf(b_obj_cpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, name);
+        } else {
+        Printf(b_obj_cpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, name);
+        }
         Printf(b_obj_cpp->b0, "\n");
 
         if (generateCppAddin) {
@@ -313,7 +317,11 @@ struct BufferGroup {
 
         // write to global buffers
 
+        if (automatic_) {
         Printf(b_obj_all_hpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, name);
+        } else {
+        Printf(b_obj_all_hpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, name);
+        }
 
         Printf(b_cre_all_hpp->b0, "#include <%s/serialization/create/create_%s.hpp>\n", objInc, name);
 
