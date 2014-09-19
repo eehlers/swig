@@ -225,24 +225,22 @@ struct BufferGroup {
         Printf(b_reg_cpp->b1, "void %s::register_%s(boost::archive::xml_iarchive &ar) {\n", module, name);
         Printf(b_reg_cpp->b1, "\n");
 
-        //if (automatic_) {
-            Printf(b_obj_hpp->b0, "\n");
-            Printf(b_obj_hpp->b0, "#ifndef obj_%s_hpp\n", name);
-            Printf(b_obj_hpp->b0, "#define obj_%s_hpp\n", name);
-            Printf(b_obj_hpp->b0, "\n");
-            Printf(b_obj_hpp->b0, "#include <string>\n");
-            Printf(b_obj_hpp->b0, "#include <oh/libraryobject.hpp>\n");
-            Printf(b_obj_hpp->b0, "#include <oh/valueobject.hpp>\n");
-            Printf(b_obj_hpp->b0, "#include <boost/shared_ptr.hpp>");
-            Printf(b_obj_hpp->b0, "%s\n", include);
-            Printf(b_obj_hpp->b0, "using namespace %s;\n", nmspace);
-            Printf(b_obj_hpp->b0, "\n");
-            Printf(b_obj_hpp->b0,"namespace %s {\n", module);
+        Printf(b_obj_hpp->b0, "\n");
+        Printf(b_obj_hpp->b0, "#ifndef obj_%s_hpp\n", name);
+        Printf(b_obj_hpp->b0, "#define obj_%s_hpp\n", name);
+        Printf(b_obj_hpp->b0, "\n");
+        Printf(b_obj_hpp->b0, "#include <string>\n");
+        Printf(b_obj_hpp->b0, "#include <oh/libraryobject.hpp>\n");
+        Printf(b_obj_hpp->b0, "#include <oh/valueobject.hpp>\n");
+        Printf(b_obj_hpp->b0, "#include <boost/shared_ptr.hpp>");
+        Printf(b_obj_hpp->b0, "%s\n", include);
+        Printf(b_obj_hpp->b0, "using namespace %s;\n", nmspace);
+        Printf(b_obj_hpp->b0, "\n");
+        Printf(b_obj_hpp->b0,"namespace %s {\n", module);
 
-            Printf(b_obj_cpp->b0, "\n");
-            Printf(b_obj_cpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, name);
-            Printf(b_obj_cpp->b0, "\n");
-        //}
+        Printf(b_obj_cpp->b0, "\n");
+        Printf(b_obj_cpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, name);
+        Printf(b_obj_cpp->b0, "\n");
 
         if (generateCppAddin) {
         Printf(b_add_hpp->b0, "\n");
@@ -368,14 +366,12 @@ struct BufferGroup {
         Printf(b_reg_cpp->b1, "}\n");
         Printf(b_reg_cpp->b1, "\n");
 
-        //if (automatic_) {
-            Printf(b_obj_hpp->b0, "} // namespace %s\n", module);
-            Printf(b_obj_hpp->b0, "\n");
-            Printf(b_obj_hpp->b0, "#endif\n");
-            Printf(b_obj_hpp->b0, "\n");
+        Printf(b_obj_hpp->b0, "} // namespace %s\n", module);
+        Printf(b_obj_hpp->b0, "\n");
+        Printf(b_obj_hpp->b0, "#endif\n");
+        Printf(b_obj_hpp->b0, "\n");
 
-            Printf(b_obj_cpp->b0, "\n");
-        //}
+        Printf(b_obj_cpp->b0, "\n");
 
         if (generateCppAddin) {
         Printf(b_add_hpp->b0, "\n");
@@ -398,10 +394,9 @@ struct BufferGroup {
         delete b_cre_cpp;
         delete b_reg_hpp;
         delete b_reg_cpp;
-        //if (automatic_) {
-            delete b_obj_hpp;
-            delete b_obj_cpp;
-        //}
+        delete b_obj_hpp;
+        delete b_obj_cpp;
+
         if (generateCppAddin) {
         delete b_add_hpp;
         delete b_add_cpp;
@@ -1141,23 +1136,21 @@ int functionWrapperImplFunc(Node *n) {
     Setattr(n, "rp:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
-    //if (automatic) {
-        Printf(bg->b_obj_hpp->b0,"\n");
-        emitTypeMap(bg->b_obj_hpp->b0, "rp_tm_obj_ret", n, type, 1);
-        Printf(bg->b_obj_hpp->b0,"    %s(\n", symname);
-        emitParmList(parms, bg->b_obj_hpp->b0, 2, "rp_tm_default", 2);
-        Printf(bg->b_obj_hpp->b0,"    );\n");
+    Printf(bg->b_obj_hpp->b0,"\n");
+    emitTypeMap(bg->b_obj_hpp->b0, "rp_tm_obj_ret", n, type, 1);
+    Printf(bg->b_obj_hpp->b0,"    %s(\n", symname);
+    emitParmList(parms, bg->b_obj_hpp->b0, 2, "rp_tm_default", 2);
+    Printf(bg->b_obj_hpp->b0,"    );\n");
 
-        emitTypeMap(bg->b_obj_cpp->b0, "rp_tm_obj_ret", n, type);
-        Printf(bg->b_obj_cpp->b0,"%s::%s(\n", module, symname);
-        emitParmList(parms, bg->b_obj_cpp->b0, 2, "rp_tm_default", 2);
-        Printf(bg->b_obj_cpp->b0,"    ) {\n");
-        emitTypeMap(bg->b_obj_cpp->b0, "rp_tm_obj_rdc", n, type, 2);
-        Printf(bg->b_obj_cpp->b0,"        %s(\n", name);
-        emitParmList(parms, bg->b_obj_cpp->b0, 0, "rp_tm_default", 3, ',', true, true);
-        Printf(bg->b_obj_cpp->b0,"        );\n");
-        Printf(bg->b_obj_cpp->b0,"}\n");
-    //}
+    emitTypeMap(bg->b_obj_cpp->b0, "rp_tm_obj_ret", n, type);
+    Printf(bg->b_obj_cpp->b0,"%s::%s(\n", module, symname);
+    emitParmList(parms, bg->b_obj_cpp->b0, 2, "rp_tm_default", 2);
+    Printf(bg->b_obj_cpp->b0,"    ) {\n");
+    emitTypeMap(bg->b_obj_cpp->b0, "rp_tm_obj_rdc", n, type, 2);
+    Printf(bg->b_obj_cpp->b0,"        %s(\n", name);
+    emitParmList(parms, bg->b_obj_cpp->b0, 0, "rp_tm_default", 3, ',', true, true);
+    Printf(bg->b_obj_cpp->b0,"        );\n");
+    Printf(bg->b_obj_cpp->b0,"}\n");
 
     if (generateCppAddin) {
     emitTypeMap(bg->b_add_hpp->b0, "rp_tm_add_ret", n, type, 1);
