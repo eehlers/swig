@@ -1,4 +1,12 @@
 
+// features
+
+// This does not work.
+//#define %overrideobj      %feature("rp:override_obj")
+//#define %clearoverrideobj %feature("rp:override_obj", "")
+//#define %overrideadd      %feature("rp:override_add")
+//#define %clearoverrideadd %feature("rp:override_add", "")
+
 // rp_val_* - valueobjects
 
 %typemap(rp_tm_val_prm) SWIGTYPE "$1_type";
@@ -82,7 +90,21 @@
 %typemap(rp_tm_add_cll) rp_tp_enm_cls "$1_name_enm_cls";
 
 %typemap(rp_add_ret) SWIGTYPE "return ";
+
 %typemap(rp_add_ret) void "";
+
+// rp_tm_add_oh_get:  This typemap is used for class member functions in the addin.
+// We retrieve the object from the repository, and then extract the required reference.
+// Default behavior: get a reference to the underlying library object.
+%typemap(rp_tm_add_oh_get) SWIGTYPE %{
+    OH_GET_REFERENCE(x, objectID, $rp_typedef_obj_add, $rp_typedef_obj_lib);
+%}
+
+// Sometimes the addin wants to override the library's behavior, in this case we get
+// a reference to the addin object that wraps the library object:
+%typemap(rp_tm_add_oh_get) rp_tp_add_obj %{
+    OH_GET_OBJECT(x, objectID, $rp_typedef_obj_add);
+%}
 
 // rp_xll_* - Excel addin
 

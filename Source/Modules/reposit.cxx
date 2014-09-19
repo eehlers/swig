@@ -124,9 +124,12 @@ struct BufferGroup {
         b_cre_cpp = new Buffer(NewStringf("%s/serialization/create/create_%s.cpp", objDir, name_));
         b_reg_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_%s.hpp", objDir, name_));
         b_reg_cpp = new Buffer(NewStringf("%s/serialization/register/serialization_%s.cpp", objDir, name_));
-        b_obj_hpp = new Buffer(NewStringf("%s/obj_%s.hpp", objDir, name_));
         if (automatic_) {
+        b_obj_hpp = new Buffer(NewStringf("%s/obj_%s.hpp", objDir, name_));
         b_obj_cpp = new Buffer(NewStringf("%s/obj_%s.cpp", objDir, name_));
+        } else {
+        b_obj_hpp = new Buffer(NewStringf("%s/obj_%s.hpp.manual", objDir, name_));
+        b_obj_cpp = new Buffer(NewStringf("%s/obj_%s.cpp.manual", objDir, name_));
         }
         if (generateCppAddin) {
         b_add_hpp = new Buffer(NewStringf("%s/add_%s.hpp", addDir, name_));
@@ -179,7 +182,11 @@ struct BufferGroup {
         Printf(b_cre_cpp->b0, "#include <%s/conversions/convert2.hpp>\n", objInc);
         Printf(b_cre_cpp->b0, "//#include <%s/handle.hpp>\n", objInc);
         Printf(b_cre_cpp->b0, "\n");
+        if (automatic_) {
         Printf(b_cre_cpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, name);
+        } else {
+        Printf(b_cre_cpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, name);
+        }
         Printf(b_cre_cpp->b0, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, name);
         Printf(b_cre_cpp->b0, "\n");
         Printf(b_cre_cpp->b0, "//#include <%s/conversions/all.hpp>\n", objInc);
@@ -218,24 +225,24 @@ struct BufferGroup {
         Printf(b_reg_cpp->b1, "void %s::register_%s(boost::archive::xml_iarchive &ar) {\n", module, name);
         Printf(b_reg_cpp->b1, "\n");
 
-        Printf(b_obj_hpp->b0, "\n");
-        Printf(b_obj_hpp->b0, "#ifndef obj_%s_hpp\n", name);
-        Printf(b_obj_hpp->b0, "#define obj_%s_hpp\n", name);
-        Printf(b_obj_hpp->b0, "\n");
-        Printf(b_obj_hpp->b0, "#include <string>\n");
-        Printf(b_obj_hpp->b0, "#include <oh/libraryobject.hpp>\n");
-        Printf(b_obj_hpp->b0, "#include <oh/valueobject.hpp>\n");
-        Printf(b_obj_hpp->b0, "#include <boost/shared_ptr.hpp>");
-        Printf(b_obj_hpp->b0, "%s\n", include);
-        Printf(b_obj_hpp->b0, "using namespace %s;\n", nmspace);
-        Printf(b_obj_hpp->b0, "\n");
-        Printf(b_obj_hpp->b0,"namespace %s {\n", module);
+        //if (automatic_) {
+            Printf(b_obj_hpp->b0, "\n");
+            Printf(b_obj_hpp->b0, "#ifndef obj_%s_hpp\n", name);
+            Printf(b_obj_hpp->b0, "#define obj_%s_hpp\n", name);
+            Printf(b_obj_hpp->b0, "\n");
+            Printf(b_obj_hpp->b0, "#include <string>\n");
+            Printf(b_obj_hpp->b0, "#include <oh/libraryobject.hpp>\n");
+            Printf(b_obj_hpp->b0, "#include <oh/valueobject.hpp>\n");
+            Printf(b_obj_hpp->b0, "#include <boost/shared_ptr.hpp>");
+            Printf(b_obj_hpp->b0, "%s\n", include);
+            Printf(b_obj_hpp->b0, "using namespace %s;\n", nmspace);
+            Printf(b_obj_hpp->b0, "\n");
+            Printf(b_obj_hpp->b0,"namespace %s {\n", module);
 
-        if (automatic_) {
             Printf(b_obj_cpp->b0, "\n");
             Printf(b_obj_cpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, name);
             Printf(b_obj_cpp->b0, "\n");
-        }
+        //}
 
         if (generateCppAddin) {
         Printf(b_add_hpp->b0, "\n");
@@ -258,7 +265,11 @@ struct BufferGroup {
         //Printf(b_add_cpp->b0, "#include <oh/enumerations/typefactory.hpp>\n");
         // FIXME this #include is only required if the file contains constructors.
         Printf(b_add_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, name);
+        if (automatic_) {
         Printf(b_add_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, name);
+        } else {
+        Printf(b_add_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, name);
+        }
         // FIXME include only factories for types used in the current file.
         Printf(b_add_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_add_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
@@ -357,14 +368,14 @@ struct BufferGroup {
         Printf(b_reg_cpp->b1, "}\n");
         Printf(b_reg_cpp->b1, "\n");
 
-        Printf(b_obj_hpp->b0, "} // namespace %s\n", module);
-        Printf(b_obj_hpp->b0, "\n");
-        Printf(b_obj_hpp->b0, "#endif\n");
-        Printf(b_obj_hpp->b0, "\n");
+        //if (automatic_) {
+            Printf(b_obj_hpp->b0, "} // namespace %s\n", module);
+            Printf(b_obj_hpp->b0, "\n");
+            Printf(b_obj_hpp->b0, "#endif\n");
+            Printf(b_obj_hpp->b0, "\n");
 
-        if (automatic_) {
             Printf(b_obj_cpp->b0, "\n");
-        }
+        //}
 
         if (generateCppAddin) {
         Printf(b_add_hpp->b0, "\n");
@@ -387,10 +398,10 @@ struct BufferGroup {
         delete b_cre_cpp;
         delete b_reg_hpp;
         delete b_reg_cpp;
-        delete b_obj_hpp;
-        if (automatic_) {
+        //if (automatic_) {
+            delete b_obj_hpp;
             delete b_obj_cpp;
-        }
+        //}
         if (generateCppAddin) {
         delete b_add_hpp;
         delete b_add_cpp;
@@ -867,8 +878,13 @@ void printList(Node *n) {
 }
 
 String *getTypeMap(const char *m, Node *n, SwigType *t, bool fatal = true) {
-    if (String *tm = Swig_typemap_lookup(m, n, t, 0))
+    if (String *tm = Swig_typemap_lookup(m, n, t, 0)) {
+        Replaceall(tm, "$rp_typedef_resolved", Getattr(n, "rp_typedef_resolved"));
+        Replaceall(tm, "$rp_typedef_raw", Getattr(n, "rp_typedef_raw"));
+        Replaceall(tm, "$rp_typedef_obj_add", Getattr(n, "rp_typedef_obj_add"));
+        Replaceall(tm, "$rp_typedef_obj_lib", Getattr(n, "rp_typedef_obj_lib"));
         return tm;
+    }
     if (fatal) {
         Append(errorList, NewStringf("*** ERROR : typemap '%s' does not match type '%s'.\n", m, Char(SwigType_str(t, 0))));
         // Do not exit, instead keep running so that the user can see any other error messages.
@@ -886,8 +902,6 @@ String *getType(Parm *p, const char *m, bool fatal) {
         return t;
     else {
         String *s = getTypeMap(m, p, t, fatal);
-        Replaceall(s, "$rp_typedef_resolved", Getattr(p, "rp_typedef_resolved"));
-        Replaceall(s, "$rp_typedef_raw", Getattr(p, "rp_typedef_raw"));
         return s;
     }
 }
@@ -899,7 +913,7 @@ void printIndent(File *buf, int indent) {
 
 void emitTypeMap(File *buf, const char *m, Node *n, SwigType *t, int indent=0, bool fatal = true) {
     printIndent(buf, indent);
-    Printf(buf, "// BEGIN typemap %s\n", m);
+    Printf(buf, "// BEGIN typemap %s %s\n", m, t);
     printIndent(buf, indent);
     String *s = getTypeMap(m, n, t, fatal);
     if (Len(s)) {
@@ -1127,13 +1141,13 @@ int functionWrapperImplFunc(Node *n) {
     Setattr(n, "rp:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
 
-    Printf(bg->b_obj_hpp->b0,"\n");
-    emitTypeMap(bg->b_obj_hpp->b0, "rp_tm_obj_ret", n, type, 1);
-    Printf(bg->b_obj_hpp->b0,"    %s(\n", symname);
-    emitParmList(parms, bg->b_obj_hpp->b0, 2, "rp_tm_default", 2);
-    Printf(bg->b_obj_hpp->b0,"    );\n");
+    //if (automatic) {
+        Printf(bg->b_obj_hpp->b0,"\n");
+        emitTypeMap(bg->b_obj_hpp->b0, "rp_tm_obj_ret", n, type, 1);
+        Printf(bg->b_obj_hpp->b0,"    %s(\n", symname);
+        emitParmList(parms, bg->b_obj_hpp->b0, 2, "rp_tm_default", 2);
+        Printf(bg->b_obj_hpp->b0,"    );\n");
 
-    if (automatic) {
         emitTypeMap(bg->b_obj_cpp->b0, "rp_tm_obj_ret", n, type);
         Printf(bg->b_obj_cpp->b0,"%s::%s(\n", module, symname);
         emitParmList(parms, bg->b_obj_cpp->b0, 2, "rp_tm_default", 2);
@@ -1143,7 +1157,7 @@ int functionWrapperImplFunc(Node *n) {
         emitParmList(parms, bg->b_obj_cpp->b0, 0, "rp_tm_default", 3, ',', true, true);
         Printf(bg->b_obj_cpp->b0,"        );\n");
         Printf(bg->b_obj_cpp->b0,"}\n");
-    }
+    //}
 
     if (generateCppAddin) {
     emitTypeMap(bg->b_add_hpp->b0, "rp_tm_add_ret", n, type, 1);
@@ -1579,9 +1593,7 @@ int memberfunctionHandlerImpl(Node *n) {
 }
 
 int functionWrapperImplMemb(Node *n) {
-    if (generateCppAddin) {
-    Printf(bg->b_add_cpp->b0,"//****MEMB*****\n");
-    }
+    Printf(b_wrappers, "//***XYZ\n");
     String   *name   = Getattr(n,"name");
     SwigType *type   = Getattr(n,"type");
     Node *p = Getattr(n,"parentNode");
@@ -1607,6 +1619,9 @@ int functionWrapperImplMemb(Node *n) {
     processParm(parms2);
     Setattr(parms2, "nextSibling", Getattr(parms, "nextSibling"));
 
+    //Setattr(n, "rp_typedef_foo1", addinClass);
+    //Setattr(n, "rp_typedef_foo2", pname);
+
     Printf(b_wrappers, "//***ABC\n");
     printList(parms2);
     Printf(b_wrappers, "// *a0* %s <<\n", Char(ParmList_str(parms)));
@@ -1621,13 +1636,29 @@ int functionWrapperImplMemb(Node *n) {
     emitParmList(parms2, bg->b_add_hpp->b0, 2, "rp_tm_add_prm", 2);
     Printf(bg->b_add_hpp->b0,"    );\n\n");
 
+    Printf(bg->b_add_cpp->b0,"//****MEMB*****\n");
     emitTypeMap(bg->b_add_cpp->b0, "rp_tm_add_ret", n, type);
     Printf(bg->b_add_cpp->b0,"%s::%s(\n", addinCppNameSpace, funcName);
     emitParmList(parms2, bg->b_add_cpp->b0, 2, "rp_tm_add_prm", 2);
     Printf(bg->b_add_cpp->b0,"    ) {\n\n");
     emitParmList(parms, bg->b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
     Printf(bg->b_add_cpp->b0,"\n");
-    Printf(bg->b_add_cpp->b0,"    OH_GET_REFERENCE(x, objectID, %s, %s);\n", addinClass, pname);
+
+    // We are invoking the member function of a class.
+    // Create a dummy node and attach to it the type of the class.
+    // This allows us to apply a typemap to the node.
+    Node *node = NewHash();
+    Setfile(node, Getfile(n));
+    Setline(node, Getline(n));
+    Setattr(node, "type", NewString("ComplexLib::Test2"));
+    // Attach to the node some values that might be referenced by the typemap:
+    Setattr(node, "rp_typedef_obj_add", addinClass);    // The type of the addin wrapper object
+    Setattr(node, "rp_typedef_obj_lib", pname);         // The type of the library object
+    // Apply the typemap to the dummy node.
+    emitTypeMap(bg->b_add_cpp->b0, "rp_tm_add_oh_get", node, type);// FIXME last parm "type" does not matter + can be omitted
+    // Delete the dummy node.
+    Delete(node);
+
     Printf(bg->b_add_cpp->b0,"    return x->%s(\n", name);
     emitParmList(parms, bg->b_add_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true);
     Printf(bg->b_add_cpp->b0,"        );\n", name);
@@ -1679,10 +1710,13 @@ void functionWrapperImplAll(Node *n) {
 
     String *include = Getattr(n,"feature:rp:include");
 
+    String *x = Getattr(n,"feature:rp:override_obj");
+    printf(">>>>>'%s'<<<<<\n", Char(x));
+
     // Check whether to generate all source code, or to omit some code to be handwritten by the user.
     // For the user writing the config file, it is easier to assume automatic (default)
-    // unless overridden with '%feature("rp:generation", "manual");' :
-    bool manual = 0 != checkAttribute(n, "feature:rp:generation", "manual");
+    // unless overridden with '%feature("rp:override_obj");' :
+    bool manual = 0 != checkAttribute(n, "feature:rp:override_obj", "1");
     // The source code for this SWIG module is cleaner if we think of it the opposite way:
     automatic = !manual;
 
