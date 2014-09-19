@@ -11,14 +11,14 @@ int main() {
         ComplexLibAddinCpp::initializeAddin();
         std::cout << "ObjectHandler version = " << ObjectHandler::ohVersion() << std::endl;
 
-//        testFunctions();
-//        testObjects();
-//        testInheritance();
-//        testTypedefs();
-//        testConversions();
-//        testCoercions();
-//        testEnumeratedTypes();
-//        testEnumeratedClasses();
+        testFunctions();
+        testObjects();
+        testInheritance();
+        testTypedefs();
+        testConversions();
+        testCoercions();
+        testEnumeratedTypes();
+        testEnumeratedClasses();
         testOverrides();
 
         ComplexLibAddinCpp::closeAddin();
