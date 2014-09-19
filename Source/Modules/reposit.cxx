@@ -113,7 +113,7 @@ struct BufferGroup {
     String *name_;
     bool automatic_;
 
-    BufferGroup(String *name, String *include, bool automatic) {
+    BufferGroup(String *name, String *obj_include, String *add_include, bool automatic) {
 
         name_ = Copy(name);
         automatic_ = automatic;
@@ -233,7 +233,7 @@ struct BufferGroup {
         Printf(b_obj_hpp->b0, "#include <oh/libraryobject.hpp>\n");
         Printf(b_obj_hpp->b0, "#include <oh/valueobject.hpp>\n");
         Printf(b_obj_hpp->b0, "#include <boost/shared_ptr.hpp>");
-        Printf(b_obj_hpp->b0, "%s\n", include);
+        Printf(b_obj_hpp->b0, "%s\n", obj_include);
         Printf(b_obj_hpp->b0, "using namespace %s;\n", nmspace);
         Printf(b_obj_hpp->b0, "\n");
         Printf(b_obj_hpp->b0,"namespace %s {\n", module);
@@ -272,6 +272,7 @@ struct BufferGroup {
         } else {
         Printf(b_add_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, name);
         }
+        Printf(b_add_cpp->b0, "%s\n", add_include);
         // FIXME include only factories for types used in the current file.
         Printf(b_add_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_add_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
@@ -424,10 +425,10 @@ class BufferMap {
 
 public:
 
-    BufferGroup *getBufferGroup(String *name, String *include, bool automatic) {
+    BufferGroup *getBufferGroup(String *name, String *obj_include, String *add_include, bool automatic) {
         name_ = Char(name);
         if (bm_.end() == bm_.find(name_))
-            bm_[name_] = new BufferGroup(name, include, automatic);
+            bm_[name_] = new BufferGroup(name, obj_include, add_include, automatic);
         return bm_[name_];
     }
 
@@ -1706,7 +1707,8 @@ void functionWrapperImplAll(Node *n) {
     String *nodeName = Getattr(n, "name");
     printf("Processing node name '%s'.\n", Char(nodeName));
 
-    String *include = Getattr(n,"feature:rp:include");
+    String *obj_include = Getattr(n,"feature:rp:obj_include");
+    String *add_include = Getattr(n,"feature:rp:add_include");
 
     String *x = Getattr(n,"feature:rp:override_obj");
     printf(">>>>>'%s'<<<<<\n", Char(x));
@@ -1721,7 +1723,7 @@ void functionWrapperImplAll(Node *n) {
     String *group = Getattr(n,"feature:rp:group");
     printf("Group='%s'.\n", Char(group));
     if (group)
-        bg = bm_.getBufferGroup(group, include, automatic);
+        bg = bm_.getBufferGroup(group, obj_include, add_include, automatic);
 
     // Process the parameter list.
     ParmList *parms  = Getattr(n,"parms");
