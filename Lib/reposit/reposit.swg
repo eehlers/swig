@@ -69,7 +69,7 @@
 
 %typemap(rp_tm_add_cnv) rp_tp_crc %{
     $1_type $1_name_crc = ObjectHandler::CoerceImpl<
-        const ObjectHandler::property_t&,
+        ObjectHandler::property_t,
         $1_type>()($1_name);
 %}
 
@@ -143,14 +143,13 @@
 //NEW
 %typemap(rp_tm_xll_cnv) rp_tp_cnv %{
         $1_type $1_name_cnv = ObjectHandler::convert2<$1_type, ObjectHandler::ConvertOper>(
-            ObjectHandler::ConvertOper(*$1_name));      
+            ObjectHandler::ConvertOper(*$1_name));
 %}
 
 %typemap(rp_tm_xll_cnv) rp_tp_crc %{
-//    $1_type $1_name_crc = ObjectHandler::CoerceImpl<
-//        const ObjectHandler::property_t&,
-//        $1_type>()(*$1_name);
-      $1_type $1_name_crc = $1_type();
+        $1_type $1_name_crc = ObjectHandler::CoerceImpl<
+            ObjectHandler::ConvertOper, $1_type>()
+            (ObjectHandler::ConvertOper(*$1_name));
 %}
 
 %typemap(rp_tm_xll_cnv) rp_tp_enm %{
