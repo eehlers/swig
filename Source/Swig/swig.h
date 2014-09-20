@@ -15,7 +15,11 @@
 #define SWIGCORE_H_
 
 #ifndef MACSWIG
+#ifdef WIN32
+#include "swigconfig_win.h"
+#else
 #include "swigconfig.h"
+#endif
 #endif
 
 #include <stdio.h>

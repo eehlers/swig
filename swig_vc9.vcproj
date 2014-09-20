@@ -469,7 +469,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Source\Swig\swigconfig.h"
+				RelativePath=".\Source\Swig\swigconfig_win.h"
 				>
 			</File>
 			<File

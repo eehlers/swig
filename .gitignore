@@ -135,3 +135,5 @@ tags
 *.user
 Release
 Debug
+
+!Source/Swig/swigconfig_win.h

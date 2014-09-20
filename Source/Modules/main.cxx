@@ -11,7 +11,11 @@
  * Main entry point to the SWIG core.
  * ----------------------------------------------------------------------------- */
 
+#ifdef WIN32
+#include "swigconfig_win.h"
+#else
 #include "swigconfig.h"
+#endif
 
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
