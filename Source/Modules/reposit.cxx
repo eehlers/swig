@@ -288,8 +288,8 @@ struct BufferGroup {
         Printf(b_xll_cpp->b0, "#include <ohxl/functions/export.hpp>\n");
         Printf(b_xll_cpp->b0, "#include <ohxl/utilities/xlutilities.hpp>\n");
         Printf(b_xll_cpp->b0, "#include <ohxl/objectwrapperxl.hpp>\n");
-        Printf(b_xll_cpp->b0, "#include <clo/coercions/all.hpp>\n");
-        Printf(b_xll_cpp->b0, "#include \"clo/enumerations/factories/all.hpp\"\n");
+        Printf(b_xll_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
+        Printf(b_xll_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, name);
         Printf(b_xll_cpp->b0, "//#include \"%s/obj_%s.hpp\"\n", objInc, name);
         Printf(b_xll_cpp->b0, "#include \"%s/obj_all.hpp\"\n", objInc);
