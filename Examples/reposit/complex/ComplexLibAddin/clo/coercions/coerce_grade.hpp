@@ -44,8 +44,8 @@ namespace ObjectHandler {
     template <class TypeIn, class TypeOut>
     class CoerceImpl : public ObjectHandler::Coerce<
         TypeIn, TypeOut> {
-        Conversion *getConversions() {
-            static Conversion conversions[] = {
+        typename ObjectHandler::Coerce<TypeIn, TypeOut>::Conversion *getConversions() {
+            static typename ObjectHandler::Coerce<TypeIn, TypeOut>::Conversion conversions[] = {
                 doubleToGrade2,
                 stringToGrade2,
                 0
