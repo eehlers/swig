@@ -189,19 +189,23 @@
 			Name="functions"
 			>
 			<File
-				RelativePath=".\clxl\functions\function_adder.cpp"
+				RelativePath=".\clxl\functions\function_coercions.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\clxl\functions\function_adder2.cpp"
+				RelativePath=".\clxl\functions\function_conversions.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\clxl\functions\function_color.cpp"
+				RelativePath=".\clxl\functions\function_enumerated_classes.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\clxl\functions\function_foo.cpp"
+				RelativePath=".\clxl\functions\function_enumerated_types.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\clxl\functions\function_functions.cpp"
 				>
 			</File>
 			<File
@@ -209,21 +213,21 @@
 				>
 			</File>
 			<File
-				RelativePath=".\clxl\functions\function_noparm.cpp"
+				RelativePath=".\clxl\functions\function_objects.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\clxl\functions\function_overrides.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\clxl\functions\function_typedefs.cpp"
 				>
 			</File>
 		</Filter>
 		<Filter
 			Name="register"
 			>
-			<File
-				RelativePath=".\clxl\register\register_adder.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\clxl\register\register_adder2.cpp"
-				>
-			</File>
 			<File
 				RelativePath=".\clxl\register\register_all.cpp"
 				>
@@ -233,11 +237,23 @@
 				>
 			</File>
 			<File
-				RelativePath=".\clxl\register\register_color.cpp"
+				RelativePath=".\clxl\register\register_coercions.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\clxl\register\register_foo.cpp"
+				RelativePath=".\clxl\register\register_conversions.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\clxl\register\register_enumerated_classes.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\clxl\register\register_enumerated_types.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\clxl\register\register_functions.cpp"
 				>
 			</File>
 			<File
@@ -245,7 +261,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\clxl\register\register_noparm.cpp"
+				RelativePath=".\clxl\register\register_objects.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\clxl\register\register_overrides.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\clxl\register\register_typedefs.cpp"
 				>
 			</File>
 		</Filter>

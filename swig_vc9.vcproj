@@ -121,7 +121,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4996"
+				DisableSpecificWarnings="4996,4800"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -521,6 +521,10 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\Lib\reposit\reposit.swg"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

@@ -288,6 +288,8 @@ struct BufferGroup {
         Printf(b_xll_cpp->b0, "#include <ohxl/functions/export.hpp>\n");
         Printf(b_xll_cpp->b0, "#include <ohxl/utilities/xlutilities.hpp>\n");
         Printf(b_xll_cpp->b0, "#include <ohxl/objectwrapperxl.hpp>\n");
+        Printf(b_xll_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
+        Printf(b_xll_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, name);
         Printf(b_xll_cpp->b0, "//#include \"%s/obj_%s.hpp\"\n", objInc, name);
         Printf(b_xll_cpp->b0, "#include \"%s/obj_all.hpp\"\n", objInc);
@@ -1711,7 +1713,7 @@ void functionWrapperImplAll(Node *n) {
     String *add_include = Getattr(n,"feature:rp:add_include");
 
     String *x = Getattr(n,"feature:rp:override_obj");
-    printf(">>>>>'%s'<<<<<\n", Char(x));
+    //printf(">>>>>'%s'<<<<<\n", Char(x));
 
     // Check whether to generate all source code, or to omit some code to be handwritten by the user.
     // For the user writing the config file, it is easier to assume automatic (default)

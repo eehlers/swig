@@ -2,7 +2,7 @@
 #include <cl/coercions.hpp>
 #include <sstream>
 
-ComplexLib::Grade2::Grade2(long score)
+ComplexLib::Grade2::Grade2(double score)
     : score_(score) {}
 
 ComplexLib::Grade2::operator char() {

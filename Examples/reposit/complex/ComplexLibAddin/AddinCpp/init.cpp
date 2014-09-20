@@ -33,6 +33,6 @@ void ComplexLibAddinCpp::initializeAddin() {
 
 void ComplexLibAddinCpp::closeAddin() {
     // Clear the Enumeration Registry
-    ComplexLibAddin::initializeAddin();
+    ComplexLibAddin::closeAddin();
 }
 

@@ -12,8 +12,8 @@ namespace ObjectHandler {
 
     template<class container_t>
     ComplexLib::Grade convertGrade(const container_t& c) {
-        if(c.type() == typeid(long))
-            return ComplexLib::Grade(c.operator long());
+        if(c.type() == typeid(double))
+            return ComplexLib::Grade(c.operator double());
         else
             OH_FAIL("unable to convert type '" << c.type().name() << "' to type 'ComplexLib::Grade'");
     }

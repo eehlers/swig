@@ -14,7 +14,7 @@ $(BUILD_DIR) :
     if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
 
 $(BUILDFLAG) : $(BUILD_DIR) $(SWIG_FILE)
-	$(SWIG_EXE) -DSWIG_MSVC -I$(SWIG_INC) -I$(REPOSIT_INC) -c++ -reposit -gencpp -prefix sl $(SWIG_FILE)
+	$(SWIG_EXE) -DSWIG_MSVC -I$(SWIG_INC) -I$(REPOSIT_INC) -c++ -reposit -gencpp -genxll -prefix sl $(SWIG_FILE)
 	echo flagged > $@
 
 CLEAN :

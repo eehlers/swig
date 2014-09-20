@@ -69,7 +69,7 @@
 
 %typemap(rp_tm_add_cnv) rp_tp_crc %{
     $1_type $1_name_crc = ObjectHandler::CoerceImpl<
-        const ObjectHandler::property_t&,
+        ObjectHandler::property_t,
         $1_type>()($1_name);
 %}
 
@@ -118,6 +118,12 @@
 %typemap(rp_tm_xll_cod) std::string const & "C";
 %typemap(rp_tm_xll_cod) void "L";
 %typemap(rp_tm_xll_cod) SWIGTYPE * "C";
+//NEW
+%typemap(rp_tm_xll_cod) rp_tp_double const & "E";
+%typemap(rp_tm_xll_cod) rp_tp_cnv "P";
+%typemap(rp_tm_xll_cod) rp_tp_crc "P";
+%typemap(rp_tm_xll_cod) rp_tp_enm "C";
+%typemap(rp_tm_xll_cod) rp_tp_enm_cls "C";
 
 %typemap(rp_tm_xll_prm) bool "bool*";
 %typemap(rp_tm_xll_prm) long "long*";
@@ -127,11 +133,45 @@
 %typemap(rp_tm_xll_prm) std::string "char*";
 %typemap(rp_tm_xll_prm) std::string& "char*";
 %typemap(rp_tm_xll_prm) std::string const & "char*";
+//NEW
+%typemap(rp_tm_xll_prm) rp_tp_double const & "double*";
+%typemap(rp_tm_xll_prm) rp_tp_cnv "OPER*";
+%typemap(rp_tm_xll_prm) rp_tp_crc "OPER*";
+%typemap(rp_tm_xll_prm) rp_tp_enm "char*";
+%typemap(rp_tm_xll_prm) rp_tp_enm_cls "char*";
+
+//NEW
+%typemap(rp_tm_xll_cnv) rp_tp_cnv %{
+        $1_type $1_name_cnv = ObjectHandler::convert2<$1_type, ObjectHandler::ConvertOper>(
+            ObjectHandler::ConvertOper(*$1_name));
+%}
+
+%typemap(rp_tm_xll_cnv) rp_tp_crc %{
+        $1_type $1_name_crc = ObjectHandler::CoerceImpl<
+            ObjectHandler::ConvertOper, $1_type>()
+            (ObjectHandler::ConvertOper(*$1_name));
+%}
+
+%typemap(rp_tm_xll_cnv) rp_tp_enm %{
+    $1_type $1_name_enm =
+        ObjectHandler::Create<$1_type>()($1_name);
+%}
+
+%typemap(rp_tm_xll_cnv) rp_tp_enm_cls %{
+    $1_type $1_name_enm_cls =
+        ObjectHandler::Create<$1_type >()($1_name);
+%}
 
 %typemap(rp_tm_xll_cll_obj) SWIGTYPE "$1_name";
 %typemap(rp_tm_xll_cll_obj) long "*$1_name";
 %typemap(rp_tm_xll_cll_obj) rp_tp_double "*$1_name";
 //%typemap(rp_tm_xll_cll_obj) double "*$1_name";
+//NEW
+%typemap(rp_tm_xll_cll_obj) rp_tp_double const & "*$1_name";
+%typemap(rp_tm_xll_cll_obj) rp_tp_cnv "$1_name_cnv";
+%typemap(rp_tm_xll_cll_obj) rp_tp_crc "$1_name_crc";
+%typemap(rp_tm_xll_cll_obj) rp_tp_enm "$1_name_enm";
+%typemap(rp_tm_xll_cll_obj) rp_tp_enm_cls "$1_name_enm_cls";
 
 %typemap(rp_tm_xll_cll_val) SWIGTYPE "$1_name";
 %typemap(rp_tm_xll_cll_val) long "*$1_name";

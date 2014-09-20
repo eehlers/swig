@@ -10,20 +10,22 @@
 
 namespace ObjectHandler {
 
-    inline bool longToGrade2(
-        const ObjectHandler::property_t &in,
+    template <class T>
+    inline bool doubleToGrade2(
+        T in,
         ComplexLib::Grade2 &out) {
 
-        if(in.type() == typeid(long)) {
-            out = ComplexLib::Grade2(in.operator long());
+        if(in.type() == typeid(double)) {
+            out = ComplexLib::Grade2(in.operator double());
             return true;
         } else {
             return false;
         }
     }
 
+    template <class T>
     inline bool stringToGrade2(
-        const ObjectHandler::property_t &in,
+        T in,
         ComplexLib::Grade2 &out) {
 
         if(in.type() == typeid(std::string)) {
@@ -41,17 +43,10 @@ namespace ObjectHandler {
 
     template <class TypeIn, class TypeOut>
     class CoerceImpl : public ObjectHandler::Coerce<
-        TypeIn, TypeOut> {};
-
-    template <>
-    class CoerceImpl<const ObjectHandler::property_t &, 
-        ComplexLib::Grade2> : public ObjectHandler::Coerce<
-        ObjectHandler::property_t, 
-        ComplexLib::Grade2> {
-
+        TypeIn, TypeOut> {
         Conversion *getConversions() {
             static Conversion conversions[] = {
-                longToGrade2,
+                doubleToGrade2,
                 stringToGrade2,
                 0
             };
