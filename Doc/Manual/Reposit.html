@@ -13,61 +13,46 @@
 <li><a href="#Reposit_nn1">Overview</a>
 <li><a href="#Reposit_nn2">Differences Between the reposit SWIG Module and Other SWIG Modules</a>
 <li><a href="#Reposit_nn3">Installation</a>
-<li><a href="#Reposit_nn10">Running SWIG</a>
-<li><a href="#Reposit_nn28">Buffers</a>
-<li><a href="#Reposit_nn12">Functions</a>
-<li><a href="#Reposit_nn13">Typedefs</a>
-<li><a href="#Reposit_nn14">Objects</a>
-<li><a href="#Reposit_nn15">Inheritance</a>
-<li><a href="#Reposit_nn16">Conversions</a>
-<li><a href="#Reposit_nn17">Coercions</a>
-<li><a href="#Reposit_nn18">Enumerations</a>
+<li><a href="#Reposit_nn4">Running SWIG</a>
+<li><a href="#Reposit_nn5">Components of the reposit SWIG module</a>
+<li><a href="#Reposit_nn6">Examples</a>
 <ul>
-<li><a href="#Reposit_nn19">Enumerated Types</a>
-<li><a href="#Reposit_nn20">Enumerated Classes</a>
-<li><a href="#Reposit_nn21">Enumerated Pairs</a>
-<li><a href="#Reposit_nn22">Custom Enumerations</a>
+<li><a href="#Reposit_nn7">SimpleLib</a>
+<li><a href="#Reposit_nn8">ComplexLib</a>
 </ul>
-<li><a href="#Reposit_nn23">Handwritten Implementations</a>
-<li><a href="#Reposit_nn26">Serialization</a>
-<li><a href="#Reposit_nn29">Typemaps</a>
+<li><a href="#Reposit_nn9">Buffers</a>
+<li><a href="#Reposit_nn24">Features</a>
+<ul>
+<li><a href="#Reposit_nn10">Functions</a>
+<li><a href="#Reposit_nn11">Typedefs</a>
+<li><a href="#Reposit_nn12">Objects</a>
+<li><a href="#Reposit_nn13">Inheritance</a>
+<li><a href="#Reposit_nn14">Conversions</a>
+<li><a href="#Reposit_nn15">Coercions</a>
+<li><a href="#Reposit_nn16">Enumerations</a>
+<ul>
+<li><a href="#Reposit_nn17">Enumerated Types</a>
+<li><a href="#Reposit_nn18">Enumerated Classes</a>
+<li><a href="#Reposit_nn19">Enumerated Pairs</a>
+<li><a href="#Reposit_nn20">Custom Enumerations</a>
+</ul>
+<li><a href="#Reposit_nn21">Handwritten Implementations</a>
+<li><a href="#Reposit_nn22">Serialization</a>
+</ul>
+<li><a href="#Reposit_nn23">Typemaps</a>
 </ul>
 </div>
 <!-- INDEX -->
 
 
 
-<p>hello hello hello</p>
-
-
 <H2><a name="Reposit_nn1"></a>19.1 Overview</H2>
 
 
-<p>hello hello hello</p>
+<p>The reposit project implements an object repository in which objects may be instantiated, queried, updated, and destroyed, facilitating deployment of object oriented functionality to procedural platforms such as spreadsheets. </p>
 
-<div class="shell"><pre>
-shell here
-</pre></div>
+<p>The reposit SWIG module parses the header files of your C++ library and autogenerates an Excel addin which allows you to call your C++ library from a spreadsheet.  Reposit also generates a C++ addin with the same interface as the Excel addin.  Reposit wraps the objects from your C++ library in a layer that supports additional features such as serialization, allowing data to be transferred between Excel and C++ processes.</p>
 
-<p>hello hello hello</p>
-
-<div class="code"><pre>
-code here
-</pre></div>
-
-<p>hello hello hello</p>
-
-<div class="targetlang"><pre>
-targetlang here
-</pre></div>
-
-<p>hello hello hello</p>
-
-<div class="diagram"><pre>
-diagram here
-</pre></div>
-
-<p>hello hello hello</p>
 
 <H2><a name="Reposit_nn2"></a>19.2 Differences Between the reposit SWIG Module and Other SWIG Modules</H2>
 
@@ -85,16 +70,16 @@ class REPOSIT : public Language {
 };
 </pre></div>
 
-<p>To generate the source code of the addin, SWIG provides a set of buffers (begin, runtime, header, etc...).  The basic structure of these buffers is usually similar from one SWIG module to another.  Reposit does not use these buffers.  Reposit allows SWIG to generate some of the default content of these buffers.  Reposit also dumps some debug info into those buffers.  Reposit then appends all of SWIG's buffers one after the other into an output file called ./test.cpp.   The file is not part of the build and does not compile, but looking at the contents of the file can sometimes be helpful when debugging the behavior of the reposit module.</p>
+<p>To generate the source code of the addin, SWIG provides a set of buffers (begin, runtime, header, etc...).  The basic structure of these buffers is usually similar from one SWIG module to another.  Reposit does not use these buffers.  Reposit allows SWIG to generate some of the default content of these buffers.  Reposit also dumps some debug info into those buffers.  Reposit then appends all of SWIG's buffers one after the other into an output file called ./test.cpp.   The file is not part of the build and does not contain valid C++, but looking at the contents of the file can sometimes be helpful when debugging the behavior of the reposit module.</p>
 
-<p>Reposit instead generates its own set of output buffers and writes these to disk.  When generating the output, reposit uses a lot of standard SWIG utilities - typemaps, output functions, etc.  But the list of output files is completely customized.  The output files are explained in detail later in this document.</p>
+<p>Reposit instead generates its own set of output buffers and writes these to disk.  When generating the output, reposit uses a lot of standard SWIG utilities - typemaps, output functions, etc.  But the list of output files is completely specific to reposit.  The output files are explained in detail later in this document.</p>
 
 <H2><a name="Reposit_nn3"></a>19.3 Installation</H2>
 
 
-<p>A basic howto for installing and running reposit is provided at the following link: <a href="http://www.quantlib.org/reposit/installation.html">http://www.quantlib.org/reposit/   installation.html</a>.  The document you are reading now provides more in depth information on the reposit SWIG module.</p>
+<p>A basic howto for installing and running the reposit SWIG module and object repository is provided at the following link: <a href="http://www.quantlib.org/reposit/installation.html">http://www.quantlib.org/reposit/installation.html</a>.  The document you are reading now provides more in depth information on the reposit SWIG module.</p>
 
-<H2><a name="Reposit_nn10"></a>19.4 Running SWIG</H2>
+<H2><a name="Reposit_nn4"></a>19.4 Running SWIG</H2>
 
 
 <p>If you build SWIG with "make install", then the resulting binary can be found at xxx/bin/swig, where xxx is the installation directory.</p>
@@ -134,7 +119,118 @@ swig -c++ -reposit -gencpp -genxll -prefix xx xxx.i
 
 <p>The paths indicate the relative paths to the directories where the addin code is generated.  The last argument is the name of the addin.  See the examples.</p>
 
-<H2><a name="Reposit_nn28"></a>19.5 Buffers</H2>
+<H2><a name="Reposit_nn5"></a>19.5 Components of the reposit SWIG module</H2>
+
+
+<p>If you want to make any changes to the reposit SWIG module then the files and directories of most interest are:</p>
+
+<div class="shell"><pre>
+swig/Source/Modules/reposit.cxx
+swig/Lib/reposit/reposit.swg
+swig/Examples/reposit/
+swig/Doc/Manual/Reposit.html
+</pre></div>
+
+<H2><a name="Reposit_nn6"></a>19.6 Examples</H2>
+
+
+<p>Two example applications are provided.</p>
+
+<H3><a name="Reposit_nn7"></a>19.6.1 SimpleLib</H3>
+
+
+<p>The SimpleLib example is provided in directory swig/Examples/reposit/simple.  This is nearly the smallest possible reposit project that it is possible to have.</p>
+
+<p>simple/Library represents the C++ library that you want to wrap.  File simple/Library/adder.hpp implements a function and a class:</p>
+
+<div class="code"><pre>
+    std::string func();
+
+    class Adder {
+    private:
+        long x_;
+    public:
+        Adder(long x);
+        long add(long y);
+    };
+</pre></div>
+
+<p>File simple/swig/simple.i is the SWIG interface file that the reposit SWIG module uses to generate the addins for the above library:</p>
+
+<div class="code"><pre>
+// This typemap tells the reposit SWIG module that type SimpleLib::Adder *
+// should be treated like a char* as far as Excel is concerned.
+%typemap(rp_tm_xll_cod) SimpleLib::Adder * "C";
+
+// This directive specifies the directories to which the autogenerated output
+// files should be written, and the name of the addin.
+%module(
+    rp_obj_dir="../AddinObjects",
+    rp_add_dir="../AddinCpp",
+    rp_xll_dir="../AddinXl",
+    rp_obj_inc="AddinObjects",
+    rp_add_inc="AddinCpp",
+    rp_xll_inc="AddinXl"
+) SimpleLibAddin
+
+// This directive says that we want to group some functions under the label
+// "adder"
+%feature("rp:group", "adder");
+
+// This directive specifies the #include statement that must be inserted into
+// the source code for autogenerated objects.
+%feature("rp:obj_include") %{
+#include "Library/adder.hpp"
+%}
+
+// This code indicates which functionality from the SimpleLib library should be
+// included in the addin.
+namespace SimpleLib {
+    std::string func();
+    class Adder {
+    public:
+        Adder(long x);
+        long add(long y);
+    };
+}
+</pre></div>
+
+<p>The source code for addin wrapper classes is autogenerated to files in directory simple/AddinObjects.</p>
+
+<p>The functions for the C++ addin are autogenerated to files in directory simple/AddinCpp.</p>
+
+<p>File simple/Main/mainSimpleLibAddin.cpp shows how an end user calls the C++ addin.  It is pretty easy:</p>
+
+<div class="code"><pre>
+// Call function SimpleLib::func()
+std::cout &lt;&lt; SimpleLibAddinCpp::slFunc() &lt;&lt; std::endl;
+// Construct an instance of class SimpleLib::Adder
+SimpleLibAddinCpp::slAdder("adder", 1);
+// Call member function SimpleLib::Adder::add()
+std::cout &lt;&lt; "1 + 2 = " &lt;&lt; SimpleLibAddinCpp::slAdderAdd("adder", 2) &lt;&lt; std::endl;
+</pre></div>
+
+<p>These are the paths to the Excel addin and sample workbook:</p>
+
+<div class="code"><pre>
+simple\Release\AddinXl.xll
+simple\AddinXl\AddinXl.xlsx
+</pre></div>
+
+<p>The functionality of the example workbook is the same as that of the example C++ program:</p>
+
+<div class="code"><pre>
+=slFunc()
+=slAdder("adder", 1)
+=slAdderAdd("adder", 2)
+</pre></div>
+
+<H3><a name="Reposit_nn8"></a>19.6.2 ComplexLib</H3>
+
+
+<p>The ComplexLib example is provided in directory swig/Examples/reposit/complex.  This project is a bucket of every single feature supported by reposit.  The ComplexLib example project is referred to throughout the rest of this document.</p>
+
+<H2><a name="Reposit_nn9"></a>19.7 Buffers</H2>
 
 
 <p>This chapter summarizes the output files that are generated by the reposit SWIG module.  The exact locations of the files depends on the configuration described above.  For purposes of this example we use the paths that are configured in the example project, swig/Examples/reposit/complex.</p>
@@ -168,7 +264,12 @@ ComplexLibXL/clxl/functions/function_xxx.cpp
 
 <p>The directories valueobjects and serialization contain code to support serialization of objects in the repository (this code is not yet working properly).  The obj_xxx.?pp files are the addin objects that wrap the library objects - this is explained in more detail later in this document.  The add_xxx.?pp files are the C++ addin functions.  The files in the XL directory are the Excel addin functions.</p>
 
-<H2><a name="Reposit_nn12"></a>19.6 Functions</H2>
+<H2><a name="Reposit_nn24"></a>19.8 Features</H2>
+
+
+<p>This section documents all of the features supported by reposit.  The relevant code in ComplexLib is referenced throughout.</p>
+
+<H3><a name="Reposit_nn10"></a>19.8.1 Functions</H3>
 
 
 <p>File ComplexLib/cl/functions.hpp defines a function:</p>
@@ -189,7 +290,7 @@ std::string func1();
 
 <p>The implementation of the function in the Excel addin appears in file ComplexLibXL/clxl/functions/function_functions.cpp.</p>
 
-<H2><a name="Reposit_nn13"></a>19.7 Typedefs</H2>
+<H3><a name="Reposit_nn11"></a>19.8.2 Typedefs</H3>
 
 
 <p>File ComplexLib/cl/typedefs.hpp implements a couple of typedefs:</p>
@@ -212,7 +313,7 @@ std::string func1();
 
 <p>This maps LongDouble to rp_tp_double.  rp_tp_double is an identifier that reposit recognizes and treats as a double.  This is explained in more detail later.</p>
 
-<H2><a name="Reposit_nn14"></a>19.8 Objects</H2>
+<H3><a name="Reposit_nn12"></a>19.8.3 Objects</H3>
 
 
 <p>File ComplexLib/cl/objects.hpp declares a class:</p>
@@ -294,7 +395,7 @@ The reposit object repository looks something like this: </p>
     =clTestGetInput("my_test")
 </pre></div>
 
-<H2><a name="Reposit_nn15"></a>19.9 Inheritance</H2>
+<H3><a name="Reposit_nn13"></a>19.8.4 Inheritance</H3>
 
 
 <p>Reposit supports inheritance.  A couple of example class hierarchies are implemented in file ComplexLib/cl/inheritance.hpp:</p>
@@ -368,7 +469,7 @@ The reposit object repository looks something like this: </p>
     std::cout << ComplexLibAddinCpp::clBaseF("derived") << std::endl;
 </pre></div>
 
-<H2><a name="Reposit_nn16"></a>19.10 Conversions</H2>
+<H3><a name="Reposit_nn14"></a>19.8.5 Conversions</H3>
 
 
 <p>For the arguments and return values of addin functions, the only data types that reposit allows are: bool, long, double, string, and any.  On C++, any is ObjectHandler::property_t, which is a boost::variant.  On Excel, any is OPER.</p>
@@ -429,7 +530,7 @@ std::cout &lt;&lt; ComplexLibAddinCpp::clShowGrade(75.) &gt;&gt; std::endl;
 
 <p>The conversion functionality in the Excel addin is analogous to that described above for the C++ addin.</p>
 
-<H2><a name="Reposit_nn17"></a>19.11 Coercions</H2>
+<H3><a name="Reposit_nn15"></a>19.8.6 Coercions</H3>
 
 
 <p>A coercion is a list of conversions.  We receive an argument from the caller - usually of type any or string - and attempt a series of conversions on it.  The first successful conversion is used.</p>
@@ -459,12 +560,12 @@ std::cout &lt;&lt; ComplexLibAddinCpp::clShowGrade(75.) &gt;&gt; std::endl;
 
 <p>In file ComplexLibAddin/AddinCpp/add_coercions.cpp, the wrapper function accepts an argument of type ObjectHandler::property_t, and invokes the relevant code to coerce the value into type Grade2.</p>
 
-<H2><a name="Reposit_nn18"></a>19.12 Enumerations</H2>
+<H3><a name="Reposit_nn16"></a>19.8.7 Enumerations</H3>
 
 
 <p>Reposit implements a number of registries which allow C++ eunmerations to be represented by strings.  This facilitiates support of C++ enumerations on platforms where they are not recognized, such as Excel.</p>
 
-<H3><a name="Reposit_nn19"></a>19.12.1 Enumerated Types</H3>
+<H4><a name="Reposit_nn17"></a>19.8.7.1 Enumerated Types</H4>
 
 
 <p>Reposit's enumerated type registry maps C++ enums to strings.</p>
@@ -511,7 +612,7 @@ long ComplexLibAddinCpp::clGetInterestRate(
 std::cout  &lt;&lt;"Interest rate current = " &lt;&lt; ComplexLibAddinCpp::clGetInterestRate("Current")  &lt;&lt; std::endl;
 </pre></div>
 
-<H3><a name="Reposit_nn20"></a>19.12.2 Enumerated Classes</H3>
+<H4><a name="Reposit_nn18"></a>19.8.7.2 Enumerated Classes</H4>
 
 
 <p>The enumerated class registry allows a string to be associated to an instance of a class.  Classes enumerated in this way ought to be stateless, though reposit does not enforce that rule.  Enumerating stateful classes can yield strange behavior.  Every occurence of a given string (identifier) maps to the same single instance of the enumerated class.</p>
@@ -548,7 +649,7 @@ std::cout  &lt;&lt;"Interest rate current = " &lt;&lt; ComplexLibAddinCpp::clGet
 std::cout &lt;&lt; "The current time in New York is "  &lt;&lt; ComplexLibAddinCpp::clTimeString("EST")  &lt;&lt; std::endl;
 </pre></div>
 
-<H3><a name="Reposit_nn21"></a>19.12.3 Enumerated Pairs</H3>
+<H4><a name="Reposit_nn19"></a>19.8.7.3 Enumerated Pairs</H4>
 
 
 <p>Enumerated pairs are used to provide support for template classes.  Suppose you have a C++ class that looks like this:</p>
@@ -566,12 +667,12 @@ class Foo { ... };
 
 <p>Support for enumerated pairs exists in the ObjectHandler object repository but has not yet been implemented in the reposit SWIG module.</p>
 
-<H3><a name="Reposit_nn22"></a>19.12.4 Custom Enumerations</H3>
+<H4><a name="Reposit_nn20"></a>19.8.7.4 Custom Enumerations</H4>
 
 
 <p>Custom enumerations allow a string to be associated to a functor of any kind.  This facilitates a wide range of custom functionality.  Support for custom enumerations exists in the ObjectHandler object repository but has not yet been implemented in the reposit SWIG module.</p>
 
-<H2><a name="Reposit_nn23"></a>19.13 Handwritten Implementations</H2>
+<H3><a name="Reposit_nn21"></a>19.8.8 Handwritten Implementations</H3>
 
 
 <p>Sometimes you want to override the behavior in the autogenerated code.</p>
@@ -634,14 +735,14 @@ std::cout << ComplexLibAddinCpp::clTest2F("my_test2") << std::endl;
 
 <p>If you run it you will see that you get the overridden behavior.</p>
 
-<H2><a name="Reposit_nn26"></a>19.14 Serialization</H2>
+<H3><a name="Reposit_nn22"></a>19.8.9 Serialization</H3>
 
 
 <p>Support for serialization is not yet implemented.</p>
 
 <p>Normally the wrapper classes, the objects stored in the repository, all can be serialized.  A little more work is required on the reposit SWIG module to autogenerate the correct code.</p>
 
-<H2><a name="Reposit_nn29"></a>19.15 Typemaps</H2>
+<H2><a name="Reposit_nn23"></a>19.9 Typemaps</H2>
 
 
 <p>There are 18 buffers and 21 typemaps.</p>
@@ -682,6 +783,30 @@ std::cout << ComplexLibAddinCpp::clTest2F("my_test2") << std::endl;
 <tr><td>rp_xll_*</td><td>rp_xll_get</td><td>xxx</td></tr>
 <tr><td>rp_xll_*</td><td>rp_tm_xll_rdc</td><td>xxx</td></tr>
 </table>
+
+<p>hello hello hello</p>
+
+<div class="shell"><pre>
+shell here
+</pre></div>
+
+<p>hello hello hello</p>
+
+<div class="code"><pre>
+code here
+</pre></div>
+
+<p>hello hello hello</p>
+
+<div class="targetlang"><pre>
+targetlang here
+</pre></div>
+
+<p>hello hello hello</p>
+
+<div class="diagram"><pre>
+diagram here
+</pre></div>
 
 </body>
 </html>

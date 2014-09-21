@@ -7,8 +7,11 @@ int main() {
     try {
         std::cout << "hi" << std::endl;
         SimpleLibAddinCpp::initializeAddin();
+        // Call function SimpleLib::func()
         std::cout << SimpleLibAddinCpp::slFunc() << std::endl;
+        // Construct an instance of class SimpleLib::Adder
         SimpleLibAddinCpp::slAdder("adder", 1);
+        // Call member function SimpleLib::Adder::add()
         std::cout << "1 + 2 = " << SimpleLibAddinCpp::slAdderAdd("adder", 2) << std::endl;
         std::cout << "bye" << std::endl;
         return 0;
