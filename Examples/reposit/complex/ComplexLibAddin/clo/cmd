@@ -1,0 +1,2 @@
+#erik's cheat sheet for troubleshooting the build
+g++ -c -fPIC -g -Wall -I../../../../../../install/include -I. -I.. -I../../ComplexLib obj_coercions.cpp -o obj_coercions.o
