@@ -1,5 +1,6 @@
 
-IDIR = ../../../../../install/include
+#IDIR = ../../../../../install/include
+IDIR = /home/countify/install/include
 LIB = ../lib/libAddinObjects.so
 STATIC_LIBS = -Wl,-whole-archive valueobjects/libValueObjects.a -Wl,-no-whole-archive
 

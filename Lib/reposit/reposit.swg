@@ -206,6 +206,16 @@
         return ret;
 %}
 
+// rp_tm_cfy_* - Countify addin
+
+%typemap(rp_tm_cfy_ret) std::string "const char *";
+%typemap(rp_tm_cfy_ret) SWIGTYPE "$1_type";
+
+%typemap(rp_tm_cfy_prm) const std::string & "const char *";
+%typemap(rp_tm_cfy_prm) SWIGTYPE "$rp_typedef_resolved";
+
+%typemap(rp_tm_cfy_cll) SWIGTYPE "$1_name";
+
 %apply rp_tp_double { double };
 %apply rp_tp_double const & { double const & };
 

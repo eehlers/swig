@@ -9,9 +9,11 @@
     rp_obj_dir="../AddinObjects",
     rp_add_dir="../AddinCpp",
     rp_xll_dir="../AddinXl",
+    rp_cfy_dir="../AddinCfy",
     rp_obj_inc="AddinObjects",
     rp_add_inc="AddinCpp",
-    rp_xll_inc="AddinXl"
+    rp_xll_inc="AddinXl",
+    rp_cfy_inc="AddinCfy"
 ) SimpleLibAddin
 
 // This directive says that we want to group some functions under the label
