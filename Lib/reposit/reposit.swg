@@ -211,8 +211,23 @@
 %typemap(rp_tm_cfy_ret) std::string "const char *";
 %typemap(rp_tm_cfy_ret) SWIGTYPE "$1_type";
 
+%typemap(rp_tm_cfy_prm) rp_tp_double "double";
+%typemap(rp_tm_cfy_prm) rp_tp_double const & "const double&";
 %typemap(rp_tm_cfy_prm) const std::string & "const char *";
+%typemap(rp_tm_cfy_prm) rp_tp_cnv "const ObjectHandler::property_t&";
+%typemap(rp_tm_cfy_prm) rp_tp_crc "const ObjectHandler::property_t&";
+%typemap(rp_tm_cfy_prm) rp_tp_enm "const std::string&";
+%typemap(rp_tm_cfy_prm) rp_tp_enm_cls "const char *";
+//%typemap(rp_tm_cfy_prm) SWIGTYPE "$1_type";
 %typemap(rp_tm_cfy_prm) SWIGTYPE "$rp_typedef_resolved";
+
+%typemap(rp_tm_cfy_cl1) std::string %{
+    static std::string ret;
+    ret =
+%}
+%typemap(rp_tm_cfy_cl1) bool "return ";
+
+%typemap(rp_tm_cfy_cl2) std::string "return ret.c_str();";
 
 %typemap(rp_tm_cfy_cll) SWIGTYPE "$1_name";
 

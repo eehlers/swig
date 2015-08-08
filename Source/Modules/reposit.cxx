@@ -330,7 +330,6 @@ struct BufferGroup {
         }
 
         if (generateCfyAddin) {
-        Printf(b_cfy_hpp->b0, "//foo1\n");
 //        Printf(b_cfy_hpp->b0, "\n");
 //        Printf(b_cfy_hpp->b0, "#ifndef add_%s_hpp\n", name);
 //        Printf(b_cfy_hpp->b0, "#define add_%s_hpp\n", name);
@@ -342,32 +341,33 @@ struct BufferGroup {
 //        Printf(b_cfy_hpp->b0, "namespace %s {\n", addinCppNameSpace);
 //        Printf(b_cfy_hpp->b0, "\n");
 //
+        Printf(b_cfy_cpp->b0, "\n");
         Printf(b_cfy_cpp->b0, "#include <string>\n");
         Printf(b_cfy_cpp->b0, "#include \"init.hpp\"\n");
+        Printf(b_cfy_cpp->b0, "#include <oh/property.hpp>\n");
+
         Printf(b_cfy_cpp->b0, "#include <oh/repository.hpp>\n");
         Printf(b_cfy_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, name);
-        Printf(b_cfy_cpp->b0, "#define MATHUTILLIB_API __attribute__((visibility(\"default\")))\n");
-//        Printf(b_cfy_cpp->b0, "\n");
-//        Printf(b_cfy_cpp->b0, "#include <AddinCpp/add_%s.hpp>\n", name);
-//        // FIXME this #include is only required if the file contains conversions.
-//        Printf(b_cfy_cpp->b0, "#include <%s/conversions/convert2.hpp>\n", objInc);
-//        Printf(b_cfy_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
-//        // FIXME this #include is only required if the file contains enumerations.
-//        //Printf(b_cfy_cpp->b0, "#include <oh/enumerations/typefactory.hpp>\n");
-//        // FIXME this #include is only required if the file contains constructors.
-//        Printf(b_cfy_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, name);
+        Printf(b_cfy_cpp->b0, "\n");
+        // FIXME this #include is only required if the file contains conversions.
+        Printf(b_cfy_cpp->b0, "#include <%s/conversions/convert2.hpp>\n", objInc);
+        Printf(b_cfy_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
+        // FIXME this #include is only required if the file contains enumerations.
+        //Printf(b_cfy_cpp->b0, "#include <oh/enumerations/typefactory.hpp>\n");
+        // FIXME this #include is only required if the file contains constructors.
+        Printf(b_cfy_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, name);
         if (automatic_) {
         Printf(b_cfy_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, name);
         } else {
         Printf(b_cfy_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, name);
         }
-//        Printf(b_cfy_cpp->b0, "%s\n", add_include);
-//        // FIXME include only factories for types used in the current file.
-//        Printf(b_cfy_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
-//        Printf(b_cfy_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
-//        Printf(b_cfy_cpp->b0, "#include <oh/repository.hpp>\n");
-//        //Printf(b_cfy_cpp->b0, "#include <AddinCpp/add_all.hpp>\n");
-//        Printf(b_cfy_cpp->b0, "\n");
+        Printf(b_cfy_cpp->b0, "%s\n", add_include);
+        // FIXME include only factories for types used in the current file.
+        Printf(b_cfy_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
+        Printf(b_cfy_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
+        Printf(b_cfy_cpp->b0, "#include <oh/repository.hpp>\n");
+        //Printf(b_cfy_cpp->b0, "#include <AddinCpp/add_all.hpp>\n");
+        Printf(b_cfy_cpp->b0, "\n");
         }
 
         // write to global buffers
@@ -456,13 +456,10 @@ struct BufferGroup {
         }
 
         if (generateCfyAddin) {
-        Printf(b_cfy_hpp->b0, "//foo2\n");
         //Printf(b_cfy_hpp->b0, "} // namespace %s\n", addinCppNameSpace);
         //Printf(b_cfy_hpp->b0, "\n");
         //Printf(b_cfy_hpp->b0, "#endif\n");
         //Printf(b_cfy_hpp->b0, "\n");
-
-        Printf(b_cfy_cpp->b0, "//foo3\n");
         }
 
         delete b_val_hpp;
@@ -719,7 +716,6 @@ virtual int top(Node *n) {
         }
 
         if (generateCfyAddin) {
-        Printf(b_cfy_all_hpp->b0, "//foo4\n");
         //Printf(b_add_all_hpp->b0, "#ifndef add_all_hpp\n");
         //Printf(b_add_all_hpp->b0, "#define add_all_hpp\n");
         //Printf(b_add_all_hpp->b0, "\n");
@@ -773,7 +769,6 @@ virtual int top(Node *n) {
         }
 
         if (generateCfyAddin) {
-        Printf(b_cfy_all_hpp->b0, "//foo5\n");
         //Printf(b_add_all_hpp->b0, "#endif\n");
         //Printf(b_add_all_hpp->b0, "\n");
         }
@@ -1232,12 +1227,6 @@ int functionHandlerImpl(Node *n) {
 }
 
 int functionWrapperImplFunc(Node *n) {
-    if (generateCppAddin) {
-    Printf(bg->b_add_cpp->b0,"//****FUNC*****\n");
-    }
-    if (generateCfyAddin) {
-    Printf(bg->b_cfy_cpp->b0,"//****FUNC*****\n");
-    }
     String   *name   = Getattr(n,"name");
     SwigType *type   = Getattr(n,"type");
     ParmList *parms  = Getattr(n,"parms");
@@ -1271,6 +1260,7 @@ int functionWrapperImplFunc(Node *n) {
     emitParmList(parms, bg->b_add_hpp->b0, 2, "rp_tm_add_prm", 2);
     Printf(bg->b_add_hpp->b0,"    );\n");
 
+    Printf(bg->b_add_cpp->b0,"//****FUNC*****\n");
     emitTypeMap(bg->b_add_cpp->b0, "rp_tm_add_ret", n, type);
     Printf(bg->b_add_cpp->b0,"%s::%s(\n", addinCppNameSpace, funcName);
     emitParmList(parms, bg->b_add_cpp->b0, 2, "rp_tm_add_prm");
@@ -1320,27 +1310,21 @@ int functionWrapperImplFunc(Node *n) {
     }
 
     if (generateCfyAddin) {
-    Printf(bg->b_cfy_hpp->b0,"//foo6\n");
-//    emitTypeMap(bg->b_add_hpp->b0, "rp_tm_add_ret", n, type, 1);
-//    Printf(bg->b_add_hpp->b0,"    %s(\n", funcName);
-//    emitParmList(parms, bg->b_add_hpp->b0, 2, "rp_tm_add_prm", 2);
-//    Printf(bg->b_add_hpp->b0,"    );\n");
-
-    Printf(bg->b_cfy_cpp->b0,"//foo7\n");
+    Printf(bg->b_cfy_cpp->b0,"//****FUNC*****\n");
     Printf(bg->b_cfy_cpp->b0,"extern \"C\" {\n");
-    Printf(bg->b_cfy_cpp->b0,"MATHUTILLIB_API\n");
+    Printf(bg->b_cfy_cpp->b0,"COUNTIFY_API\n");
     emitTypeMap(bg->b_cfy_cpp->b0, "rp_tm_cfy_ret", n, type);
     Printf(bg->b_cfy_cpp->b0,"%s(\n", funcName);
     emitParmList(parms, bg->b_cfy_cpp->b0, 2, "rp_tm_add_prm");
     Printf(bg->b_cfy_cpp->b0,") {\n");
-    Printf(bg->b_cfy_cpp->b0,"    SimpleLibAddinCpp::initializeAddin();\n");
+    Printf(bg->b_cfy_cpp->b0,"    initializeAddin();\n");
     emitParmList(parms, bg->b_cfy_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
     Printf(bg->b_cfy_cpp->b0,"\n");
-    Printf(bg->b_cfy_cpp->b0,"    static std::string ret;\n");
-    Printf(bg->b_cfy_cpp->b0,"    ret = %s::%s(\n", module, symname);
+    emitTypeMap(bg->b_cfy_cpp->b0, "rp_tm_cfy_cl1", n, type, 1, false);
+    Printf(bg->b_cfy_cpp->b0,"    %s::%s(\n", module, symname);
     emitParmList(parms, bg->b_cfy_cpp->b0, 1, "rp_tm_add_cll", 2, ',', true, true);
     Printf(bg->b_cfy_cpp->b0,"    );\n");
-    Printf(bg->b_cfy_cpp->b0,"    return ret.c_str();\n");
+    emitTypeMap(bg->b_cfy_cpp->b0, "rp_tm_cfy_cl2", n, type, 1, false);
     Printf(bg->b_cfy_cpp->b0,"}\n");
     Printf(bg->b_cfy_cpp->b0,"} // extern \"C\"\n");
     }
@@ -1666,12 +1650,12 @@ int functionWrapperImplCtor(Node *n) {
 
         Printf(bg->b_cfy_cpp->b0,"//****CTOR*****\n");
         Printf(bg->b_cfy_cpp->b0,"extern \"C\" {\n");
-        Printf(bg->b_cfy_cpp->b0,"MATHUTILLIB_API\n");
+        Printf(bg->b_cfy_cpp->b0,"COUNTIFY_API\n");
         Printf(bg->b_cfy_cpp->b0,"const char *%s(\n", funcName);
         emitParmList(parms2, bg->b_cfy_cpp->b0, 2, "rp_tm_cfy_prm", 2);
         Printf(bg->b_cfy_cpp->b0,"    ) {\n");
         Printf(bg->b_cfy_cpp->b0,"\n");
-        Printf(bg->b_cfy_cpp->b0,"    SimpleLibAddinCpp::initializeAddin();\n");
+        Printf(bg->b_cfy_cpp->b0,"    initializeAddin();\n");
         Printf(bg->b_cfy_cpp->b0,"    // Convert input types into Library types\n\n");
         emitParmList(parms, bg->b_cfy_cpp->b0, 1, "rp_tm_cfy_cnv", 1, 0, false);
         Printf(bg->b_cfy_cpp->b0,"\n");
@@ -1875,7 +1859,7 @@ int functionWrapperImplMemb(Node *n) {
 
     Printf(bg->b_cfy_cpp->b0,"//****MEMB*****\n");
     Printf(bg->b_cfy_cpp->b0,"extern \"C\" {\n");
-    Printf(bg->b_cfy_cpp->b0,"MATHUTILLIB_API\n");
+    Printf(bg->b_cfy_cpp->b0,"COUNTIFY_API\n");
     emitTypeMap(bg->b_cfy_cpp->b0, "rp_tm_add_ret", n, type);
     Printf(bg->b_cfy_cpp->b0,"%s(\n", funcName);
     emitParmList(parms2, bg->b_cfy_cpp->b0, 2, "rp_tm_cfy_prm", 2);
