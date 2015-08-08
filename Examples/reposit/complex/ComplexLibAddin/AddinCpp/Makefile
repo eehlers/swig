@@ -1,6 +1,8 @@
 
-IDIR = ../../../../../../install/include
-SYS_LIBS = -L../../../../../../install/lib -lObjectHandler -lboost_regex -lboost_serialization -lboost_system -lboost_filesystem
+#IDIR = ../../../../../../install/include
+IDIR = /home/countify/install/include
+#SYS_LIBS = -L../../../../../../install/lib -lObjectHandler -lboost_regex -lboost_serialization -lboost_system -lboost_filesystem
+SYS_LIBS = -L/home/countify/install/lib -lObjectHandler -lboost_regex -lboost_serialization -lboost_system -lboost_filesystem
 LIB = ../../lib/libAddinCpp.so
 OBJECTS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 #STATIC_LIBS = conversions/libConversions.a

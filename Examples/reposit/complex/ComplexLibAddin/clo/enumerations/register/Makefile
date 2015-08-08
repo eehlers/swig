@@ -1,5 +1,6 @@
 
-IDIR = ../../../../../../../../install/include
+#IDIR = ../../../../../../install/include
+IDIR = /home/countify/install/include
 LIB = libEnumerationRegister.a
 OBJECTS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 
