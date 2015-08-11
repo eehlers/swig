@@ -3,7 +3,7 @@
 IDIR = /home/countify/install/include
 #SYS_LIBS = -L../../../../../install/lib -lObjectHandler -lboost_regex -lboost_serialization -lboost_system -lboost_filesystem
 SYS_LIBS = -L/home/countify/install/lib -lObjectHandler -lboost_regex -lboost_serialization -lboost_system -lboost_filesystem
-LIB = ../lib/libAddinCfy.so
+LIB = ../lib/libCountifyRepositSimpleLib.so
 
 all: $(LIB)
 

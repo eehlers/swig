@@ -7,7 +7,7 @@
 //#include <qlo/serialization/serializationfactory.hpp>
 //#include "AddinObjects/init.hpp"
 
-void SimpleLibAddinCpp::initializeAddin() {
+void initializeAddin() {
 
         // Instantiate the ObjectHandler Repository
         static ObjectHandler::Repository repository;
