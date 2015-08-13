@@ -124,6 +124,7 @@
 %typemap(rp_tm_xll_cod) rp_tp_crc "P";
 %typemap(rp_tm_xll_cod) rp_tp_enm "C";
 %typemap(rp_tm_xll_cod) rp_tp_enm_cls "C";
+%typemap(rp_tm_xll_cod) rp_tp_any "P";
 
 %typemap(rp_tm_xll_prm) bool "bool*";
 %typemap(rp_tm_xll_prm) long "long*";
@@ -137,6 +138,7 @@
 %typemap(rp_tm_xll_prm) rp_tp_double const & "double*";
 %typemap(rp_tm_xll_prm) rp_tp_cnv "OPER*";
 %typemap(rp_tm_xll_prm) rp_tp_crc "OPER*";
+%typemap(rp_tm_xll_prm) rp_tp_any "OPER*";
 %typemap(rp_tm_xll_prm) rp_tp_enm "char*";
 %typemap(rp_tm_xll_prm) rp_tp_enm_cls "char*";
 
@@ -244,4 +246,4 @@
 
 %apply rp_tp_double { double };
 %apply rp_tp_double const & { double const & };
-
+%apply rp_tp_any { const ObjectHandler::property_t& };

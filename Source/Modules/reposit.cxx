@@ -1221,6 +1221,19 @@ int functionHandlerImpl(Node *n) {
     functionType=0;
     return Language::functionHandler(n);
 }
+Parm *prependParm(ParmList *parms, const char *name, const char *type, bool hidden = false) {
+    Parm *ret = NewHash();
+    Setattr(ret, "name", name);
+    String *nt  = NewString(type);
+    SwigType_add_qualifier(nt, "const");
+    SwigType_add_reference(nt);
+    Setattr(ret, "type", nt);
+    if (hidden)
+        Setattr(ret, "hidden", "1");
+    processParm(ret);
+    Setattr(ret, "nextSibling", parms);
+    return ret;
+}
 
 int functionWrapperImplFunc(Node *n) {
     String   *name   = Getattr(n,"name");
@@ -1233,6 +1246,10 @@ int functionWrapperImplFunc(Node *n) {
     String *funcName = NewStringf("%s%s", prefix, temp);
     Setattr(n, "rp:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
+
+    // Create from parms another list parms2 - prepend an argument to represent
+    // the dependency trigger which is the first argument of every addin function.
+    Parm *parms2 = prependParm(parms, "Trigger", "ObjectHandler::property_t");
 
     Printf(bg->b_obj_hpp->b0,"\n");
     emitTypeMap(bg->b_obj_hpp->b0, "rp_tm_obj_ret", n, type, 1);
@@ -1270,15 +1287,18 @@ int functionWrapperImplFunc(Node *n) {
     }
 
     if (generateXllAddin) {
-    excelRegister(bg->b_xll_reg->b0, n, type, parms);
-    excelUnregister(bg->b_xll_reg->b1, n, type, parms);
+    excelRegister(bg->b_xll_reg->b0, n, type, parms2);
+    excelUnregister(bg->b_xll_reg->b1, n, type, parms2);
 
     Printf(bg->b_xll_cpp->b0, "\n");
+    Printf(bg->b_xll_cpp->b0,"//****FUNC*****\n");
     Printf(bg->b_xll_cpp->b0, "DLLEXPORT\n");
     emitTypeMap(bg->b_xll_cpp->b0, "rp_tm_xll_ret", n, type);
     Printf(bg->b_xll_cpp->b0, "%s(\n", funcName);
-    emitParmList(parms, bg->b_xll_cpp->b0, 2, "rp_tm_xll_prm", 1);
+    emitParmList(parms2, bg->b_xll_cpp->b0, 2, "rp_tm_xll_prm", 1);
     Printf(bg->b_xll_cpp->b0, ") {\n");
+    Printf(bg->b_xll_cpp->b0, "\n");
+    Printf(bg->b_xll_cpp->b0, "    ObjectHandler::validateRange(Trigger, \"Trigger\");\n");
     Printf(bg->b_xll_cpp->b0, "\n");
     Printf(bg->b_xll_cpp->b0, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
     Printf(bg->b_xll_cpp->b0, "\n");
@@ -1479,26 +1499,11 @@ int functionWrapperImplCtor(Node *n) {
 
     // Create from parms another list parms2 - prepend an argument to represent
     // the object ID which is passed in as the first parameter to every ctor.
-    Parm *parms2 = NewHash();
-    Setattr(parms2, "name", "objectID");
-    String *nt  = NewString("std::string");
-    SwigType_add_qualifier(nt, "const");
-    SwigType_add_reference(nt);
-    Setattr(parms2, "type", nt);
-    processParm(parms2);
-    Setattr(parms2, "nextSibling", parms);
+    Parm *parms2 = prependParm(parms, "objectID", "std::string");
 
     // Create from parms2 another list parms3 - prepend an argument to represent
     // the object ID which is the return value of addin func that wraps ctor.
-    Parm *parms3 = NewHash();
-    Setattr(parms3, "name", "");
-    String *nt2  = NewString("std::string");
-    SwigType_add_qualifier(nt2, "const");
-    SwigType_add_reference(nt2);
-    Setattr(parms3, "type", nt2);
-    Setattr(parms3, "hidden", "1");
-    processParm(parms3);
-    Setattr(parms3, "nextSibling", parms2);
+    Parm *parms3 = prependParm(parms2, "objectID", "std::string", true);
 
     Printf(b_wrappers, "//***DEF\n");
     printList(parms2);
@@ -1693,9 +1698,6 @@ int functionWrapperImplCtor(Node *n) {
 
         if (generateCfyAddin) {
         Printf(bg->b_cfy_hpp->b0,"\n");
-//        Printf(bg->b_add_hpp->b0,"    std::string %s(\n", funcName);
-//        emitParmList(parms2, bg->b_add_hpp->b0, 2, "rp_tm_add_prm", 2);
-//        Printf(bg->b_add_hpp->b0,"    );\n\n");
 
         Printf(bg->b_cfy_cpp->b0,"//****CTOR*****\n");
         Printf(bg->b_cfy_cpp->b0,"extern \"C\" {\n");
@@ -1758,6 +1760,7 @@ int functionWrapperImplCtor(Node *n) {
 
     if (generateCtor) {
     Printf(bg->b_xll_cpp->b0, "\n");
+    Printf(bg->b_xll_cpp->b0,"//****CTOR*****\n");
     Printf(bg->b_xll_cpp->b0, "DLLEXPORT char *%s(\n", funcName);
     emitParmList(parms2, bg->b_xll_cpp->b0, 2, "rp_tm_xll_prm");
     Printf(bg->b_xll_cpp->b0, ") {\n");
@@ -1826,14 +1829,8 @@ int functionWrapperImplMemb(Node *n) {
 
     // Create from parms another list parms2 - prepend an argument to represent
     // the object ID which is passed in as the first parameter to every member.
-    Parm *parms2 = NewHash();
-    Setattr(parms2, "name", "objectID");
-    String *nt  = NewString("std::string");
-    SwigType_add_qualifier(nt, "const");
-    SwigType_add_reference(nt);
-    Setattr(parms2, "type", nt);
-    processParm(parms2);
-    Setattr(parms2, "nextSibling", Getattr(parms, "nextSibling"));
+    ParmList *parmsTemp = Getattr(parms, "nextSibling");
+    Parm *parms2 = prependParm(parmsTemp, "objectID", "std::string");
 
     Printf(b_wrappers, "//***ABC\n");
     printList(parms2);
@@ -1883,6 +1880,7 @@ int functionWrapperImplMemb(Node *n) {
     excelUnregister(bg->b_xll_reg->b1, n, type, parms2);
 
     Printf(bg->b_xll_cpp->b0, "\n");
+    Printf(bg->b_xll_cpp->b0,"//****MEMB*****\n");
     Printf(bg->b_xll_cpp->b0, "DLLEXPORT\n");
     emitTypeMap(bg->b_xll_cpp->b0, "rp_tm_xll_ret", n, type);
     Printf(bg->b_xll_cpp->b0, "%s(\n", funcName);
