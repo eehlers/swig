@@ -304,7 +304,8 @@ struct BufferGroup {
         Printf(b_xll_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, name);
         Printf(b_xll_cpp->b0, "//#include \"%s/obj_%s.hpp\"\n", objInc, name);
         Printf(b_xll_cpp->b0, "#include \"%s/obj_all.hpp\"\n", objInc);
-        Printf(b_xll_cpp->b0, "#include \"conversions/convert2.hpp\"\n");
+        Printf(b_xll_cpp->b0, "#include \"%s/conversions/convert2.hpp\"\n", objInc);
+        Printf(b_xll_cpp->b0, "#include \"%s/conversions/convert2.hpp\"\n", xllInc);
         Printf(b_xll_cpp->b0, "\n");
         Printf(b_xll_cpp->b0, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
         Printf(b_xll_cpp->b0, "   for example) also #define _MSC_VER\n");
@@ -699,7 +700,7 @@ virtual int top(Node *n) {
 
         if (generateXllAddin) {
         Printf(b_xll_reg_cpp->b0, "\n");
-        Printf(b_xll_reg_cpp->b0, "#include <register/register_all.hpp>\n");
+        Printf(b_xll_reg_cpp->b0, "#include <%s/register/register_all.hpp>\n", xllInc);
         Printf(b_xll_reg_cpp->b0, "\n");
 
         Printf(b_xll_reg_cpp->b2, "\n");
