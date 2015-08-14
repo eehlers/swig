@@ -1221,12 +1221,14 @@ int functionHandlerImpl(Node *n) {
     functionType=0;
     return Language::functionHandler(n);
 }
-Parm *prependParm(ParmList *parms, const char *name, const char *type, bool hidden = false) {
+Parm *prependParm(ParmList *parms, const char *name, const char *type, bool constRef = true, bool hidden = false) {
     Parm *ret = NewHash();
     Setattr(ret, "name", name);
     String *nt  = NewString(type);
-    SwigType_add_qualifier(nt, "const");
-    SwigType_add_reference(nt);
+    if (constRef) {
+        SwigType_add_qualifier(nt, "const");
+        SwigType_add_reference(nt);
+    }
     Setattr(ret, "type", nt);
     if (hidden)
         Setattr(ret, "hidden", "1");
@@ -1499,11 +1501,14 @@ int functionWrapperImplCtor(Node *n) {
 
     // Create from parms another list parms2 - prepend an argument to represent
     // the object ID which is passed in as the first parameter to every ctor.
-    Parm *parms2 = prependParm(parms, "objectID", "std::string");
+    Parm *temp1 = prependParm(parms, "Permanent", "bool", false);
+    Parm *temp2 = prependParm(temp1, "ObjectOverwrite", "bool", false);
+    Parm *temp3 = prependParm(temp2, "objectID", "std::string");
+    Parm *parms2 = prependParm(temp3, "Trigger", "ObjectHandler::property_t");
 
     // Create from parms2 another list parms3 - prepend an argument to represent
     // the object ID which is the return value of addin func that wraps ctor.
-    Parm *parms3 = prependParm(parms2, "objectID", "std::string", true);
+    Parm *parms3 = prependParm(parms2, "objectID", "std::string", true, true);
 
     Printf(b_wrappers, "//***DEF\n");
     printList(parms2);

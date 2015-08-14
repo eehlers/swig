@@ -11,6 +11,7 @@
 
 %typemap(rp_tm_val_prm) SWIGTYPE "$1_type";
 
+%typemap(rp_tm_val_dcl) const std::string & "std::string $1_name_";
 %typemap(rp_tm_val_dcl) SWIGTYPE "$1_type $1_name_";
 
 %typemap(rp_tm_val_ser) SWIGTYPE "& boost::serialization::make_nvp(\"$1_name\", $1_name_)";
