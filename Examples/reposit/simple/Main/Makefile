@@ -1,8 +1,6 @@
 
-#IDIR = ../../../../../install/include
-IDIR = /home/countify/install/include
-#LDIR = ../../../../../install/lib
-LDIR = /home/countify/install/lib
+IDIR = $(INSTALL_DIR)/include
+LDIR = $(INSTALL_DIR)/lib
 
 all: mainSimpleLibAddin
 

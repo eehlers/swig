@@ -1,6 +1,5 @@
 
-#IDIR = ../../../../../../install/include
-IDIR = /home/countify/install/include
+IDIR = $(INSTALL_DIR)/include
 LIB = ../../lib/libAddinObjects.so
 OBJECTS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 STATIC_LIBS = \
