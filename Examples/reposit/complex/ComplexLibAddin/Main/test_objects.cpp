@@ -11,7 +11,11 @@ void testObjects() {
     std::cout << "Testing objects" << std::endl;
     std::cout << std::endl;
 
-    ComplexLibAddinCpp::clTest("my_test", 42);
+    ObjectHandler::property_t trigger;
+    bool overwrite = true;
+    bool permanent = true;
+
+    ComplexLibAddinCpp::clTest(trigger, "my_test", overwrite, permanent, 42);
     std::cout << ComplexLibAddinCpp::clTestGetInput("my_test") << std::endl;
 }
 

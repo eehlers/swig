@@ -11,9 +11,13 @@ void testInheritance() {
     std::cout << "Testing inheritance" << std::endl;
     std::cout << std::endl;
 
-    ComplexLibAddinCpp::clBase("base");
+    ObjectHandler::property_t trigger;
+    bool overwrite = true;
+    bool permanent = true;
+
+    ComplexLibAddinCpp::clBase(trigger, "base", overwrite, permanent);
     std::cout << ComplexLibAddinCpp::clBaseF("base") << std::endl;
-    ComplexLibAddinCpp::clDerived("derived");
+    ComplexLibAddinCpp::clDerived(trigger, "derived", overwrite, permanent);
     std::cout << ComplexLibAddinCpp::clBaseF("derived") << std::endl;
     std::cout << ComplexLibAddinCpp::clDerivedF("derived") << std::endl;
     try {
@@ -22,7 +26,7 @@ void testInheritance() {
         std::cout << "Expected error : " << e.what() << std::endl;
     }
 
-    ComplexLibAddinCpp::clC("c");
+    ComplexLibAddinCpp::clC(trigger, "c", overwrite, permanent);
     std::cout << ComplexLibAddinCpp::clAF0("c") << std::endl;
     std::cout << ComplexLibAddinCpp::clBF1("c") << std::endl;
 }

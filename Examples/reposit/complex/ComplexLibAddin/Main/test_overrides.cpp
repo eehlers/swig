@@ -11,7 +11,11 @@ void testOverrides() {
     std::cout << "Testing overrides" << std::endl;
     std::cout << std::endl;
 
-    ComplexLibAddinCpp::clTest2("my_test2");
+    ObjectHandler::property_t trigger;
+    bool overwrite = true;
+    bool permanent = true;
+
+    ComplexLibAddinCpp::clTest2(trigger, "my_test2", overwrite, permanent);
     std::cout << ComplexLibAddinCpp::clTest2F("my_test2") << std::endl;
 }
 

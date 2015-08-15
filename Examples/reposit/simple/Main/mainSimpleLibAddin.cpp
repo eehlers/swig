@@ -10,7 +10,10 @@ int main() {
         // Call function SimpleLib::func()
         std::cout << SimpleLibAddinCpp::slFunc() << std::endl;
         // Construct an instance of class SimpleLib::Adder
-        SimpleLibAddinCpp::slAdder("adder", 1);
+        ObjectHandler::property_t trigger;
+        bool overwrite = true;
+        bool permanent = true;
+        SimpleLibAddinCpp::slAdder(trigger, "adder", overwrite, permanent, 1);
         // Call member function SimpleLib::Adder::add()
         std::cout << "1 + 2 = " << SimpleLibAddinCpp::slAdderAdd("adder", 2) << std::endl;
         std::cout << "bye" << std::endl;
