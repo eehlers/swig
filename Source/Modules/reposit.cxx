@@ -1838,6 +1838,17 @@ int functionWrapperImplMemb(Node *n) {
     ParmList *parmsTemp = Getattr(parms, "nextSibling");
     Parm *parms2 = prependParm(parmsTemp, "objectID", "std::string");
 
+    // We are invoking the member function of a class.
+    // Create a dummy node and attach to it the type of the class.
+    // This allows us to apply a typemap to the node.
+    Node *node = NewHash();
+    Setfile(node, Getfile(n));
+    Setline(node, Getline(n));
+    Setattr(node, "type", pname);
+    // Attach to the node some values that might be referenced by the typemap:
+    Setattr(node, "rp_typedef_obj_add", addinClass);    // The type of the addin wrapper object
+    Setattr(node, "rp_typedef_obj_lib", pname);         // The type of the library object
+
     Printf(b_wrappers, "//***ABC\n");
     printList(parms2);
     Printf(b_wrappers, "// *a0* %s <<\n", Char(ParmList_str(parms)));
@@ -1860,20 +1871,20 @@ int functionWrapperImplMemb(Node *n) {
     emitParmList(parms, bg->b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
     Printf(bg->b_add_cpp->b0,"\n");
 
-    // We are invoking the member function of a class.
-    // Create a dummy node and attach to it the type of the class.
-    // This allows us to apply a typemap to the node.
-    Node *node = NewHash();
-    Setfile(node, Getfile(n));
-    Setline(node, Getline(n));
-    Setattr(node, "type", pname);
-    // Attach to the node some values that might be referenced by the typemap:
-    Setattr(node, "rp_typedef_obj_add", addinClass);    // The type of the addin wrapper object
-    Setattr(node, "rp_typedef_obj_lib", pname);         // The type of the library object
+    //// We are invoking the member function of a class.
+    //// Create a dummy node and attach to it the type of the class.
+    //// This allows us to apply a typemap to the node.
+    //Node *node = NewHash();
+    //Setfile(node, Getfile(n));
+    //Setline(node, Getline(n));
+    //Setattr(node, "type", pname);
+    //// Attach to the node some values that might be referenced by the typemap:
+    //Setattr(node, "rp_typedef_obj_add", addinClass);    // The type of the addin wrapper object
+    //Setattr(node, "rp_typedef_obj_lib", pname);         // The type of the library object
     // Apply the typemap to the dummy node.
     emitTypeMap(bg->b_add_cpp->b0, "rp_tm_add_oh_get", node, type);// FIXME last parm "type" does not matter + can be omitted
-    // Delete the dummy node.
-    Delete(node);
+    //// Delete the dummy node.
+    //Delete(node);
 
     Printf(bg->b_add_cpp->b0,"    return x->%s(\n", name);
     emitParmList(parms, bg->b_add_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true);
@@ -1902,7 +1913,9 @@ int functionWrapperImplMemb(Node *n) {
     Printf(bg->b_xll_cpp->b0, "\n");
     emitParmList(parms, bg->b_xll_cpp->b0, 1, "rp_tm_xll_cnv", 2, 0, false);
     Printf(bg->b_xll_cpp->b0, "\n");
-    Printf(bg->b_xll_cpp->b0, "        OH_GET_REFERENCE(x, objectID, %s, %s);\n", addinClass, pname);
+    //Printf(bg->b_xll_cpp->b0, "        OH_GET_REFERENCE(x, objectID, %s, %s);\n", addinClass, pname);
+    // Apply the typemap to the dummy node.
+    emitTypeMap(bg->b_xll_cpp->b0, "rp_tm_add_oh_get", node, type, 2);// FIXME last parm "type" does not matter + can be omitted
     Printf(bg->b_xll_cpp->b0, "\n");
     emitTypeMap(bg->b_xll_cpp->b0, "rp_xll_get", n, type, 2);
     Printf(bg->b_xll_cpp->b0, "        x->%s(\n", name);
@@ -1942,7 +1955,7 @@ int functionWrapperImplMemb(Node *n) {
     Setattr(node, "rp_typedef_obj_add", addinClass);    // The type of the addin wrapper object
     Setattr(node, "rp_typedef_obj_lib", pname);         // The type of the library object
     // Apply the typemap to the dummy node.
-    emitTypeMap(bg->b_cfy_cpp->b0, "rp_tm_add_oh_get", node, type);// FIXME last parm "type" does not matter + can be omitted
+    emitTypeMap(bg->b_cfy_cpp->b0, "rp_tm_add_oh_get", node, type, 2);// FIXME last parm "type" does not matter + can be omitted
     // Delete the dummy node.
     Delete(node);
 
@@ -1954,6 +1967,10 @@ int functionWrapperImplMemb(Node *n) {
 
     mongoFunc(funcName2, funcName, n, type, parms);
     }
+
+    // Delete the dummy node.
+    Delete(node);
+
     return SWIG_OK;
 }
 

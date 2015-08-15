@@ -98,13 +98,13 @@
 // We retrieve the object from the repository, and then extract the required reference.
 // Default behavior: get a reference to the underlying library object.
 %typemap(rp_tm_add_oh_get) SWIGTYPE %{
-    OH_GET_REFERENCE(x, objectID, $rp_typedef_obj_add, $rp_typedef_obj_lib);
+        OH_GET_REFERENCE(x, objectID, $rp_typedef_obj_add, $rp_typedef_obj_lib);
 %}
 
 // Sometimes the addin wants to override the library's behavior, in this case we get
 // a reference to the addin object that wraps the library object:
 %typemap(rp_tm_add_oh_get) rp_tp_add_obj %{
-    OH_GET_OBJECT(x, objectID, $rp_typedef_obj_add);
+        OH_GET_OBJECT(x, objectID, $rp_typedef_obj_add);
 %}
 
 // rp_xll_* - Excel addin
