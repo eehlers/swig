@@ -126,6 +126,8 @@
 %typemap(rp_tm_xll_cod) rp_tp_enm "C";
 %typemap(rp_tm_xll_cod) rp_tp_enm_cls "C";
 %typemap(rp_tm_xll_cod) rp_tp_any "P";
+%typemap(rp_tm_xll_cod) std::vector< std::string > "P";
+%typemap(rp_tm_xll_cod) std::vector< bool > const & "P";
 
 %typemap(rp_tm_xll_prm) bool "bool*";
 %typemap(rp_tm_xll_prm) long "long*";
@@ -142,6 +144,7 @@
 %typemap(rp_tm_xll_prm) rp_tp_any "OPER*";
 %typemap(rp_tm_xll_prm) rp_tp_enm "char*";
 %typemap(rp_tm_xll_prm) rp_tp_enm_cls "char*";
+%typemap(rp_tm_xll_prm) std::vector< bool > const & "OPER *";
 
 //NEW
 %typemap(rp_tm_xll_cnv) rp_tp_cnv %{
@@ -165,6 +168,11 @@
         ObjectHandler::Create<$1_type >()($1_name);
 %}
 
+%typemap(rp_tm_xll_cnv) const std::vector<bool> & %{
+        std::vector<bool> $1_name_cnv =
+            ObjectHandler::operToVector<bool>(*$1_name, "$1_name");            
+%}
+
 %typemap(rp_tm_xll_cll_obj) SWIGTYPE "$1_name";
 %typemap(rp_tm_xll_cll_obj) bool "*$1_name";
 %typemap(rp_tm_xll_cll_obj) long "*$1_name";
@@ -176,6 +184,7 @@
 %typemap(rp_tm_xll_cll_obj) rp_tp_crc "$1_name_crc";
 %typemap(rp_tm_xll_cll_obj) rp_tp_enm "$1_name_enm";
 %typemap(rp_tm_xll_cll_obj) rp_tp_enm_cls "$1_name_enm_cls";
+%typemap(rp_tm_xll_cll_obj) const std::vector<bool> & "$1_name_cnv";
 
 %typemap(rp_tm_xll_cll_val) SWIGTYPE "$1_name";
 %typemap(rp_tm_xll_cll_val) long "*$1_name";
@@ -189,6 +198,7 @@
 %typemap(rp_tm_xll_ret) char* "char*";
 %typemap(rp_tm_xll_ret) std::string "char*";
 %typemap(rp_tm_xll_ret) void "bool*";
+%typemap(rp_tm_xll_ret) std::vector< std::string > "OPER*";
 
 %typemap(rp_xll_get) SWIGTYPE "$1_type returnValue =";
 %typemap(rp_xll_get) void "";
@@ -208,6 +218,12 @@
         static char ret[XL_MAX_STR_LEN];
         ObjectHandler::stringToChar(returnValue, ret);
         return ret;
+%}
+
+%typemap(rp_tm_xll_rdc) std::vector< std::string > %{
+        static OPER xRet;
+        ObjectHandler::vectorToOper(returnValue, xRet);
+        return &xRet;
 %}
 
 // rp_tm_cfy_* - Countify addin
