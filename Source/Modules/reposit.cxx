@@ -919,6 +919,7 @@ struct Addin {
     virtual void top() {}
     virtual void top2() {}
     virtual ~Addin() {}
+    virtual void processGroup() {}
 };
 
 template <class Group>
@@ -927,10 +928,12 @@ struct AddinImpl : public Addin {
     typedef std::map<std::string, Group*> GroupMap;
     GroupMap groupMap_;
 
-    Group *getGroup() {
+    virtual Group *getGroup() {
         std::string name_ = Char(group_name);
-        if (groupMap_.end() == groupMap_.find(name_))
+        if (groupMap_.end() == groupMap_.find(name_)) {
             groupMap_[name_] = new Group;
+            processGroup();
+        }
         return groupMap_[name_];
     }
 
@@ -958,6 +961,10 @@ struct AddinImpl : public Addin {
 struct AddinCpp : public AddinImpl<GroupCpp> {
 
     Buffer *b_add_all_hpp;
+
+    virtual void processGroup() {
+        Printf(b_add_all_hpp->b0, "#include <%s/add_%s.hpp>\n", addInc, group_name);
+    }
 
     virtual void clear() {
         AddinImpl<GroupCpp>::clear();
@@ -1136,10 +1143,6 @@ struct AddinList {
 //        Printf(b_cfy_cpp->b0, "#include <oh/repository.hpp>\n");
 //        //Printf(b_cfy_cpp->b0, "#include <AddinCpp/add_all.hpp>\n");
 //        Printf(b_cfy_cpp->b0, "\n");
-//        }
-//
-//        if (generateCppAddin) {
-//        Printf(b_add_all_hpp->b0, "#include <%s/add_%s.hpp>\n", addInc, name);
 //        }
 //
 //        if (generateXllAddin) {

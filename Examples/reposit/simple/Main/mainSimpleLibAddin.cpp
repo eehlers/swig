@@ -15,7 +15,7 @@ int main() {
         bool permanent = true;
         SimpleLibAddinCpp::slAdder(trigger, "adder", overwrite, permanent, 1);
         // Call member function SimpleLib::Adder::add()
-        std::cout << "1 + 2 = " << SimpleLibAddinCpp::slAdderAdd("adder", 2) << std::endl;
+        std::cout << "1 + 2 = " << SimpleLibAddinCpp::slAdderAdd(trigger, "adder", 2) << std::endl;
         std::cout << "bye" << std::endl;
         return 0;
     } catch(const std::exception &e) {
