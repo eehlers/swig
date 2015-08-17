@@ -43,7 +43,6 @@ Buffer *b_cre_reg_cpp=0;
 Buffer *b_cre_all_hpp=0;
 Buffer *b_reg_ser_hpp=0;
 Buffer *b_reg_all_hpp=0;
-//Buffer *b_add_all_hpp=0;
 //Buffer *b_cfy_mng_txt=0;
 //Buffer *b_xll_reg_cpp=0;
 
@@ -381,9 +380,6 @@ struct Buffer {
 
 struct GroupObjects {
 
-    std::string name_;
-    String *obj_include_;
-
     Buffer *b_val_hpp;
     Buffer *b_val_cpp;
     Buffer *b_cre_hpp;
@@ -394,8 +390,6 @@ struct GroupObjects {
     Buffer *b_obj_cpp;
 
     GroupObjects() {
-
-        obj_include_ = Copy(obj_include);
 
         b_val_hpp = new Buffer(NewStringf("%s/valueobjects/vo_%s.hpp", objDir, group_name));
         b_val_cpp = new Buffer(NewStringf("%s/valueobjects/vo_%s.cpp", objDir, group_name));
@@ -505,7 +499,7 @@ struct GroupObjects {
         Printf(b_obj_hpp->b0, "#include <oh/libraryobject.hpp>\n");
         Printf(b_obj_hpp->b0, "#include <oh/valueobject.hpp>\n");
         Printf(b_obj_hpp->b0, "#include <boost/shared_ptr.hpp>");
-        Printf(b_obj_hpp->b0, "%s\n", obj_include_);
+        Printf(b_obj_hpp->b0, "%s\n", obj_include);
         Printf(b_obj_hpp->b0, "using namespace %s;\n", nmspace);
         Printf(b_obj_hpp->b0, "\n");
         Printf(b_obj_hpp->b0,"namespace %s {\n", module);
@@ -535,7 +529,7 @@ struct GroupObjects {
         Printf(b_reg_all_hpp->b0, "#include <%s/serialization/register/serialization_%s.hpp>\n", objInc, group_name);
     }
 
-    ~GroupObjects() {
+    virtual ~GroupObjects() {
 
         Printf(b_val_hpp->b0, "} // namespace %s\n", module);
         Printf(b_val_hpp->b0, "\n");
@@ -583,7 +577,7 @@ struct GroupObjects {
         delete b_obj_cpp;
     }
 
-    virtual void functionWrapperImplFunc(Node *n, ParmList *parms, String *name, SwigType *type, String *symname) {
+    void functionWrapperImplFunc(Node *n, ParmList *parms, String *name, SwigType *type, String *symname, String* /*funcName*/) {
 
         Printf(b_obj_hpp->b0,"\n");
         emitTypeMap(b_obj_hpp->b0, "rp_tm_obj_ret", n, type, 1);
@@ -602,7 +596,7 @@ struct GroupObjects {
         Printf(b_obj_cpp->b0,"}\n");
     }
 
-    virtual void functionWrapperImplCtor(Node *n, String *name, bool generateCtor, String *funcName, ParmList *parms, String *pname, String *base) {
+    void functionWrapperImplCtor(String *name, bool generateCtor, String *funcName, ParmList *parms, ParmList * /*parms2*/, String *pname, String *base) {
 
         if (generateCtor) {
 
@@ -764,13 +758,167 @@ struct GroupObjects {
             Printf(b_obj_hpp->b0, "    // END   typemap rp_tm_obj_cls\n");
         }
     }
+
+    void functionWrapperImplMemb(Node*, SwigType*, String*, ParmList *, ParmList *, String*, String*, String*) {
+    }
 };
+
+struct GroupCpp {
+
+    Buffer *b_add_hpp;
+    Buffer *b_add_cpp;
+
+    GroupCpp() {
+
+        b_add_hpp = new Buffer(NewStringf("%s/add_%s.hpp", addDir, group_name));
+        b_add_cpp = new Buffer(NewStringf("%s/add_%s.cpp", addDir, group_name));
+
+        Printf(b_add_hpp->b0, "\n");
+        Printf(b_add_hpp->b0, "#ifndef add_%s_hpp\n", group_name);
+        Printf(b_add_hpp->b0, "#define add_%s_hpp\n", group_name);
+        Printf(b_add_hpp->b0, "\n");
+        Printf(b_add_hpp->b0, "#include <string>\n");
+        // FIXME this #include is only needed if a datatype conversion is taking place.
+        Printf(b_add_hpp->b0, "#include <oh/property.hpp>\n");
+        Printf(b_add_hpp->b0, "\n");
+        Printf(b_add_hpp->b0, "namespace %s {\n", addinCppNameSpace);
+        Printf(b_add_hpp->b0, "\n");
+
+        Printf(b_add_cpp->b0, "\n");
+        Printf(b_add_cpp->b0, "#include <AddinCpp/add_%s.hpp>\n", group_name);
+        // FIXME this #include is only required if the file contains conversions.
+        Printf(b_add_cpp->b0, "#include <%s/conversions/convert2.hpp>\n", objInc);
+        Printf(b_add_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
+        // FIXME this #include is only required if the file contains enumerations.
+        //Printf(b_add_cpp->b0, "#include <oh/enumerations/typefactory.hpp>\n");
+        // FIXME this #include is only required if the file contains constructors.
+        Printf(b_add_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, group_name);
+        if (automatic) {
+            Printf(b_add_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, group_name);
+        } else {
+            Printf(b_add_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, group_name);
+        }
+        Printf(b_add_cpp->b0, "%s\n", add_include);
+        // FIXME include only factories for types used in the current file.
+        Printf(b_add_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
+        Printf(b_add_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
+        Printf(b_add_cpp->b0, "#include <oh/repository.hpp>\n");
+        //Printf(b_add_cpp->b0, "#include <AddinCpp/add_all.hpp>\n");
+        Printf(b_add_cpp->b0, "\n");
+    }
+
+    virtual ~GroupCpp() {
+        Printf(b_add_hpp->b0, "\n");
+        Printf(b_add_hpp->b0, "} // namespace %s\n", addinCppNameSpace);
+        Printf(b_add_hpp->b0, "\n");
+        Printf(b_add_hpp->b0, "#endif\n");
+        Printf(b_add_hpp->b0, "\n");
+
+        Printf(b_add_cpp->b0, "\n");
+
+        delete b_add_hpp;
+        delete b_add_cpp;
+    }
+
+    void functionWrapperImplFunc(Node *n, ParmList *parms, String * /*name*/, SwigType *type, String *symname, String *funcName) {
+
+        emitTypeMap(b_add_hpp->b0, "rp_tm_add_ret", n, type, 1);
+        Printf(b_add_hpp->b0,"    %s(\n", funcName);
+        emitParmList(parms, b_add_hpp->b0, 2, "rp_tm_add_prm", 2);
+        Printf(b_add_hpp->b0,"    );\n");
+
+        Printf(b_add_cpp->b0,"//****FUNC*****\n");
+        emitTypeMap(b_add_cpp->b0, "rp_tm_add_ret", n, type);
+        Printf(b_add_cpp->b0,"%s::%s(\n", addinCppNameSpace, funcName);
+        emitParmList(parms, b_add_cpp->b0, 2, "rp_tm_add_prm");
+        Printf(b_add_cpp->b0,") {\n");
+        emitParmList(parms, b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
+        Printf(b_add_cpp->b0,"\n");
+        Printf(b_add_cpp->b0,"    return %s::%s(\n", module, symname);
+        emitParmList(parms, b_add_cpp->b0, 1, "rp_tm_add_cll", 2, ',', true, true);
+        Printf(b_add_cpp->b0,"    );\n");
+        Printf(b_add_cpp->b0,"}\n");
+    }
+
+    void functionWrapperImplCtor(String *name, bool /*generateCtor*/, String *funcName, ParmList *parms, ParmList *parms2, String * /*pname*/, String * /*base*/) {
+
+        Printf(b_add_hpp->b0,"\n");
+        Printf(b_add_hpp->b0,"    std::string %s(\n", funcName);
+        emitParmList(parms2, b_add_hpp->b0, 2, "rp_tm_add_prm", 2);
+        Printf(b_add_hpp->b0,"    );\n\n");
+
+        Printf(b_add_cpp->b0,"//****CTOR*****\n");
+        Printf(b_add_cpp->b0,"std::string %s::%s(\n", addinCppNameSpace, funcName);
+        emitParmList(parms2, b_add_cpp->b0, 2, "rp_tm_add_prm", 2);
+        Printf(b_add_cpp->b0,"    ) {\n");
+        Printf(b_add_cpp->b0,"\n");
+        Printf(b_add_cpp->b0,"    // Convert input types into Library types\n\n");
+        emitParmList(parms, b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
+        Printf(b_add_cpp->b0,"\n");
+        Printf(b_add_cpp->b0,"    boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
+        Printf(b_add_cpp->b0,"        new %s::ValueObjects::%s(\n", module, funcName);
+        Printf(b_add_cpp->b0,"            objectID,\n");
+        emitParmList(parms, b_add_cpp->b0, 0, "rp_tm_default", 3, ',', true, false, true);
+        Printf(b_add_cpp->b0,"            false));\n");
+        Printf(b_add_cpp->b0,"    boost::shared_ptr<ObjectHandler::Object> object(\n");
+        Printf(b_add_cpp->b0,"        new %s::%s(\n", module, name);
+        Printf(b_add_cpp->b0,"            valueObject,\n");
+        emitParmList(parms, b_add_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true, true);
+        Printf(b_add_cpp->b0,"            false));\n");
+        Printf(b_add_cpp->b0,"    std::string returnValue =\n");
+        Printf(b_add_cpp->b0,"        ObjectHandler::Repository::instance().storeObject(\n");
+        Printf(b_add_cpp->b0,"            objectID, object, false, valueObject);\n");
+        Printf(b_add_cpp->b0,"    return returnValue;\n");
+        Printf(b_add_cpp->b0,"}\n\n");
+    }
+
+    void functionWrapperImplMemb(Node *n, SwigType *type, String *funcName, ParmList *parms, ParmList *parms2, String *pname, String *addinClass, String *name) {
+        emitTypeMap(b_add_hpp->b0, "rp_tm_add_ret", n, type, 1);
+        Printf(b_add_hpp->b0,"    %s(\n", funcName);
+        emitParmList(parms2, b_add_hpp->b0, 2, "rp_tm_add_prm", 2);
+        Printf(b_add_hpp->b0,"    );\n\n");
+
+        Printf(b_add_cpp->b0,"//****MEMB*****\n");
+        emitTypeMap(b_add_cpp->b0, "rp_tm_add_ret", n, type);
+        Printf(b_add_cpp->b0,"%s::%s(\n", addinCppNameSpace, funcName);
+        emitParmList(parms2, b_add_cpp->b0, 2, "rp_tm_add_prm", 2);
+        Printf(b_add_cpp->b0,"    ) {\n\n");
+        emitParmList(parms, b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
+        Printf(b_add_cpp->b0,"\n");
+
+        // FIXME move this in to the calling function to be shared by Excel?
+        // We are invoking the member function of a class.
+        // Create a dummy node and attach to it the type of the class.
+        // This allows us to apply a typemap to the node.
+        Node *node = NewHash();
+        Setfile(node, Getfile(n));
+        Setline(node, Getline(n));
+        Setattr(node, "type", pname);
+        // Attach to the node some values that might be referenced by the typemap:
+        Setattr(node, "rp_typedef_obj_add", addinClass);    // The type of the addin wrapper object
+        Setattr(node, "rp_typedef_obj_lib", pname);         // The type of the library object
+        //  Apply the typemap to the dummy node.
+        emitTypeMap(b_add_cpp->b0, "rp_tm_add_oh_get", node, type); // FIXME last parm "type" does not matter + can be omitted
+        // Delete the dummy node.
+        Delete(node);
+
+        Printf(b_add_cpp->b0,"    return x->%s(\n", name);
+        emitParmList(parms, b_add_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true);
+        Printf(b_add_cpp->b0,"        );\n", name);
+        Printf(b_add_cpp->b0,"}\n");
+    }
+};
+
 
 struct Addin {
 
-    virtual void functionWrapperImplFunc(Node *n, ParmList *parms, String *name, SwigType *type, String *symname) = 0;
-    virtual void functionWrapperImplCtor(Node *n, String *name, bool generateCtor, String *funcName, ParmList *parms, String *pname, String *base) = 0;
+    virtual void functionWrapperImplFunc(Node *n, ParmList *parms, String *name, SwigType *type, String *symname, String *funcName) = 0;
+    virtual void functionWrapperImplCtor(String *name, bool generateCtor, String *funcName, ParmList *parms, ParmList *parms2, String *pname, String *base) = 0;
+    virtual void functionWrapperImplMemb(Node *n, SwigType *type, String *funcName, ParmList *parms, ParmList *parms2, String *pname, String *addinClass, String *name) = 0;
     virtual void clear() = 0;
+    virtual void top() {}
+    virtual void top2() {}
+    virtual ~Addin() {}
 };
 
 template <class Group>
@@ -787,20 +935,52 @@ struct AddinImpl : public Addin {
     }
 
     virtual void clear() {
-        for (GroupMap::const_iterator i=groupMap_.begin(); i!=groupMap_.end(); ++i)
+        for (typename GroupMap::const_iterator i=groupMap_.begin(); i!=groupMap_.end(); ++i)
             delete i->second;
     }
 
-    virtual void functionWrapperImplFunc(Node *n, ParmList *parms, String *name, SwigType *type, String *symname) {
+    virtual void functionWrapperImplFunc(Node *n, ParmList *parms, String *name, SwigType *type, String *symname, String *funcName) {
         Group *group = getGroup();
-        group->functionWrapperImplFunc(n, parms, name, type, symname);
+        group->functionWrapperImplFunc(n, parms, name, type, symname, funcName);
     }
 
-    virtual void functionWrapperImplCtor(Node *n, String *name, bool generateCtor, String *funcName, ParmList *parms, String *pname, String *base) {
+    virtual void functionWrapperImplCtor(String *name, bool generateCtor, String *funcName, ParmList *parms, ParmList *parms2, String *pname, String *base) {
         Group *group = getGroup();
-        group->functionWrapperImplCtor(n, name, generateCtor, funcName, parms, pname, base);
+        group->functionWrapperImplCtor(name, generateCtor, funcName, parms, parms2, pname, base);
+    }
+
+    virtual void functionWrapperImplMemb(Node *n, SwigType *type, String *funcName, ParmList *parms, ParmList *parms2, String *pname, String *addinClass, String *name) {
+        Group *group = getGroup();
+        group->functionWrapperImplMemb(n, type, funcName, parms, parms2, pname, addinClass, name);
     }
 };
+
+struct AddinCpp : public AddinImpl<GroupCpp> {
+
+    Buffer *b_add_all_hpp;
+
+    virtual void clear() {
+        AddinImpl<GroupCpp>::clear();
+        delete b_add_all_hpp;
+    }
+
+    virtual void top() {
+        b_add_all_hpp = new Buffer(NewStringf("%s/add_all.hpp", addDir));
+
+        Printf(b_add_all_hpp->b0, "\n");
+        Printf(b_add_all_hpp->b0, "#ifndef add_all_hpp\n");
+        Printf(b_add_all_hpp->b0, "#define add_all_hpp\n");
+        Printf(b_add_all_hpp->b0, "\n");
+        Printf(b_add_all_hpp->b0, "#include <%s/init.hpp>\n", addInc);
+    }
+
+    virtual void top2() {
+        Printf(b_add_all_hpp->b0, "\n");
+        Printf(b_add_all_hpp->b0, "#endif\n");
+        Printf(b_add_all_hpp->b0, "\n");
+    }
+};
+
 
 struct AddinList {
 
@@ -818,17 +998,38 @@ struct AddinList {
         }
     }
 
-    void functionWrapperImplFunc(Node *n, ParmList *parms, String *name, SwigType *type, String *symname) {
+    virtual void top() {
         for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
             Addin *addin = *i;
-            addin->functionWrapperImplFunc(n, parms, name, type, symname);
+            addin->top();
         }
     }
 
-    void functionWrapperImplCtor(Node *n, String *name, bool generateCtor, String *funcName, ParmList *parms, String *pname, String *base) {
+    virtual void top2() {
         for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
             Addin *addin = *i;
-            addin->functionWrapperImplCtor(n, name, generateCtor, funcName, parms, pname, base);
+            addin->top2();
+        }
+    }
+
+    void functionWrapperImplFunc(Node *n, ParmList *parms, String *name, SwigType *type, String *symname, String *funcName) {
+        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
+            Addin *addin = *i;
+            addin->functionWrapperImplFunc(n, parms, name, type, symname, funcName);
+        }
+    }
+
+    void functionWrapperImplCtor(String *name, bool generateCtor, String *funcName, ParmList *parms, ParmList *parms2, String *pname, String *base) {
+        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
+            Addin *addin = *i;
+            addin->functionWrapperImplCtor(name, generateCtor, funcName, parms, parms2, pname, base);
+        }
+    }
+
+    void functionWrapperImplMemb(Node *n, SwigType *type, String *funcName, ParmList *parms, ParmList *parms2, String *pname, String *addinClass, String *name) {
+        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
+            Addin *addin = *i;
+            addin->functionWrapperImplMemb(n, type, funcName, parms, parms2, pname, addinClass, name);
         }
     }
 };
@@ -836,8 +1037,6 @@ struct AddinList {
 //struct BufferGroup {
 //
 //    // buffers
-//    Buffer *b_add_hpp;
-//    Buffer *b_add_cpp;
 //    Buffer *b_cfy_hpp;
 //    Buffer *b_cfy_cpp;
 //    Buffer *b_xll_cpp;
@@ -851,10 +1050,6 @@ struct AddinList {
 //        name_ = Copy(name);
 //        automatic_ = automatic;
 //
-//        if (generateCppAddin) {
-//        b_add_hpp = new Buffer(NewStringf("%s/add_%s.hpp", addDir, name_));
-//        b_add_cpp = new Buffer(NewStringf("%s/add_%s.cpp", addDir, name_));
-//        }
 //        if (generateXllAddin) {
 //        b_xll_cpp = new Buffer(NewStringf("%s/functions/function_%s.cpp", xllDir, name_));
 //        b_xll_reg = new Buffer(NewStringf("%s/register/register_%s.cpp", xllDir, name_));
@@ -862,41 +1057,6 @@ struct AddinList {
 //        if (generateCfyAddin) {
 //        b_cfy_hpp = new Buffer(NewStringf("%s/cfy_%s.hpp", cfyDir, name_));
 //        b_cfy_cpp = new Buffer(NewStringf("%s/cfy_%s.cpp", cfyDir, name_));
-//        }
-
-//        if (generateCppAddin) {
-//        Printf(b_add_hpp->b0, "\n");
-//        Printf(b_add_hpp->b0, "#ifndef add_%s_hpp\n", name);
-//        Printf(b_add_hpp->b0, "#define add_%s_hpp\n", name);
-//        Printf(b_add_hpp->b0, "\n");
-//        Printf(b_add_hpp->b0, "#include <string>\n");
-//        // FIXME this #include is only needed if a datatype conversion is taking place.
-//        Printf(b_add_hpp->b0, "#include <oh/property.hpp>\n");
-//        Printf(b_add_hpp->b0, "\n");
-//        Printf(b_add_hpp->b0, "namespace %s {\n", addinCppNameSpace);
-//        Printf(b_add_hpp->b0, "\n");
-//
-//        Printf(b_add_cpp->b0, "\n");
-//        Printf(b_add_cpp->b0, "#include <AddinCpp/add_%s.hpp>\n", name);
-//        // FIXME this #include is only required if the file contains conversions.
-//        Printf(b_add_cpp->b0, "#include <%s/conversions/convert2.hpp>\n", objInc);
-//        Printf(b_add_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
-//        // FIXME this #include is only required if the file contains enumerations.
-//        //Printf(b_add_cpp->b0, "#include <oh/enumerations/typefactory.hpp>\n");
-//        // FIXME this #include is only required if the file contains constructors.
-//        Printf(b_add_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, name);
-//        if (automatic_) {
-//        Printf(b_add_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, name);
-//        } else {
-//        Printf(b_add_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, name);
-//        }
-//        Printf(b_add_cpp->b0, "%s\n", add_include);
-//        // FIXME include only factories for types used in the current file.
-//        Printf(b_add_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
-//        Printf(b_add_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
-//        Printf(b_add_cpp->b0, "#include <oh/repository.hpp>\n");
-//        //Printf(b_add_cpp->b0, "#include <AddinCpp/add_all.hpp>\n");
-//        Printf(b_add_cpp->b0, "\n");
 //        }
 //
 //        if (generateXllAddin) {
@@ -992,15 +1152,6 @@ struct AddinList {
 //
 //    ~BufferGroup() {
 //
-//        if (generateCppAddin) {
-//        Printf(b_add_hpp->b0, "\n");
-//        Printf(b_add_hpp->b0, "} // namespace %s\n", addinCppNameSpace);
-//        Printf(b_add_hpp->b0, "\n");
-//        Printf(b_add_hpp->b0, "#endif\n");
-//        Printf(b_add_hpp->b0, "\n");
-//
-//        Printf(b_add_cpp->b0, "\n");
-//        }
 //
 //        if (generateXllAddin) {
 //        Printf(b_xll_reg->b0, "}\n");
@@ -1014,10 +1165,6 @@ struct AddinList {
 //        //Printf(b_cfy_hpp->b0, "\n");
 //        //}
 //
-//        if (generateCppAddin) {
-//        delete b_add_hpp;
-//        delete b_add_cpp;
-//        }
 //        if (generateXllAddin) {
 //        delete b_xll_cpp;
 //        delete b_xll_reg;
@@ -1029,31 +1176,8 @@ struct AddinList {
 //    }
 //};
 
-//class BufferMap {
-//
-//    typedef std::map<std::string, BufferGroup*> BM;
-//    BM bm_;
-//    std::string name_;
-//
-//public:
-//
-//    BufferGroup *getBufferGroup(String *name, String *obj_include, String *add_include, String *cfy_include, bool automatic) {
-//        name_ = Char(name);
-//        if (bm_.end() == bm_.find(name_))
-//            bm_[name_] = new BufferGroup(name, obj_include, add_include, cfy_include, automatic);
-//        return bm_[name_];
-//    }
-//
-//    void clear() {
-//        for (BM::const_iterator i=bm_.begin(); i!=bm_.end(); ++i)
-//            delete i->second;
-//    }
-//};
-
 class REPOSIT : public Language {
 
-    //BufferMap bm_;
-    //BufferGroup *bg;
     int functionType;//0=function, 1=constructor, 2=member
     AddinList addinList_;
 
@@ -1090,7 +1214,7 @@ public:
 
     for (int i = 1; i < argc; i++) {
         if ( (strcmp(argv[i],"-gencpp") == 0)) {
-            //generateCppAddin = true;
+            addinList_.appendAddin(new AddinCpp);
             Swig_mark_arg(i);
         } else if ( (strcmp(argv[i],"-genxll") == 0)) {
             //generateXllAddin = true;
@@ -1175,9 +1299,8 @@ virtual int top(Node *n) {
     b_cre_all_hpp = new Buffer(NewStringf("%s/serialization/create/create_all.hpp", objDir));
     b_reg_ser_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_register.hpp", objDir));
     b_reg_all_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_all.hpp", objDir));
-    //if (generateCppAddin) {
-    //b_add_all_hpp = new Buffer(NewStringf("%s/add_all.hpp", addDir));
-    //}
+
+    addinList_.top();
     //if (generateXllAddin) {
     //b_xll_reg_cpp = new Buffer(NewStringf("%s/register/register_all.cpp", xllDir));
     //}
@@ -1218,14 +1341,6 @@ virtual int top(Node *n) {
         Printf(b_reg_all_hpp->b0, "#ifndef serialization_all_hpp\n");
         Printf(b_reg_all_hpp->b0, "#define serialization_all_hpp\n");
         Printf(b_reg_all_hpp->b0, "\n");
-
-        //if (generateCppAddin) {
-        //Printf(b_add_all_hpp->b0, "\n");
-        //Printf(b_add_all_hpp->b0, "#ifndef add_all_hpp\n");
-        //Printf(b_add_all_hpp->b0, "#define add_all_hpp\n");
-        //Printf(b_add_all_hpp->b0, "\n");
-        //Printf(b_add_all_hpp->b0, "#include <%s/init.hpp>\n", addInc);
-        //}
 
         //if (generateXllAddin) {
         //Printf(b_xll_reg_cpp->b0, "\n");
@@ -1278,11 +1393,7 @@ virtual int top(Node *n) {
         Printf(b_reg_all_hpp->b0, "#endif\n");
         Printf(b_reg_all_hpp->b0, "\n");
 
-        //if (generateCppAddin) {
-        //Printf(b_add_all_hpp->b0, "\n");
-        //Printf(b_add_all_hpp->b0, "#endif\n");
-        //Printf(b_add_all_hpp->b0, "\n");
-        //}
+        addinList_.top2();
 
         //if (generateXllAddin) {
         //Printf(b_xll_reg_cpp->b2, "\n");
@@ -1295,6 +1406,7 @@ virtual int top(Node *n) {
         //}
 
         //if (generateCfyAddin) {
+        // FIXME that's the C++ file
         //Printf(b_add_all_hpp->b0, "#endif\n");
         //Printf(b_add_all_hpp->b0, "\n");
         //}
@@ -1304,9 +1416,6 @@ virtual int top(Node *n) {
     delete b_cre_all_hpp;
     delete b_reg_ser_hpp;
     delete b_reg_all_hpp;
-    //if (generateCppAddin) {
-    //delete b_add_all_hpp;
-    //}
     //if (generateXllAddin) {
     //delete b_xll_reg_cpp;
     //}
@@ -1357,7 +1466,6 @@ virtual int top(Node *n) {
     //Close(f_test);
     Delete(f_test);
 
-    //bm_.clear();
     addinList_.clear();
 
     for (int i=0; i<Len(errorList); ++i) {
@@ -1384,8 +1492,6 @@ void getFeatures(Node *n) {
 
     group_name = Getattr(n, "feature:rp:group");
     printf("Group='%s'.\n", Char(group_name));
-    //if (group)
-    //    bg = bm_.getBufferGroup(group, obj_include, add_include, cfy_include, automatic);
 }
 
 // overrride base class members, write debug info to b_init,
@@ -1520,10 +1626,8 @@ int includeDirective(Node *n) {
 
 
 int functionWrapperImpl(Node *n) {
-    // Perform some processing common to all function types
-    //functionWrapperImplAll(n);
 
-    // Generate outpu appropriate to the given function type
+    // Generate output appropriate to the given function type
     int ret;
     if (0==functionType) {
         functionWrapperImplAll(n);
@@ -1576,28 +1680,9 @@ int functionWrapperImplFunc(Node *n) {
 
     // Create from parms another list parms2 - prepend an argument to represent
     // the dependency trigger which is the first argument of every addin function.
-    Parm *parms2 = prependParm(parms, "Trigger", "ObjectHandler::property_t");
+    //Parm *parms2 = prependParm(parms, "Trigger", "ObjectHandler::property_t");
 
-    addinList_.functionWrapperImplFunc(n, parms, name, type, symname);
-
-    //if (generateCppAddin) {
-    //emitTypeMap(bg->b_add_hpp->b0, "rp_tm_add_ret", n, type, 1);
-    //Printf(bg->b_add_hpp->b0,"    %s(\n", funcName);
-    //emitParmList(parms, bg->b_add_hpp->b0, 2, "rp_tm_add_prm", 2);
-    //Printf(bg->b_add_hpp->b0,"    );\n");
-
-    //Printf(bg->b_add_cpp->b0,"//****FUNC*****\n");
-    //emitTypeMap(bg->b_add_cpp->b0, "rp_tm_add_ret", n, type);
-    //Printf(bg->b_add_cpp->b0,"%s::%s(\n", addinCppNameSpace, funcName);
-    //emitParmList(parms, bg->b_add_cpp->b0, 2, "rp_tm_add_prm");
-    //Printf(bg->b_add_cpp->b0,") {\n");
-    //emitParmList(parms, bg->b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
-    //Printf(bg->b_add_cpp->b0,"\n");
-    //Printf(bg->b_add_cpp->b0,"    return %s::%s(\n", module, symname);
-    //emitParmList(parms, bg->b_add_cpp->b0, 1, "rp_tm_add_cll", 2, ',', true, true);
-    //Printf(bg->b_add_cpp->b0,"    );\n");
-    //Printf(bg->b_add_cpp->b0,"}\n");
-    //}
+    addinList_.functionWrapperImplFunc(n, parms, name, type, symname, funcName);
 
     //if (generateXllAddin) {
     //excelRegister(bg->b_xll_reg->b0, n, type, parms2);
@@ -1795,7 +1880,7 @@ int functionWrapperImplCtor(Node *n) {
 
     // Create from parms2 another list parms3 - prepend an argument to represent
     // the object ID which is the return value of addin func that wraps ctor.
-    Parm *parms3 = prependParm(parms2, "objectID", "std::string", true, true);
+    //Parm *parms3 = prependParm(parms2, "objectID", "std::string", true, true);
 
     Printf(b_wrappers, "//***DEF\n");
     printList(parms2, b_wrappers);
@@ -1805,190 +1890,7 @@ int functionWrapperImplCtor(Node *n) {
     Printf(b_wrappers, "// *a3* %s <<\n", Char(ParmList_protostr(parms2)));
     Printf(b_wrappers, "//***DEF\n");
 
-    addinList_.functionWrapperImplCtor(n, name, generateCtor, funcName, parms, pname, base);
-
-    //if (generateCtor) {
-    //Printf(bg->b_val_hpp->b0,"        class %s : public ObjectHandler::ValueObject {\n", funcName);
-    //Printf(bg->b_val_hpp->b0,"            friend class boost::serialization::access;\n");
-    //Printf(bg->b_val_hpp->b0,"        public:\n");
-    //Printf(bg->b_val_hpp->b0,"            %s() {}\n", funcName);
-    //Printf(bg->b_val_hpp->b0,"            %s(\n", funcName);
-    //Printf(bg->b_val_hpp->b0,"                const std::string& ObjectId,\n");
-    //emitParmList(parms, bg->b_val_hpp->b0, 2, "rp_tm_val_prm", 4, ',', true, false, true);
-    //Printf(bg->b_val_hpp->b0,"                bool Permanent);\n");
-    //Printf(bg->b_val_hpp->b0,"\n");
-    //Printf(bg->b_val_hpp->b0,"            const std::set<std::string>& getSystemPropertyNames() const;\n");
-    //Printf(bg->b_val_hpp->b0,"            std::vector<std::string> getPropertyNamesVector() const;\n");
-    //Printf(bg->b_val_hpp->b0,"            ObjectHandler::property_t getSystemProperty(const std::string&) const;\n");
-    //Printf(bg->b_val_hpp->b0,"            void setSystemProperty(const std::string& name, const ObjectHandler::property_t& value);\n");
-    //Printf(bg->b_val_hpp->b0,"\n");
-    //Printf(bg->b_val_hpp->b0,"        protected:\n");
-    //Printf(bg->b_val_hpp->b0,"            static const char* mPropertyNames[];\n");
-    //Printf(bg->b_val_hpp->b0,"            static std::set<std::string> mSystemPropertyNames;\n");
-    //emitParmList(parms, bg->b_val_hpp->b0, 1, "rp_tm_val_dcl", 3, ';', true, false, true);
-    //Printf(bg->b_val_hpp->b0,"            bool Permanent_;\n");
-    //Printf(bg->b_val_hpp->b0,"\n");
-    //Printf(bg->b_val_hpp->b0,"            template<class Archive>\n");
-    //Printf(bg->b_val_hpp->b0,"            void serialize(Archive& ar, const unsigned int) {\n");
-    //Printf(bg->b_val_hpp->b0,"            boost::serialization::void_cast_register<%s, ObjectHandler::ValueObject>(this, this);\n", funcName);
-    //Printf(bg->b_val_hpp->b0,"                ar  & boost::serialization::make_nvp(\"ObjectId\", objectId_)\n");
-    //Printf(bg->b_val_hpp->b0,"                    & boost::serialization::make_nvp(\"ClassName\", className_)\n");
-    //emitParmList(parms, bg->b_val_hpp->b0, 1, "rp_tm_val_ser", 5, 0);
-    //Printf(bg->b_val_hpp->b0,"                    & boost::serialization::make_nvp(\"Permanent\", Permanent_)\n");
-    //Printf(bg->b_val_hpp->b0,"                    & boost::serialization::make_nvp(\"UserProperties\", userProperties);\n");
-    //Printf(bg->b_val_hpp->b0,"            }\n");
-    //Printf(bg->b_val_hpp->b0,"        };\n");
-    //Printf(bg->b_val_hpp->b0,"\n");
-
-    //Printf(bg->b_val_cpp->b0,"        const char* %s::mPropertyNames[] = {\n", funcName);
-    //emitParmList(parms, bg->b_val_cpp->b0, 1, "rp_tm_val_nam", 3, ',', true, false, true);
-    //Printf(bg->b_val_cpp->b0,"            \"Permanent\"\n");
-    //Printf(bg->b_val_cpp->b0,"        };\n");
-    //Printf(bg->b_val_cpp->b0,"\n");
-    //Printf(bg->b_val_cpp->b0,"        std::set<std::string> %s::mSystemPropertyNames(\n", funcName);
-    //Printf(bg->b_val_cpp->b0,"            mPropertyNames, mPropertyNames + sizeof(mPropertyNames) / sizeof(const char*));\n");
-    //Printf(bg->b_val_cpp->b0,"\n");
-    //Printf(bg->b_val_cpp->b0,"        const std::set<std::string>& %s::getSystemPropertyNames() const {\n", funcName);
-    //Printf(bg->b_val_cpp->b0,"            return mSystemPropertyNames;\n");
-    //Printf(bg->b_val_cpp->b0,"        }\n");
-    //Printf(bg->b_val_cpp->b0,"\n");
-    //Printf(bg->b_val_cpp->b0,"        std::vector<std::string> %s::getPropertyNamesVector() const {\n", funcName);
-    //Printf(bg->b_val_cpp->b0,"            std::vector<std::string> ret(\n");
-    //Printf(bg->b_val_cpp->b0,"                mPropertyNames, mPropertyNames + sizeof(mPropertyNames) / sizeof(const char*));\n");
-    //Printf(bg->b_val_cpp->b0,"            for (std::map<std::string, ObjectHandler::property_t>::const_iterator i = userProperties.begin();\n");
-    //Printf(bg->b_val_cpp->b0,"                i != userProperties.end(); ++i)\n");
-    //Printf(bg->b_val_cpp->b0,"                ret.push_back(i->first);\n");
-    //Printf(bg->b_val_cpp->b0,"            return ret;\n");
-    //Printf(bg->b_val_cpp->b0,"        }\n");
-    //Printf(bg->b_val_cpp->b0,"\n");
-    //Printf(bg->b_val_cpp->b0,"        ObjectHandler::property_t %s::getSystemProperty(const std::string& name) const {\n", funcName);
-    //Printf(bg->b_val_cpp->b0,"            std::string nameUpper = boost::algorithm::to_upper_copy(name);\n");
-    //Printf(bg->b_val_cpp->b0,"            if(strcmp(nameUpper.c_str(), \"OBJECTID\")==0)\n");
-    //Printf(bg->b_val_cpp->b0,"                return objectId_;\n");
-    //Printf(bg->b_val_cpp->b0,"            else if(strcmp(nameUpper.c_str(), \"CLASSNAME\")==0)\n");
-    //Printf(bg->b_val_cpp->b0,"                return className_;\n");
-    //voGetProp(bg->b_val_cpp->b0, parms);
-    //Printf(bg->b_val_cpp->b0,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
-    //Printf(bg->b_val_cpp->b0,"                return Permanent_;\n");
-    //Printf(bg->b_val_cpp->b0,"            else\n");
-    //Printf(bg->b_val_cpp->b0,"                OH_FAIL(\"Error: attempt to retrieve non-existent Property: '\" + name + \"'\");\n");
-    //Printf(bg->b_val_cpp->b0,"        }\n");
-    //Printf(bg->b_val_cpp->b0,"\n");
-    //Printf(bg->b_val_cpp->b0,"        void %s::setSystemProperty(const std::string& name, const ObjectHandler::property_t& value) {\n", funcName);
-    //Printf(bg->b_val_cpp->b0,"            std::string nameUpper = boost::algorithm::to_upper_copy(name);\n");
-    //Printf(bg->b_val_cpp->b0,"            if(strcmp(nameUpper.c_str(), \"OBJECTID\")==0)\n");
-    //Printf(bg->b_val_cpp->b0,"                objectId_ = boost::get<std::string>(value);\n");
-    //Printf(bg->b_val_cpp->b0,"            else if(strcmp(nameUpper.c_str(), \"CLASSNAME\")==0)\n");
-    //Printf(bg->b_val_cpp->b0,"                className_ = boost::get<std::string>(value);\n");
-    //voSetProp(bg->b_val_cpp->b0, parms);
-    //Printf(bg->b_val_cpp->b0,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
-    //Printf(bg->b_val_cpp->b0,"                Permanent_ = ObjectHandler::convert2<bool>(value);\n");
-    //Printf(bg->b_val_cpp->b0,"            else\n");
-    //Printf(bg->b_val_cpp->b0,"                OH_FAIL(\"Error: attempt to set non-existent Property: '\" + name + \"'\");\n");
-    //Printf(bg->b_val_cpp->b0,"        }\n");
-    //Printf(bg->b_val_cpp->b0,"\n");
-    //Printf(bg->b_val_cpp->b0,"        %s::%s(\n", funcName, funcName);
-    //Printf(bg->b_val_cpp->b0,"                const std::string& ObjectId,\n");
-    //emitParmList(parms, bg->b_val_cpp->b0, 2, "rp_tm_val_prm", 4, ',', true, false, true);
-    //Printf(bg->b_val_cpp->b0,"                bool Permanent) :\n");
-    //Printf(bg->b_val_cpp->b0,"            ObjectHandler::ValueObject(ObjectId, \"%s\", Permanent),\n", funcName);
-    //emitParmList(parms, bg->b_val_cpp->b0, 1, "rp_tm_val_ini", 3, ',', true, false, true);
-    //Printf(bg->b_val_cpp->b0,"            Permanent_(Permanent) {\n");
-    //Printf(bg->b_val_cpp->b0,"        }\n");
-    //}
-
-    //if (generateCtor) {
-    //Printf(bg->b_cre_hpp->b0, "\n");
-    //Printf(bg->b_cre_hpp->b0, "boost::shared_ptr<ObjectHandler::Object> create_%s(\n", funcName);
-    //Printf(bg->b_cre_hpp->b0, "    const boost::shared_ptr<ObjectHandler::ValueObject>&);\n");
-
-    //Printf(bg->b_cre_cpp->b0, "\n");
-    //Printf(bg->b_cre_cpp->b0, "boost::shared_ptr<ObjectHandler::Object> %s::create_%s(\n", module, funcName);
-    //Printf(bg->b_cre_cpp->b0, "    const boost::shared_ptr<ObjectHandler::ValueObject> &valueObject) {\n");
-    //Printf(bg->b_cre_cpp->b0, "\n");
-    //Printf(bg->b_cre_cpp->b0, "    // conversions\n\n");
-    //emitParmList(parms, bg->b_cre_cpp->b0, 1, "rp_tm_cre_cnv", 1, 0);
-    //Printf(bg->b_cre_cpp->b0, "\n");
-    //Printf(bg->b_cre_cpp->b0, "    bool Permanent =\n");
-    //Printf(bg->b_cre_cpp->b0, "        ObjectHandler::convert2<bool>(valueObject->getProperty(\"Permanent\"));\n");
-    //Printf(bg->b_cre_cpp->b0, "\n");
-    //Printf(bg->b_cre_cpp->b0, "    // construct and return the object\n");
-    //Printf(bg->b_cre_cpp->b0, "\n");
-    //Printf(bg->b_cre_cpp->b0, "    boost::shared_ptr<ObjectHandler::Object> object(\n");
-    //Printf(bg->b_cre_cpp->b0, "        new %s::%s(\n", module, name);
-    //Printf(bg->b_cre_cpp->b0, "            valueObject,\n");
-    //emitParmList(parms, bg->b_cre_cpp->b0, 0, "rp_tm_default", 3, ',', true, false, true);
-    //Printf(bg->b_cre_cpp->b0, "            Permanent));\n");
-    //Printf(bg->b_cre_cpp->b0, "    return object;\n");
-    //Printf(bg->b_cre_cpp->b0, "}\n");
-    //}
-
-    //if (generateCtor) {
-    //Printf(bg->b_reg_cpp->b0, "    // class ID %d in the boost serialization framework\n", idNum);
-    //Printf(bg->b_reg_cpp->b0, "    ar.register_type<%s::ValueObjects::%s>();\n", module, funcName);
-
-    //Printf(bg->b_reg_cpp->b1, "    // class ID %d in the boost serialization framework\n", idNum);
-    //Printf(bg->b_reg_cpp->b1, "    ar.register_type<%s::ValueObjects::%s>();\n", module, funcName);
-    //}
-
-    //idNum++;
-
-    //if (generateCtor) {
-    //    String *s0 = NewString("");
-    //    String *s1 = NewString("");
-    //    if (base) {
-    //        s0 = base;
-    //        s1 = NewStringf("%s::%s", nmspace, base);
-    //    } else {
-    //        s0 = NewStringf("ObjectHandler::LibraryObject<%s>", pname);
-    //        s1 = pname;
-    //    }
-    //    Printf(bg->b_obj_hpp->b0,"\n");
-    //    Printf(bg->b_obj_hpp->b0,"    class %s : \n", name);
-    //    Printf(bg->b_obj_hpp->b0,"        public %s {\n", s0);
-    //    Printf(bg->b_obj_hpp->b0,"    public:\n");
-    //    Printf(bg->b_obj_hpp->b0,"        %s(\n", name);
-    //    Printf(bg->b_obj_hpp->b0,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties,\n");
-    //    emitParmList(parms, bg->b_obj_hpp->b0, 2, "rp_tm_default", 3, ',', true, false, true);
-    //    Printf(bg->b_obj_hpp->b0,"            bool permanent)\n");
-    //    Printf(bg->b_obj_hpp->b0,"        : %s(properties, permanent) {\n", s0);
-    //    Printf(bg->b_obj_hpp->b0,"            libraryObject_ = boost::shared_ptr<%s>(new %s(\n", s1, pname);
-    //    emitParmList(parms, bg->b_obj_hpp->b0, 0, "rp_tm_default", 4);
-    //    Printf(bg->b_obj_hpp->b0,"            ));\n");
-    //    Printf(bg->b_obj_hpp->b0,"        }\n");
-    //    Printf(bg->b_obj_hpp->b0,"    };\n");
-    //    Printf(bg->b_obj_hpp->b0,"\n");
-
-    //    if (generateCppAddin) {
-    //    Printf(bg->b_add_hpp->b0,"\n");
-    //    Printf(bg->b_add_hpp->b0,"    std::string %s(\n", funcName);
-    //    emitParmList(parms2, bg->b_add_hpp->b0, 2, "rp_tm_add_prm", 2);
-    //    Printf(bg->b_add_hpp->b0,"    );\n\n");
-
-    //    Printf(bg->b_add_cpp->b0,"//****CTOR*****\n");
-    //    Printf(bg->b_add_cpp->b0,"std::string %s::%s(\n", addinCppNameSpace, funcName);
-    //    emitParmList(parms2, bg->b_add_cpp->b0, 2, "rp_tm_add_prm", 2);
-    //    Printf(bg->b_add_cpp->b0,"    ) {\n");
-    //    Printf(bg->b_add_cpp->b0,"\n");
-    //    Printf(bg->b_add_cpp->b0,"    // Convert input types into Library types\n\n");
-    //    emitParmList(parms, bg->b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
-    //    Printf(bg->b_add_cpp->b0,"\n");
-    //    Printf(bg->b_add_cpp->b0,"    boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
-    //    Printf(bg->b_add_cpp->b0,"        new %s::ValueObjects::%s(\n", module, funcName);
-    //    Printf(bg->b_add_cpp->b0,"            objectID,\n");
-    //    emitParmList(parms, bg->b_add_cpp->b0, 0, "rp_tm_default", 3, ',', true, false, true);
-    //    Printf(bg->b_add_cpp->b0,"            false));\n");
-    //    Printf(bg->b_add_cpp->b0,"    boost::shared_ptr<ObjectHandler::Object> object(\n");
-    //    Printf(bg->b_add_cpp->b0,"        new %s::%s(\n", module, name);
-    //    Printf(bg->b_add_cpp->b0,"            valueObject,\n");
-    //    emitParmList(parms, bg->b_add_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true, true);
-    //    Printf(bg->b_add_cpp->b0,"            false));\n");
-    //    Printf(bg->b_add_cpp->b0,"    std::string returnValue =\n");
-    //    Printf(bg->b_add_cpp->b0,"        ObjectHandler::Repository::instance().storeObject(\n");
-    //    Printf(bg->b_add_cpp->b0,"            objectID, object, false, valueObject);\n");
-    //    Printf(bg->b_add_cpp->b0,"    return returnValue;\n");
-    //    Printf(bg->b_add_cpp->b0,"}\n\n");
-    //    }
+    addinList_.functionWrapperImplCtor(name, generateCtor, funcName, parms, parms2, pname, base);
 
     //    if (generateCfyAddin) {
     //    Printf(bg->b_cfy_hpp->b0,"\n");
@@ -2119,7 +2021,7 @@ int functionWrapperImplMemb(Node *n) {
     String *funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
     Setattr(n, "rp:funcName", funcName);
     printf("funcName=%s\n", Char(funcName));
-    String *funcName2 = NewStringf("%s%s", temp0, temp1);
+    //String *funcName2 = NewStringf("%s%s", temp0, temp1);
 
     // Create from parms another list parms2 - prepend an argument to represent
     // the object ID which is passed in as the first parameter to every ctor.
@@ -2146,40 +2048,7 @@ int functionWrapperImplMemb(Node *n) {
     Printf(b_wrappers, "// *a3* %s <<\n", Char(ParmList_protostr(parms2)));
     Printf(b_wrappers, "//***ABC\n");
 
-    //if (generateCppAddin) {
-    //emitTypeMap(bg->b_add_hpp->b0, "rp_tm_add_ret", n, type, 1);
-    //Printf(bg->b_add_hpp->b0,"    %s(\n", funcName);
-    //emitParmList(parms2, bg->b_add_hpp->b0, 2, "rp_tm_add_prm", 2);
-    //Printf(bg->b_add_hpp->b0,"    );\n\n");
-
-    //Printf(bg->b_add_cpp->b0,"//****MEMB*****\n");
-    //emitTypeMap(bg->b_add_cpp->b0, "rp_tm_add_ret", n, type);
-    //Printf(bg->b_add_cpp->b0,"%s::%s(\n", addinCppNameSpace, funcName);
-    //emitParmList(parms2, bg->b_add_cpp->b0, 2, "rp_tm_add_prm", 2);
-    //Printf(bg->b_add_cpp->b0,"    ) {\n\n");
-    //emitParmList(parms, bg->b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
-    //Printf(bg->b_add_cpp->b0,"\n");
-
-    ////// We are invoking the member function of a class.
-    ////// Create a dummy node and attach to it the type of the class.
-    ////// This allows us to apply a typemap to the node.
-    ////Node *node = NewHash();
-    ////Setfile(node, Getfile(n));
-    ////Setline(node, Getline(n));
-    ////Setattr(node, "type", pname);
-    ////// Attach to the node some values that might be referenced by the typemap:
-    ////Setattr(node, "rp_typedef_obj_add", addinClass);    // The type of the addin wrapper object
-    ////Setattr(node, "rp_typedef_obj_lib", pname);         // The type of the library object
-    //// Apply the typemap to the dummy node.
-    //emitTypeMap(bg->b_add_cpp->b0, "rp_tm_add_oh_get", node, type);// FIXME last parm "type" does not matter + can be omitted
-    ////// Delete the dummy node.
-    ////Delete(node);
-
-    //Printf(bg->b_add_cpp->b0,"    return x->%s(\n", name);
-    //emitParmList(parms, bg->b_add_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true);
-    //Printf(bg->b_add_cpp->b0,"        );\n", name);
-    //Printf(bg->b_add_cpp->b0,"}\n");
-    //}
+    addinList_.functionWrapperImplMemb(n, type, funcName, parms, parms2, pname, addinClass, name);
 
     //if (generateXllAddin) {
     //excelRegister(bg->b_xll_reg->b0, n, type, parms2);
