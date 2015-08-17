@@ -1524,7 +1524,7 @@ int functionWrapperImplCtor(Node *n) {
     // Create from parms another list parms2 - prepend an argument to represent
     // the object ID which is passed in as the first parameter to every ctor.
     Parm *temp1 = prependParm(parms, "Permanent", "bool", false);
-    Parm *temp2 = prependParm(temp1, "ObjectOverwrite", "bool", false);
+    Parm *temp2 = prependParm(temp1, "Overwrite", "bool", false);
     Parm *temp3 = prependParm(temp2, "objectID", "std::string");
     Parm *parms2 = prependParm(temp3, "Trigger", "ObjectHandler::property_t");
 
@@ -1855,9 +1855,10 @@ int functionWrapperImplMemb(Node *n) {
     String *funcName2 = NewStringf("%s%s", temp0, temp1);
 
     // Create from parms another list parms2 - prepend an argument to represent
-    // the object ID which is passed in as the first parameter to every member.
+    // the object ID which is passed in as the first parameter to every ctor.
     ParmList *parmsTemp = Getattr(parms, "nextSibling");
-    Parm *parms2 = prependParm(parmsTemp, "objectID", "std::string");
+    Parm *parmsTemp2 = prependParm(parmsTemp, "objectID", "std::string");
+    Parm *parms2 = prependParm(parmsTemp2, "Trigger", "ObjectHandler::property_t");
 
     // We are invoking the member function of a class.
     // Create a dummy node and attach to it the type of the class.
