@@ -166,6 +166,7 @@
 %}
 
 %typemap(rp_tm_xll_cll_obj) SWIGTYPE "$1_name";
+%typemap(rp_tm_xll_cll_obj) bool "*$1_name";
 %typemap(rp_tm_xll_cll_obj) long "*$1_name";
 %typemap(rp_tm_xll_cll_obj) rp_tp_double "*$1_name";
 //%typemap(rp_tm_xll_cll_obj) double "*$1_name";
