@@ -1322,14 +1322,14 @@ int functionWrapperImplFunc(Node *n) {
     emitParmList(parms2, bg->b_xll_cpp->b0, 2, "rp_tm_xll_prm", 1);
     Printf(bg->b_xll_cpp->b0, ") {\n");
     Printf(bg->b_xll_cpp->b0, "\n");
-    Printf(bg->b_xll_cpp->b0, "    ObjectHandler::validateRange(Trigger, \"Trigger\");\n");
-    Printf(bg->b_xll_cpp->b0, "\n");
     Printf(bg->b_xll_cpp->b0, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
     Printf(bg->b_xll_cpp->b0, "\n");
     Printf(bg->b_xll_cpp->b0, "    try {\n");
     Printf(bg->b_xll_cpp->b0, "\n");
     Printf(bg->b_xll_cpp->b0, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
     Printf(bg->b_xll_cpp->b0, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", funcName);
+    Printf(bg->b_xll_cpp->b0, "\n");
+    Printf(bg->b_xll_cpp->b0, "        ObjectHandler::validateRange(Trigger, \"Trigger\");\n");
     Printf(bg->b_xll_cpp->b0, "\n");
     emitParmList(parms, bg->b_xll_cpp->b0, 1, "rp_tm_xll_cnv", 2, 0, false);
     Printf(bg->b_xll_cpp->b0, "\n");
