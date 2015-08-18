@@ -325,7 +325,8 @@ struct Buffer {
     File *b2;
     File *b3;
     String *outputBuffer_;
-    Buffer(String *name) : name_(name) {
+    Buffer(String *name) : name_(Copy(name)) {
+        //printf("Creating file '%s'...", Char(name_));
         b0 = NewString("");
         b1 = NewString("");
         b2 = NewString("");
@@ -1262,7 +1263,6 @@ struct Addin {
     virtual void functionWrapperImplMemb(ParmsMemb &p) = 0;
     virtual void clear() = 0;
     virtual void top() {}
-    virtual void top2() {}
     virtual ~Addin() {}
     virtual void processGroup() {}
 };
@@ -1322,7 +1322,38 @@ struct AddinObjects : public AddinImpl<GroupObjects> {
     }
 
     virtual void clear() {
+
         AddinImpl<GroupObjects>::clear();
+
+        Printf(b_cre_reg_cpp->b0, "\n");
+        Printf(b_cre_reg_cpp->b0, "}\n");
+        Printf(b_cre_reg_cpp->b0, "\n");
+
+        Printf(b_obj_all_hpp->b0, "\n");
+        Printf(b_obj_all_hpp->b0, "#endif\n");
+        Printf(b_obj_all_hpp->b0, "\n");
+
+        Printf(b_cre_all_hpp->b0, "\n");
+        Printf(b_cre_all_hpp->b0, "#endif\n");
+        Printf(b_cre_all_hpp->b0, "\n");
+
+        Printf(b_reg_ser_hpp->b0, "\n");
+        Printf(b_reg_ser_hpp->b0, "    }\n");
+        Printf(b_reg_ser_hpp->b0, "\n");
+        Printf(b_reg_ser_hpp->b0, "}\n");
+        Printf(b_reg_ser_hpp->b0, "\n");
+        Printf(b_reg_ser_hpp->b0, "#endif\n");
+        Printf(b_reg_ser_hpp->b0, "\n");
+
+        Printf(b_reg_all_hpp->b0, "\n");
+        Printf(b_reg_all_hpp->b0, "#endif\n");
+        Printf(b_reg_all_hpp->b0, "\n");
+
+        delete b_obj_all_hpp;
+        delete b_cre_reg_cpp;
+        delete b_cre_all_hpp;
+        delete b_reg_ser_hpp;
+        delete b_reg_all_hpp;
     }
 
     virtual void top() {
@@ -1371,41 +1402,11 @@ struct AddinObjects : public AddinImpl<GroupObjects> {
         }
     }
 
-    virtual void top2() {
-        Printf(b_cre_reg_cpp->b0, "\n");
-        Printf(b_cre_reg_cpp->b0, "}\n");
-        Printf(b_cre_reg_cpp->b0, "\n");
-
-        Printf(b_obj_all_hpp->b0, "\n");
-        Printf(b_obj_all_hpp->b0, "#endif\n");
-        Printf(b_obj_all_hpp->b0, "\n");
-
-        Printf(b_cre_all_hpp->b0, "\n");
-        Printf(b_cre_all_hpp->b0, "#endif\n");
-        Printf(b_cre_all_hpp->b0, "\n");
-
-        Printf(b_reg_ser_hpp->b0, "\n");
-        Printf(b_reg_ser_hpp->b0, "    }\n");
-        Printf(b_reg_ser_hpp->b0, "\n");
-        Printf(b_reg_ser_hpp->b0, "}\n");
-        Printf(b_reg_ser_hpp->b0, "\n");
-        Printf(b_reg_ser_hpp->b0, "#endif\n");
-        Printf(b_reg_ser_hpp->b0, "\n");
-
-        Printf(b_reg_all_hpp->b0, "\n");
-        Printf(b_reg_all_hpp->b0, "#endif\n");
-        Printf(b_reg_all_hpp->b0, "\n");
-
-        delete b_obj_all_hpp;
-        delete b_cre_reg_cpp;
-        delete b_cre_all_hpp;
-        delete b_reg_ser_hpp;
-        delete b_reg_all_hpp;
-    }
-
     virtual void functionWrapperImplCtor(ParmsCtor &p) {
         AddinImpl<GroupObjects>::functionWrapperImplCtor(p);
-        Printf(b_cre_reg_cpp->b0, "    registerCreator(\"%s\", create_%s);\n", p.funcName, p.funcName);
+        if (generateCtor) {
+            Printf(b_cre_reg_cpp->b0, "    registerCreator(\"%s\", create_%s);\n", p.funcName, p.funcName);
+        }
     }
 };
 
@@ -1419,6 +1420,9 @@ struct AddinCpp : public AddinImpl<GroupCpp> {
 
     virtual void clear() {
         AddinImpl<GroupCpp>::clear();
+        Printf(b_add_all_hpp->b0, "\n");
+        Printf(b_add_all_hpp->b0, "#endif\n");
+        Printf(b_add_all_hpp->b0, "\n");
         delete b_add_all_hpp;
     }
 
@@ -1430,12 +1434,6 @@ struct AddinCpp : public AddinImpl<GroupCpp> {
         Printf(b_add_all_hpp->b0, "#define add_all_hpp\n");
         Printf(b_add_all_hpp->b0, "\n");
         Printf(b_add_all_hpp->b0, "#include <%s/init.hpp>\n", addInc);
-    }
-
-    virtual void top2() {
-        Printf(b_add_all_hpp->b0, "\n");
-        Printf(b_add_all_hpp->b0, "#endif\n");
-        Printf(b_add_all_hpp->b0, "\n");
     }
 };
 
@@ -1452,6 +1450,12 @@ struct AddinExcel : public AddinImpl<GroupExcel> {
 
     virtual void clear() {
         AddinImpl<GroupExcel>::clear();
+        Printf(b_xll_reg_cpp->b2, "\n");
+        Printf(b_xll_reg_cpp->b2, "}\n");
+        Printf(b_xll_reg_cpp->b2, "\n");
+        Printf(b_xll_reg_cpp->b3, "\n");
+        Printf(b_xll_reg_cpp->b3, "}\n");
+        Printf(b_xll_reg_cpp->b3, "\n");
         delete b_xll_reg_cpp;
     }
 
@@ -1470,19 +1474,6 @@ struct AddinExcel : public AddinImpl<GroupExcel> {
         Printf(b_xll_reg_cpp->b3, "void unregisterFunctions(const XLOPER& xDll) {\n");
         Printf(b_xll_reg_cpp->b3, "\n");
     }
-
-    virtual void top2() {
-
-        Printf(b_xll_reg_cpp->b2, "\n");
-        Printf(b_xll_reg_cpp->b2, "}\n");
-        Printf(b_xll_reg_cpp->b2, "\n");
-
-        Printf(b_xll_reg_cpp->b3, "\n");
-        Printf(b_xll_reg_cpp->b3, "}\n");
-        Printf(b_xll_reg_cpp->b3, "\n");
-
-        delete b_xll_reg_cpp;
-    }
 };
 
 //struct AddinCountify : public AddinImpl<GroupCountify> {
@@ -1494,14 +1485,11 @@ struct AddinExcel : public AddinImpl<GroupExcel> {
 //
 //    virtual void clear() {
 //        AddinImpl<GroupCpp>::clear();
+//        delete b_cfy_mng_txt;
 //    }
 //
 //    virtual void top() {
 //        b_cfy_mng_txt = new Buffer(NewStringf("%s/cfy_mongo.txt", cfyDir));
-//    }
-//
-//    virtual void top2() {
-//        delete b_cfy_mng_txt;
 //    }
 //};
 
@@ -1525,13 +1513,6 @@ struct AddinList {
         for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
             Addin *addin = *i;
             addin->top();
-        }
-    }
-
-    virtual void top2() {
-        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
-            Addin *addin = *i;
-            addin->top2();
         }
     }
 
@@ -1683,7 +1664,7 @@ virtual int top(Node *n) {
    /* Emit code for children */
    Language::top(n);
 
-        addinList_.top2();
+    addinList_.clear();
 
     // To help with troubleshooting, create an output file to which all of the
     // SWIG buffers will be written.  We are not going to compile this file but
@@ -1728,8 +1709,6 @@ virtual int top(Node *n) {
     //Close(f_test);
     Delete(f_test);
 
-    addinList_.clear();
-
     for (int i=0; i<Len(errorList); ++i) {
         String *errorMessage = Getitem(errorList, i);
         printf("%s", Char(errorMessage));
@@ -1753,7 +1732,7 @@ void getFeatures(Node *n) {
     automatic = !manual;
 
     group_name = Getattr(n, "feature:rp:group");
-    printf("Group='%s'.\n", Char(group_name));
+    printf(">>Group='%s'.\n", Char(group_name));
 }
 
 // overrride base class members, write debug info to b_init,
@@ -1763,6 +1742,7 @@ int moduleDirective(Node *n) {
     String *nodename = Getattr(n, "name");
     Printf(b_init, "BEGIN moduleDirective - node name='%s'.\n", Char(nodename));
     printNode(n, b_init);
+    printf("moduleDirective\n");
     Printf(b_init, "call parent\n");
     int ret=Language::moduleDirective(n);
     Printf(b_init, "END   moduleDirective - node name='%s'.\n", Char(nodename));
@@ -1774,6 +1754,7 @@ int classDeclaration(Node *n) {
     Printf(b_init, "BEGIN classDeclaration - node name='%s'.\n", Char(nodename));
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
+    printf("classDeclaration\n");
     getFeatures(n);
     int ret=Language::classDeclaration(n);
     Printf(b_init, "END   classDeclaration - node name='%s'.\n", Char(nodename));
@@ -1785,6 +1766,7 @@ int constructorDeclaration(Node *n) {
     Printf(b_init, "BEGIN constructorDeclaration - node name='%s'.\n", Char(nodename));
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
+    printf("constructorDeclaration\n");
     int ret=Language::constructorDeclaration(n);
     Printf(b_init, "END   constructorDeclaration - node name='%s'.\n", Char(nodename));
     return ret;
@@ -1795,6 +1777,7 @@ int namespaceDeclaration(Node *n) {
     Printf(b_init, "BEGIN namespaceDeclaration - node name='%s'.\n", Char(nmspace));
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
+    printf("namespaceDeclaration\n");
     getFeatures(n);
     int ret=Language::namespaceDeclaration(n);
     Printf(b_init, "END   namespaceDeclaration - node name='%s'.\n", Char(nmspace));
@@ -1827,6 +1810,7 @@ int functionHandler(Node *n) {
     Printf(b_init, "BEGIN functionHandler - node name='%s'.\n", Char(nodename));
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
+    printf("functionHandler\n");
     //int ret=Language::functionHandler(n);
     int ret=functionHandlerImpl(n);
     Printf(b_init, "END   functionHandler - node name='%s'.\n", Char(nodename));
@@ -1838,6 +1822,7 @@ int memberfunctionHandler(Node *n) {
     Printf(b_init, "BEGIN memberfunctionHandler - node name='%s'.\n", Char(nodename));
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
+    printf("memberfunctionHandler\n");
     //int ret=Language::memberfunctionHandler(n);
     int ret=memberfunctionHandlerImpl(n);
     Printf(b_init, "END   memberfunctionHandler - node name='%s'.\n", Char(nodename));
@@ -1849,6 +1834,7 @@ int constructorHandler(Node *n) {
     Printf(b_init, "BEGIN constructorHandler - node name='%s'.\n", Char(nodename));
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
+    printf("constructorHandler\n");
     //int ret=Language::constructorHandler(n);
     int ret=constructorHandlerImpl(n);
     Printf(b_init, "END   constructorHandler - node name='%s'.\n", Char(nodename));
@@ -1860,6 +1846,8 @@ int functionWrapper(Node *n) {
     Printf(b_init, "BEGIN functionWrapper - node name='%s'.\n", Char(nodename));
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
+    printf("functionWrapper\n");
+    //getFeatures(n);
     //int ret=Language::functionWrapper(n);
     int ret=functionWrapperImpl(n);
     Printf(b_init, "END   functionWrapper - node name='%s'.\n", Char(nodename));
@@ -1871,6 +1859,7 @@ int classHandler(Node *n) {
     Printf(b_init, "BEGIN classHandler - node name='%s'.\n", Char(nodename));
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
+    printf("classHandler\n");
     int ret=Language::classHandler(n);
     Printf(b_init, "END   classHandler - node name='%s'.\n", Char(nodename));
     return ret;
@@ -1881,6 +1870,7 @@ int includeDirective(Node *n) {
     Printf(b_init, "BEGIN includeDirective - node name='%s'.\n", Char(nodename));
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
+    printf("includeDirective\n");
     int ret=Language::includeDirective(n);
     Printf(b_init, "END   includeDirective - node name='%s'.\n", Char(nodename));
     return ret;
@@ -2004,6 +1994,7 @@ int functionWrapperImplCtor(Node *n) {
 
     ParmsCtor p;
 
+    p.n = n;
     p.name   = Getattr(n,"name");
     p.type   = Getattr(n,"type");
     p.parms  = Getattr(n,"parms");
@@ -2062,7 +2053,7 @@ int functionWrapperImplMemb(Node *n) {
 
     ParmsMemb p;
 
-    Printf(b_wrappers, "//***XYZ\n");
+    p.n = n;
     p.name   = Getattr(n,"name");
     p.type   = Getattr(n,"type");
     Node *n1 = Getattr(n,"parentNode");
@@ -2114,7 +2105,8 @@ void functionWrapperImplAll(Node *n) {
     String *nodeName = Getattr(n, "name");
     printf("Processing node name '%s'.\n", Char(nodeName));
 
-    getFeatures(n);
+    printf("functionWrapperImplAll\n");
+    //getFeatures(n);
 
     // Process the parameter list.
     ParmList *parms  = Getattr(n,"parms");
