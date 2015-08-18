@@ -354,7 +354,7 @@ struct Buffer {
             File *f = initFile(name_);
             Dump(outputBuffer_, f);
             Delete(f);
-            printf("Done.\n");
+            printf("Done.******************************************\n");
         } else {
             printf("Unchanged.\n");
         }
@@ -885,7 +885,7 @@ struct GroupCpp {
         Printf(b_add_cpp->b0,"    ) {\n\n");
         emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
         Printf(b_add_cpp->b0,"\n");
-        emitTypeMap(b_add_cpp->b0, "rp_tm_add_oh_get", p.node, p.type); // FIXME last parm "type" does not matter + can be omitted
+        emitTypeMap(b_add_cpp->b0, "rp_tm_xxx_oh_get", p.node, p.type); // FIXME last parm "type" does not matter + can be omitted
         Printf(b_add_cpp->b0,"    return x->%s(\n", p.name);
         emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true);
         Printf(b_add_cpp->b0,"        );\n", p.name);
@@ -1060,7 +1060,7 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "\n");
         emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_xll_cnv", 2, 0, false);
         Printf(b_xll_cpp->b0, "\n");
-        emitTypeMap(b_xll_cpp->b0, "rp_tm_add_oh_get", p.node, p.type, 2);// FIXME last parm "type" does not matter + can be omitted
+        emitTypeMap(b_xll_cpp->b0, "rp_tm_xxx_oh_get", p.node, p.type, 2);// FIXME last parm "type" does not matter + can be omitted
         Printf(b_xll_cpp->b0, "\n");
         emitTypeMap(b_xll_cpp->b0, "rp_xll_get", p.n, p.type, 2);
         Printf(b_xll_cpp->b0, "        x->%s(\n", p.name);
@@ -1244,7 +1244,7 @@ struct GroupExcel {
 //        emitParmList(parms, b_cfy_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
 //        Printf(b_cfy_cpp->b0,"\n");
 //
-//        emitTypeMap(b_cfy_cpp->b0, "rp_tm_add_oh_get", p.node, p.type, 2);// FIXME last parm "type" does not matter + can be omitted
+//        emitTypeMap(b_cfy_cpp->b0, "rp_tm_xxx_oh_get", p.node, p.type, 2);// FIXME last parm "type" does not matter + can be omitted
 //
 //        Printf(b_cfy_cpp->b0,"    return x->%s(\n", p.name);
 //        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true);
@@ -1982,12 +1982,12 @@ void processParm(Parm *p) {
     SwigType *t2 = SwigType_str(SwigType_typedef_resolve_all(t), 0);
     Setattr(p, "rp_typedef_resolved", t2);
 
-////  From "const T&" extract "T"
-//    Parm *p2 = CopyParm(p);
-//    SwigType *t3 = Getattr(p2, "type");
-//    SwigType_del_reference(t3);
-//    SwigType_del_qualifier(t3);
-//    Setattr(p, "rp_typedef_raw", SwigType_str(t3, 0));
+//  From "const T&" extract "T"
+    Parm *p2 = CopyParm(p);
+    SwigType *t3 = Getattr(p2, "type");
+    SwigType_del_reference(t3);
+    SwigType_del_qualifier(t3);
+    Setattr(p, "rp_typedef_raw", SwigType_str(t3, 0));
 }
 
 int functionWrapperImplCtor(Node *n) {
