@@ -116,8 +116,8 @@
 %typemap(rp_tm_xll_cod) rp_tp_enm "C";
 %typemap(rp_tm_xll_cod) rp_tp_enm_cls "C";
 %typemap(rp_tm_xll_cod) rp_tp_any "P";
-%typemap(rp_tm_xll_cod) std::vector< std::string > "P";
-%typemap(rp_tm_xll_cod) std::vector< bool > const & "P";
+%typemap(rp_tm_xll_cod) std::vector "P";
+%typemap(rp_tm_xll_cod) std::vector const & "P";
 %typemap(rp_tm_xll_cod) SWIGTYPE * "C";
 
 %typemap(rp_tm_xll_prm) bool "bool*";
@@ -132,7 +132,7 @@
 %typemap(rp_tm_xll_prm) rp_tp_any "OPER*";
 %typemap(rp_tm_xll_prm) rp_tp_enm "char*";
 %typemap(rp_tm_xll_prm) rp_tp_enm_cls "char*";
-%typemap(rp_tm_xll_prm) std::vector< bool > const & "OPER *";
+%typemap(rp_tm_xll_prm) std::vector const & "OPER *";
 
 %typemap(rp_tm_xll_cnv) rp_tp_cnv %{
         $1_type $1_name_cnv = ObjectHandler::convert2<$1_type, ObjectHandler::ConvertOper>(

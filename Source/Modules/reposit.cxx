@@ -15,6 +15,8 @@ String *libraryClass = 0;
 long idNum = 4;
 bool generateCtor = false;
 String *parent = 0;
+int fileCountUpdated = 0;
+int fileCountUnchanged = 0;
 
 // Default names for directories for source code and headers.
 // FIXME store these defaults in reposit.swg and retrieve them here.
@@ -354,9 +356,11 @@ struct Buffer {
             File *f = initFile(name_);
             Dump(outputBuffer_, f);
             Delete(f);
-            printf("Done.******************************************\n");
+            printf("Updated.******************************************\n");
+            fileCountUpdated++;
         } else {
             printf("Unchanged.\n");
+            fileCountUnchanged++;
         }
         Delete(outputBuffer_);
         Delete(name_);
@@ -1714,6 +1718,8 @@ virtual int top(Node *n) {
         printf("%s", Char(errorMessage));
     }
     Delete(errorList);//FIXME also delete each item individually
+
+    printf("Updated: %i Unchanged: %i Total: %i\n", fileCountUpdated, fileCountUnchanged, fileCountUpdated + fileCountUnchanged);
 
    return SWIG_OK;
 }
