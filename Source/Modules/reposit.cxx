@@ -1989,11 +1989,14 @@ void processParm(Parm *p) {
     Setattr(p, "rp_typedef_resolved", t2);
 
 //  From "const T&" extract "T"
-    Parm *p2 = CopyParm(p);
-    SwigType *t3 = Getattr(p2, "type");
-    SwigType_del_reference(t3);
-    SwigType_del_qualifier(t3);
-    Setattr(p, "rp_typedef_raw", SwigType_str(t3, 0));
+    //Parm *p2 = CopyParm(p);
+    //SwigType *t3 = Getattr(p2, "type");
+    //SwigType_del_reference(t3);
+    //SwigType_del_qualifier(t3);
+    //Setattr(p, "rp_typedef_raw", SwigType_str(t3, 0));
+    SwigType *t3 = Getattr(p, "type");
+    SwigType *t4 = SwigType_base(t3);
+    Setattr(p, "rp_typedef_raw", SwigType_str(t4, 0));
 }
 
 int functionWrapperImplCtor(Node *n) {
