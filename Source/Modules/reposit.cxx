@@ -67,7 +67,11 @@ void printList(Node *n, File *f) {
 String *getTypeMap(const char *m, Node *n, SwigType *t, bool fatal = true) {
     if (String *tm = Swig_typemap_lookup(m, n, "", 0)) {
         Replaceall(tm, "$rp_typedef_resolved", Getattr(n, "rp_typedef_resolved"));
-        Replaceall(tm, "$rp_typedef_raw", Getattr(n, "rp_typedef_raw"));
+        Replaceall(tm, "$rp_typedef_base", Getattr(n, "rp_typedef_base"));
+        Replaceall(tm, "$rp_typedef_no_template", Getattr(n, "rp_typedef_no_template"));
+        Replaceall(tm, "$rp_typedef_no_namespace", Getattr(n, "rp_typedef_no_namespace"));
+        Replaceall(tm, "$rp_addin_namespace", NewString(module));
+
         Replaceall(tm, "$rp_typedef_obj_add", Getattr(n, "rp_typedef_obj_add"));
         Replaceall(tm, "$rp_typedef_obj_lib", Getattr(n, "rp_typedef_obj_lib"));
         return tm;
@@ -1985,18 +1989,38 @@ void processParm(Parm *p) {
     String *nameUpper = copyUpper2(name);
     Setattr(p, "rp_name_upper", nameUpper);
 
-    SwigType *t2 = SwigType_str(SwigType_typedef_resolve_all(t), 0);
-    Setattr(p, "rp_typedef_resolved", t2);
+    SwigType *t2 = SwigType_typedef_resolve_all(t);
+    Setattr(p, "rp_typedef_resolved", SwigType_str(t2, 0));
 
-//  From "const T&" extract "T"
-    //Parm *p2 = CopyParm(p);
-    //SwigType *t3 = Getattr(p2, "type");
-    //SwigType_del_reference(t3);
-    //SwigType_del_qualifier(t3);
-    //Setattr(p, "rp_typedef_raw", SwigType_str(t3, 0));
-    SwigType *t3 = Getattr(p, "type");
-    SwigType *t4 = SwigType_base(t3);
-    Setattr(p, "rp_typedef_raw", SwigType_str(t4, 0));
+    // From "const T&" extract "T"
+    SwigType *t3 = SwigType_base(t2);
+    Setattr(p, "rp_typedef_base", SwigType_str(t3, 0));
+
+    // From A<B> extract B.  We do not yet support nested templates.
+    char no_template[100];
+    if (SwigType_istemplate(t3)) {
+        String *s1 = SwigType_str(t3, 0);
+        char *c1 = Char(s1);
+        char *c2 = strchr(c1, '<');
+        char *c3 = strchr(c1, '>');
+        strncpy(no_template, c2+1, c3-c2-1);
+        no_template[c3-c2-1]=0;
+    } else {
+        strcpy(no_template, Char(SwigType_str(t3, 0)));
+    }
+    String *s2 = NewString(no_template);
+    Setattr(p, "rp_typedef_no_template", s2);
+
+    // From namespace::type extract type.  We do not yet support nested namespaces.
+    char no_namespace[100];
+    char *c1 = strchr(no_template, ':');
+    if (c1) {
+        strcpy(no_namespace, c1+2);
+    } else {
+        strcpy(no_namespace, no_template);
+    }
+    String *s3 = NewString(no_namespace);
+    Setattr(p, "rp_typedef_no_namespace", s3);
 }
 
 int functionWrapperImplCtor(Node *n) {
