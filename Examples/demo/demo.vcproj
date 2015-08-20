@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="9.00"
+	Name="demo"
+	ProjectGUID="{55343C5A-EB5B-4F35-84CB-2A28D48E4F8E}"
+	Keyword="MakeFileProj"
+	TargetFrameworkVersion="196613"
+	>
+	<Platforms>
+		<Platform
+			Name="Win32"
+		/>
+	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="build\vc"
+			IntermediateDirectory="build\vc"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="NMAKE /f Makefile.vc"
+				ReBuildCommandLine="NMAKE /f Makefile.vc /a"
+				CleanCommandLine="NMAKE /f Makefile.vc clean"
+				Output=""
+				PreprocessorDefinitions="WIN32;_DEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="build\vc"
+			IntermediateDirectory="build\vc"
+			ConfigurationType="0"
+			>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="NMAKE /f Makefile.vc"
+				ReBuildCommandLine="NMAKE /f Makefile.vc /a"
+				CleanCommandLine="NMAKE /f Makefile.vc clean"
+				Output=""
+				PreprocessorDefinitions="WIN32;NDEBUG"
+				IncludeSearchPath=""
+				ForcedIncludes=""
+				AssemblySearchPath=""
+				ForcedUsingAssemblies=""
+				CompileAsManaged=""
+			/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<File
+			RelativePath=".\demo.i"
+			>
+		</File>
+		<File
+			RelativePath=".\Makefile.vc"
+			>
+		</File>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>

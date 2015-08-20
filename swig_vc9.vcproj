@@ -288,6 +288,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Source\Modules\demo.cxx"
+				>
+			</File>
+			<File
 				RelativePath=".\Source\Modules\directors.cxx"
 				>
 			</File>
@@ -525,7 +529,7 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\Lib\reposit\reposit.swg"
+			RelativePath=".\Lib\demo\demo.swg"
 			>
 		</File>
 	</Files>
