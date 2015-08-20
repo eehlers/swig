@@ -112,9 +112,9 @@ int functionHandler(Node *n) {
 
     printNode(n);
 
-    ParmList *parms  = Getattr(n,"parms");
-    for (Parm *p = parms; p; p = nextSibling(p))
-        processParm(p);
+    //ParmList *parms  = Getattr(n,"parms");
+    //for (Parm *p = parms; p; p = nextSibling(p))
+    //    processParm(p);
 
     int ret=Language::functionHandler(n);
     printf("END   functionHandler - node name='%s'.\n", Char(name));
