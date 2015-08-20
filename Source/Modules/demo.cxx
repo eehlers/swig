@@ -1,6 +1,14 @@
 
 #include "swigmod.h"
 
+void printNode(Node *n) {
+    List *list1 = Keys(n);
+    for(int i=0; i<Len(list1); ++i) {
+        String *key = Getitem(list1, i);
+        printf("%d %s %s\n", i, Char(key), Char(Getattr(n, key)));
+    }
+}
+
 class DEMO : public Language {
 
 public:
@@ -72,9 +80,42 @@ int namespaceDeclaration(Node *n) {
     return ret;
 }
 
+void processParm(Parm *p) {
+    String *name = Getattr(p, "name");
+    printf("BEGIN processParm - node name='%s'.\n", Char(name));
+    printNode(p);
+
+    SwigType *t1 = Getattr(p, "type");
+    SwigType *t2 = SwigType_base(t1);
+    printf("base = %s\n", Char(SwigType_str(t2, 0)));
+
+    SwigType *t3 = SwigType_str(SwigType_typedef_resolve_all(t1), 0);
+    printf("resolved = %s\n", Char(SwigType_str(t3, 0)));
+
+    printf("is_template=%d\n", SwigType_istemplate(t1));
+
+    String *s1 = SwigType_str(t1, 0);
+    char *c1 = Char(s1);
+    char *c2 = strchr(c1, '<');
+    char *c3 = strchr(c1, '>');
+    char x[100];
+    strncpy(x, c2+1, c3-c2-1);
+    x[c3-c2-1]=0;
+    printf("T=%s\n", x);
+
+    printf("END   processParm - node name='%s'.\n", Char(name));
+}
+
 int functionHandler(Node *n) {
     String *name = Getattr(n, "name");
     printf("BEGIN functionHandler - node name='%s'.\n", Char(name));
+
+    printNode(n);
+
+    ParmList *parms  = Getattr(n,"parms");
+    for (Parm *p = parms; p; p = nextSibling(p))
+        processParm(p);
+
     int ret=Language::functionHandler(n);
     printf("END   functionHandler - node name='%s'.\n", Char(name));
     return ret;
