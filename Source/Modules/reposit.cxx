@@ -57,6 +57,14 @@ void printNode(Node *n, File *f) {
     }
 }
 
+void printNode2(Node *n) {
+    List *list1 = Keys(n);
+    for(int i=0; i<Len(list1); ++i) {
+        String *key = Getitem(list1, i);
+        printf("/* %d %s %s */\n", i, Char(key), Char(Getattr(n, key)));
+    }
+}
+
 void printList(Node *n, File *f) {
     while (n) {
         printNode(n, f);
@@ -65,6 +73,10 @@ void printList(Node *n, File *f) {
 }
 
 String *getTypeMap(const char *m, Node *n, SwigType *t, bool fatal = true) {
+    printf("++++++++++++++++++++++++++++++\n");
+    printf("%s\n", Char(SwigType_str(t, 0)));
+    printNode2(n);
+    printf("++++++++++++++++++++++++++++++\n");
     if (String *tm = Swig_typemap_lookup(m, n, "", 0)) {
         Replaceall(tm, "$rp_typedef_resolved", Getattr(n, "rp_typedef_resolved"));
         Replaceall(tm, "$rp_typedef_base", Getattr(n, "rp_typedef_base"));
@@ -917,6 +929,8 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "#include <ohxl/functions/export.hpp>\n");
         Printf(b_xll_cpp->b0, "#include <ohxl/utilities/xlutilities.hpp>\n");
         Printf(b_xll_cpp->b0, "#include <ohxl/objectwrapperxl.hpp>\n");
+        // FIXME only required if the file contains a looping function
+        Printf(b_xll_cpp->b0, "#include <ohxl/loop.hpp>\n");
         Printf(b_xll_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, group_name);
@@ -957,6 +971,26 @@ struct GroupExcel {
         delete b_xll_reg;
     }
 
+    void emitLoopFunc(ParmsFunc &p, String *loopParameter) {
+        String *loopParameterType = Getattr(p.n, "rp:loopParameterType");
+        String *loopFunctionType = Getattr(p.n, "rp:loopFunctionType");
+        Printf(b_xll_cpp->b0, "        // BEGIN function emitLoopFunc\n");
+        Printf(b_xll_cpp->b0, "\n");
+        Printf(b_xll_cpp->b0, "        static XLOPER returnValue;\n");
+        Printf(b_xll_cpp->b0, "\n");
+        Printf(b_xll_cpp->b0, "        %s::%sBind bindObject =\n", module, p.funcName);
+        Printf(b_xll_cpp->b0, "            boost::bind(\n");
+        Printf(b_xll_cpp->b0, "                &%s,\n", p.name);
+        Printf(b_xll_cpp->b0, "                _1);\n");
+        Printf(b_xll_cpp->b0, "        ObjectHandler::loop\n");
+        Printf(b_xll_cpp->b0, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
+        Printf(b_xll_cpp->b0, "            (functionCall, bindObject, %s, returnValue);\n", loopParameter);
+        Printf(b_xll_cpp->b0, "\n");
+        Printf(b_xll_cpp->b0, "        return &returnValue;\n");
+        Printf(b_xll_cpp->b0, "\n");
+        Printf(b_xll_cpp->b0, "        // END   function emitLoopFunc\n");
+    }
+
     void functionWrapperImplFunc(ParmsFunc &p) {
 
         excelRegister(b_xll_reg->b0, p.n, p.type, p.parms2);
@@ -981,11 +1015,15 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "\n");
         emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_xll_cnv", 2, 0, false);
         Printf(b_xll_cpp->b0, "\n");
-        emitTypeMap(b_xll_cpp->b0, "rp_xll_get", p.n, p.type, 2);
-        Printf(b_xll_cpp->b0, "        %s::%s(\n", module, p.symname);
-        emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_xll_cll_obj", 3, ',', true, true);
-        Printf(b_xll_cpp->b0, "        );\n\n");
-        emitTypeMap(b_xll_cpp->b0, "rp_tm_xll_rdc", p.n, p.type, 2);
+        if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
+            emitLoopFunc(p, loopParameter);
+        } else {
+            emitTypeMap(b_xll_cpp->b0, "rp_xll_get", p.n, p.type, 2);
+            Printf(b_xll_cpp->b0, "        %s::%s(\n", module, p.symname);
+            emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_xll_cll_obj", 3, ',', true, true);
+            Printf(b_xll_cpp->b0, "        );\n\n");
+            emitTypeMap(b_xll_cpp->b0, "rp_tm_xll_rdc", p.n, p.type, 2);
+        }
 
         Printf(b_xll_cpp->b0, "\n");
         Printf(b_xll_cpp->b0, "    } catch (const std::exception &e) {\n");
@@ -1937,12 +1975,18 @@ int functionWrapperImplFunc(Node *n) {
     p.type   = Getattr(n,"type");
     p.parms  = Getattr(n,"parms");
     p.symname   = Getattr(n,"sym:name");
+    Printf(b_init, ">>> p.symname=%s\n", p.symname);
     //String   *action = Getattr(n,"wrap:action");
 
     String *temp = copyUpper(p.symname);
     p.funcName = NewStringf("%s%s", prefix, temp);
     Setattr(n, "rp:funcName", p.funcName);
     printf("funcName=%s\n", Char(p.funcName));
+    Printf(b_init, "@@@ FUNC Name=%s\n", p.funcName);
+    Printf(b_init, "&&& p.type=%s\n", p.type);
+    Printf(b_init, "&&& p.symname=%s\n", p.symname);
+    Printf(b_init, "&&& prefix=%s\n", prefix);
+    Printf(b_init, "&&& p.funcName=%s\n", p.funcName);
 
     // Create from parms another list parms2 - prepend an argument to represent
     // the dependency trigger which is the first argument of every addin function.
@@ -2052,6 +2096,7 @@ int functionWrapperImplCtor(Node *n) {
     Setattr(n, "rp:funcName", p.funcName);
     printf("funcName=%s\n", Char(p.funcName));
     printf("type=%s\n", Char(SwigType_str(p.type, 0)));
+    Printf(b_init, "@@@ CTOR Name=%s\n", Char(p.funcName));
 
     // Create from parms another list parms2 - prepend an argument to represent
     // the object ID which is passed in as the first parameter to every ctor.
@@ -2100,6 +2145,7 @@ int functionWrapperImplMemb(Node *n) {
     p.funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
     Setattr(p.n, "rp:funcName", p.funcName);
     printf("funcName=%s\n", Char(p.funcName));
+    Printf(b_init, "@@@ MEMB Name=%s\n", Char(p.funcName));
 
     // Create from parms another list parms2 - prepend an argument to represent
     // the object ID which is passed in as the first parameter to every ctor.
@@ -2134,15 +2180,48 @@ int functionWrapperImplMemb(Node *n) {
     return SWIG_OK;
 }
 
+void processLoopParameter(Node *n, String *functionName, ParmList *parms, String *loopParameter) {
+    for (Parm *p=parms; p; p=nextSibling(p)) {
+        String *name = Getattr(p, "name");
+        if (0==Strcmp(loopParameter, name)) {
+            Parm *p2 = Copy(p);
+            SwigType *t = Getattr(p2, "type");
+            SwigType *t2 = SwigType_base(t);
+            Setattr(p2, "type", t2);
+            SwigType *t3 = NewString("std::vector");
+            SwigType_add_template(t3, p2);
+            Setattr(p, "type", t3);
+            Setattr(n, "rp:loopParameterType", SwigType_str(t2, 0));
+
+            SwigType *t4 = Getattr(n, "type");
+            Setattr(n, "rp:loopFunctionType", SwigType_str(t4, 0));
+            Parm *p3 = NewHash();
+            Setattr(p3, "type", t4);
+            SwigType *t5 = NewString("std::vector");
+            SwigType_add_template(t5, p3);
+            Setattr(n, "type", t5);
+
+            return;
+        }
+    }
+    printf("Error processing function '%s' - you specified loop parameter '%s' "
+        "but the function has no parameter with that name.\n", Char(functionName), Char(loopParameter));
+    SWIG_exit(EXIT_FAILURE);
+}
+
 void functionWrapperImplAll(Node *n) {
     String *nodeName = Getattr(n, "name");
     printf("Processing node name '%s'.\n", Char(nodeName));
 
-    printf("functionWrapperImplAll\n");
+    ParmList *parms  = Getattr(n, "parms");
+
+    String *loopParameter = Getattr(n, "feature:rp:loopParameter");
+    if (loopParameter)
+        processLoopParameter(n, nodeName, parms, loopParameter);
+
     //getFeatures(n);
 
     // Process the parameter list.
-    ParmList *parms  = Getattr(n,"parms");
     for (Parm *p = parms; p; p = nextSibling(p))
         processParm(p);
 

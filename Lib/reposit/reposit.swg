@@ -139,6 +139,7 @@
 %typemap(rp_tm_xll_prm) rp_tp_any "OPER*";
 %typemap(rp_tm_xll_prm) rp_tp_enm "char*";
 %typemap(rp_tm_xll_prm) rp_tp_enm_cls "char*";
+%typemap(rp_tm_xll_prm) std::vector "OPER *";
 %typemap(rp_tm_xll_prm) std::vector const & "OPER *";
 %typemap(rp_tm_xll_prm) rp_tp_obj1 "char*";
 
@@ -176,6 +177,11 @@
             $rp_addin_namespace::$rp_typedef_no_namespace, $rp_typedef_no_template);        
 %} 
 
+%typemap(rp_tm_xll_cnv) std::vector %{
+        std::vector<$rp_typedef_no_template> $1_name_vec =
+            ObjectHandler::operToVector<$rp_typedef_no_template>(*$1_name, "$1_name");
+%}
+
 %typemap(rp_tm_xll_cnv) const std::vector & %{
         std::vector<$rp_typedef_no_template> $1_name_vec =
             ObjectHandler::operToVector<$rp_typedef_no_template>(*$1_name, "$1_name");
@@ -191,6 +197,7 @@
 %typemap(rp_tm_xll_cll_obj) rp_tp_enm "$1_name_enm";
 %typemap(rp_tm_xll_cll_obj) rp_tp_enm_cls "$1_name_enm_cls";
 %typemap(rp_tm_xll_cll_obj) const std::vector & "$1_name_vec";
+%typemap(rp_tm_xll_cll_obj) std::vector "$1_name_vec";
 %typemap(rp_tm_xll_cll_obj) rp_tp_obj1 "$1_name_obj";
 
 %typemap(rp_xll_call) rp_tp_cnv "$1_name_cnv";
