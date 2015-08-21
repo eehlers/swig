@@ -212,7 +212,8 @@
 %typemap(rp_tm_xll_ret) rp_tp_double "double*";
 %typemap(rp_tm_xll_ret) rp_tp_string "char*";
 %typemap(rp_tm_xll_ret) void "bool*";
-%typemap(rp_tm_xll_ret) std::vector< std::string > "OPER*";
+//%typemap(rp_tm_xll_ret) std::vector< std::string > "OPER*";
+%typemap(rp_tm_xll_ret) std::vector "OPER*";
 
 %typemap(rp_xll_get) SWIGTYPE "$1_type returnValue =";
 %typemap(rp_xll_get) void "";

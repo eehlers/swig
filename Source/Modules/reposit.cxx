@@ -937,6 +937,7 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "//#include \"%s/obj_%s.hpp\"\n", objInc, group_name);
         Printf(b_xll_cpp->b0, "#include \"%s/obj_all.hpp\"\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/conversions/convert2.hpp\"\n", objInc);
+        Printf(b_xll_cpp->b0, "#include \"%s/conversions/conversions.hpp\"\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/conversions/convert2.hpp\"\n", xllInc);
         Printf(b_xll_cpp->b0, "\n");
         Printf(b_xll_cpp->b0, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
