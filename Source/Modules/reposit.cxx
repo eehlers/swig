@@ -924,7 +924,7 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "#include <ohxl/functions/export.hpp>\n");
         Printf(b_xll_cpp->b0, "#include <ohxl/utilities/xlutilities.hpp>\n");
         Printf(b_xll_cpp->b0, "#include <ohxl/objectwrapperxl.hpp>\n");
-        // FIXME only required if the file contains a looping function
+        Printf(b_xll_cpp->b0, "// FIXME only required if the file contains a looping function\n");
         Printf(b_xll_cpp->b0, "#include <ohxl/loop.hpp>\n");
         Printf(b_xll_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
@@ -933,7 +933,9 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "#include \"%s/obj_all.hpp\"\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/conversions/convert2.hpp\"\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/conversions/conversions.hpp\"\n", objInc);
-        Printf(b_xll_cpp->b0, "#include \"%s/conversions/convert2.hpp\"\n", xllInc);
+        Printf(b_xll_cpp->b0, "#include \"%s/conversions/all.hpp\"\n", xllInc);
+        Printf(b_xll_cpp->b0, "// FIXME only required if the file contains a looping function\n");
+        Printf(b_xll_cpp->b0, "#include \"%s/loop.hpp\"\n", objInc);
         Printf(b_xll_cpp->b0, "\n");
         Printf(b_xll_cpp->b0, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
         Printf(b_xll_cpp->b0, "   for example) also #define _MSC_VER\n");
@@ -1081,6 +1083,28 @@ struct GroupExcel {
         }
     }
 
+    void emitLoopFunc(ParmsMemb &p, String *loopParameter) {
+        String *loopParameterType = Getattr(p.n, "rp:loopParameterType");
+        String *loopFunctionType = Getattr(p.n, "rp:loopFunctionType");
+        Printf(b_xll_cpp->b0, "        // BEGIN function emitLoopFunc\n");
+        Printf(b_xll_cpp->b0, "\n");
+        Printf(b_xll_cpp->b0, "        static XLOPER returnValue;\n");
+        Printf(b_xll_cpp->b0, "\n");
+        Printf(b_xll_cpp->b0, "        %s::%sBind bindObject =\n", module, p.funcName);
+        Printf(b_xll_cpp->b0, "            boost::bind(\n");
+        Printf(b_xll_cpp->b0, "                &%s::%s,\n", p.pname, p.name);
+        Printf(b_xll_cpp->b0, "                x,\n");
+        emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_loop", 4, ',', true, true);
+        Printf(b_xll_cpp->b0, "            );\n");
+        Printf(b_xll_cpp->b0, "        ObjectHandler::loop\n");
+        Printf(b_xll_cpp->b0, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
+        Printf(b_xll_cpp->b0, "            (functionCall, bindObject, %s, returnValue);\n", loopParameter);
+        Printf(b_xll_cpp->b0, "\n");
+        Printf(b_xll_cpp->b0, "        return &returnValue;\n");
+        Printf(b_xll_cpp->b0, "\n");
+        Printf(b_xll_cpp->b0, "        // END   function emitLoopFunc\n");
+    }
+
     void functionWrapperImplMemb(ParmsMemb &p) {
         excelRegister(b_xll_reg->b0, p.n, p.type, p.parms2);
         excelUnregister(b_xll_reg->b1, p.n, p.type, p.parms2);
@@ -1104,11 +1128,15 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "\n");
         emitTypeMap(b_xll_cpp->b0, "rp_tm_xxx_oh_get", p.node, 2);
         Printf(b_xll_cpp->b0, "\n");
-        emitTypeMap(b_xll_cpp->b0, "rp_xll_get", p.n, 2);
-        Printf(b_xll_cpp->b0, "        x->%s(\n", p.name);
-        emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_xll_cll_obj", 3, ',', true, true);
-        Printf(b_xll_cpp->b0, "        );\n\n");
-        emitTypeMap(b_xll_cpp->b0, "rp_tm_xll_rdc", p.n, 2);
+        if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
+            emitLoopFunc(p, loopParameter);
+        } else {
+            emitTypeMap(b_xll_cpp->b0, "rp_xll_get", p.n, 2);
+            Printf(b_xll_cpp->b0, "        x->%s(\n", p.name);
+            emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_xll_cll_obj", 3, ',', true, true);
+            Printf(b_xll_cpp->b0, "        );\n\n");
+            emitTypeMap(b_xll_cpp->b0, "rp_tm_xll_rdc", p.n, 2);
+        }
         Printf(b_xll_cpp->b0, "\n");
         Printf(b_xll_cpp->b0, "    } catch (const std::exception &e) {\n");
         Printf(b_xll_cpp->b0, "\n");
@@ -2180,10 +2208,11 @@ void processLoopParameter(Node *n, String *functionName, ParmList *parms, String
     for (Parm *p=parms; p; p=nextSibling(p)) {
         String *name = Getattr(p, "name");
         if (0==Strcmp(loopParameter, name)) {
-            Parm *p2 = Copy(p);
-            SwigType *t = Getattr(p2, "type");
+            SwigType *t = Getattr(p, "type");
             SwigType *t2 = SwigType_base(t);
+            Parm *p2 = NewHash();
             Setattr(p2, "type", t2);
+            //SwigType *t3 = NewString("rp_tp_loop");
             SwigType *t3 = NewString("std::vector");
             SwigType_add_template(t3, p2);
             Setattr(p, "type", t3);

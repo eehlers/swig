@@ -22,6 +22,12 @@
         OH_GET_OBJECT(x, objectID, $rp_typedef_obj_add);
 %}
 
+// Retrieve an instance of an enumerated class from the enumeration registry.
+%typemap(rp_tm_xxx_oh_get) rp_tp_enm %{
+        $1_type x =
+            ObjectHandler::Create<$1_type>()(objectID);
+%}
+
 // rp_tm_val_* - typemaps for valueobjects
 
 %typemap(rp_tm_val_prm) rp_tp_double "double";
@@ -39,6 +45,13 @@
 %typemap(rp_tm_val_dcl) SWIGTYPE "$1_type $1_name_";
 
 %typemap(rp_tm_val_ser) SWIGTYPE "& boost::serialization::make_nvp(\"$1_name\", $1_name_)";
+
+//%typemap(rp_tm_loop) rp_tp_loop "_1";
+%typemap(rp_tm_loop) std::vector "_1";
+%typemap(rp_tm_loop) bool "*$1_name";
+%typemap(rp_tm_loop) rp_tp_cnv2 "$1_name_cnv";
+%typemap(rp_tm_loop) rp_tp_enm "$1_name_enm";
+%typemap(rp_tm_loop) SWIGTYPE "$1_name";
 
 %typemap(rp_tm_val_nam) SWIGTYPE "\"$1_name\"";
 
@@ -155,13 +168,13 @@
 %}
 
 %typemap(rp_tm_xll_cnv) rp_tp_enm %{
-    $rp_typedef_base $1_name_enm =
-        ObjectHandler::Create<$rp_typedef_base>()($1_name);
+        $rp_typedef_base $1_name_enm =
+            ObjectHandler::Create<$rp_typedef_base>()($1_name);
 %}
 
 %typemap(rp_tm_xll_cnv) rp_tp_enm_cls %{
-    $1_type $1_name_enm_cls =
-        ObjectHandler::Create<$1_type >()($1_name);
+        $1_type $1_name_enm_cls =
+            ObjectHandler::Create<$1_type >()($1_name);
 %}
 
 // FIXME this typemap should be split into two
