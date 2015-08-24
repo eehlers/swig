@@ -30,6 +30,7 @@
 
 // rp_tm_val_* - typemaps for valueobjects
 
+%typemap(rp_tm_val_prm) rp_tp_long "long";
 %typemap(rp_tm_val_prm) rp_tp_double "double";
 %typemap(rp_tm_val_prm) rp_tp_string "const std::string &";
 %typemap(rp_tm_val_prm) rp_tp_any "const ObjectHandler::property_t&";
@@ -37,6 +38,7 @@
 %typemap(rp_tm_val_prm) rp_tp_obj1 "const std::string &";
 %typemap(rp_tm_val_prm) SWIGTYPE "$1_type";
 
+%typemap(rp_tm_val_dcl) rp_tp_long "long $1_name_";
 %typemap(rp_tm_val_dcl) rp_tp_double "double $1_name_";
 %typemap(rp_tm_val_dcl) rp_tp_string "std::string $1_name_";
 %typemap(rp_tm_val_dcl) rp_tp_any "ObjectHandler::property_t $1_name_";
@@ -57,6 +59,7 @@
 
 %typemap(rp_tm_val_ini) SWIGTYPE "$1_name_($1_name)";
 
+%typemap(rp_tm_val_cnv) rp_tp_long "ObjectHandler::convert2<long>(value)";
 %typemap(rp_tm_val_cnv) rp_tp_double "ObjectHandler::convert2<double>(value)";
 %typemap(rp_tm_val_cnv) rp_tp_string "ObjectHandler::convert2<std::string>(value)";
 %typemap(rp_tm_val_cnv) rp_tp_any "value";
@@ -123,7 +126,7 @@
 // rp_tm_xll_* - typemaps for the Excel addin
 
 %typemap(rp_tm_xll_cod) bool "L";
-%typemap(rp_tm_xll_cod) long "N";
+%typemap(rp_tm_xll_cod) rp_tp_long "N";
 %typemap(rp_tm_xll_cod) rp_tp_double "E";
 %typemap(rp_tm_xll_cod) rp_tp_string "C";
 %typemap(rp_tm_xll_cod) rp_tp_string * "C";
@@ -141,7 +144,7 @@
 %typemap(rp_tm_xll_cod) SWIGTYPE * "C";
 
 %typemap(rp_tm_xll_prm) bool "bool*";
-%typemap(rp_tm_xll_prm) long "long*";
+%typemap(rp_tm_xll_prm) rp_tp_long "long*";
 %typemap(rp_tm_xll_prm) rp_tp_double "double*";
 %typemap(rp_tm_xll_prm) rp_tp_string "char*";
 %typemap(rp_tm_xll_prm) rp_tp_string * "char*";
@@ -202,7 +205,7 @@
 
 %typemap(rp_tm_xll_cll_obj) SWIGTYPE "$1_name";
 %typemap(rp_tm_xll_cll_obj) bool "*$1_name";
-%typemap(rp_tm_xll_cll_obj) long "*$1_name";
+%typemap(rp_tm_xll_cll_obj) rp_tp_long "*$1_name";
 %typemap(rp_tm_xll_cll_obj) rp_tp_double "*$1_name";
 %typemap(rp_tm_xll_cll_obj) rp_tp_cnv "$1_name_cnv";
 %typemap(rp_tm_xll_cll_obj) rp_tp_cnv2 "$1_name_cnv";
@@ -216,7 +219,7 @@
 %typemap(rp_xll_call) rp_tp_cnv "$1_name_cnv";
 
 %typemap(rp_tm_xll_cll_val) SWIGTYPE "$1_name";
-%typemap(rp_tm_xll_cll_val) long "*$1_name";
+%typemap(rp_tm_xll_cll_val) rp_tp_long "*$1_name";
 %typemap(rp_tm_xll_cll_val) rp_tp_double "*$1_name";
 %typemap(rp_tm_xll_cll_val) rp_tp_cnv2 "$1_name_cnv2";
 
@@ -287,6 +290,8 @@
 //%typemap(rp_tm_cfy_mng) SWIGTYPE "CSTR";
 
 // Map native types to reposit types
+
+%apply rp_tp_long { long };
 
 %apply rp_tp_double { double };
 
