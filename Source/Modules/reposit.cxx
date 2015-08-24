@@ -17,6 +17,7 @@ bool generateCtor = false;
 String *parent = 0;
 int fileCountUpdated = 0;
 int fileCountUnchanged = 0;
+int functionCount = 0;
 
 // Default names for directories for source code and headers.
 // FIXME store these defaults in reposit.swg and retrieve them here.
@@ -217,6 +218,7 @@ std::string hexLen(String *c) {
 }
 
 void excelRegister(File *b, Node *n, SwigType *type, ParmList *parms) {
+    functionCount++;
     String *funcName   = Getattr(n, "rp:funcName");
     Printf(b, "        // BEGIN function excelRegister\n");
     Printf(b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
@@ -1786,6 +1788,7 @@ virtual int top(Node *n) {
     Delete(errorList);//FIXME also delete each item individually
 
     printf("Updated: %i Unchanged: %i Total: %i\n", fileCountUpdated, fileCountUnchanged, fileCountUpdated + fileCountUnchanged);
+    printf("function count=%i\n", functionCount);
 
    return SWIG_OK;
 }
