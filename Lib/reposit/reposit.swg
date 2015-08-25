@@ -28,6 +28,7 @@
             ObjectHandler::Create<$1_type>()(objectID);
 %}
 
+// Call a member function on an addin object rather than a library object
 %typemap(rp_tm_xxx_oh_get) rp_tp_obj2 %{
         OH_GET_OBJECT(xxx, objectID, $rp_typedef_obj_add);
 %}
