@@ -28,6 +28,10 @@
             ObjectHandler::Create<$1_type>()(objectID);
 %}
 
+%typemap(rp_tm_xxx_oh_get) rp_tp_obj2 %{
+        OH_GET_OBJECT(xxx, objectID, $rp_typedef_obj_add);
+%}
+
 // rp_tm_val_* - typemaps for valueobjects
 
 %typemap(rp_tm_val_prm) rp_tp_long "long";
