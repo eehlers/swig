@@ -980,8 +980,9 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "\n");
         Printf(b_xll_cpp->b0, "        %s::%sBind bindObject =\n", module, p.funcName);
         Printf(b_xll_cpp->b0, "            boost::bind(\n");
-        Printf(b_xll_cpp->b0, "                &%s,\n", p.name);
-        Printf(b_xll_cpp->b0, "                _1);\n");
+        Printf(b_xll_cpp->b0, "                %s,\n", p.name);
+        emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_loop", 4, ',', true, true);
+        Printf(b_xll_cpp->b0, "            );\n");
         Printf(b_xll_cpp->b0, "        ObjectHandler::loop\n");
         Printf(b_xll_cpp->b0, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
         Printf(b_xll_cpp->b0, "            (functionCall, bindObject, %s, returnValue);\n", loopParameter);
