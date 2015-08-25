@@ -903,7 +903,7 @@ struct GroupCpp {
         emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
         Printf(b_add_cpp->b0,"\n");
         emitTypeMap(b_add_cpp->b0, "rp_tm_xxx_oh_get", p.node);
-        Printf(b_add_cpp->b0,"    return x->%s(\n", p.name);
+        Printf(b_add_cpp->b0,"    return xxx->%s(\n", p.name);
         emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true);
         Printf(b_add_cpp->b0,"        );\n", p.name);
         Printf(b_add_cpp->b0,"}\n");
@@ -1095,7 +1095,7 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "        %s::%sBind bindObject =\n", module, p.funcName);
         Printf(b_xll_cpp->b0, "            boost::bind(\n");
         Printf(b_xll_cpp->b0, "                &%s::%s,\n", p.pname, p.name);
-        Printf(b_xll_cpp->b0, "                x,\n");
+        Printf(b_xll_cpp->b0, "                xxx,\n");
         emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_loop", 4, ',', true, true);
         Printf(b_xll_cpp->b0, "            );\n");
         Printf(b_xll_cpp->b0, "        ObjectHandler::loop\n");
@@ -1134,7 +1134,7 @@ struct GroupExcel {
             emitLoopFunc(p, loopParameter);
         } else {
             emitTypeMap(b_xll_cpp->b0, "rp_xll_get", p.n, 2);
-            Printf(b_xll_cpp->b0, "        x->%s(\n", p.name);
+            Printf(b_xll_cpp->b0, "        xxx->%s(\n", p.name);
             emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_xll_cll_obj", 3, ',', true, true);
             Printf(b_xll_cpp->b0, "        );\n\n");
             emitTypeMap(b_xll_cpp->b0, "rp_tm_xll_rdc", p.n, 2);
@@ -1318,7 +1318,7 @@ struct GroupExcel {
 //
 //        emitTypeMap(b_cfy_cpp->b0, "rp_tm_xxx_oh_get", p.node, 2);
 //
-//        Printf(b_cfy_cpp->b0,"    return x->%s(\n", p.name);
+//        Printf(b_cfy_cpp->b0,"    return xxx->%s(\n", p.name);
 //        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true);
 //        Printf(b_cfy_cpp->b0,"        );\n", p.name);
 //        Printf(b_cfy_cpp->b0,"}\n");
