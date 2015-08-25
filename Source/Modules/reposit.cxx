@@ -481,7 +481,7 @@ struct GroupObjects {
         Printf(b_cre_cpp->b0, "\n");
         Printf(b_cre_cpp->b0, "#include <%s/serialization/create/create_%s.hpp>\n", objInc, group_name);
         Printf(b_cre_cpp->b0, "//#include <%s/qladdindefines.hpp>\n", objInc);
-        Printf(b_cre_cpp->b0, "#include <%s/conversions/convert2.hpp>\n", objInc);
+        //Printf(b_cre_cpp->b0, "#include <%s/conversions/convert2.hpp>\n", objInc);
         Printf(b_cre_cpp->b0, "//#include <%s/handle.hpp>\n", objInc);
         Printf(b_cre_cpp->b0, "\n");
         if (automatic) {
@@ -491,7 +491,7 @@ struct GroupObjects {
         }
         Printf(b_cre_cpp->b0, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, group_name);
         Printf(b_cre_cpp->b0, "\n");
-        Printf(b_cre_cpp->b0, "//#include <%s/conversions/all.hpp>\n", objInc);
+        Printf(b_cre_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
         Printf(b_cre_cpp->b0, "#include <oh/property.hpp>\n");
         Printf(b_cre_cpp->b0, "\n");
 
@@ -928,12 +928,12 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "#include <ohxl/objectwrapperxl.hpp>\n");
         Printf(b_xll_cpp->b0, "// FIXME only required if the file contains a looping function\n");
         Printf(b_xll_cpp->b0, "#include <ohxl/loop.hpp>\n");
-        Printf(b_xll_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
+        //Printf(b_xll_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, group_name);
         Printf(b_xll_cpp->b0, "//#include \"%s/obj_%s.hpp\"\n", objInc, group_name);
         Printf(b_xll_cpp->b0, "#include \"%s/obj_all.hpp\"\n", objInc);
-        Printf(b_xll_cpp->b0, "#include \"%s/conversions/convert2.hpp\"\n", objInc);
+        //Printf(b_xll_cpp->b0, "#include \"%s/conversions/convert2.hpp\"\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/conversions/conversions.hpp\"\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/conversions/all.hpp\"\n", xllInc);
         Printf(b_xll_cpp->b0, "// FIXME only required if the file contains a looping function\n");
