@@ -2028,7 +2028,7 @@ int functionWrapperImplFunc(Node *n) {
 int constructorHandlerImpl(Node *n) {
 
     // If no ctor was defined in the *.i file then SWIG sets the following flag:
-    bool defaultCtor = Getattr(n, "default_constructor");
+    bool defaultCtor = 0 != Getattr(n, "default_constructor");
     // For our purposes if no ctor was configured then we don't generate one:
     generateCtor = !defaultCtor;
 
