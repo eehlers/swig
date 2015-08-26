@@ -1392,6 +1392,9 @@ struct AddinObjects : public AddinImpl<GroupObjects> {
         }
         Printf(b_cre_all_hpp->b0, "#include <%s/serialization/create/create_%s.hpp>\n", objInc, group_name);
         Printf(b_reg_all_hpp->b0, "#include <%s/serialization/register/serialization_%s.hpp>\n", objInc, group_name);
+        if (generateCtor) {
+            Printf(b_reg_ser_hpp->b0, "        register_%s(ar);\n", group_name);
+        }
     }
 
     virtual void clear() {
@@ -1469,10 +1472,6 @@ struct AddinObjects : public AddinImpl<GroupObjects> {
         Printf(b_reg_all_hpp->b0, "#ifndef serialization_all_hpp\n");
         Printf(b_reg_all_hpp->b0, "#define serialization_all_hpp\n");
         Printf(b_reg_all_hpp->b0, "\n");
-
-        if (generateCtor) {
-            Printf(b_reg_ser_hpp->b0, "        register_%s(ar);\n", group_name);
-        }
     }
 
     virtual void functionWrapperImplCtor(ParmsCtor &p) {
