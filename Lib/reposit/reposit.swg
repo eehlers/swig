@@ -74,12 +74,10 @@
 
 // rp_ser_* - typemaps for serialization
 
-%typemap(rp_tm_cre_cnv) rp_tp_obj1 %{
-    std::string $1_name_str =
-        ObjectHandler::convert2<std::string>(valueObject->getProperty("$1_name"));
-    valueObject->processPrecedentID($1_name_str);
-    OH_GET_REFERENCE($1_name, $1_name_str,
-        $rp_addin_namespace::$rp_typedef_no_namespace, $rp_typedef_no_template);        
+%typemap(rp_tm_cre_cnv) rp_tp_long %{
+    long $1_name =
+        ObjectHandler::convert2<long>(
+            valueObject->getProperty("$1_name"));
 %}
 
 %typemap(rp_tm_cre_cnv) rp_tp_enm %{
@@ -87,6 +85,14 @@
         ObjectHandler::convert2<std::string>(valueObject->getProperty("$1_name"));
     $rp_typedef_base $1_name =
         ObjectHandler::Create<$rp_typedef_base>()($1_name_str);
+%}
+
+%typemap(rp_tm_cre_cnv) rp_tp_obj1 %{
+    std::string $1_name_str =
+        ObjectHandler::convert2<std::string>(valueObject->getProperty("$1_name"));
+    valueObject->processPrecedentID($1_name_str);
+    OH_GET_REFERENCE($1_name, $1_name_str,
+        $rp_addin_namespace::$rp_typedef_no_namespace, $rp_typedef_no_template);
 %}
 
 %typemap(rp_tm_cre_cnv) SWIGTYPE %{
@@ -204,14 +210,14 @@
 %typemap(rp_tm_xll_cnv) rp_tp_cnv2 %{
         $rp_typedef_base $1_name_cnv = ObjectHandler::convert2<$rp_typedef_base>(
             ObjectHandler::ConvertOper(*$1_name), "$1_name", $rp_typedef_base());
-            
+
         ObjectHandler::property_t $1_name_cnv2 = ObjectHandler::convert2<ObjectHandler::property_t>(
-            ObjectHandler::ConvertOper(*$1_name));            
-%} 
+            ObjectHandler::ConvertOper(*$1_name));
+%}
 %typemap(rp_tm_xll_cnv) rp_tp_obj1 %{
         OH_GET_REFERENCE($1_name_obj, $1_name,
-            $rp_addin_namespace::$rp_typedef_no_namespace, $rp_typedef_no_template);        
-%} 
+            $rp_addin_namespace::$rp_typedef_no_namespace, $rp_typedef_no_template);
+%}
 
 %typemap(rp_tm_xll_cnv) std::vector %{
         std::vector<$rp_typedef_no_template> $1_name_vec =
