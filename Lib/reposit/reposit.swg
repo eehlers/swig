@@ -74,9 +74,24 @@
 
 // rp_ser_* - typemaps for serialization
 
+%typemap(rp_tm_cre_cnv) rp_tp_obj1 %{
+    std::string $1_name_str =
+        ObjectHandler::convert2<std::string>(valueObject->getProperty("$1_name"));
+    valueObject->processPrecedentID($1_name_str);
+    OH_GET_REFERENCE($1_name, $1_name_str,
+        $rp_addin_namespace::$rp_typedef_no_namespace, $rp_typedef_no_template);        
+%}
+
+%typemap(rp_tm_cre_cnv) rp_tp_enm %{
+    std::string $1_name_str =
+        ObjectHandler::convert2<std::string>(valueObject->getProperty("$1_name"));
+    $rp_typedef_base $1_name =
+        ObjectHandler::Create<$rp_typedef_base>()($1_name_str);
+%}
+
 %typemap(rp_tm_cre_cnv) SWIGTYPE %{
-    $1_type $1_name =
-        ObjectHandler::convert2<$1_type>(
+    $rp_typedef_base $1_name =
+        ObjectHandler::convert2<$rp_typedef_base>(
             valueObject->getProperty("$1_name"));
 %}
 

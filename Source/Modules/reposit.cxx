@@ -492,6 +492,7 @@ struct GroupObjects {
         Printf(b_cre_cpp->b0, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, group_name);
         Printf(b_cre_cpp->b0, "\n");
         Printf(b_cre_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
+        Printf(b_cre_cpp->b0, "#include <%s/enumerations/factories/all.hpp>\n", objInc);
         Printf(b_cre_cpp->b0, "#include <oh/property.hpp>\n");
         Printf(b_cre_cpp->b0, "\n");
 
@@ -639,6 +640,8 @@ struct GroupObjects {
             Printf(b_val_hpp->b0,"            static std::set<std::string> mSystemPropertyNames;\n");
             emitParmList(p.parms, b_val_hpp->b0, 1, "rp_tm_val_dcl", 3, ';', true, false, true);
             Printf(b_val_hpp->b0,"            bool Permanent_;\n");
+            if (String *processorName = Getattr(p.n, "feature:rp:processorName"))
+                Printf(b_val_hpp->b0,"            virtual std::string processorName() { return \"%s\"; }\n", processorName);
             Printf(b_val_hpp->b0,"\n");
             Printf(b_val_hpp->b0,"            template<class Archive>\n");
             Printf(b_val_hpp->b0,"            void serialize(Archive& ar, const unsigned int) {\n");
