@@ -404,6 +404,7 @@ struct ParmsCtor {
 struct ParmsMemb {
     Node *n;
     SwigType *type;
+    String *nameUpper;
     String *funcName;
     ParmList *parms;
     ParmList *parms2;
@@ -1181,7 +1182,7 @@ void mongoParms(File *f, ParmList *parms) {
     }
 }
 
-void mongoFunc(File *f, String *funcName1, String *funcName2, Node *n, /*SwigType *t,*/ ParmList *parms) {
+void mongoFunc(File *f, String *funcName1, String *funcName2, Node *n, ParmList *parms) {
     Printf(f, "        {\n");
     Printf(f, "            \"name\": \"%s\",\n", funcName1);
     Printf(f, "            \"codeName\": \"%s\",\n", funcName2);
@@ -1244,9 +1245,7 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"        initializeAddin();\n");
         Printf(b_cfy_cpp->b0,"\n");
-        Printf(b_cfy_cpp->b0,"        // Convert Countify types into native types\n\n");
-        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_xx0", 2, 0, false);
-        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"        // Convert input types into Library types\n\n");
         emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cnv", 2, 0, false);
         Printf(b_cfy_cpp->b0,"\n");
         emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_cl1", p.n, 2, false);
@@ -1262,72 +1261,67 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
     }
 
-    void functionWrapperImplCtor(ParmsCtor &/*p*/) {
+    void functionWrapperImplCtor(ParmsCtor &p) {
 
         Printf(b_cfy_cpp->b0,"//****CTOR*****\n");
-//        Printf(b_cfy_cpp->b0,"extern \"C\" {\n");
-//        Printf(b_cfy_cpp->b0,"COUNTIFY_API\n");
-//        Printf(b_cfy_cpp->b0,"const char *%s(\n", p.funcName);
-//        emitParmList(p.parms2, b_cfy_cpp->b0, 1, "rp_tm_cfy_prm", 2);
-//        Printf(b_cfy_cpp->b0,"    ) {\n");
-//        Printf(b_cfy_cpp->b0,"\n");
-//        Printf(b_cfy_cpp->b0,"    try {\n");
-//        Printf(b_cfy_cpp->b0,"\n");
-//        Printf(b_cfy_cpp->b0,"        initializeAddin();\n");
-//        Printf(b_cfy_cpp->b0,"\n");
-//        Printf(b_cfy_cpp->b0,"        // Convert Countify types into native types\n\n");
-//        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_xx0", 2, 0, false);
-//        Printf(b_cfy_cpp->b0,"\n");
-//        Printf(b_cfy_cpp->b0,"        // Convert input types into Library types\n\n");
-//        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cnv", 2, 0, false);
-//        Printf(b_cfy_cpp->b0,"\n");
-//        Printf(b_cfy_cpp->b0,"        boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
-//        Printf(b_cfy_cpp->b0,"            new %s::ValueObjects::%s(\n", module, funcName);
-//        Printf(b_cfy_cpp->b0,"                objectID,\n");
-//        emitParmList(p.parms, b_cfy_cpp->b0, 0, "rp_tm_default", 4, ',', true, false, true);
-//        Printf(b_cfy_cpp->b0,"                false));\n");
-//        Printf(b_cfy_cpp->b0,"        boost::shared_ptr<ObjectHandler::Object> object(\n");
-//        Printf(b_cfy_cpp->b0,"            new %s::%s(\n", module, group_name);
-//        Printf(b_cfy_cpp->b0,"                valueObject,\n");
-//        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cll", 4, ',', true, true, true);
-//        Printf(b_cfy_cpp->b0,"                false));\n");
-//        Printf(b_cfy_cpp->b0,"        static std::string returnValue;\n");
-//        Printf(b_cfy_cpp->b0,"        returnValue =\n");
-//        Printf(b_cfy_cpp->b0,"            ObjectHandler::Repository::instance().storeObject(\n");
-//        Printf(b_cfy_cpp->b0,"                objectID, object, true, valueObject);\n");
-//        Printf(b_cfy_cpp->b0,"        return returnValue.c_str();\n");
-//        Printf(b_cfy_cpp->b0,"\n");
-//        Printf(b_cfy_cpp->b0,"    } catch (const std::exception &e) {\n");
-//        Printf(b_cfy_cpp->b0,"        return e.what();\n");
-//        Printf(b_cfy_cpp->b0,"    } catch (...) {\n");
-//        Printf(b_cfy_cpp->b0,"        return 0;\n");
-//        Printf(b_cfy_cpp->b0,"    }\n");
-//        Printf(b_cfy_cpp->b0,"}\n\n");
-//        Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
-//
-//        mongoFunc(p.name, p.funcName, p.n, p.type, p.parms2);
+        Printf(b_cfy_cpp->b0,"extern \"C\" {\n");
+        Printf(b_cfy_cpp->b0,"COUNTIFY_API\n");
+        Printf(b_cfy_cpp->b0,"const char *%s(\n", p.funcName);
+        emitParmList(p.parms2, b_cfy_cpp->b0, 1, "rp_tm_cfy_prm", 2);
+        Printf(b_cfy_cpp->b0,"    ) {\n");
+        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"    try {\n");
+        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"        initializeAddin();\n");
+        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"        // Convert input types into Library types\n\n");
+        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cnv", 2, 0, false);
+        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"        boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
+        Printf(b_cfy_cpp->b0,"            new %s::ValueObjects::%s(\n", module, p.funcName);
+        Printf(b_cfy_cpp->b0,"                objectID,\n");
+        emitParmList(p.parms, b_cfy_cpp->b0, 0, "rp_tm_default", 4, ',', true, false, true);
+        Printf(b_cfy_cpp->b0,"                false));\n");
+        Printf(b_cfy_cpp->b0,"        boost::shared_ptr<ObjectHandler::Object> object(\n");
+        Printf(b_cfy_cpp->b0,"            new %s::%s(\n", module, p.name);
+        Printf(b_cfy_cpp->b0,"                valueObject,\n");
+        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cll", 4, ',', true, true, true);
+        Printf(b_cfy_cpp->b0,"                false));\n");
+        Printf(b_cfy_cpp->b0,"        static std::string returnValue;\n");
+        Printf(b_cfy_cpp->b0,"        returnValue =\n");
+        Printf(b_cfy_cpp->b0,"            ObjectHandler::Repository::instance().storeObject(\n");
+        Printf(b_cfy_cpp->b0,"                objectID, object, true, valueObject);\n");
+        Printf(b_cfy_cpp->b0,"        return returnValue.c_str();\n");
+        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"    } catch (const std::exception &e) {\n");
+        Printf(b_cfy_cpp->b0,"        return e.what();\n");
+        Printf(b_cfy_cpp->b0,"    } catch (...) {\n");
+        Printf(b_cfy_cpp->b0,"        return 0;\n");
+        Printf(b_cfy_cpp->b0,"    }\n");
+        Printf(b_cfy_cpp->b0,"}\n\n");
+        Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
     }
 
-    void functionWrapperImplMemb(ParmsMemb &/*p*/) {
+    void functionWrapperImplMemb(ParmsMemb &p) {
         Printf(b_cfy_cpp->b0,"//****MEMB*****\n");
-//        Printf(b_cfy_cpp->b0,"extern \"C\" {\n");
-//        Printf(b_cfy_cpp->b0,"COUNTIFY_API\n");
-//        emitTypeMap(b_cfy_cpp->b0, "rp_tm_add_ret", p.n);
-//        Printf(b_cfy_cpp->b0,"%s(\n", p.funcName);
-//        emitParmList(parms2, b_cfy_cpp->b0, 1, "rp_tm_cfy_prm", 2);
-//        Printf(b_cfy_cpp->b0,"    ) {\n\n");
-//        emitParmList(parms, b_cfy_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
-//        Printf(b_cfy_cpp->b0,"\n");
-//
-//        emitTypeMap(b_cfy_cpp->b0, "rp_tm_xxx_oh_get", p.node, 2);
-//
-//        Printf(b_cfy_cpp->b0,"    return xxx->%s(\n", p.name);
-//        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true);
-//        Printf(b_cfy_cpp->b0,"        );\n", p.name);
-//        Printf(b_cfy_cpp->b0,"}\n");
-//        Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
-//
-//        mongoFunc(p.funcName2, p.funcName, p.n, p.type, p.parms);
+        Printf(b_cfy_cpp->b0,"extern \"C\" {\n");
+        Printf(b_cfy_cpp->b0,"COUNTIFY_API\n");
+        emitTypeMap(b_cfy_cpp->b0, "rp_tm_add_ret", p.n);
+        Printf(b_cfy_cpp->b0,"%s(\n", p.funcName);
+        emitParmList(p.parms2, b_cfy_cpp->b0, 1, "rp_tm_cfy_prm", 2);
+        Printf(b_cfy_cpp->b0,"    ) {\n\n");
+        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
+        Printf(b_cfy_cpp->b0,"\n");
+
+        emitTypeMap(b_cfy_cpp->b0, "rp_tm_xxx_oh_get", p.node, 2);
+        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_ret1", p.n, 2);
+
+        Printf(b_cfy_cpp->b0,"    xxx->%s(\n", p.name);
+        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true);
+        Printf(b_cfy_cpp->b0,"        );\n", p.name);
+        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_ret2", p.n, 2);
+        Printf(b_cfy_cpp->b0,"}\n");
+        Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
     }
 };
 
@@ -1567,18 +1561,22 @@ struct AddinCountify : public AddinImpl<GroupCountify> {
     virtual void functionWrapperImplFunc(ParmsFunc &p) {
         if (checkAttribute(p.n, "feature:rp:generate_countify", "1")) {
             AddinImpl::functionWrapperImplFunc(p);
-            mongoFunc(b_cfy_mng_txt->b0, p.symnameUpper, p.funcName, p.n, /*p.type,*/ p.parms);
+            mongoFunc(b_cfy_mng_txt->b0, p.symnameUpper, p.funcName, p.n, p.parms);
         }
     }
 
     virtual void functionWrapperImplCtor(ParmsCtor &p) {
-        if (checkAttribute(p.n, "feature:rp:generate_countify", "1"))
+        if (checkAttribute(p.n, "feature:rp:generate_countify", "1")) {
             AddinImpl::functionWrapperImplCtor(p);
+            mongoFunc(b_cfy_mng_txt->b0, p.name, p.funcName, p.n, p.parms2);
+        }
     }
 
     virtual void functionWrapperImplMemb(ParmsMemb &p) {
-        if (checkAttribute(p.n, "feature:rp:generate_countify", "1"))
+        if (checkAttribute(p.n, "feature:rp:generate_countify", "1")) {
             AddinImpl::functionWrapperImplMemb(p);
+            mongoFunc(b_cfy_mng_txt->b0, p.nameUpper, p.funcName, p.n, p.parms2);
+        }
     }
 };
 
@@ -2179,6 +2177,7 @@ int functionWrapperImplMemb(Node *n) {
 
     String *temp0 = copyUpper(cls);
     String *temp1 = copyUpper(p.name);
+    p.nameUpper = NewStringf("%s%s", temp0, temp1);
     p.funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
     Setattr(p.n, "rp:funcName", p.funcName);
     printf("funcName=%s\n", Char(p.funcName));

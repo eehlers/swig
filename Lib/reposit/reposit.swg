@@ -109,7 +109,9 @@
 
 // rp_tm_add_* - typemaps for  the C++ addin
 
-//%typemap(rp_tm_add_ret) SWIGTYPE "$1_type";
+%typemap(rp_tm_add_ret) rp_tp_double "double";
+%typemap(rp_tm_add_ret) void "bool";
+%typemap(rp_tm_add_ret) SWIGTYPE "$1_type";
 
 //%typemap(rp_tm_add_prm) rp_tp_double "double";
 //%typemap(rp_tm_add_prm) rp_tp_cnv "const ObjectHandler::property_t&";
@@ -139,11 +141,12 @@
 //        ObjectHandler::Create<$1_type >()($1_name);
 //%}
 
-//%typemap(rp_tm_add_cll) SWIGTYPE "$1_name";
 //%typemap(rp_tm_add_cll) rp_tp_cnv "$1_name_cnv";
 //%typemap(rp_tm_add_cll) rp_tp_crc "$1_name_crc";
 //%typemap(rp_tm_add_cll) rp_tp_enm "$1_name_enm";
 //%typemap(rp_tm_add_cll) rp_tp_enm_cls "$1_name_enm_cls";
+%typemap(rp_tm_add_cll) rp_tp_obj1 "$1_name_get";
+//%typemap(rp_tm_add_cll) SWIGTYPE "$1_name";
 
 //%typemap(rp_add_ret) SWIGTYPE "return ";
 
@@ -283,22 +286,35 @@
         return &xRet;
 %}
 
-// rp_tm_cfy_* - typemaps for the Countify addin
+// rp_tm_cfy_* - typemaps for the =countify addin
 
 %typemap(rp_tm_cfy_ret) std::string "const char *";
-//%typemap(rp_tm_cfy_ret) void "bool";
+%typemap(rp_tm_cfy_ret) void "bool";
 //%typemap(rp_tm_cfy_ret) SWIGTYPE "$1_type";
 
 %typemap(rp_tm_cfy_rt2) SWIGTYPE "return 0;";
 
-//%typemap(rp_tm_cfy_prm) rp_tp_double "double $1_name";
+%typemap(rp_tm_cfy_prm) rp_tp_double "double $1_name";
 //%typemap(rp_tm_cfy_prm) rp_tp_double const & "const double& $1_name";
-//%typemap(rp_tm_cfy_prm) const std::string & "const char * $1_name";
+%typemap(rp_tm_cfy_prm) rp_tp_string "const char * $1_name";
+%typemap(rp_tm_cfy_prm) rp_tp_obj1 "const char * $1_name";
 //%typemap(rp_tm_cfy_prm) rp_tp_cnv "const ObjectHandler::property_t& $1_name";
 //%typemap(rp_tm_cfy_prm) rp_tp_crc "const ObjectHandler::property_t& $1_name";
-//%typemap(rp_tm_cfy_prm) rp_tp_enm "const std::string& $1_name";
+%typemap(rp_tm_cfy_prm) rp_tp_enm "const char * $1_name";
 //%typemap(rp_tm_cfy_prm) rp_tp_enm_cls "const char * $1_name";
-//%typemap(rp_tm_cfy_prm) SWIGTYPE "$rp_typedef_resolved $1_name";
+// This is a temporary hack for trigger parameters, which are not supported by =countify.
+// Declare the value as a summy bool.  Later we will suppress it altogether.
+%typemap(rp_tm_cfy_prm)  ObjectHandler::property_t const & "bool $1_name";
+%typemap(rp_tm_cfy_prm) SWIGTYPE "$rp_typedef_resolved $1_name";
+
+%typemap(rp_tm_cfy_cnv) rp_tp_enm %{
+        $rp_typedef_base $1_name_enum =
+            ObjectHandler::Create<$rp_typedef_base>()($1_name);
+%}
+
+%typemap(rp_tm_cfy_cnv) rp_tp_obj1 %{
+        OH_GET_REFERENCE($1_name_get, $1_name, $rp_addin_namespace::$rp_typedef_no_namespace, $rp_typedef_no_template);
+%}
 
 %typemap(rp_tm_cfy_cl1) std::string %{
         static std::string ret;
@@ -306,13 +322,24 @@
 %}
 //%typemap(rp_tm_cfy_cl1) bool "return ";
 
-//%typemap(rp_tm_cfy_cl2) void "return true;";
+%typemap(rp_tm_cfy_cl2) void "return true;";
 %typemap(rp_tm_cfy_cl2) std::string "return ret.c_str();";
 
-//%typemap(rp_tm_cfy_cll) SWIGTYPE "$1_name";
+%typemap(rp_tm_cfy_cll) rp_tp_enm "$1_name_enum";
+%typemap(rp_tm_cfy_cll) rp_tp_obj1 "$1_name_get";
+%typemap(rp_tm_cfy_cll) SWIGTYPE "$1_name";
 
-//%typemap(rp_tm_cfy_mng) void "BOOL";
-//%typemap(rp_tm_cfy_mng) rp_tp_double "REAL32";
+%typemap(rp_tm_cfy_ret1) rp_tp_double "double returnValue =";
+%typemap(rp_tm_cfy_ret1) void "";
+%typemap(rp_tm_cfy_ret2) rp_tp_double "return returnValue;";
+%typemap(rp_tm_cfy_ret2) void "return true;";
+
+// This is a temporary hack for trigger parameters, which are not supported by =countify.
+// Declare the value as a summy bool.  Later we will suppress it altogether.
+%typemap(rp_tm_cfy_mng) ObjectHandler::property_t const & "BOOL";
+%typemap(rp_tm_cfy_mng) void "BOOL";
+%typemap(rp_tm_cfy_mng) bool "BOOL";
+%typemap(rp_tm_cfy_mng) rp_tp_double "REAL32";
 %typemap(rp_tm_cfy_mng) SWIGTYPE "CSTR";
 
 // Map native types to reposit types
