@@ -285,11 +285,11 @@
 
 // rp_tm_cfy_* - typemaps for the Countify addin
 
-//%typemap(rp_tm_cfy_ret) std::string "const char *";
+%typemap(rp_tm_cfy_ret) std::string "const char *";
 //%typemap(rp_tm_cfy_ret) void "bool";
 //%typemap(rp_tm_cfy_ret) SWIGTYPE "$1_type";
 
-//%typemap(rp_tm_cfy_rt2) SWIGTYPE "return 0;";
+%typemap(rp_tm_cfy_rt2) SWIGTYPE "return 0;";
 
 //%typemap(rp_tm_cfy_prm) rp_tp_double "double $1_name";
 //%typemap(rp_tm_cfy_prm) rp_tp_double const & "const double& $1_name";
@@ -300,14 +300,14 @@
 //%typemap(rp_tm_cfy_prm) rp_tp_enm_cls "const char * $1_name";
 //%typemap(rp_tm_cfy_prm) SWIGTYPE "$rp_typedef_resolved $1_name";
 
-//%typemap(rp_tm_cfy_cl1) std::string %{
-//    static std::string ret;
-//    ret =
-//%}
+%typemap(rp_tm_cfy_cl1) std::string %{
+        static std::string ret;
+        ret =
+%}
 //%typemap(rp_tm_cfy_cl1) bool "return ";
 
 //%typemap(rp_tm_cfy_cl2) void "return true;";
-//%typemap(rp_tm_cfy_cl2) std::string "return ret.c_str();";
+%typemap(rp_tm_cfy_cl2) std::string "return ret.c_str();";
 
 //%typemap(rp_tm_cfy_cll) SWIGTYPE "$1_name";
 
@@ -327,3 +327,4 @@
 %apply rp_tp_string { std::string const & };
 
 %apply rp_tp_any { const ObjectHandler::property_t& };
+

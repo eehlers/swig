@@ -23,17 +23,15 @@ int functionCount = 0;
 // FIXME store these defaults in reposit.swg and retrieve them here.
 String *objDir = NewString("AddinObjects");
 String *addDir = NewString("AddinCpp");
-//String *cfyDir = NewString("AddinCfy");
+String *cfyDir = NewString("AddinCfy");
 String *xllDir = NewString("AddinXl");
 String *objInc = NewString("AddinObjects");
 String *addInc = NewString("AddinCpp");
 String *xllInc = NewString("AddinXl");
-//String *cfyInc = NewString("AddinCfy");
 
 // Features
 String *obj_include = 0;
 String *add_include = 0;
-//String *cfy_include = 0;
 String *group_name = 0;
 bool automatic = false;
 
@@ -1194,78 +1192,79 @@ struct GroupExcel {
 //    Printf(f, "\n");
 //    }
 //}
-//
-//struct GroupCountify {
-//
-//    Buffer *b_cfy_cpp;
-//
-//    GroupCountify() {
-//
-//        b_cfy_cpp = new Buffer(NewStringf("%s/cfy_%s.cpp", cfyDir, group_name));
-//
-//        Printf(b_cfy_cpp->b0, "#include <oh/repository.hpp>\n");
-//        Printf(b_cfy_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, name);
-//        Printf(b_cfy_cpp->b0, "\n");
-//        // FIXME this #include is only required if the file contains conversions.
-//        Printf(b_cfy_cpp->b0, "#include <%s/conversions/convert2.hpp>\n", objInc);
-//        Printf(b_cfy_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
-//        // FIXME this #include is only required if the file contains enumerations.
-//        //Printf(b_cfy_cpp->b0, "#include <oh/enumerations/typefactory.hpp>\n");
-//        // FIXME this #include is only required if the file contains constructors.
-//        Printf(b_cfy_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, name);
-//        if (automatic_) {
-//            Printf(b_cfy_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, name);
-//        } else {
-//            Printf(b_cfy_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, name);
-//        }
-//        Printf(b_cfy_cpp->b0, "%s\n", add_include);
-//        // FIXME include only factories for types used in the current file.
-//        Printf(b_cfy_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
-//        Printf(b_cfy_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
-//        Printf(b_cfy_cpp->b0, "#include <oh/repository.hpp>\n");
-//        //Printf(b_cfy_cpp->b0, "#include <AddinCpp/add_all.hpp>\n");
-//        Printf(b_cfy_cpp->b0, "\n");
-//    }
-//
-//    virtual ~GroupCountify() {
-//        delete b_cfy_cpp;
-//    }
-//
-//    void functionWrapperImplFunc(ParmsFunc &p) {
-//        Printf(b_cfy_cpp->b0,"//****FUNC*****\n");
-//        Printf(b_cfy_cpp->b0,"extern \"C\" {\n");
-//        Printf(b_cfy_cpp->b0,"COUNTIFY_API\n");
-//        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_ret", p.n);
-//        Printf(b_cfy_cpp->b0,"%s(\n", p.funcName);
-//        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_prm");
-//        Printf(b_cfy_cpp->b0,") {\n");
-//        Printf(b_cfy_cpp->b0,"\n");
-//        Printf(b_cfy_cpp->b0,"    try {\n");
-//        Printf(b_cfy_cpp->b0,"\n");
-//        Printf(b_cfy_cpp->b0,"        initializeAddin();\n");
-//        Printf(b_cfy_cpp->b0,"\n");
-//        Printf(b_cfy_cpp->b0,"        // Convert Countify types into native types\n\n");
-//        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_xx0", 2, 0, false);
-//        Printf(b_cfy_cpp->b0,"\n");
-//        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cnv", 2, 0, false);
-//        Printf(b_cfy_cpp->b0,"\n");
-//        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_cl1", p.n, 2, false);
-//        Printf(b_cfy_cpp->b0,"        %s::%s(\n", module, p.symname);
-//        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cll", 3, ',', true, true);
-//        Printf(b_cfy_cpp->b0,"        );\n");
-//        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_cl2", p.n, 2, false);
-//        Printf(b_cfy_cpp->b0,"\n");
-//        Printf(b_cfy_cpp->b0,"    } catch (...) {\n");
-//        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_rt2", p.n, 2, false);
-//        Printf(b_cfy_cpp->b0,"    }\n");
-//        Printf(b_cfy_cpp->b0,"}\n");
-//        Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
-//        mongoFunc(p.temp, p.funcName, p.n, p.type, p.parms);
-//    }
-//
-//    void functionWrapperImplCtor(ParmsCtor &p) {
-//
-//        Printf(b_cfy_cpp->b0,"//****CTOR*****\n");
+
+struct GroupCountify {
+
+    Buffer *b_cfy_cpp;
+
+    GroupCountify() {
+
+        b_cfy_cpp = new Buffer(NewStringf("%s/cfy_%s.cpp", cfyDir, group_name));
+
+        Printf(b_cfy_cpp->b0, "\n");
+        Printf(b_cfy_cpp->b0, "#include \"init.hpp\"\n");
+        Printf(b_cfy_cpp->b0, "#include <oh/repository.hpp>\n");
+        Printf(b_cfy_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, group_name);
+        Printf(b_cfy_cpp->b0, "\n");
+        Printf(b_cfy_cpp->b0, "//FIXME this #include is only required if the file contains conversions\n", objInc);
+        Printf(b_cfy_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
+        //Printf(b_cfy_cpp->b0, "//FIXME this #include is only required if the file contains enumerations\n", objInc);
+        //Printf(b_cfy_cpp->b0, "#include <oh/enumerations/typefactory.hpp>\n");
+        Printf(b_cfy_cpp->b0, "//FIXME this #include is only required if the file contains constructors\n", objInc);
+        Printf(b_cfy_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, group_name);
+        if (automatic) {
+            Printf(b_cfy_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, group_name);
+        } else {
+            Printf(b_cfy_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, group_name);
+        }
+        Printf(b_cfy_cpp->b0, "%s\n", add_include);
+        Printf(b_cfy_cpp->b0, "//FIXME include only factories for types used in the current file\n", objInc);
+        Printf(b_cfy_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
+        Printf(b_cfy_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
+        Printf(b_cfy_cpp->b0, "#include <oh/repository.hpp>\n");
+        //Printf(b_cfy_cpp->b0, "#include <AddinCpp/add_all.hpp>\n");
+        Printf(b_cfy_cpp->b0, "\n");
+    }
+
+    virtual ~GroupCountify() {
+        delete b_cfy_cpp;
+    }
+
+    void functionWrapperImplFunc(ParmsFunc &p) {
+        Printf(b_cfy_cpp->b0,"//****FUNC*****\n");
+        Printf(b_cfy_cpp->b0,"extern \"C\" {\n");
+        Printf(b_cfy_cpp->b0,"COUNTIFY_API\n");
+        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_ret", p.n);
+        Printf(b_cfy_cpp->b0,"%s(\n", p.funcName);
+        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_prm");
+        Printf(b_cfy_cpp->b0,") {\n");
+        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"    try {\n");
+        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"        initializeAddin();\n");
+        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"        // Convert Countify types into native types\n\n");
+        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_xx0", 2, 0, false);
+        Printf(b_cfy_cpp->b0,"\n");
+        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cnv", 2, 0, false);
+        Printf(b_cfy_cpp->b0,"\n");
+        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_cl1", p.n, 2, false);
+        Printf(b_cfy_cpp->b0,"        %s::%s(\n", module, p.symname);
+        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cll", 3, ',', true, true);
+        Printf(b_cfy_cpp->b0,"        );\n");
+        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_cl2", p.n, 2, false);
+        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"    } catch (...) {\n");
+        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_rt2", p.n, 2, false);
+        Printf(b_cfy_cpp->b0,"    }\n");
+        Printf(b_cfy_cpp->b0,"}\n");
+        Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
+        //mongoFunc(p.temp, p.funcName, p.n, p.type, p.parms);
+    }
+
+    void functionWrapperImplCtor(ParmsCtor &p) {
+
+        Printf(b_cfy_cpp->b0,"//****CTOR*****\n");
 //        Printf(b_cfy_cpp->b0,"extern \"C\" {\n");
 //        Printf(b_cfy_cpp->b0,"COUNTIFY_API\n");
 //        Printf(b_cfy_cpp->b0,"const char *%s(\n", p.funcName);
@@ -1288,7 +1287,7 @@ struct GroupExcel {
 //        emitParmList(p.parms, b_cfy_cpp->b0, 0, "rp_tm_default", 4, ',', true, false, true);
 //        Printf(b_cfy_cpp->b0,"                false));\n");
 //        Printf(b_cfy_cpp->b0,"        boost::shared_ptr<ObjectHandler::Object> object(\n");
-//        Printf(b_cfy_cpp->b0,"            new %s::%s(\n", module, name);
+//        Printf(b_cfy_cpp->b0,"            new %s::%s(\n", module, group_name);
 //        Printf(b_cfy_cpp->b0,"                valueObject,\n");
 //        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cll", 4, ',', true, true, true);
 //        Printf(b_cfy_cpp->b0,"                false));\n");
@@ -1307,10 +1306,10 @@ struct GroupExcel {
 //        Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
 //
 //        mongoFunc(p.name, p.funcName, p.n, p.type, p.parms2);
-//    }
-//
-//    void functionWrapperImplMemb(ParmsMemb &p) {
-//        Printf(b_cfy_cpp->b0,"//****MEMB*****\n");
+    }
+
+    void functionWrapperImplMemb(ParmsMemb &p) {
+        Printf(b_cfy_cpp->b0,"//****MEMB*****\n");
 //        Printf(b_cfy_cpp->b0,"extern \"C\" {\n");
 //        Printf(b_cfy_cpp->b0,"COUNTIFY_API\n");
 //        emitTypeMap(b_cfy_cpp->b0, "rp_tm_add_ret", p.n);
@@ -1329,8 +1328,8 @@ struct GroupExcel {
 //        Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
 //
 //        mongoFunc(p.funcName2, p.funcName, p.n, p.type, p.parms);
-//    }
-//};
+    }
+};
 
 struct Addin {
 
@@ -1549,22 +1548,37 @@ struct AddinExcel : public AddinImpl<GroupExcel> {
     }
 };
 
-//struct AddinCountify : public AddinImpl<GroupCountify> {
-//
-//    Buffer *b_cfy_mng_txt;
-//
-//    virtual void processGroup() {
-//    }
-//
-//    virtual void clear() {
-//        AddinImpl<GroupCpp>::clear();
-//        delete b_cfy_mng_txt;
-//    }
-//
-//    virtual void top() {
-//        b_cfy_mng_txt = new Buffer(NewStringf("%s/cfy_mongo.txt", cfyDir));
-//    }
-//};
+struct AddinCountify : public AddinImpl<GroupCountify> {
+
+    //Buffer *b_cfy_mng_txt;
+
+    virtual void processGroup() {
+    }
+
+    virtual void clear() {
+        AddinImpl<GroupCountify>::clear();
+    //    delete b_cfy_mng_txt;
+    }
+
+    virtual void top() {
+    //    b_cfy_mng_txt = new Buffer(NewStringf("%s/cfy_mongo.txt", cfyDir));
+    }
+
+    virtual void functionWrapperImplFunc(ParmsFunc &p) {
+        if (checkAttribute(p.n, "feature:rp:generate_countify", "1"))
+            AddinImpl<GroupCountify>::functionWrapperImplFunc(p);
+    }
+
+    virtual void functionWrapperImplCtor(ParmsCtor &p) {
+        if (checkAttribute(p.n, "feature:rp:generate_countify", "1"))
+            AddinImpl<GroupCountify>::functionWrapperImplCtor(p);
+    }
+
+    virtual void functionWrapperImplMemb(ParmsMemb &p) {
+        if (checkAttribute(p.n, "feature:rp:generate_countify", "1"))
+            AddinImpl<GroupCountify>::functionWrapperImplMemb(p);
+    }
+};
 
 struct AddinList {
 
@@ -1655,7 +1669,7 @@ public:
             addinList_.appendAddin(new AddinExcel);
             Swig_mark_arg(i);
         } else if ( (strcmp(argv[i],"-gencfy") == 0)) {
-        //    addinList_.appendAddin(new AddinCountify);
+            addinList_.appendAddin(new AddinCountify);
             Swig_mark_arg(i);
         } else if (strcmp(argv[i], "-prefix") == 0) {
             if (argv[i + 1]) {
@@ -1686,16 +1700,14 @@ virtual int top(Node *n) {
             addDir = n5;
         if (String *n6 = getNode(n3, "rp_xll_dir"))
             xllDir = n6;
-        //if (String *n6a = getNode(n3, "rp_cfy_dir"))
-        //    cfyDir = n6a;
+        if (String *n6a = getNode(n3, "rp_cfy_dir"))
+            cfyDir = n6a;
         if (String *n7 = getNode(n3, "rp_obj_inc"))
             objInc = n7;
         if (String *n8 = getNode(n3, "rp_add_inc"))
             addInc = n8;
         if (String *n9 = getNode(n3, "rp_xll_inc"))
             xllInc = n9;
-        //if (String *n10 = getNode(n3, "rp_cfy_inc"))
-        //    cfyInc = n10;
     }
 
     printf("module=%s\n", Char(module));
@@ -1703,11 +1715,10 @@ virtual int top(Node *n) {
     printf("rp_obj_dir=%s\n", Char(objDir));
     printf("rp_add_dir=%s\n", Char(addDir));
     printf("rp_xll_dir=%s\n", Char(xllDir));
-    //printf("rp_cfy_dir=%s\n", Char(cfyDir));
+    printf("rp_cfy_dir=%s\n", Char(cfyDir));
     printf("rp_obj_inc=%s\n", Char(objInc));
     printf("rp_add_inc=%s\n", Char(addInc));
     printf("rp_xll_inc=%s\n", Char(xllInc));
-    //printf("rp_cfy_inc=%s\n", Char(cfyInc));
 
    /* Initialize I/O */
     b_begin = NewString("");
@@ -1798,7 +1809,6 @@ void getFeatures(Node *n) {
 
     obj_include = Getattr(n, "feature:rp:obj_include");
     add_include = Getattr(n, "feature:rp:add_include");
-    //cfy_include = Getattr(n, "feature:rp:cfy_include");
 
     // Check whether to generate all source code, or to omit some code to be handwritten by the user.
     // For the user writing the config file, it is easier to assume automatic (default)
@@ -1831,7 +1841,7 @@ int classDeclaration(Node *n) {
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
     printf("classDeclaration\n");
-    getFeatures(n);
+    //getFeatures(n);
     int ret=Language::classDeclaration(n);
     Printf(b_init, "END   classDeclaration - node name='%s'.\n", Char(nodename));
     return ret;
