@@ -290,7 +290,7 @@
 
 %typemap(rp_tm_cfy_ret) std::string "const char *";
 %typemap(rp_tm_cfy_ret) void "bool";
-//%typemap(rp_tm_cfy_ret) SWIGTYPE "$1_type";
+%typemap(rp_tm_cfy_ret) SWIGTYPE "$1_type";
 
 %typemap(rp_tm_cfy_rt2) SWIGTYPE "return 0;";
 
@@ -320,9 +320,13 @@
         static std::string ret;
         ret =
 %}
+%typemap(rp_tm_cfy_cl1) rp_tp_long %{
+        long returnValue =
+%}
 //%typemap(rp_tm_cfy_cl1) bool "return ";
 
 %typemap(rp_tm_cfy_cl2) void "return true;";
+%typemap(rp_tm_cfy_cl2) rp_tp_long "return returnValue;";
 %typemap(rp_tm_cfy_cl2) std::string "return ret.c_str();";
 
 %typemap(rp_tm_cfy_cll) rp_tp_enm "$1_name_enum";
@@ -339,6 +343,7 @@
 %typemap(rp_tm_cfy_mng) ObjectHandler::property_t const & "BOOL";
 %typemap(rp_tm_cfy_mng) void "BOOL";
 %typemap(rp_tm_cfy_mng) bool "BOOL";
+%typemap(rp_tm_cfy_mng) rp_tp_long "INT32";
 %typemap(rp_tm_cfy_mng) rp_tp_double "REAL32";
 %typemap(rp_tm_cfy_mng) SWIGTYPE "CSTR";
 
