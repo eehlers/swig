@@ -1210,6 +1210,7 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0, "\n");
         Printf(b_cfy_cpp->b0, "//FIXME this #include is only required if the file contains conversions\n", objInc);
         Printf(b_cfy_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
+        Printf(b_cfy_cpp->b0, "#include <%s/conversions/coercetermstructure.hpp>\n", objInc);
         //Printf(b_cfy_cpp->b0, "//FIXME this #include is only required if the file contains enumerations\n", objInc);
         //Printf(b_cfy_cpp->b0, "#include <oh/enumerations/typefactory.hpp>\n");
         Printf(b_cfy_cpp->b0, "//FIXME this #include is only required if the file contains constructors\n", objInc);
@@ -1306,11 +1307,11 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"//****MEMB*****\n");
         Printf(b_cfy_cpp->b0,"extern \"C\" {\n");
         Printf(b_cfy_cpp->b0,"COUNTIFY_API\n");
-        emitTypeMap(b_cfy_cpp->b0, "rp_tm_add_ret", p.n);
+        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_rt3", p.n);
         Printf(b_cfy_cpp->b0,"%s(\n", p.funcName);
         emitParmList(p.parms2, b_cfy_cpp->b0, 1, "rp_tm_cfy_prm", 2);
         Printf(b_cfy_cpp->b0,"    ) {\n\n");
-        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
+        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cnv", 1, 0, false);
         Printf(b_cfy_cpp->b0,"\n");
 
         emitTypeMap(b_cfy_cpp->b0, "rp_tm_xxx_oh_get", p.node, 2);

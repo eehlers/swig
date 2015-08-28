@@ -109,9 +109,9 @@
 
 // rp_tm_add_* - typemaps for  the C++ addin
 
-%typemap(rp_tm_add_ret) rp_tp_double "double";
-%typemap(rp_tm_add_ret) void "bool";
-%typemap(rp_tm_add_ret) SWIGTYPE "$1_type";
+//%typemap(rp_tm_add_ret) rp_tp_double "double";
+//%typemap(rp_tm_add_ret) void "bool";
+//%typemap(rp_tm_add_ret) SWIGTYPE "$1_type";
 
 //%typemap(rp_tm_add_prm) rp_tp_double "double";
 //%typemap(rp_tm_add_prm) rp_tp_cnv "const ObjectHandler::property_t&";
@@ -146,7 +146,7 @@
 //%typemap(rp_tm_add_cll) rp_tp_enm "$1_name_enm";
 //%typemap(rp_tm_add_cll) rp_tp_enm_cls "$1_name_enm_cls";
 %typemap(rp_tm_add_cll) rp_tp_obj1 "$1_name_get";
-//%typemap(rp_tm_add_cll) SWIGTYPE "$1_name";
+%typemap(rp_tm_add_cll) SWIGTYPE "$1_name";
 
 //%typemap(rp_add_ret) SWIGTYPE "return ";
 
@@ -287,6 +287,10 @@
 %}
 
 // rp_tm_cfy_* - typemaps for the =countify addin
+
+%typemap(rp_tm_cfy_rt3) rp_tp_double "double";
+%typemap(rp_tm_cfy_rt3) void "bool";
+%typemap(rp_tm_cfy_rt3) SWIGTYPE "$1_type";
 
 %typemap(rp_tm_cfy_ret) std::string "const char *";
 %typemap(rp_tm_cfy_ret) void "bool";
