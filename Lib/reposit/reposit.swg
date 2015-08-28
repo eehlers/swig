@@ -313,7 +313,7 @@
 
 //%typemap(rp_tm_cfy_mng) void "BOOL";
 //%typemap(rp_tm_cfy_mng) rp_tp_double "REAL32";
-//%typemap(rp_tm_cfy_mng) SWIGTYPE "CSTR";
+%typemap(rp_tm_cfy_mng) SWIGTYPE "CSTR";
 
 // Map native types to reposit types
 

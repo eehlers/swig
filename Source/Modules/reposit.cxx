@@ -385,6 +385,7 @@ struct ParmsFunc {
     String *name;
     SwigType *type;
     String *symname;
+    String *symnameUpper;
     String* funcName;
 };
 
@@ -1152,46 +1153,46 @@ struct GroupExcel {
     }
 };
 
-//void mongoFunc(String *funcName1, String *funcName2, Node *n, SwigType *t, ParmList *parms) {
-//    Printf(b_cfy_mng_txt->b0, "        {\n");
-//    Printf(b_cfy_mng_txt->b0, "            \"name\": \"%s\",\n", funcName1);
-//    Printf(b_cfy_mng_txt->b0, "            \"codeName\": \"%s\",\n", funcName2);
-//    Printf(b_cfy_mng_txt->b0, "            \"description\": \"\",\n");
-//    Printf(b_cfy_mng_txt->b0, "            \"returnValue\": {\n");
-//    String *s = getTypeMap("rp_tm_cfy_mng", n);
-//    Printf(b_cfy_mng_txt->b0, "                \"dataType\": \"%s\"\n", s);
-//    Printf(b_cfy_mng_txt->b0, "            }");
-//    mongoParms(b_cfy_mng_txt->b0, parms);
-//    Printf(b_cfy_mng_txt->b0, "        },\n");
-//}
-//
-//void mongoParms(File *f, ParmList *parms) {
-//    if (parms) {
-//    Printf(f, ",\n");
-//    Printf(f, "            \"parameters\": [\n");
-//    bool first = true;
-//    for (Parm *p = parms; p; p = nextSibling(p)) {
-//    String *name = Getattr(p,"name");
-//    if (first) {
-//        first = false;
-//    } else {
-//        Printf(f, ",\n");
-//    }
-//    Printf(f, "                {\n");
-//    Printf(f, "                    \"name\": \"%s\",\n", name);
-//    SwigType *t  = Getattr(p, "type");
-//    String *s = getTypeMap("rp_tm_cfy_mng", p);
-//    Printf(f, "                    \"dataType\": \"%s\",\n", s);
-//    Printf(f, "                    \"description\": \"\",\n");
-//    Printf(f, "                    \"optional\": false\n");
-//    Printf(f, "                }");
-//    }
-//    Printf(f, "\n");
-//    Printf(f, "            ]\n");
-//    } else {
-//    Printf(f, "\n");
-//    }
-//}
+void mongoParms(File *f, ParmList *parms) {
+    if (parms) {
+    Printf(f, ",\n");
+    Printf(f, "            \"parameters\": [\n");
+    bool first = true;
+    for (Parm *p = parms; p; p = nextSibling(p)) {
+    String *name = Getattr(p,"name");
+    if (first) {
+        first = false;
+    } else {
+        Printf(f, ",\n");
+    }
+    Printf(f, "                {\n");
+    Printf(f, "                    \"name\": \"%s\",\n", name);
+    //SwigType *t  = Getattr(p, "type");
+    String *s = getTypeMap("rp_tm_cfy_mng", p);
+    Printf(f, "                    \"dataType\": \"%s\",\n", s);
+    Printf(f, "                    \"description\": \"\",\n");
+    Printf(f, "                    \"optional\": false\n");
+    Printf(f, "                }");
+    }
+    Printf(f, "\n");
+    Printf(f, "            ]\n");
+    } else {
+    Printf(f, "\n");
+    }
+}
+
+void mongoFunc(File *f, String *funcName1, String *funcName2, Node *n, /*SwigType *t,*/ ParmList *parms) {
+    Printf(f, "        {\n");
+    Printf(f, "            \"name\": \"%s\",\n", funcName1);
+    Printf(f, "            \"codeName\": \"%s\",\n", funcName2);
+    Printf(f, "            \"description\": \"\",\n");
+    Printf(f, "            \"returnValue\": {\n");
+    String *s = getTypeMap("rp_tm_cfy_mng", n);
+    Printf(f, "                \"dataType\": \"%s\"\n", s);
+    Printf(f, "            }");
+    mongoParms(f, parms);
+    Printf(f, "        },\n");
+}
 
 struct GroupCountify {
 
@@ -1259,10 +1260,9 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"    }\n");
         Printf(b_cfy_cpp->b0,"}\n");
         Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
-        //mongoFunc(p.temp, p.funcName, p.n, p.type, p.parms);
     }
 
-    void functionWrapperImplCtor(ParmsCtor &p) {
+    void functionWrapperImplCtor(ParmsCtor &/*p*/) {
 
         Printf(b_cfy_cpp->b0,"//****CTOR*****\n");
 //        Printf(b_cfy_cpp->b0,"extern \"C\" {\n");
@@ -1308,7 +1308,7 @@ struct GroupCountify {
 //        mongoFunc(p.name, p.funcName, p.n, p.type, p.parms2);
     }
 
-    void functionWrapperImplMemb(ParmsMemb &p) {
+    void functionWrapperImplMemb(ParmsMemb &/*p*/) {
         Printf(b_cfy_cpp->b0,"//****MEMB*****\n");
 //        Printf(b_cfy_cpp->b0,"extern \"C\" {\n");
 //        Printf(b_cfy_cpp->b0,"COUNTIFY_API\n");
@@ -1399,7 +1399,7 @@ struct AddinObjects : public AddinImpl<GroupObjects> {
 
     virtual void clear() {
 
-        AddinImpl<GroupObjects>::clear();
+        AddinImpl::clear();
 
         Printf(b_cre_reg_cpp->b0, "\n");
         Printf(b_cre_reg_cpp->b0, "}\n");
@@ -1475,7 +1475,7 @@ struct AddinObjects : public AddinImpl<GroupObjects> {
     }
 
     virtual void functionWrapperImplCtor(ParmsCtor &p) {
-        AddinImpl<GroupObjects>::functionWrapperImplCtor(p);
+        AddinImpl::functionWrapperImplCtor(p);
         if (generateCtor) {
             Printf(b_cre_reg_cpp->b0, "    registerCreator(\"%s\", create_%s);\n", p.funcName, p.funcName);
         }
@@ -1491,7 +1491,7 @@ struct AddinCpp : public AddinImpl<GroupCpp> {
     }
 
     virtual void clear() {
-        AddinImpl<GroupCpp>::clear();
+        AddinImpl::clear();
         Printf(b_add_all_hpp->b0, "\n");
         Printf(b_add_all_hpp->b0, "#endif\n");
         Printf(b_add_all_hpp->b0, "\n");
@@ -1521,7 +1521,7 @@ struct AddinExcel : public AddinImpl<GroupExcel> {
     }
 
     virtual void clear() {
-        AddinImpl<GroupExcel>::clear();
+        AddinImpl::clear();
         Printf(b_xll_reg_cpp->b2, "\n");
         Printf(b_xll_reg_cpp->b2, "}\n");
         Printf(b_xll_reg_cpp->b2, "\n");
@@ -1550,33 +1550,35 @@ struct AddinExcel : public AddinImpl<GroupExcel> {
 
 struct AddinCountify : public AddinImpl<GroupCountify> {
 
-    //Buffer *b_cfy_mng_txt;
+    Buffer *b_cfy_mng_txt;
 
     virtual void processGroup() {
     }
 
     virtual void clear() {
-        AddinImpl<GroupCountify>::clear();
-    //    delete b_cfy_mng_txt;
+        AddinImpl::clear();
+        delete b_cfy_mng_txt;
     }
 
     virtual void top() {
-    //    b_cfy_mng_txt = new Buffer(NewStringf("%s/cfy_mongo.txt", cfyDir));
+        b_cfy_mng_txt = new Buffer(NewStringf("%s/cfy_mongo.txt", cfyDir));
     }
 
     virtual void functionWrapperImplFunc(ParmsFunc &p) {
-        if (checkAttribute(p.n, "feature:rp:generate_countify", "1"))
-            AddinImpl<GroupCountify>::functionWrapperImplFunc(p);
+        if (checkAttribute(p.n, "feature:rp:generate_countify", "1")) {
+            AddinImpl::functionWrapperImplFunc(p);
+            mongoFunc(b_cfy_mng_txt->b0, p.symnameUpper, p.funcName, p.n, /*p.type,*/ p.parms);
+        }
     }
 
     virtual void functionWrapperImplCtor(ParmsCtor &p) {
         if (checkAttribute(p.n, "feature:rp:generate_countify", "1"))
-            AddinImpl<GroupCountify>::functionWrapperImplCtor(p);
+            AddinImpl::functionWrapperImplCtor(p);
     }
 
     virtual void functionWrapperImplMemb(ParmsMemb &p) {
         if (checkAttribute(p.n, "feature:rp:generate_countify", "1"))
-            AddinImpl<GroupCountify>::functionWrapperImplMemb(p);
+            AddinImpl::functionWrapperImplMemb(p);
     }
 };
 
@@ -2013,11 +2015,8 @@ int functionWrapperImplFunc(Node *n) {
     p.type   = Getattr(n,"type");
     p.parms  = Getattr(n,"parms");
     p.symname   = Getattr(n,"sym:name");
-    Printf(b_init, ">>> p.symname=%s\n", p.symname);
-    //String   *action = Getattr(n,"wrap:action");
-
-    String *temp = copyUpper(p.symname);
-    p.funcName = NewStringf("%s%s", prefix, temp);
+    p.symnameUpper = copyUpper(p.symname);
+    p.funcName = NewStringf("%s%s", prefix, p.symnameUpper);
     Setattr(n, "rp:funcName", p.funcName);
     printf("funcName=%s\n", Char(p.funcName));
     Printf(b_init, "@@@ FUNC Name=%s\n", p.funcName);
