@@ -288,15 +288,18 @@
 
 // rp_tm_cfy_* - typemaps for the =countify addin
 
-%typemap(rp_tm_cfy_rt3) rp_tp_double "double";
-%typemap(rp_tm_cfy_rt3) void "bool";
-%typemap(rp_tm_cfy_rt3) SWIGTYPE "$1_type";
-
 %typemap(rp_tm_cfy_ret) std::string "const char *";
 %typemap(rp_tm_cfy_ret) void "bool";
 %typemap(rp_tm_cfy_ret) SWIGTYPE "$1_type";
 
 %typemap(rp_tm_cfy_rt2) SWIGTYPE "return 0;";
+
+%typemap(rp_tm_cfy_rt3) rp_tp_double "double";
+%typemap(rp_tm_cfy_rt3) void "bool";
+%typemap(rp_tm_cfy_rt3) SWIGTYPE "$1_type";
+
+// return vale in the event of an exception
+%typemap(rp_tm_cfy_rt4) SWIGTYPE "return 0;";
 
 %typemap(rp_tm_cfy_prm) rp_tp_double "double $1_name";
 //%typemap(rp_tm_cfy_prm) rp_tp_double const & "const double& $1_name";

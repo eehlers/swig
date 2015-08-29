@@ -1251,12 +1251,16 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"\n");
         emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_cl1", p.n, 2, false);
         Printf(b_cfy_cpp->b0,"        %s::%s(\n", module, p.symname);
-        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cll", 3, ',', true, true);
+        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cll", 2, ',', true, true);
         Printf(b_cfy_cpp->b0,"        );\n");
         emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_cl2", p.n, 2, false);
         Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"    } catch (const std::exception &e) {\n");
+        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
+        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_rt4", p.n, 2, false);
         Printf(b_cfy_cpp->b0,"    } catch (...) {\n");
-        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_rt2", p.n, 2, false);
+        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
+        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_rt4", p.n, 2, false);
         Printf(b_cfy_cpp->b0,"    }\n");
         Printf(b_cfy_cpp->b0,"}\n");
         Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
@@ -1295,9 +1299,12 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"        return returnValue.c_str();\n");
         Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"    } catch (const std::exception &e) {\n");
+        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
         Printf(b_cfy_cpp->b0,"        return e.what();\n");
         Printf(b_cfy_cpp->b0,"    } catch (...) {\n");
-        Printf(b_cfy_cpp->b0,"        return 0;\n");
+        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
+        Printf(b_cfy_cpp->b0,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
+        Printf(b_cfy_cpp->b0,"        return errorMessage.c_str();\n");
         Printf(b_cfy_cpp->b0,"    }\n");
         Printf(b_cfy_cpp->b0,"}\n\n");
         Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
@@ -1310,17 +1317,30 @@ struct GroupCountify {
         emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_rt3", p.n);
         Printf(b_cfy_cpp->b0,"%s(\n", p.funcName);
         emitParmList(p.parms2, b_cfy_cpp->b0, 1, "rp_tm_cfy_prm", 2);
-        Printf(b_cfy_cpp->b0,"    ) {\n\n");
-        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cnv", 1, 0, false);
+        Printf(b_cfy_cpp->b0,"    ) {\n");
         Printf(b_cfy_cpp->b0,"\n");
-
+        Printf(b_cfy_cpp->b0,"    try {\n");
+        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"        initializeAddin();\n");
+        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"        // Convert input types into Library types\n\n");
+        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cnv", 2, 0, false);
+        Printf(b_cfy_cpp->b0,"\n");
         emitTypeMap(b_cfy_cpp->b0, "rp_tm_xxx_oh_get", p.node, 2);
         emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_ret1", p.n, 2);
-
-        Printf(b_cfy_cpp->b0,"    xxx->%s(\n", p.name);
+        Printf(b_cfy_cpp->b0,"        xxx->%s(\n", p.name);
         emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true);
         Printf(b_cfy_cpp->b0,"        );\n", p.name);
         emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_ret2", p.n, 2);
+        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"    } catch (const std::exception &e) {\n");
+        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
+        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_rt4", p.n, 2, false);
+        Printf(b_cfy_cpp->b0,"    } catch (...) {\n");
+        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
+        Printf(b_cfy_cpp->b0,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
+        emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_rt4", p.n, 2, false);
+        Printf(b_cfy_cpp->b0,"    }\n");
         Printf(b_cfy_cpp->b0,"}\n");
         Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
     }
