@@ -1300,7 +1300,9 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"    } catch (const std::exception &e) {\n");
         Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
-        Printf(b_cfy_cpp->b0,"        return e.what();\n");
+        Printf(b_cfy_cpp->b0,"        static std::string errorMessage;\n");
+        Printf(b_cfy_cpp->b0,"        errorMessage = e.what();\n");
+        Printf(b_cfy_cpp->b0,"        return errorMessage.c_str();\n");
         Printf(b_cfy_cpp->b0,"    } catch (...) {\n");
         Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
         Printf(b_cfy_cpp->b0,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
