@@ -247,17 +247,18 @@
 
 %typemap(rp_xll_call) rp_tp_cnv "$1_name_cnv";
 
-%typemap(rp_tm_xll_cll_val) SWIGTYPE "$1_name";
+%typemap(rp_tm_xll_cll_val) bool "*$1_name";
 %typemap(rp_tm_xll_cll_val) rp_tp_long "*$1_name";
 %typemap(rp_tm_xll_cll_val) rp_tp_double "*$1_name";
 %typemap(rp_tm_xll_cll_val) rp_tp_cnv2 "$1_name_cnv2";
+%typemap(rp_tm_xll_cll_val) SWIGTYPE "$1_name";
 
+%typemap(rp_tm_xll_ret) void "bool*";
 %typemap(rp_tm_xll_ret) bool "bool*";
-%typemap(rp_tm_xll_ret) long "long*";
+%typemap(rp_tm_xll_ret) rp_tp_long "long*";
 %typemap(rp_tm_xll_ret) rp_tp_double "double*";
 %typemap(rp_tm_xll_ret) rp_tp_string "char*";
-%typemap(rp_tm_xll_ret) void "bool*";
-//%typemap(rp_tm_xll_ret) std::vector< std::string > "OPER*";
+%typemap(rp_tm_xll_ret) rp_tp_enm "char*";
 %typemap(rp_tm_xll_ret) std::vector "OPER*";
 
 %typemap(rp_xll_get) SWIGTYPE "$1_type returnValue =";

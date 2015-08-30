@@ -217,7 +217,7 @@ std::string hexLen(String *c) {
 
 void excelRegister(File *b, Node *n, SwigType *type, ParmList *parms) {
     functionCount++;
-    String *funcName   = Getattr(n, "rp:funcName");
+    String *funcName   = Getattr(n, "rp:funcRename");
     Printf(b, "        // BEGIN function excelRegister\n");
     Printf(b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
     Printf(b, "            // function code name\n");
@@ -247,7 +247,7 @@ void excelRegister(File *b, Node *n, SwigType *type, ParmList *parms) {
 }
 
 void excelUnregister(File *b, Node *n, SwigType *type, ParmList *parms) {
-    String *funcName   = Getattr(n, "rp:funcName");
+    String *funcName   = Getattr(n, "rp:funcRename");
     Printf(b, "        // BEGIN function excelUnregister\n");
     Printf(b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
     Printf(b, "            // function code name\n");
@@ -392,8 +392,10 @@ struct ParmsFunc {
 struct ParmsCtor {
     Node *n;
     String *name;
+    String *rename;
     SwigType *type;
     String *funcName;
+    String *funcRename;
     ParmList *parms;
     ParmList *parms2;
     Parm *parms3;
@@ -621,11 +623,11 @@ struct GroupObjects {
 
         if (generateCtor) {
 
-            Printf(b_val_hpp->b0,"        class %s : public ObjectHandler::ValueObject {\n", p.funcName);
+            Printf(b_val_hpp->b0,"        class %s : public ObjectHandler::ValueObject {\n", p.funcRename);
             Printf(b_val_hpp->b0,"            friend class boost::serialization::access;\n");
             Printf(b_val_hpp->b0,"        public:\n");
-            Printf(b_val_hpp->b0,"            %s() {}\n", p.funcName);
-            Printf(b_val_hpp->b0,"            %s(\n", p.funcName);
+            Printf(b_val_hpp->b0,"            %s() {}\n", p.funcRename);
+            Printf(b_val_hpp->b0,"            %s(\n", p.funcRename);
             Printf(b_val_hpp->b0,"                const std::string& ObjectId,\n");
             emitParmList(p.parms, b_val_hpp->b0, 2, "rp_tm_val_prm", 4, ',', true, false, true);
             Printf(b_val_hpp->b0,"                bool Permanent);\n");
@@ -645,7 +647,7 @@ struct GroupObjects {
             Printf(b_val_hpp->b0,"\n");
             Printf(b_val_hpp->b0,"            template<class Archive>\n");
             Printf(b_val_hpp->b0,"            void serialize(Archive& ar, const unsigned int) {\n");
-            Printf(b_val_hpp->b0,"            boost::serialization::void_cast_register<%s, ObjectHandler::ValueObject>(this, this);\n", p.funcName);
+            Printf(b_val_hpp->b0,"            boost::serialization::void_cast_register<%s, ObjectHandler::ValueObject>(this, this);\n", p.funcRename);
             Printf(b_val_hpp->b0,"                ar  & boost::serialization::make_nvp(\"ObjectId\", objectId_)\n");
             Printf(b_val_hpp->b0,"                    & boost::serialization::make_nvp(\"ClassName\", className_)\n");
             emitParmList(p.parms, b_val_hpp->b0, 1, "rp_tm_val_ser", 5, 0);
@@ -655,19 +657,19 @@ struct GroupObjects {
             Printf(b_val_hpp->b0,"        };\n");
             Printf(b_val_hpp->b0,"\n");
 
-            Printf(b_val_cpp->b0,"        const char* %s::mPropertyNames[] = {\n", p.funcName);
+            Printf(b_val_cpp->b0,"        const char* %s::mPropertyNames[] = {\n", p.funcRename);
             emitParmList(p.parms, b_val_cpp->b0, 1, "rp_tm_val_nam", 3, ',', true, false, true);
             Printf(b_val_cpp->b0,"            \"Permanent\"\n");
             Printf(b_val_cpp->b0,"        };\n");
             Printf(b_val_cpp->b0,"\n");
-            Printf(b_val_cpp->b0,"        std::set<std::string> %s::mSystemPropertyNames(\n", p.funcName);
+            Printf(b_val_cpp->b0,"        std::set<std::string> %s::mSystemPropertyNames(\n", p.funcRename);
             Printf(b_val_cpp->b0,"            mPropertyNames, mPropertyNames + sizeof(mPropertyNames) / sizeof(const char*));\n");
             Printf(b_val_cpp->b0,"\n");
-            Printf(b_val_cpp->b0,"        const std::set<std::string>& %s::getSystemPropertyNames() const {\n", p.funcName);
+            Printf(b_val_cpp->b0,"        const std::set<std::string>& %s::getSystemPropertyNames() const {\n", p.funcRename);
             Printf(b_val_cpp->b0,"            return mSystemPropertyNames;\n");
             Printf(b_val_cpp->b0,"        }\n");
             Printf(b_val_cpp->b0,"\n");
-            Printf(b_val_cpp->b0,"        std::vector<std::string> %s::getPropertyNamesVector() const {\n", p.funcName);
+            Printf(b_val_cpp->b0,"        std::vector<std::string> %s::getPropertyNamesVector() const {\n", p.funcRename);
             Printf(b_val_cpp->b0,"            std::vector<std::string> ret(\n");
             Printf(b_val_cpp->b0,"                mPropertyNames, mPropertyNames + sizeof(mPropertyNames) / sizeof(const char*));\n");
             Printf(b_val_cpp->b0,"            for (std::map<std::string, ObjectHandler::property_t>::const_iterator i = userProperties.begin();\n");
@@ -676,7 +678,7 @@ struct GroupObjects {
             Printf(b_val_cpp->b0,"            return ret;\n");
             Printf(b_val_cpp->b0,"        }\n");
             Printf(b_val_cpp->b0,"\n");
-            Printf(b_val_cpp->b0,"        ObjectHandler::property_t %s::getSystemProperty(const std::string& name) const {\n", p.funcName);
+            Printf(b_val_cpp->b0,"        ObjectHandler::property_t %s::getSystemProperty(const std::string& name) const {\n", p.funcRename);
             Printf(b_val_cpp->b0,"            std::string nameUpper = boost::algorithm::to_upper_copy(name);\n");
             Printf(b_val_cpp->b0,"            if(strcmp(nameUpper.c_str(), \"OBJECTID\")==0)\n");
             Printf(b_val_cpp->b0,"                return objectId_;\n");
@@ -689,7 +691,7 @@ struct GroupObjects {
             Printf(b_val_cpp->b0,"                OH_FAIL(\"Error: attempt to retrieve non-existent Property: '\" + name + \"'\");\n");
             Printf(b_val_cpp->b0,"        }\n");
             Printf(b_val_cpp->b0,"\n");
-            Printf(b_val_cpp->b0,"        void %s::setSystemProperty(const std::string& name, const ObjectHandler::property_t& value) {\n", p.funcName);
+            Printf(b_val_cpp->b0,"        void %s::setSystemProperty(const std::string& name, const ObjectHandler::property_t& value) {\n", p.funcRename);
             Printf(b_val_cpp->b0,"            std::string nameUpper = boost::algorithm::to_upper_copy(name);\n");
             Printf(b_val_cpp->b0,"            if(strcmp(nameUpper.c_str(), \"OBJECTID\")==0)\n");
             Printf(b_val_cpp->b0,"                objectId_ = boost::get<std::string>(value);\n");
@@ -702,21 +704,21 @@ struct GroupObjects {
             Printf(b_val_cpp->b0,"                OH_FAIL(\"Error: attempt to set non-existent Property: '\" + name + \"'\");\n");
             Printf(b_val_cpp->b0,"        }\n");
             Printf(b_val_cpp->b0,"\n");
-            Printf(b_val_cpp->b0,"        %s::%s(\n", p.funcName, p.funcName);
+            Printf(b_val_cpp->b0,"        %s::%s(\n", p.funcRename, p.funcRename);
             Printf(b_val_cpp->b0,"                const std::string& ObjectId,\n");
             emitParmList(p.parms, b_val_cpp->b0, 2, "rp_tm_val_prm", 4, ',', true, false, true);
             Printf(b_val_cpp->b0,"                bool Permanent) :\n");
-            Printf(b_val_cpp->b0,"            ObjectHandler::ValueObject(ObjectId, \"%s\", Permanent),\n", p.funcName);
+            Printf(b_val_cpp->b0,"            ObjectHandler::ValueObject(ObjectId, \"%s\", Permanent),\n", p.funcRename);
             emitParmList(p.parms, b_val_cpp->b0, 1, "rp_tm_val_ini", 3, ',', true, false, true);
             Printf(b_val_cpp->b0,"            Permanent_(Permanent) {\n");
             Printf(b_val_cpp->b0,"        }\n");
 
             Printf(b_cre_hpp->b0, "\n");
-            Printf(b_cre_hpp->b0, "boost::shared_ptr<ObjectHandler::Object> create_%s(\n", p.funcName);
+            Printf(b_cre_hpp->b0, "boost::shared_ptr<ObjectHandler::Object> create_%s(\n", p.funcRename);
             Printf(b_cre_hpp->b0, "    const boost::shared_ptr<ObjectHandler::ValueObject>&);\n");
 
             Printf(b_cre_cpp->b0, "\n");
-            Printf(b_cre_cpp->b0, "boost::shared_ptr<ObjectHandler::Object> %s::create_%s(\n", module, p.funcName);
+            Printf(b_cre_cpp->b0, "boost::shared_ptr<ObjectHandler::Object> %s::create_%s(\n", module, p.funcRename);
             Printf(b_cre_cpp->b0, "    const boost::shared_ptr<ObjectHandler::ValueObject> &valueObject) {\n");
             Printf(b_cre_cpp->b0, "\n");
             Printf(b_cre_cpp->b0, "    // conversions\n\n");
@@ -736,10 +738,10 @@ struct GroupObjects {
             Printf(b_cre_cpp->b0, "}\n");
 
             Printf(b_reg_cpp->b0, "    // class ID %d in the boost serialization framework\n", idNum);
-            Printf(b_reg_cpp->b0, "    ar.register_type<%s::ValueObjects::%s>();\n", module, p.funcName);
+            Printf(b_reg_cpp->b0, "    ar.register_type<%s::ValueObjects::%s>();\n", module, p.funcRename);
 
             Printf(b_reg_cpp->b1, "    // class ID %d in the boost serialization framework\n", idNum);
-            Printf(b_reg_cpp->b1, "    ar.register_type<%s::ValueObjects::%s>();\n", module, p.funcName);
+            Printf(b_reg_cpp->b1, "    ar.register_type<%s::ValueObjects::%s>();\n", module, p.funcRename);
 
             idNum++;
 
@@ -1047,7 +1049,7 @@ struct GroupExcel {
         if (generateCtor) {
             Printf(b_xll_cpp->b0, "\n");
             Printf(b_xll_cpp->b0,"//****CTOR*****\n");
-            Printf(b_xll_cpp->b0, "DLLEXPORT char *%s(\n", p.funcName);
+            Printf(b_xll_cpp->b0, "DLLEXPORT char *%s(\n", p.funcRename);
             emitParmList(p.parms2, b_xll_cpp->b0, 2, "rp_tm_xll_prm");
             Printf(b_xll_cpp->b0, ") {\n");
             Printf(b_xll_cpp->b0, "\n");
@@ -1056,12 +1058,12 @@ struct GroupExcel {
             Printf(b_xll_cpp->b0, "    try {\n");
             Printf(b_xll_cpp->b0, "\n");
             Printf(b_xll_cpp->b0, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
-            Printf(b_xll_cpp->b0, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", p.funcName);
+            Printf(b_xll_cpp->b0, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", p.funcRename);
             Printf(b_xll_cpp->b0, "\n");
             emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_xll_cnv", 2, 0, false);
             Printf(b_xll_cpp->b0, "\n");
             Printf(b_xll_cpp->b0, "        boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
-            Printf(b_xll_cpp->b0, "            new %s::ValueObjects::%s(\n", module, p.funcName);
+            Printf(b_xll_cpp->b0, "            new %s::ValueObjects::%s(\n", module, p.funcRename);
             Printf(b_xll_cpp->b0, "                objectID,\n");
             emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_xll_cll_val", 4, ',', true, true, true);
             Printf(b_xll_cpp->b0, "                false));\n");
@@ -2054,6 +2056,7 @@ int functionWrapperImplFunc(Node *n) {
     p.symnameUpper = copyUpper(p.symname);
     p.funcName = NewStringf("%s%s", prefix, p.symnameUpper);
     Setattr(n, "rp:funcName", p.funcName);
+    Setattr(n, "rp:funcRename", p.funcName);
     printf("funcName=%s\n", Char(p.funcName));
     Printf(b_init, "@@@ FUNC Name=%s\n", p.funcName);
     Printf(b_init, "&&& p.type=%s\n", p.type);
@@ -2146,6 +2149,7 @@ int functionWrapperImplCtor(Node *n) {
 
     p.n = n;
     p.name   = Getattr(n,"name");
+    p.rename   = Getattr(n,"constructorDeclaration:sym:name");
     p.type   = Getattr(n,"type");
     p.parms  = Getattr(n,"parms");
     Node *n1 = Getattr(n,"parentNode");
@@ -2166,7 +2170,10 @@ int functionWrapperImplCtor(Node *n) {
 
     String *temp = copyUpper(p.name);
     p.funcName = NewStringf("%s%s", prefix, temp);
+    String *tempx = copyUpper(p.rename);
+    p.funcRename = NewStringf("%s%s", prefix, tempx);
     Setattr(n, "rp:funcName", p.funcName);
+    Setattr(n, "rp:funcRename", p.funcRename);
     printf("funcName=%s\n", Char(p.funcName));
     printf("type=%s\n", Char(SwigType_str(p.type, 0)));
     Printf(b_init, "@@@ CTOR Name=%s\n", Char(p.funcName));
@@ -2218,6 +2225,7 @@ int functionWrapperImplMemb(Node *n) {
     p.nameUpper = NewStringf("%s%s", temp0, temp1);
     p.funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
     Setattr(p.n, "rp:funcName", p.funcName);
+    Setattr(n, "rp:funcRename", p.funcName);
     printf("funcName=%s\n", Char(p.funcName));
     Printf(b_init, "@@@ MEMB Name=%s\n", Char(p.funcName));
 
