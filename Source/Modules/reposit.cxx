@@ -1244,6 +1244,8 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"    try {\n");
         Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
+        Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"        initializeAddin();\n");
         Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"        // Convert input types into Library types\n\n");
@@ -1253,6 +1255,9 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"        %s::%s(\n", module, p.symname);
         emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cll", 2, ',', true, true);
         Printf(b_cfy_cpp->b0,"        );\n");
+        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
+        Printf(b_cfy_cpp->b0,"\n");
         emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_cl2", p.n, 2, false);
         Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"    } catch (const std::exception &e) {\n");
@@ -1277,6 +1282,8 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"    try {\n");
         Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
+        Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"        initializeAddin();\n");
         Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"        // Convert input types into Library types\n\n");
@@ -1296,6 +1303,9 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"        returnValue =\n");
         Printf(b_cfy_cpp->b0,"            ObjectHandler::Repository::instance().storeObject(\n");
         Printf(b_cfy_cpp->b0,"                objectID, object, true, valueObject);\n");
+        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
+        Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"        return returnValue.c_str();\n");
         Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"    } catch (const std::exception &e) {\n");
@@ -1323,6 +1333,8 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"    try {\n");
         Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
+        Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"        initializeAddin();\n");
         Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"        // Convert input types into Library types\n\n");
@@ -1333,6 +1345,9 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"        xxx->%s(\n", p.name);
         emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true);
         Printf(b_cfy_cpp->b0,"        );\n", p.name);
+        Printf(b_cfy_cpp->b0,"\n");
+        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
+        Printf(b_cfy_cpp->b0,"\n");
         emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_ret2", p.n, 2);
         Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"    } catch (const std::exception &e) {\n");
