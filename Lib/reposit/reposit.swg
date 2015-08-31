@@ -49,6 +49,7 @@
 %typemap(rp_tm_val_dcl) rp_tp_any "ObjectHandler::property_t $1_name_";
 %typemap(rp_tm_val_dcl) rp_tp_enm "std::string $1_name_";
 %typemap(rp_tm_val_dcl) rp_tp_obj1 "std::string $1_name_";
+%typemap(rp_tm_val_dcl) const std::vector<bool>& "std::vector<bool> $1_name_";
 %typemap(rp_tm_val_dcl) SWIGTYPE "$1_type $1_name_";
 
 %typemap(rp_tm_val_ser) SWIGTYPE "& boost::serialization::make_nvp(\"$1_name\", $1_name_)";
@@ -70,6 +71,7 @@
 %typemap(rp_tm_val_cnv) rp_tp_any "value";
 %typemap(rp_tm_val_cnv) rp_tp_enm "ObjectHandler::convert2<std::string>(value)";
 %typemap(rp_tm_val_cnv) rp_tp_obj1 "ObjectHandler::convert2<std::string>(value)";
+%typemap(rp_tm_val_cnv) const std::vector<bool>& "ObjectHandler::vector::convert2<bool>(value, nameUpper)";
 %typemap(rp_tm_val_cnv) SWIGTYPE "ObjectHandler::convert2<$1_type>(value)";
 
 // rp_ser_* - typemaps for serialization
@@ -251,6 +253,7 @@
 %typemap(rp_tm_xll_cll_val) rp_tp_long "*$1_name";
 %typemap(rp_tm_xll_cll_val) rp_tp_double "*$1_name";
 %typemap(rp_tm_xll_cll_val) rp_tp_cnv2 "$1_name_cnv2";
+%typemap(rp_tm_xll_cll_val) const std::vector & "$1_name_vec";
 %typemap(rp_tm_xll_cll_val) SWIGTYPE "$1_name";
 
 %typemap(rp_tm_xll_ret) void "bool*";
@@ -260,6 +263,7 @@
 %typemap(rp_tm_xll_ret) rp_tp_string "char*";
 %typemap(rp_tm_xll_ret) rp_tp_enm "char*";
 %typemap(rp_tm_xll_ret) std::vector "OPER*";
+//%typemap(rp_tm_xll_ret) const std::vector & "OPER*";
 
 %typemap(rp_xll_get) SWIGTYPE "$1_type returnValue =";
 %typemap(rp_xll_get) void "";
