@@ -1511,7 +1511,7 @@ struct AddinObjects : public AddinImpl<GroupObjects> {
     virtual void functionWrapperImplCtor(ParmsCtor &p) {
         AddinImpl::functionWrapperImplCtor(p);
         if (generateCtor) {
-            Printf(b_cre_reg_cpp->b0, "    registerCreator(\"%s\", create_%s);\n", p.funcName, p.funcName);
+            Printf(b_cre_reg_cpp->b0, "    registerCreator(\"%s\", create_%s);\n", p.funcRename, p.funcRename);
         }
     }
 };
