@@ -9,28 +9,28 @@
 
 // rp_tm_xxx_* - typemaps shared by multiple addins
 
-// rp_tm_add_oh_get:  This typemap is used for class member functions in the addin.
+// rp_tm_add_rp_get:  This typemap is used for class member functions in the addin.
 // We retrieve the object from the repository, and then extract the required reference.
 // Default behavior: get a reference to the underlying library object.
-%typemap(rp_tm_xxx_oh_get) SWIGTYPE %{
-        OH_GET_REFERENCE(xxx, objectID, $rp_typedef_obj_add, $rp_typedef_obj_lib);
+%typemap(rp_tm_xxx_rp_get) SWIGTYPE %{
+        RP_GET_REFERENCE(xxx, objectID, $rp_typedef_obj_add, $rp_typedef_obj_lib);
 %}
 
 // Sometimes the addin wants to override the library's behavior, in this case we get
 // a reference to the addin object that wraps the library object:
-%typemap(rp_tm_xxx_oh_get) rp_tp_add_obj %{
-        OH_GET_OBJECT(xxx, objectID, $rp_typedef_obj_add);
+%typemap(rp_tm_xxx_rp_get) rp_tp_add_obj %{
+        RP_GET_OBJECT(xxx, objectID, $rp_typedef_obj_add);
 %}
 
 // Retrieve an instance of an enumerated class from the enumeration registry.
-%typemap(rp_tm_xxx_oh_get) rp_tp_enm %{
+%typemap(rp_tm_xxx_rp_get) rp_tp_enm %{
         $1_type xxx =
-            ObjectHandler::Create<$1_type>()(objectID);
+            reposit::Create<$1_type>()(objectID);
 %}
 
 // Call a member function on an addin object rather than a library object
-%typemap(rp_tm_xxx_oh_get) rp_tp_obj2 %{
-        OH_GET_OBJECT(xxx, objectID, $rp_typedef_obj_add);
+%typemap(rp_tm_xxx_rp_get) rp_tp_obj2 %{
+        RP_GET_OBJECT(xxx, objectID, $rp_typedef_obj_add);
 %}
 
 // rp_tm_val_* - typemaps for valueobjects
@@ -38,7 +38,7 @@
 %typemap(rp_tm_val_prm) rp_tp_long "long";
 %typemap(rp_tm_val_prm) rp_tp_double "double";
 %typemap(rp_tm_val_prm) rp_tp_string "const std::string &";
-%typemap(rp_tm_val_prm) rp_tp_any "const ObjectHandler::property_t&";
+%typemap(rp_tm_val_prm) rp_tp_any "const reposit::property_t&";
 %typemap(rp_tm_val_prm) rp_tp_enm "const std::string &";
 %typemap(rp_tm_val_prm) rp_tp_obj1 "const std::string &";
 %typemap(rp_tm_val_prm) SWIGTYPE "$1_type";
@@ -46,7 +46,7 @@
 %typemap(rp_tm_val_dcl) rp_tp_long "long $1_name_";
 %typemap(rp_tm_val_dcl) rp_tp_double "double $1_name_";
 %typemap(rp_tm_val_dcl) rp_tp_string "std::string $1_name_";
-%typemap(rp_tm_val_dcl) rp_tp_any "ObjectHandler::property_t $1_name_";
+%typemap(rp_tm_val_dcl) rp_tp_any "reposit::property_t $1_name_";
 %typemap(rp_tm_val_dcl) rp_tp_enm "std::string $1_name_";
 %typemap(rp_tm_val_dcl) rp_tp_obj1 "std::string $1_name_";
 %typemap(rp_tm_val_dcl) const std::vector<bool>& "std::vector<bool> $1_name_";
@@ -65,41 +65,41 @@
 
 %typemap(rp_tm_val_ini) SWIGTYPE "$1_name_($1_name)";
 
-%typemap(rp_tm_val_cnv) rp_tp_long "ObjectHandler::convert2<long>(value)";
-%typemap(rp_tm_val_cnv) rp_tp_double "ObjectHandler::convert2<double>(value)";
-%typemap(rp_tm_val_cnv) rp_tp_string "ObjectHandler::convert2<std::string>(value)";
+%typemap(rp_tm_val_cnv) rp_tp_long "reposit::convert2<long>(value)";
+%typemap(rp_tm_val_cnv) rp_tp_double "reposit::convert2<double>(value)";
+%typemap(rp_tm_val_cnv) rp_tp_string "reposit::convert2<std::string>(value)";
 %typemap(rp_tm_val_cnv) rp_tp_any "value";
-%typemap(rp_tm_val_cnv) rp_tp_enm "ObjectHandler::convert2<std::string>(value)";
-%typemap(rp_tm_val_cnv) rp_tp_obj1 "ObjectHandler::convert2<std::string>(value)";
-%typemap(rp_tm_val_cnv) const std::vector<bool>& "ObjectHandler::vector::convert2<bool>(value, nameUpper)";
-%typemap(rp_tm_val_cnv) SWIGTYPE "ObjectHandler::convert2<$1_type>(value)";
+%typemap(rp_tm_val_cnv) rp_tp_enm "reposit::convert2<std::string>(value)";
+%typemap(rp_tm_val_cnv) rp_tp_obj1 "reposit::convert2<std::string>(value)";
+%typemap(rp_tm_val_cnv) const std::vector<bool>& "reposit::vector::convert2<bool>(value, nameUpper)";
+%typemap(rp_tm_val_cnv) SWIGTYPE "reposit::convert2<$1_type>(value)";
 
 // rp_ser_* - typemaps for serialization
 
 %typemap(rp_tm_cre_cnv) rp_tp_long %{
     long $1_name =
-        ObjectHandler::convert2<long>(
+        reposit::convert2<long>(
             valueObject->getProperty("$1_name"));
 %}
 
 %typemap(rp_tm_cre_cnv) rp_tp_enm %{
     std::string $1_name_str =
-        ObjectHandler::convert2<std::string>(valueObject->getProperty("$1_name"));
+        reposit::convert2<std::string>(valueObject->getProperty("$1_name"));
     $rp_typedef_base $1_name =
-        ObjectHandler::Create<$rp_typedef_base>()($1_name_str);
+        reposit::Create<$rp_typedef_base>()($1_name_str);
 %}
 
 %typemap(rp_tm_cre_cnv) rp_tp_obj1 %{
     std::string $1_name_str =
-        ObjectHandler::convert2<std::string>(valueObject->getProperty("$1_name"));
+        reposit::convert2<std::string>(valueObject->getProperty("$1_name"));
     valueObject->processPrecedentID($1_name_str);
-    OH_GET_REFERENCE($1_name, $1_name_str,
+    RP_GET_REFERENCE($1_name, $1_name_str,
         $rp_addin_namespace::$rp_typedef_no_namespace, $rp_typedef_no_template);
 %}
 
 %typemap(rp_tm_cre_cnv) SWIGTYPE %{
     $rp_typedef_base $1_name =
-        ObjectHandler::convert2<$rp_typedef_base>(
+        reposit::convert2<$rp_typedef_base>(
             valueObject->getProperty("$1_name"));
 %}
 
@@ -116,31 +116,31 @@
 //%typemap(rp_tm_add_ret) SWIGTYPE "$1_type";
 
 //%typemap(rp_tm_add_prm) rp_tp_double "double";
-//%typemap(rp_tm_add_prm) rp_tp_cnv "const ObjectHandler::property_t&";
-//%typemap(rp_tm_add_prm) rp_tp_crc "const ObjectHandler::property_t&";
+//%typemap(rp_tm_add_prm) rp_tp_cnv "const reposit::property_t&";
+//%typemap(rp_tm_add_prm) rp_tp_crc "const reposit::property_t&";
 //%typemap(rp_tm_add_prm) rp_tp_enm "const std::string&";
 //%typemap(rp_tm_add_prm) rp_tp_enm_cls "const std::string&";
 //%typemap(rp_tm_add_prm) SWIGTYPE "$rp_typedef_resolved";
 
 //%typemap(rp_tm_add_cnv) rp_tp_cnv %{
 //    $1_type $1_name_cnv =
-//        ObjectHandler::convert2<$1_type, ObjectHandler::property_t>($1_name);
+//        reposit::convert2<$1_type, reposit::property_t>($1_name);
 //%}
 
 //%typemap(rp_tm_add_cnv) rp_tp_crc %{
-//    $1_type $1_name_crc = ObjectHandler::CoerceImpl<
-//        ObjectHandler::property_t,
+//    $1_type $1_name_crc = reposit::CoerceImpl<
+//        reposit::property_t,
 //        $1_type>()($1_name);
 //%}
 
 //%typemap(rp_tm_add_cnv) rp_tp_enm %{
 //    $1_type $1_name_enm =
-//        ObjectHandler::Create<$1_type>()($1_name);
+//        reposit::Create<$1_type>()($1_name);
 //%}
 
 //%typemap(rp_tm_add_cnv) rp_tp_enm_cls %{
 //    $1_type $1_name_enm_cls =
-//        ObjectHandler::Create<$1_type >()($1_name);
+//        reposit::Create<$1_type >()($1_name);
 //%}
 
 //%typemap(rp_tm_add_cll) rp_tp_cnv "$1_name_cnv";
@@ -191,47 +191,47 @@
 %typemap(rp_tm_xll_prm) rp_tp_obj1 "char*";
 
 %typemap(rp_tm_xll_cnv) rp_tp_cnv %{
-        $1_type $1_name_cnv = ObjectHandler::convert2<$1_type, ObjectHandler::ConvertOper>(
-            ObjectHandler::ConvertOper(*$1_name));
+        $1_type $1_name_cnv = reposit::convert2<$1_type, reposit::ConvertOper>(
+            reposit::ConvertOper(*$1_name));
 %}
 
 %typemap(rp_tm_xll_cnv) rp_tp_crc %{
-        $1_type $1_name_crc = ObjectHandler::CoerceImpl<
-            ObjectHandler::ConvertOper, $1_type>()
-            (ObjectHandler::ConvertOper(*$1_name));
+        $1_type $1_name_crc = reposit::CoerceImpl<
+            reposit::ConvertOper, $1_type>()
+            (reposit::ConvertOper(*$1_name));
 %}
 
 %typemap(rp_tm_xll_cnv) rp_tp_enm %{
         $rp_typedef_base $1_name_enm =
-            ObjectHandler::Create<$rp_typedef_base>()($1_name);
+            reposit::Create<$rp_typedef_base>()($1_name);
 %}
 
 %typemap(rp_tm_xll_cnv) rp_tp_enm_cls %{
         $1_type $1_name_enm_cls =
-            ObjectHandler::Create<$1_type >()($1_name);
+            reposit::Create<$1_type >()($1_name);
 %}
 
 // FIXME this typemap should be split into two
 %typemap(rp_tm_xll_cnv) rp_tp_cnv2 %{
-        $rp_typedef_base $1_name_cnv = ObjectHandler::convert2<$rp_typedef_base>(
-            ObjectHandler::ConvertOper(*$1_name), "$1_name", $rp_typedef_base());
+        $rp_typedef_base $1_name_cnv = reposit::convert2<$rp_typedef_base>(
+            reposit::ConvertOper(*$1_name), "$1_name", $rp_typedef_base());
 
-        ObjectHandler::property_t $1_name_cnv2 = ObjectHandler::convert2<ObjectHandler::property_t>(
-            ObjectHandler::ConvertOper(*$1_name));
+        reposit::property_t $1_name_cnv2 = reposit::convert2<reposit::property_t>(
+            reposit::ConvertOper(*$1_name));
 %}
 %typemap(rp_tm_xll_cnv) rp_tp_obj1 %{
-        OH_GET_REFERENCE($1_name_obj, $1_name,
+        RP_GET_REFERENCE($1_name_obj, $1_name,
             $rp_addin_namespace::$rp_typedef_no_namespace, $rp_typedef_no_template);
 %}
 
 %typemap(rp_tm_xll_cnv) std::vector %{
         std::vector<$rp_typedef_no_template> $1_name_vec =
-            ObjectHandler::operToVector<$rp_typedef_no_template>(*$1_name, "$1_name");
+            reposit::operToVector<$rp_typedef_no_template>(*$1_name, "$1_name");
 %}
 
 %typemap(rp_tm_xll_cnv) const std::vector & %{
         std::vector<$rp_typedef_no_template> $1_name_vec =
-            ObjectHandler::operToVector<$rp_typedef_no_template>(*$1_name, "$1_name");
+            reposit::operToVector<$rp_typedef_no_template>(*$1_name, "$1_name");
 %}
 
 %typemap(rp_tm_xll_cll_obj) SWIGTYPE "$1_name";
@@ -281,13 +281,13 @@
 
 %typemap(rp_tm_xll_rdc) std::string %{
         static char ret[XL_MAX_STR_LEN];
-        ObjectHandler::stringToChar(returnValue, ret);
+        reposit::stringToChar(returnValue, ret);
         return ret;
 %}
 
 %typemap(rp_tm_xll_rdc) std::vector< std::string > %{
         static OPER xRet;
-        ObjectHandler::vectorToOper(returnValue, xRet);
+        reposit::vectorToOper(returnValue, xRet);
         return &xRet;
 %}
 
@@ -310,22 +310,22 @@
 //%typemap(rp_tm_cfy_prm) rp_tp_double const & "const double& $1_name";
 %typemap(rp_tm_cfy_prm) rp_tp_string "const char * $1_name";
 %typemap(rp_tm_cfy_prm) rp_tp_obj1 "const char * $1_name";
-//%typemap(rp_tm_cfy_prm) rp_tp_cnv "const ObjectHandler::property_t& $1_name";
-//%typemap(rp_tm_cfy_prm) rp_tp_crc "const ObjectHandler::property_t& $1_name";
+//%typemap(rp_tm_cfy_prm) rp_tp_cnv "const reposit::property_t& $1_name";
+//%typemap(rp_tm_cfy_prm) rp_tp_crc "const reposit::property_t& $1_name";
 %typemap(rp_tm_cfy_prm) rp_tp_enm "const char * $1_name";
 //%typemap(rp_tm_cfy_prm) rp_tp_enm_cls "const char * $1_name";
 // This is a temporary hack for trigger parameters, which are not supported by =countify.
 // Declare the value as a summy bool.  Later we will suppress it altogether.
-%typemap(rp_tm_cfy_prm)  ObjectHandler::property_t const & "bool $1_name";
+%typemap(rp_tm_cfy_prm)  reposit::property_t const & "bool $1_name";
 %typemap(rp_tm_cfy_prm) SWIGTYPE "$rp_typedef_resolved $1_name";
 
 %typemap(rp_tm_cfy_cnv) rp_tp_enm %{
         $rp_typedef_base $1_name_enum =
-            ObjectHandler::Create<$rp_typedef_base>()($1_name);
+            reposit::Create<$rp_typedef_base>()($1_name);
 %}
 
 %typemap(rp_tm_cfy_cnv) rp_tp_obj1 %{
-        OH_GET_REFERENCE($1_name_get, $1_name, $rp_addin_namespace::$rp_typedef_no_namespace, $rp_typedef_no_template);
+        RP_GET_REFERENCE($1_name_get, $1_name, $rp_addin_namespace::$rp_typedef_no_namespace, $rp_typedef_no_template);
 %}
 
 %typemap(rp_tm_cfy_cl1) std::string %{
@@ -352,7 +352,7 @@
 
 // This is a temporary hack for trigger parameters, which are not supported by =countify.
 // Declare the value as a summy bool.  Later we will suppress it altogether.
-%typemap(rp_tm_cfy_mng) ObjectHandler::property_t const & "BOOL";
+%typemap(rp_tm_cfy_mng) reposit::property_t const & "BOOL";
 %typemap(rp_tm_cfy_mng) void "BOOL";
 %typemap(rp_tm_cfy_mng) bool "BOOL";
 %typemap(rp_tm_cfy_mng) rp_tp_long "INT32";
@@ -370,5 +370,5 @@
 %apply rp_tp_string { std::string & };
 %apply rp_tp_string { std::string const & };
 
-%apply rp_tp_any { const ObjectHandler::property_t& };
+%apply rp_tp_any { const reposit::property_t& };
 

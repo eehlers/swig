@@ -448,7 +448,7 @@ struct GroupObjects {
         Printf(b_val_hpp->b0, "#ifndef vo_%s_hpp\n", group_name);
         Printf(b_val_hpp->b0, "#define vo_%s_hpp\n", group_name);
         Printf(b_val_hpp->b0, "\n");
-        Printf(b_val_hpp->b0, "#include <oh/valueobject.hpp>\n");
+        Printf(b_val_hpp->b0, "#include <rp/valueobject.hpp>\n");
         Printf(b_val_hpp->b0, "#include <string>\n");
         Printf(b_val_hpp->b0, "#include <vector>\n");
         Printf(b_val_hpp->b0, "#include <set>\n");
@@ -473,9 +473,9 @@ struct GroupObjects {
         Printf(b_cre_hpp->b0, "#ifndef create_%s_hpp\n", group_name);
         Printf(b_cre_hpp->b0, "#define create_%s_hpp\n", group_name);
         Printf(b_cre_hpp->b0, "\n");
-        Printf(b_cre_hpp->b0, "#include <oh/ohdefines.hpp>\n");
-        Printf(b_cre_hpp->b0, "#include <oh/object.hpp>\n");
-        Printf(b_cre_hpp->b0, "#include <oh/valueobject.hpp>\n");
+        Printf(b_cre_hpp->b0, "#include <rp/rpdefines.hpp>\n");
+        Printf(b_cre_hpp->b0, "#include <rp/object.hpp>\n");
+        Printf(b_cre_hpp->b0, "#include <rp/valueobject.hpp>\n");
         Printf(b_cre_hpp->b0, "\n");
         Printf(b_cre_hpp->b0, "namespace %s {\n", module);
         Printf(b_cre_hpp->b0, "\n");
@@ -495,7 +495,7 @@ struct GroupObjects {
         Printf(b_cre_cpp->b0, "\n");
         Printf(b_cre_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
         Printf(b_cre_cpp->b0, "#include <%s/enumerations/factories/all.hpp>\n", objInc);
-        Printf(b_cre_cpp->b0, "#include <oh/property.hpp>\n");
+        Printf(b_cre_cpp->b0, "#include <rp/property.hpp>\n");
         Printf(b_cre_cpp->b0, "\n");
 
         Printf(b_reg_hpp->b0, "\n");
@@ -516,7 +516,7 @@ struct GroupObjects {
         Printf(b_reg_hpp->b0, "\n");
 
         Printf(b_reg_cpp->b0, "\n");
-        Printf(b_reg_cpp->b0, "#include <oh/ohdefines.hpp>\n");
+        Printf(b_reg_cpp->b0, "#include <rp/rpdefines.hpp>\n");
         Printf(b_reg_cpp->b0, "#include <%s/serialization/register/serialization_%s.hpp>\n", objInc, group_name);
         Printf(b_reg_cpp->b0, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, group_name);
         Printf(b_reg_cpp->b0, "#include <boost/serialization/shared_ptr.hpp>\n");
@@ -535,8 +535,8 @@ struct GroupObjects {
         Printf(b_obj_hpp->b0, "#define obj_%s_hpp\n", group_name);
         Printf(b_obj_hpp->b0, "\n");
         Printf(b_obj_hpp->b0, "#include <string>\n");
-        Printf(b_obj_hpp->b0, "#include <oh/libraryobject.hpp>\n");
-        Printf(b_obj_hpp->b0, "#include <oh/valueobject.hpp>\n");
+        Printf(b_obj_hpp->b0, "#include <rp/libraryobject.hpp>\n");
+        Printf(b_obj_hpp->b0, "#include <rp/valueobject.hpp>\n");
         Printf(b_obj_hpp->b0, "#include <boost/shared_ptr.hpp>");
         Printf(b_obj_hpp->b0, "%s\n", obj_include);
         Printf(b_obj_hpp->b0, "using namespace %s;\n", nmspace);
@@ -623,7 +623,7 @@ struct GroupObjects {
 
         if (generateCtor) {
 
-            Printf(b_val_hpp->b0,"        class %s : public ObjectHandler::ValueObject {\n", p.funcRename);
+            Printf(b_val_hpp->b0,"        class %s : public reposit::ValueObject {\n", p.funcRename);
             Printf(b_val_hpp->b0,"            friend class boost::serialization::access;\n");
             Printf(b_val_hpp->b0,"        public:\n");
             Printf(b_val_hpp->b0,"            %s() {}\n", p.funcRename);
@@ -634,8 +634,8 @@ struct GroupObjects {
             Printf(b_val_hpp->b0,"\n");
             Printf(b_val_hpp->b0,"            const std::set<std::string>& getSystemPropertyNames() const;\n");
             Printf(b_val_hpp->b0,"            std::vector<std::string> getPropertyNamesVector() const;\n");
-            Printf(b_val_hpp->b0,"            ObjectHandler::property_t getSystemProperty(const std::string&) const;\n");
-            Printf(b_val_hpp->b0,"            void setSystemProperty(const std::string& name, const ObjectHandler::property_t& value);\n");
+            Printf(b_val_hpp->b0,"            reposit::property_t getSystemProperty(const std::string&) const;\n");
+            Printf(b_val_hpp->b0,"            void setSystemProperty(const std::string& name, const reposit::property_t& value);\n");
             Printf(b_val_hpp->b0,"\n");
             Printf(b_val_hpp->b0,"        protected:\n");
             Printf(b_val_hpp->b0,"            static const char* mPropertyNames[];\n");
@@ -647,7 +647,7 @@ struct GroupObjects {
             Printf(b_val_hpp->b0,"\n");
             Printf(b_val_hpp->b0,"            template<class Archive>\n");
             Printf(b_val_hpp->b0,"            void serialize(Archive& ar, const unsigned int) {\n");
-            Printf(b_val_hpp->b0,"            boost::serialization::void_cast_register<%s, ObjectHandler::ValueObject>(this, this);\n", p.funcRename);
+            Printf(b_val_hpp->b0,"            boost::serialization::void_cast_register<%s, reposit::ValueObject>(this, this);\n", p.funcRename);
             Printf(b_val_hpp->b0,"                ar  & boost::serialization::make_nvp(\"ObjectId\", objectId_)\n");
             Printf(b_val_hpp->b0,"                    & boost::serialization::make_nvp(\"ClassName\", className_)\n");
             emitParmList(p.parms, b_val_hpp->b0, 1, "rp_tm_val_ser", 5, 0);
@@ -672,13 +672,13 @@ struct GroupObjects {
             Printf(b_val_cpp->b0,"        std::vector<std::string> %s::getPropertyNamesVector() const {\n", p.funcRename);
             Printf(b_val_cpp->b0,"            std::vector<std::string> ret(\n");
             Printf(b_val_cpp->b0,"                mPropertyNames, mPropertyNames + sizeof(mPropertyNames) / sizeof(const char*));\n");
-            Printf(b_val_cpp->b0,"            for (std::map<std::string, ObjectHandler::property_t>::const_iterator i = userProperties.begin();\n");
+            Printf(b_val_cpp->b0,"            for (std::map<std::string, reposit::property_t>::const_iterator i = userProperties.begin();\n");
             Printf(b_val_cpp->b0,"                i != userProperties.end(); ++i)\n");
             Printf(b_val_cpp->b0,"                ret.push_back(i->first);\n");
             Printf(b_val_cpp->b0,"            return ret;\n");
             Printf(b_val_cpp->b0,"        }\n");
             Printf(b_val_cpp->b0,"\n");
-            Printf(b_val_cpp->b0,"        ObjectHandler::property_t %s::getSystemProperty(const std::string& name) const {\n", p.funcRename);
+            Printf(b_val_cpp->b0,"        reposit::property_t %s::getSystemProperty(const std::string& name) const {\n", p.funcRename);
             Printf(b_val_cpp->b0,"            std::string nameUpper = boost::algorithm::to_upper_copy(name);\n");
             Printf(b_val_cpp->b0,"            if(strcmp(nameUpper.c_str(), \"OBJECTID\")==0)\n");
             Printf(b_val_cpp->b0,"                return objectId_;\n");
@@ -688,10 +688,10 @@ struct GroupObjects {
             Printf(b_val_cpp->b0,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
             Printf(b_val_cpp->b0,"                return Permanent_;\n");
             Printf(b_val_cpp->b0,"            else\n");
-            Printf(b_val_cpp->b0,"                OH_FAIL(\"Error: attempt to retrieve non-existent Property: '\" + name + \"'\");\n");
+            Printf(b_val_cpp->b0,"                RP_FAIL(\"Error: attempt to retrieve non-existent Property: '\" + name + \"'\");\n");
             Printf(b_val_cpp->b0,"        }\n");
             Printf(b_val_cpp->b0,"\n");
-            Printf(b_val_cpp->b0,"        void %s::setSystemProperty(const std::string& name, const ObjectHandler::property_t& value) {\n", p.funcRename);
+            Printf(b_val_cpp->b0,"        void %s::setSystemProperty(const std::string& name, const reposit::property_t& value) {\n", p.funcRename);
             Printf(b_val_cpp->b0,"            std::string nameUpper = boost::algorithm::to_upper_copy(name);\n");
             Printf(b_val_cpp->b0,"            if(strcmp(nameUpper.c_str(), \"OBJECTID\")==0)\n");
             Printf(b_val_cpp->b0,"                objectId_ = boost::get<std::string>(value);\n");
@@ -699,37 +699,37 @@ struct GroupObjects {
             Printf(b_val_cpp->b0,"                className_ = boost::get<std::string>(value);\n");
             voSetProp(b_val_cpp->b0, p.parms);
             Printf(b_val_cpp->b0,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
-            Printf(b_val_cpp->b0,"                Permanent_ = ObjectHandler::convert2<bool>(value);\n");
+            Printf(b_val_cpp->b0,"                Permanent_ = reposit::convert2<bool>(value);\n");
             Printf(b_val_cpp->b0,"            else\n");
-            Printf(b_val_cpp->b0,"                OH_FAIL(\"Error: attempt to set non-existent Property: '\" + name + \"'\");\n");
+            Printf(b_val_cpp->b0,"                RP_FAIL(\"Error: attempt to set non-existent Property: '\" + name + \"'\");\n");
             Printf(b_val_cpp->b0,"        }\n");
             Printf(b_val_cpp->b0,"\n");
             Printf(b_val_cpp->b0,"        %s::%s(\n", p.funcRename, p.funcRename);
             Printf(b_val_cpp->b0,"                const std::string& ObjectId,\n");
             emitParmList(p.parms, b_val_cpp->b0, 2, "rp_tm_val_prm", 4, ',', true, false, true);
             Printf(b_val_cpp->b0,"                bool Permanent) :\n");
-            Printf(b_val_cpp->b0,"            ObjectHandler::ValueObject(ObjectId, \"%s\", Permanent),\n", p.funcRename);
+            Printf(b_val_cpp->b0,"            reposit::ValueObject(ObjectId, \"%s\", Permanent),\n", p.funcRename);
             emitParmList(p.parms, b_val_cpp->b0, 1, "rp_tm_val_ini", 3, ',', true, false, true);
             Printf(b_val_cpp->b0,"            Permanent_(Permanent) {\n");
             Printf(b_val_cpp->b0,"        }\n");
 
             Printf(b_cre_hpp->b0, "\n");
-            Printf(b_cre_hpp->b0, "boost::shared_ptr<ObjectHandler::Object> create_%s(\n", p.funcRename);
-            Printf(b_cre_hpp->b0, "    const boost::shared_ptr<ObjectHandler::ValueObject>&);\n");
+            Printf(b_cre_hpp->b0, "boost::shared_ptr<reposit::Object> create_%s(\n", p.funcRename);
+            Printf(b_cre_hpp->b0, "    const boost::shared_ptr<reposit::ValueObject>&);\n");
 
             Printf(b_cre_cpp->b0, "\n");
-            Printf(b_cre_cpp->b0, "boost::shared_ptr<ObjectHandler::Object> %s::create_%s(\n", module, p.funcRename);
-            Printf(b_cre_cpp->b0, "    const boost::shared_ptr<ObjectHandler::ValueObject> &valueObject) {\n");
+            Printf(b_cre_cpp->b0, "boost::shared_ptr<reposit::Object> %s::create_%s(\n", module, p.funcRename);
+            Printf(b_cre_cpp->b0, "    const boost::shared_ptr<reposit::ValueObject> &valueObject) {\n");
             Printf(b_cre_cpp->b0, "\n");
             Printf(b_cre_cpp->b0, "    // conversions\n\n");
             emitParmList(p.parms, b_cre_cpp->b0, 1, "rp_tm_cre_cnv", 1, 0);
             Printf(b_cre_cpp->b0, "\n");
             Printf(b_cre_cpp->b0, "    bool Permanent =\n");
-            Printf(b_cre_cpp->b0, "        ObjectHandler::convert2<bool>(valueObject->getProperty(\"Permanent\"));\n");
+            Printf(b_cre_cpp->b0, "        reposit::convert2<bool>(valueObject->getProperty(\"Permanent\"));\n");
             Printf(b_cre_cpp->b0, "\n");
             Printf(b_cre_cpp->b0, "    // construct and return the object\n");
             Printf(b_cre_cpp->b0, "\n");
-            Printf(b_cre_cpp->b0, "    boost::shared_ptr<ObjectHandler::Object> object(\n");
+            Printf(b_cre_cpp->b0, "    boost::shared_ptr<reposit::Object> object(\n");
             Printf(b_cre_cpp->b0, "        new %s::%s(\n", module, p.name);
             Printf(b_cre_cpp->b0, "            valueObject,\n");
             emitParmList(p.parms, b_cre_cpp->b0, 0, "rp_tm_default", 3, ',', true, false, true);
@@ -751,7 +751,7 @@ struct GroupObjects {
                 s0 = p.base;
                 s1 = NewStringf("%s::%s", nmspace, p.base);
             } else {
-                s0 = NewStringf("ObjectHandler::LibraryObject<%s>", p.pname);
+                s0 = NewStringf("reposit::LibraryObject<%s>", p.pname);
                 s1 = p.pname;
             }
             Printf(b_obj_hpp->b0,"\n");
@@ -759,7 +759,7 @@ struct GroupObjects {
             Printf(b_obj_hpp->b0,"        public %s {\n", s0);
             Printf(b_obj_hpp->b0,"    public:\n");
             Printf(b_obj_hpp->b0,"        %s(\n", p.name);
-            Printf(b_obj_hpp->b0,"            const boost::shared_ptr<ObjectHandler::ValueObject>& properties,\n");
+            Printf(b_obj_hpp->b0,"            const boost::shared_ptr<reposit::ValueObject>& properties,\n");
             emitParmList(p.parms, b_obj_hpp->b0, 2, "rp_tm_default", 3, ',', true, false, true);
             Printf(b_obj_hpp->b0,"            bool permanent)\n");
             Printf(b_obj_hpp->b0,"        : %s(properties, permanent) {\n", s0);
@@ -773,9 +773,9 @@ struct GroupObjects {
 
             Printf(b_obj_hpp->b0, "    // BEGIN typemap rp_tm_obj_cls\n");
             if (parent) {
-                Printf(b_obj_hpp->b0, "    OH_OBJ_CLASS(%s, %s);\n", p.name, parent);
+                Printf(b_obj_hpp->b0, "    RP_OBJ_CLASS(%s, %s);\n", p.name, parent);
             } else {
-                Printf(b_obj_hpp->b0, "    OH_LIB_CLASS(%s, %s);\n", p.name, libraryClass);
+                Printf(b_obj_hpp->b0, "    RP_LIB_CLASS(%s, %s);\n", p.name, libraryClass);
             }
             Printf(b_obj_hpp->b0, "    // END   typemap rp_tm_obj_cls\n");
         }
@@ -801,7 +801,7 @@ struct GroupCpp {
         Printf(b_add_hpp->b0, "\n");
         Printf(b_add_hpp->b0, "#include <string>\n");
         // FIXME this #include is only needed if a datatype conversion is taking place.
-        Printf(b_add_hpp->b0, "#include <oh/property.hpp>\n");
+        Printf(b_add_hpp->b0, "#include <rp/property.hpp>\n");
         Printf(b_add_hpp->b0, "\n");
         Printf(b_add_hpp->b0, "namespace %s {\n", addinCppNameSpace);
         Printf(b_add_hpp->b0, "\n");
@@ -812,7 +812,7 @@ struct GroupCpp {
         Printf(b_add_cpp->b0, "#include <%s/conversions/convert2.hpp>\n", objInc);
         Printf(b_add_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
         // FIXME this #include is only required if the file contains enumerations.
-        //Printf(b_add_cpp->b0, "#include <oh/enumerations/typefactory.hpp>\n");
+        //Printf(b_add_cpp->b0, "#include <rp/enumerations/typefactory.hpp>\n");
         // FIXME this #include is only required if the file contains constructors.
         Printf(b_add_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, group_name);
         if (automatic) {
@@ -824,7 +824,7 @@ struct GroupCpp {
         // FIXME include only factories for types used in the current file.
         Printf(b_add_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_add_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
-        Printf(b_add_cpp->b0, "#include <oh/repository.hpp>\n");
+        Printf(b_add_cpp->b0, "#include <rp/repository.hpp>\n");
         //Printf(b_add_cpp->b0, "#include <AddinCpp/add_all.hpp>\n");
         Printf(b_add_cpp->b0, "\n");
     }
@@ -877,18 +877,18 @@ struct GroupCpp {
         Printf(b_add_cpp->b0,"    // Convert input types into Library types\n\n");
         emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
         Printf(b_add_cpp->b0,"\n");
-        Printf(b_add_cpp->b0,"    boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
+        Printf(b_add_cpp->b0,"    boost::shared_ptr<reposit::ValueObject> valueObject(\n");
         Printf(b_add_cpp->b0,"        new %s::ValueObjects::%s(\n", module, p.funcName);
         Printf(b_add_cpp->b0,"            objectID,\n");
         emitParmList(p.parms, b_add_cpp->b0, 0, "rp_tm_default", 3, ',', true, false, true);
         Printf(b_add_cpp->b0,"            false));\n");
-        Printf(b_add_cpp->b0,"    boost::shared_ptr<ObjectHandler::Object> object(\n");
+        Printf(b_add_cpp->b0,"    boost::shared_ptr<reposit::Object> object(\n");
         Printf(b_add_cpp->b0,"        new %s::%s(\n", module, p.name);
         Printf(b_add_cpp->b0,"            valueObject,\n");
         emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true, true);
         Printf(b_add_cpp->b0,"            false));\n");
         Printf(b_add_cpp->b0,"    std::string returnValue =\n");
-        Printf(b_add_cpp->b0,"        ObjectHandler::Repository::instance().storeObject(\n");
+        Printf(b_add_cpp->b0,"        reposit::Repository::instance().storeObject(\n");
         Printf(b_add_cpp->b0,"            objectID, object, false, valueObject);\n");
         Printf(b_add_cpp->b0,"    return returnValue;\n");
         Printf(b_add_cpp->b0,"}\n\n");
@@ -907,7 +907,7 @@ struct GroupCpp {
         Printf(b_add_cpp->b0,"    ) {\n\n");
         emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
         Printf(b_add_cpp->b0,"\n");
-        emitTypeMap(b_add_cpp->b0, "rp_tm_xxx_oh_get", p.node);
+        emitTypeMap(b_add_cpp->b0, "rp_tm_xxx_rp_get", p.node);
         Printf(b_add_cpp->b0,"    return xxx->%s(\n", p.name);
         emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true);
         Printf(b_add_cpp->b0,"        );\n", p.name);
@@ -949,7 +949,7 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "*/\n");
         Printf(b_xll_cpp->b0, "#ifdef BOOST_MSVC\n");
         Printf(b_xll_cpp->b0, "#  define BOOST_LIB_DIAGNOSTIC\n");
-        Printf(b_xll_cpp->b0, "#  include <oh/auto_link.hpp>\n");
+        Printf(b_xll_cpp->b0, "#  include <rp/auto_link.hpp>\n");
         Printf(b_xll_cpp->b0, "#  undef BOOST_LIB_DIAGNOSTIC\n");
         Printf(b_xll_cpp->b0, "#endif\n");
         Printf(b_xll_cpp->b0, "#include <sstream>\n");
@@ -988,7 +988,7 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "                %s,\n", p.name);
         emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_loop", 4, ',', true, true);
         Printf(b_xll_cpp->b0, "            );\n");
-        Printf(b_xll_cpp->b0, "        ObjectHandler::loop\n");
+        Printf(b_xll_cpp->b0, "        reposit::loop\n");
         Printf(b_xll_cpp->b0, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
         Printf(b_xll_cpp->b0, "            (functionCall, bindObject, %s, returnValue);\n", loopParameter);
         Printf(b_xll_cpp->b0, "\n");
@@ -1010,14 +1010,14 @@ struct GroupExcel {
         emitParmList(p.parms2, b_xll_cpp->b0, 2, "rp_tm_xll_prm", 1);
         Printf(b_xll_cpp->b0, ") {\n");
         Printf(b_xll_cpp->b0, "\n");
-        Printf(b_xll_cpp->b0, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
+        Printf(b_xll_cpp->b0, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
         Printf(b_xll_cpp->b0, "\n");
         Printf(b_xll_cpp->b0, "    try {\n");
         Printf(b_xll_cpp->b0, "\n");
-        Printf(b_xll_cpp->b0, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
-        Printf(b_xll_cpp->b0, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", p.funcName);
+        Printf(b_xll_cpp->b0, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
+        Printf(b_xll_cpp->b0, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcName);
         Printf(b_xll_cpp->b0, "\n");
-        Printf(b_xll_cpp->b0, "        ObjectHandler::validateRange(Trigger, \"Trigger\");\n");
+        Printf(b_xll_cpp->b0, "        reposit::validateRange(Trigger, \"Trigger\");\n");
         Printf(b_xll_cpp->b0, "\n");
         emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_xll_cnv", 2, 0, false);
         Printf(b_xll_cpp->b0, "\n");
@@ -1034,7 +1034,7 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "\n");
         Printf(b_xll_cpp->b0, "    } catch (const std::exception &e) {\n");
         Printf(b_xll_cpp->b0, "\n");
-        Printf(b_xll_cpp->b0, "        ObjectHandler::RepositoryXL::instance().logError(e.what(), functionCall);\n");
+        Printf(b_xll_cpp->b0, "        reposit::RepositoryXL::instance().logError(e.what(), functionCall);\n");
         Printf(b_xll_cpp->b0, "        return 0;\n");
         Printf(b_xll_cpp->b0, "\n");
         Printf(b_xll_cpp->b0, "    }\n");
@@ -1053,37 +1053,37 @@ struct GroupExcel {
             emitParmList(p.parms2, b_xll_cpp->b0, 2, "rp_tm_xll_prm");
             Printf(b_xll_cpp->b0, ") {\n");
             Printf(b_xll_cpp->b0, "\n");
-            Printf(b_xll_cpp->b0, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
+            Printf(b_xll_cpp->b0, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
             Printf(b_xll_cpp->b0, "\n");
             Printf(b_xll_cpp->b0, "    try {\n");
             Printf(b_xll_cpp->b0, "\n");
-            Printf(b_xll_cpp->b0, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
-            Printf(b_xll_cpp->b0, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", p.funcRename);
+            Printf(b_xll_cpp->b0, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
+            Printf(b_xll_cpp->b0, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcRename);
             Printf(b_xll_cpp->b0, "\n");
             emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_xll_cnv", 2, 0, false);
             Printf(b_xll_cpp->b0, "\n");
-            Printf(b_xll_cpp->b0, "        boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
+            Printf(b_xll_cpp->b0, "        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
             Printf(b_xll_cpp->b0, "            new %s::ValueObjects::%s(\n", module, p.funcRename);
             Printf(b_xll_cpp->b0, "                objectID,\n");
             emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_xll_cll_val", 4, ',', true, true, true);
             Printf(b_xll_cpp->b0, "                false));\n");
             Printf(b_xll_cpp->b0, "\n");
-            Printf(b_xll_cpp->b0, "        boost::shared_ptr<ObjectHandler::Object> object(\n");
+            Printf(b_xll_cpp->b0, "        boost::shared_ptr<reposit::Object> object(\n");
             Printf(b_xll_cpp->b0, "            new %s::%s(\n", module, p.name);
             Printf(b_xll_cpp->b0, "                valueObject,\n");
             emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_xll_cll_obj", 4, ',', true, true, true);
             Printf(b_xll_cpp->b0, "                false));\n");
             Printf(b_xll_cpp->b0, "\n");
             Printf(b_xll_cpp->b0, "        std::string returnValue =\n");
-            Printf(b_xll_cpp->b0, "            ObjectHandler::RepositoryXL::instance().storeObject(objectID, object, true);\n");
+            Printf(b_xll_cpp->b0, "            reposit::RepositoryXL::instance().storeObject(objectID, object, true);\n");
             Printf(b_xll_cpp->b0, "\n");
             Printf(b_xll_cpp->b0, "        static char ret[XL_MAX_STR_LEN];\n");
-            Printf(b_xll_cpp->b0, "        ObjectHandler::stringToChar(returnValue, ret);\n");
+            Printf(b_xll_cpp->b0, "        reposit::stringToChar(returnValue, ret);\n");
             Printf(b_xll_cpp->b0, "        return ret;\n");
             Printf(b_xll_cpp->b0, "\n");
             Printf(b_xll_cpp->b0, "    } catch (const std::exception &e) {\n");
             Printf(b_xll_cpp->b0, "\n");
-            Printf(b_xll_cpp->b0, "        ObjectHandler::RepositoryXL::instance().logError(e.what(), functionCall);\n");
+            Printf(b_xll_cpp->b0, "        reposit::RepositoryXL::instance().logError(e.what(), functionCall);\n");
             Printf(b_xll_cpp->b0, "        return 0;\n");
             Printf(b_xll_cpp->b0, "\n");
             Printf(b_xll_cpp->b0, "    }\n");
@@ -1104,7 +1104,7 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "                xxx,\n");
         emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_loop", 4, ',', true, true);
         Printf(b_xll_cpp->b0, "            );\n");
-        Printf(b_xll_cpp->b0, "        ObjectHandler::loop\n");
+        Printf(b_xll_cpp->b0, "        reposit::loop\n");
         Printf(b_xll_cpp->b0, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
         Printf(b_xll_cpp->b0, "            (functionCall, bindObject, %s, returnValue);\n", loopParameter);
         Printf(b_xll_cpp->b0, "\n");
@@ -1125,16 +1125,16 @@ struct GroupExcel {
         emitParmList(p.parms2, b_xll_cpp->b0, 2, "rp_tm_xll_prm");
         Printf(b_xll_cpp->b0, ") {\n");
         Printf(b_xll_cpp->b0, "\n");
-        Printf(b_xll_cpp->b0, "    boost::shared_ptr<ObjectHandler::FunctionCall> functionCall;\n");
+        Printf(b_xll_cpp->b0, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
         Printf(b_xll_cpp->b0, "\n");
         Printf(b_xll_cpp->b0, "    try {\n");
         Printf(b_xll_cpp->b0, "\n");
-        Printf(b_xll_cpp->b0, "        functionCall = boost::shared_ptr<ObjectHandler::FunctionCall>\n");
-        Printf(b_xll_cpp->b0, "            (new ObjectHandler::FunctionCall(\"%s\"));\n", p.funcName);
+        Printf(b_xll_cpp->b0, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
+        Printf(b_xll_cpp->b0, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcName);
         Printf(b_xll_cpp->b0, "\n");
         emitParmList(p.parms, b_xll_cpp->b0, 1, "rp_tm_xll_cnv", 2, 0, false);
         Printf(b_xll_cpp->b0, "\n");
-        emitTypeMap(b_xll_cpp->b0, "rp_tm_xxx_oh_get", p.node, 2);
+        emitTypeMap(b_xll_cpp->b0, "rp_tm_xxx_rp_get", p.node, 2);
         Printf(b_xll_cpp->b0, "\n");
         if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
             emitLoopFunc(p, loopParameter);
@@ -1148,7 +1148,7 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "\n");
         Printf(b_xll_cpp->b0, "    } catch (const std::exception &e) {\n");
         Printf(b_xll_cpp->b0, "\n");
-        Printf(b_xll_cpp->b0, "        ObjectHandler::RepositoryXL::instance().logError(e.what(), functionCall);\n");
+        Printf(b_xll_cpp->b0, "        reposit::RepositoryXL::instance().logError(e.what(), functionCall);\n");
         Printf(b_xll_cpp->b0, "        return 0;\n");
         Printf(b_xll_cpp->b0, "\n");
         Printf(b_xll_cpp->b0, "    }\n");
@@ -1207,14 +1207,14 @@ struct GroupCountify {
 
         Printf(b_cfy_cpp->b0, "\n");
         Printf(b_cfy_cpp->b0, "#include \"init.hpp\"\n");
-        Printf(b_cfy_cpp->b0, "#include <oh/repository.hpp>\n");
+        Printf(b_cfy_cpp->b0, "#include <rp/repository.hpp>\n");
         Printf(b_cfy_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, group_name);
         Printf(b_cfy_cpp->b0, "\n");
         Printf(b_cfy_cpp->b0, "//FIXME this #include is only required if the file contains conversions\n", objInc);
         Printf(b_cfy_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
         Printf(b_cfy_cpp->b0, "#include <%s/conversions/coercetermstructure.hpp>\n", objInc);
         //Printf(b_cfy_cpp->b0, "//FIXME this #include is only required if the file contains enumerations\n", objInc);
-        //Printf(b_cfy_cpp->b0, "#include <oh/enumerations/typefactory.hpp>\n");
+        //Printf(b_cfy_cpp->b0, "#include <rp/enumerations/typefactory.hpp>\n");
         Printf(b_cfy_cpp->b0, "//FIXME this #include is only required if the file contains constructors\n", objInc);
         Printf(b_cfy_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, group_name);
         if (automatic) {
@@ -1226,7 +1226,7 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0, "//FIXME include only factories for types used in the current file\n", objInc);
         Printf(b_cfy_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_cfy_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
-        Printf(b_cfy_cpp->b0, "#include <oh/repository.hpp>\n");
+        Printf(b_cfy_cpp->b0, "#include <rp/repository.hpp>\n");
         //Printf(b_cfy_cpp->b0, "#include <AddinCpp/add_all.hpp>\n");
         Printf(b_cfy_cpp->b0, "\n");
     }
@@ -1291,19 +1291,19 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"        // Convert input types into Library types\n\n");
         emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cnv", 2, 0, false);
         Printf(b_cfy_cpp->b0,"\n");
-        Printf(b_cfy_cpp->b0,"        boost::shared_ptr<ObjectHandler::ValueObject> valueObject(\n");
+        Printf(b_cfy_cpp->b0,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
         Printf(b_cfy_cpp->b0,"            new %s::ValueObjects::%s(\n", module, p.funcName);
         Printf(b_cfy_cpp->b0,"                objectID,\n");
         emitParmList(p.parms, b_cfy_cpp->b0, 0, "rp_tm_default", 4, ',', true, false, true);
         Printf(b_cfy_cpp->b0,"                false));\n");
-        Printf(b_cfy_cpp->b0,"        boost::shared_ptr<ObjectHandler::Object> object(\n");
+        Printf(b_cfy_cpp->b0,"        boost::shared_ptr<reposit::Object> object(\n");
         Printf(b_cfy_cpp->b0,"            new %s::%s(\n", module, p.name);
         Printf(b_cfy_cpp->b0,"                valueObject,\n");
         emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cll", 4, ',', true, true, true);
         Printf(b_cfy_cpp->b0,"                false));\n");
         Printf(b_cfy_cpp->b0,"        static std::string returnValue;\n");
         Printf(b_cfy_cpp->b0,"        returnValue =\n");
-        Printf(b_cfy_cpp->b0,"            ObjectHandler::Repository::instance().storeObject(\n");
+        Printf(b_cfy_cpp->b0,"            reposit::Repository::instance().storeObject(\n");
         Printf(b_cfy_cpp->b0,"                objectID, object, true, valueObject);\n");
         Printf(b_cfy_cpp->b0,"\n");
         Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
@@ -1342,7 +1342,7 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"        // Convert input types into Library types\n\n");
         emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cnv", 2, 0, false);
         Printf(b_cfy_cpp->b0,"\n");
-        emitTypeMap(b_cfy_cpp->b0, "rp_tm_xxx_oh_get", p.node, 2);
+        emitTypeMap(b_cfy_cpp->b0, "rp_tm_xxx_rp_get", p.node, 2);
         emitTypeMap(b_cfy_cpp->b0, "rp_tm_cfy_ret1", p.n, 2);
         Printf(b_cfy_cpp->b0,"        xxx->%s(\n", p.name);
         emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true);
@@ -2066,7 +2066,7 @@ int functionWrapperImplFunc(Node *n) {
 
     // Create from parms another list parms2 - prepend an argument to represent
     // the dependency trigger which is the first argument of every addin function.
-    p.parms2 = prependParm(p.parms, "Trigger", "ObjectHandler::property_t");
+    p.parms2 = prependParm(p.parms, "Trigger", "reposit::property_t");
 
     addinList_.functionWrapperImplFunc(p);
 
@@ -2183,7 +2183,7 @@ int functionWrapperImplCtor(Node *n) {
     Parm *temp1 = prependParm(p.parms, "Permanent", "bool", false);
     Parm *temp2 = prependParm(temp1, "Overwrite", "bool", false);
     Parm *temp3 = prependParm(temp2, "objectID", "std::string");
-    p.parms2 = prependParm(temp3, "Trigger", "ObjectHandler::property_t");
+    p.parms2 = prependParm(temp3, "Trigger", "reposit::property_t");
 
     // Create from parms2 another list parms3 - prepend an argument to represent
     // the object ID which is the return value of addin func that wraps ctor.
@@ -2233,7 +2233,7 @@ int functionWrapperImplMemb(Node *n) {
     // the object ID which is passed in as the first parameter to every ctor.
     ParmList *parmsTemp = Getattr(p.parms, "nextSibling");
     Parm *parmsTemp2 = prependParm(parmsTemp, "objectID", "std::string");
-    p.parms2 = prependParm(parmsTemp2, "Trigger", "ObjectHandler::property_t");
+    p.parms2 = prependParm(parmsTemp2, "Trigger", "reposit::property_t");
 
     // We are invoking the member function of a class.
     // Create a dummy node and attach to it the type of the class.
