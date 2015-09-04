@@ -926,13 +926,13 @@ struct GroupExcel {
         b_xll_reg = new Buffer(NewStringf("%s/register/register_%s.cpp", xllDir, group_name));
 
         Printf(b_xll_cpp->b0, "\n");
-        Printf(b_xll_cpp->b0, "#include <ohxl/objecthandlerxl.hpp>\n");
-        Printf(b_xll_cpp->b0, "#include <ohxl/register/register_all.hpp>\n");
-        Printf(b_xll_cpp->b0, "#include <ohxl/functions/export.hpp>\n");
-        Printf(b_xll_cpp->b0, "#include <ohxl/utilities/xlutilities.hpp>\n");
-        Printf(b_xll_cpp->b0, "#include <ohxl/objectwrapperxl.hpp>\n");
+        Printf(b_xll_cpp->b0, "#include <rpxl/repositxl.hpp>\n");
+        Printf(b_xll_cpp->b0, "#include <rpxl/register/register_all.hpp>\n");
+        Printf(b_xll_cpp->b0, "#include <rpxl/functions/export.hpp>\n");
+        Printf(b_xll_cpp->b0, "#include <rpxl/utilities/xlutilities.hpp>\n");
+        Printf(b_xll_cpp->b0, "#include <rpxl/objectwrapperxl.hpp>\n");
         Printf(b_xll_cpp->b0, "// FIXME only required if the file contains a looping function\n");
-        Printf(b_xll_cpp->b0, "#include <ohxl/loop.hpp>\n");
+        Printf(b_xll_cpp->b0, "#include <rpxl/loop.hpp>\n");
         //Printf(b_xll_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, group_name);
