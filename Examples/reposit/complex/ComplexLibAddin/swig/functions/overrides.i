@@ -1,10 +1,13 @@
 
-%feature("rp:group", "overrides");
-%feature("rp:obj_include") %{
+%pragma(reposit) group="overrides";
+%pragma(reposit) override_obj="true";
+
+%pragma(reposit) obj_include=%{
 #include <cl/overrides.hpp>
 %}
 
-%feature("rp:override_obj");
+%pragma(reposit) add_include=%{
+%}
 
 namespace ComplexLib {
     class Test2 {
@@ -13,8 +16,4 @@ namespace ComplexLib {
         std::string f();
     };
 }
-
-%feature("rp:override_obj", "");
-
-%feature("rp:group", "");
 

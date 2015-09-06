@@ -1,6 +1,7 @@
 
-%feature("rp:group", "typedefs");
-%feature("rp:obj_include") %{
+%pragma(reposit) group="typedefs";
+
+%pragma(reposit) obj_include=%{
 #include <cl/typedefs.hpp>
 %}
 
@@ -11,6 +12,4 @@ namespace ComplexLib {
 
     std::string longDoubleToString(const LongDouble &d);
 }
-
-%feature("rp:group", "");
 

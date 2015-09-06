@@ -538,7 +538,8 @@ struct GroupObjects {
         Printf(b_obj_hpp->b0, "#include <rp/libraryobject.hpp>\n");
         Printf(b_obj_hpp->b0, "#include <rp/valueobject.hpp>\n");
         Printf(b_obj_hpp->b0, "#include <boost/shared_ptr.hpp>");
-        Printf(b_obj_hpp->b0, "%s\n", obj_include);
+        if (obj_include)
+            Printf(b_obj_hpp->b0, "%s\n", obj_include);
         Printf(b_obj_hpp->b0, "using namespace %s;\n", nmspace);
         Printf(b_obj_hpp->b0, "\n");
         Printf(b_obj_hpp->b0,"namespace %s {\n", module);
@@ -821,7 +822,8 @@ struct GroupCpp {
         } else {
             Printf(b_add_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, group_name);
         }
-        Printf(b_add_cpp->b0, "%s\n", add_include);
+        if (add_include)
+            Printf(b_add_cpp->b0, "%s\n", add_include);
         Printf(b_add_cpp->b0, "//FIXME include only factories for types used in the current file\n", objInc);
         Printf(b_add_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_add_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
@@ -1230,7 +1232,8 @@ struct GroupCountify {
         } else {
             Printf(b_cfy_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, group_name);
         }
-        Printf(b_cfy_cpp->b0, "%s\n", add_include);
+        if (add_include)
+            Printf(b_cfy_cpp->b0, "%s\n", add_include);
         Printf(b_cfy_cpp->b0, "//FIXME include only factories for types used in the current file\n", objInc);
         Printf(b_cfy_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_cfy_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
@@ -1872,21 +1875,21 @@ virtual int top(Node *n) {
    return SWIG_OK;
 }
 
-void getFeatures(Node *n) {
-
-    obj_include = Getattr(n, "feature:rp:obj_include");
-    add_include = Getattr(n, "feature:rp:add_include");
-
-    // Check whether to generate all source code, or to omit some code to be handwritten by the user.
-    // For the user writing the config file, it is easier to assume automatic (default)
-    // unless overridden with '%feature("rp:override_obj");' :
-    bool manual = 0 != checkAttribute(n, "feature:rp:override_obj", "1");
-    // The source code for this SWIG module is cleaner if we think of it the opposite way:
-    automatic = !manual;
-
-    group_name = Getattr(n, "feature:rp:group");
-    printf(">>Group='%s'.\n", Char(group_name));
-}
+//void getFeatures(Node *n) {
+//
+//    obj_include = Getattr(n, "feature:rp:obj_include");
+//    add_include = Getattr(n, "feature:rp:add_include");
+//
+//    // Check whether to generate all source code, or to omit some code to be handwritten by the user.
+//    // For the user writing the config file, it is easier to assume automatic (default)
+//    // unless overridden with '%feature("rp:override_obj");' :
+//    bool manual = 0 != checkAttribute(n, "feature:rp:override_obj", "1");
+//    // The source code for this SWIG module is cleaner if we think of it the opposite way:
+//    automatic = !manual;
+//
+//    group_name = Getattr(n, "feature:rp:group");
+//    printf(">>Group='%s'.\n", Char(group_name));
+//}
 
 // overrride base class members, write debug info to b_init,
 // and possibly pass control to a handler.
@@ -1931,7 +1934,7 @@ int namespaceDeclaration(Node *n) {
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
     printf("namespaceDeclaration\n");
-    getFeatures(n);
+    //getFeatures(n);
     int ret=Language::namespaceDeclaration(n);
     Printf(b_init, "END   namespaceDeclaration - node name='%s'.\n", Char(nmspace));
     return ret;
@@ -2024,13 +2027,56 @@ int includeDirective(Node *n) {
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
     printf("includeDirective\n");
+
+    obj_include = 0;
+    add_include = 0;
+    group_name = 0;
+    automatic = true;
+
     int ret=Language::includeDirective(n);
     Printf(b_init, "END   includeDirective - node name='%s'.\n", Char(nodename));
     return ret;
 }
 
+int pragmaDirective(Node *n) {
+    if (!ImportMode) {
+        String *lang = Getattr(n, "lang");
+
+        if (0 == Strcmp(lang, "reposit")) {
+            String *name = Getattr(n, "name");
+            String *value = Getattr(n, "value");
+            printf ("ABCDEF name=%s value=%s.\n", Char(name), Char(value));
+
+            if (0 == Strcmp(name, "group")) {
+                group_name = NewString(value);
+            } else if (0 == Strcmp(name, "obj_include")) {
+                obj_include = NewString(value);
+            } else if (0 == Strcmp(name, "add_include")) {
+                add_include = NewString(value);
+            } else if (0 == Strcmp(name, "override_obj")) {
+                // For the user writing the config file, it is easier to assume automatic (default)
+                // unless overridden with '%feature("rp:override_obj");' :
+                bool manual = 0 == Strcmp(value, "true");
+                // The source code for this SWIG module is cleaner if we think of it the opposite way:
+                automatic = !manual;
+            } else {
+                Swig_error(input_file, line_number, "Unrecognized pragma.\n");
+            }
+        }
+    }
+    return Language::pragmaDirective(n);
+  }
 
 int functionWrapperImpl(Node *n) {
+    if (!group_name) {
+        Swig_error(input_file, line_number,
+            "\n******************\n"
+            "group name not set. You need this at the top of each *.i interface file:\n"
+            "%%pragma(reposit) group=\"xxx\";\n"
+            "******************\n"
+        );
+        SWIG_exit(EXIT_FAILURE);
+    }
 
     // Generate output appropriate to the given function type
     int ret;

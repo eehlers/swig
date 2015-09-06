@@ -1,6 +1,7 @@
 
-%feature("rp:group", "objects");
-%feature("rp:obj_include") %{
+%pragma(reposit) group="objects";
+
+%pragma(reposit) obj_include=%{
 #include <cl/objects.hpp>
 %}
 
@@ -11,6 +12,4 @@ namespace ComplexLib {
         long getInput() const;
     };
 }
-
-%feature("rp:group", "");
 

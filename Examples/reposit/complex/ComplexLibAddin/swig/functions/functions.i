@@ -1,12 +1,11 @@
 
-%feature("rp:group", "functions");
-%feature("rp:obj_include") %{
+%pragma(reposit) group="functions";
+
+%pragma(reposit) obj_include=%{
 #include <cl/functions.hpp>
 %}
 
 namespace ComplexLib {
     std::string func1();
 }
-
-%feature("rp:group", "");
 

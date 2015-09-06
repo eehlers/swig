@@ -1,6 +1,7 @@
 
-%feature("rp:group", "inheritance");
-%feature("rp:obj_include") %{
+%pragma(reposit) group="inheritance";
+
+%pragma(reposit) obj_include=%{
 #include <cl/inheritance.hpp>
 %}
 
@@ -38,6 +39,4 @@ namespace ComplexLib {
         C();
     };
 }
-
-%feature("rp:group", "");
 
