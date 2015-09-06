@@ -6,10 +6,10 @@ OBJECTS := $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 all: mainComplexLibAddin
 
 mainComplexLibAddin: $(OBJECTS) ../../lib/libAddinCpp.so
-	g++ -g -Wall $(OBJECTS) -o mainComplexLibAddin -L../../lib -L$(LDIR) -lAddinCpp -lObjectHandler
+	g++ -g -Wall -Wno-unused-local-typedefs $(OBJECTS) -o mainComplexLibAddin -L../../lib -L$(LDIR) -lAddinCpp -lreposit
 
 %.o: %.cpp test_all.hpp
-	g++ -c -g -Wall -I. -I.. -I$(IDIR) $< -o $@
+	g++ -c -g -Wall -Wno-unused-local-typedefs -I. -I.. -I$(IDIR) $< -o $@
 
 clean:
 	rm -f mainComplexLibAddin $(OBJECTS)

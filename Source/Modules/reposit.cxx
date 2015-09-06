@@ -808,12 +808,13 @@ struct GroupCpp {
 
         Printf(b_add_cpp->b0, "\n");
         Printf(b_add_cpp->b0, "#include <AddinCpp/add_%s.hpp>\n", group_name);
-        // FIXME this #include is only required if the file contains conversions.
-        Printf(b_add_cpp->b0, "#include <%s/conversions/convert2.hpp>\n", objInc);
+        Printf(b_add_cpp->b0, "//FIXME this #include is only required if the file contains conversions\n", objInc);
+        Printf(b_add_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
         Printf(b_add_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
+        Printf(b_add_cpp->b0, "#include <%s/conversions/coercetermstructure.hpp>\n", objInc);
         // FIXME this #include is only required if the file contains enumerations.
         //Printf(b_add_cpp->b0, "#include <rp/enumerations/typefactory.hpp>\n");
-        // FIXME this #include is only required if the file contains constructors.
+        Printf(b_add_cpp->b0, "//FIXME this #include is only required if the file contains constructors\n", objInc);
         Printf(b_add_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, group_name);
         if (automatic) {
             Printf(b_add_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, group_name);
@@ -821,7 +822,7 @@ struct GroupCpp {
             Printf(b_add_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, group_name);
         }
         Printf(b_add_cpp->b0, "%s\n", add_include);
-        // FIXME include only factories for types used in the current file.
+        Printf(b_add_cpp->b0, "//FIXME include only factories for types used in the current file\n", objInc);
         Printf(b_add_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_add_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_add_cpp->b0, "#include <rp/repository.hpp>\n");
@@ -856,61 +857,67 @@ struct GroupCpp {
         Printf(b_add_cpp->b0,") {\n");
         emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
         Printf(b_add_cpp->b0,"\n");
-        Printf(b_add_cpp->b0,"    return %s::%s(\n", module, p.symname);
+        emitTypeMap(b_add_cpp->b0, "rp_tm_add_ret1", p.n, 2);
+        Printf(b_add_cpp->b0,"    %s::%s(\n", module, p.symname);
         emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cll", 2, ',', true, true);
         Printf(b_add_cpp->b0,"    );\n");
+        emitTypeMap(b_add_cpp->b0, "rp_tm_add_ret2", p.n, 2);
         Printf(b_add_cpp->b0,"}\n");
     }
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        Printf(b_add_hpp->b0,"\n");
-        Printf(b_add_hpp->b0,"    std::string %s(\n", p.funcName);
-        emitParmList(p.parms2, b_add_hpp->b0, 2, "rp_tm_add_prm", 2);
-        Printf(b_add_hpp->b0,"    );\n\n");
+        if (generateCtor) {
+            Printf(b_add_hpp->b0,"\n");
+            Printf(b_add_hpp->b0,"    std::string %s(\n", p.funcName);
+            emitParmList(p.parms2, b_add_hpp->b0, 2, "rp_tm_add_prm", 2);
+            Printf(b_add_hpp->b0,"    );\n\n");
 
-        Printf(b_add_cpp->b0,"//****CTOR*****\n");
-        Printf(b_add_cpp->b0,"std::string %s::%s(\n", addinCppNameSpace, p.funcName);
-        emitParmList(p.parms2, b_add_cpp->b0, 2, "rp_tm_add_prm", 2);
-        Printf(b_add_cpp->b0,"    ) {\n");
-        Printf(b_add_cpp->b0,"\n");
-        Printf(b_add_cpp->b0,"    // Convert input types into Library types\n\n");
-        emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
-        Printf(b_add_cpp->b0,"\n");
-        Printf(b_add_cpp->b0,"    boost::shared_ptr<reposit::ValueObject> valueObject(\n");
-        Printf(b_add_cpp->b0,"        new %s::ValueObjects::%s(\n", module, p.funcName);
-        Printf(b_add_cpp->b0,"            objectID,\n");
-        emitParmList(p.parms, b_add_cpp->b0, 0, "rp_tm_default", 3, ',', true, false, true);
-        Printf(b_add_cpp->b0,"            false));\n");
-        Printf(b_add_cpp->b0,"    boost::shared_ptr<reposit::Object> object(\n");
-        Printf(b_add_cpp->b0,"        new %s::%s(\n", module, p.name);
-        Printf(b_add_cpp->b0,"            valueObject,\n");
-        emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true, true);
-        Printf(b_add_cpp->b0,"            false));\n");
-        Printf(b_add_cpp->b0,"    std::string returnValue =\n");
-        Printf(b_add_cpp->b0,"        reposit::Repository::instance().storeObject(\n");
-        Printf(b_add_cpp->b0,"            objectID, object, false, valueObject);\n");
-        Printf(b_add_cpp->b0,"    return returnValue;\n");
-        Printf(b_add_cpp->b0,"}\n\n");
+            Printf(b_add_cpp->b0,"//****CTOR*****\n");
+            Printf(b_add_cpp->b0,"std::string %s::%s(\n", addinCppNameSpace, p.funcName);
+            emitParmList(p.parms2, b_add_cpp->b0, 2, "rp_tm_add_prm", 2);
+            Printf(b_add_cpp->b0,"    ) {\n");
+            Printf(b_add_cpp->b0,"\n");
+            Printf(b_add_cpp->b0,"    // Convert input types into Library types\n\n");
+            emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
+            Printf(b_add_cpp->b0,"\n");
+            Printf(b_add_cpp->b0,"    boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+            Printf(b_add_cpp->b0,"        new %s::ValueObjects::%s(\n", module, p.funcName);
+            Printf(b_add_cpp->b0,"            objectID,\n");
+            emitParmList(p.parms, b_add_cpp->b0, 0, "rp_tm_default", 3, ',', true, false, true);
+            Printf(b_add_cpp->b0,"            false));\n");
+            Printf(b_add_cpp->b0,"    boost::shared_ptr<reposit::Object> object(\n");
+            Printf(b_add_cpp->b0,"        new %s::%s(\n", module, p.name);
+            Printf(b_add_cpp->b0,"            valueObject,\n");
+            emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true, true);
+            Printf(b_add_cpp->b0,"            false));\n");
+            Printf(b_add_cpp->b0,"    std::string returnValue =\n");
+            Printf(b_add_cpp->b0,"        reposit::Repository::instance().storeObject(\n");
+            Printf(b_add_cpp->b0,"            objectID, object, false, valueObject);\n");
+            Printf(b_add_cpp->b0,"    return returnValue;\n");
+            Printf(b_add_cpp->b0,"}\n\n");
+        }
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
-        emitTypeMap(b_add_hpp->b0, "rp_tm_add_ret", p.n, 1);
+        emitTypeMap(b_add_hpp->b0, "rp_tm_add_rt3", p.n, 1);
         Printf(b_add_hpp->b0,"    %s(\n", p.funcName);
         emitParmList(p.parms2, b_add_hpp->b0, 2, "rp_tm_add_prm", 2);
         Printf(b_add_hpp->b0,"    );\n\n");
 
         Printf(b_add_cpp->b0,"//****MEMB*****\n");
-        emitTypeMap(b_add_cpp->b0, "rp_tm_add_ret", p.n);
+        emitTypeMap(b_add_cpp->b0, "rp_tm_add_rt3", p.n);
         Printf(b_add_cpp->b0,"%s::%s(\n", addinCppNameSpace, p.funcName);
         emitParmList(p.parms2, b_add_cpp->b0, 2, "rp_tm_add_prm", 2);
         Printf(b_add_cpp->b0,"    ) {\n\n");
         emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cnv", 1, 0, false);
         Printf(b_add_cpp->b0,"\n");
         emitTypeMap(b_add_cpp->b0, "rp_tm_xxx_rp_get", p.node);
-        Printf(b_add_cpp->b0,"    return xxx->%s(\n", p.name);
+        emitTypeMap(b_add_cpp->b0, "rp_tm_add_ret1", p.n, 2);
+        Printf(b_add_cpp->b0,"    xxx->%s(\n", p.name);
         emitParmList(p.parms, b_add_cpp->b0, 1, "rp_tm_add_cll", 3, ',', true, true);
         Printf(b_add_cpp->b0,"        );\n", p.name);
+        emitTypeMap(b_add_cpp->b0, "rp_tm_add_ret2", p.n, 2);
         Printf(b_add_cpp->b0,"}\n");
     }
 };
@@ -933,7 +940,7 @@ struct GroupExcel {
         Printf(b_xll_cpp->b0, "#include <rpxl/objectwrapperxl.hpp>\n");
         Printf(b_xll_cpp->b0, "// FIXME only required if the file contains a looping function\n");
         Printf(b_xll_cpp->b0, "#include <rpxl/loop.hpp>\n");
-        //Printf(b_xll_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
+        Printf(b_xll_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_xll_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, group_name);
         Printf(b_xll_cpp->b0, "//#include \"%s/obj_%s.hpp\"\n", objInc, group_name);
@@ -1043,6 +1050,7 @@ struct GroupExcel {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
+        // FIXME shouldn't we only generate this code if generateCtor==true?
         excelRegister(b_xll_reg->b0, p.n, 0, p.parms3);
         excelUnregister(b_xll_reg->b1, p.n, p.type, p.parms3);
 
@@ -1275,6 +1283,7 @@ struct GroupCountify {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
+        // FIXME shouldn't we only generate this code if generateCtor==true?
         Printf(b_cfy_cpp->b0,"//****CTOR*****\n");
         Printf(b_cfy_cpp->b0,"extern \"C\" {\n");
         Printf(b_cfy_cpp->b0,"COUNTIFY_API\n");
@@ -1540,6 +1549,24 @@ struct AddinCpp : public AddinImpl<GroupCpp> {
         Printf(b_add_all_hpp->b0, "#define add_all_hpp\n");
         Printf(b_add_all_hpp->b0, "\n");
         Printf(b_add_all_hpp->b0, "#include <%s/init.hpp>\n", addInc);
+    }
+
+    virtual void functionWrapperImplFunc(ParmsFunc &p) {
+        if (checkAttribute(p.n, "feature:rp:generate_cpp", "1")) {
+            AddinImpl::functionWrapperImplFunc(p);
+        }
+    }
+
+    virtual void functionWrapperImplCtor(ParmsCtor &p) {
+        if (checkAttribute(p.n, "feature:rp:generate_cpp", "1")) {
+            AddinImpl::functionWrapperImplCtor(p);
+        }
+    }
+
+    virtual void functionWrapperImplMemb(ParmsMemb &p) {
+        if (checkAttribute(p.n, "feature:rp:generate_cpp", "1")) {
+            AddinImpl::functionWrapperImplMemb(p);
+        }
     }
 };
 

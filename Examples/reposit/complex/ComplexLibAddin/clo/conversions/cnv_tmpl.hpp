@@ -8,14 +8,14 @@
 #include <cl/conversions.hpp>
 #include <boost/lexical_cast.hpp>
 
-namespace ObjectHandler {
+namespace reposit {
 
     template<class container_t>
     ComplexLib::Grade convertGrade(const container_t& c) {
         if(c.type() == typeid(double))
             return ComplexLib::Grade(c.operator double());
         else
-            OH_FAIL("unable to convert type '" << c.type().name() << "' to type 'ComplexLib::Grade'");
+            RP_FAIL("unable to convert type '" << c.type().name() << "' to type 'ComplexLib::Grade'");
     }
 
 //    inline bool is_numeric(const std::string &s, long &l) {
@@ -37,9 +37,9 @@ namespace ObjectHandler {
 //            if (is_numeric(s, l))
 //                return ComplexLib::Long(l);
 //            else
-//                OH_FAIL("unable to convert string '" << s << "' to type 'ComplexLib::Long'");
+//                RP_FAIL("unable to convert string '" << s << "' to type 'ComplexLib::Long'");
 //        }
-//        OH_FAIL("unable to convert type '" << c.type().name() << "' to type 'ComplexLib::Long'");
+//        RP_FAIL("unable to convert type '" << c.type().name() << "' to type 'ComplexLib::Long'");
 //    }
 }
 

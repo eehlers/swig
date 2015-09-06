@@ -9,7 +9,7 @@ $(LIB): $(OBJECTS)
 	ar rcs $(LIB) $(OBJECTS)
 
 %.o: %.cpp %.hpp
-	g++ -c -fPIC -g -Wall -I../.. -I../../../ComplexLib -I$(IDIR) $< -o $@
+	g++ -c -fPIC -g -Wall -Wno-unused-local-typedefs -I../.. -I../../../ComplexLib -I$(IDIR) $< -o $@
 
 clean:
 	rm -f $(LIB) $(OBJECTS)

@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include "AddinCpp/add_all.hpp"
-#include "oh/addin.hpp"
+#include "rp/addin.hpp"
 #include "test_all.hpp"
 
 int main() {
@@ -9,7 +9,7 @@ int main() {
         std::cout << "hi" << std::endl;
 
         ComplexLibAddinCpp::initializeAddin();
-        std::cout << "ObjectHandler version = " << ObjectHandler::ohVersion() << std::endl;
+        std::cout << "reposit version = " << reposit::ohVersion() << std::endl;
 
         testFunctions();
         testObjects();

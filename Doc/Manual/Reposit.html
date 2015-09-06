@@ -274,7 +274,7 @@ simple\AddinXl\AddinXl.xlsx
 <tr><td>ComplexLibXL/clxl/functions/function_xxx.cpp</td><td>The functions in the Excel addin</td></tr>
 </table>
 
-<p>The directories valueobjects and serialization contain code to support serialization of objects in the repository (this code is not yet working properly).  The obj_xxx.?pp files are the addin objects that wrap the library objects - this is explained in more detail later in this document.  The add_xxx.?pp files are the C++ addin functions.  The files in the XL directory are the Excel addin functions.</p>
+<p>The directories valueobjects and serialization contain code to support serialization of objects in the repository.  The obj_xxx.?pp files are the addin objects that wrap the library objects - this is explained in more detail later in this document.  The add_xxx.?pp files are the C++ addin functions.  The files in the XL directory are the Excel addin functions.</p>
 
 <H2><a name="Reposit_nn24"></a>19.8 Features</H2>
 
@@ -744,7 +744,7 @@ std::cout << ComplexLibAddinCpp::clTest2F("my_test2") << std::endl;
 <H3><a name="Reposit_nn22"></a>19.8.9 Serialization</H3>
 
 
-<p>This feature is not yet supported.  The functionality is supported in the object repository but the reposit SWIG module does not yet autogenerate the corresponding addin code.</p>
+<p>reposit generates all of the code necessary to serialize the objects in the addin.  This feature is not yet documented.</p>
 
 <H2><a name="Reposit_nn23"></a>19.9 Typemaps</H2>
 

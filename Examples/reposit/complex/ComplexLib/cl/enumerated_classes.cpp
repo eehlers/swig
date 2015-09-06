@@ -9,7 +9,7 @@ std::string ComplexLib::timeString(boost::shared_ptr<TimeZone> timeZone) {
     time( &rawtime);
     struct tm *ptm = gmtime(&rawtime);
     std::ostringstream ret;
-    ret << std::setw(2) << std::setfill('0') << (ptm->tm_hour+timeZone->utcOffset())%24 << ":" << ptm->tm_min;
+    ret << std::setw(2) << std::setfill('0') << (ptm->tm_hour+timeZone->utcOffset())%24 << ":" << std::setw(2) << std::setfill('0') << ptm->tm_min;
     return ret.str();
 }
 

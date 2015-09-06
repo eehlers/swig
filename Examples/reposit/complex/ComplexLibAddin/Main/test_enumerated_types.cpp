@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include "AddinCpp/add_all.hpp"
-#include "oh/addin.hpp"
+#include <rp/addin.hpp>
 #include "test_all.hpp"
 
 #ifdef TEST_ENUMERATED_TYPES

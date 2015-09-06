@@ -31,7 +31,7 @@ namespace ComplexLibAddin {
     }
 
     void SerializationFactory::register_out(boost::archive::xml_oarchive &ar,
-        std::vector<boost::shared_ptr<ObjectHandler::ValueObject> >& valueObjects){
+        std::vector<boost::shared_ptr<reposit::ValueObject> >& valueObjects){
 
             tpl_register_classes(ar);
             ar << boost::serialization::make_nvp("object_list", valueObjects);
@@ -39,7 +39,7 @@ namespace ComplexLibAddin {
 
 
     void SerializationFactory::register_in(boost::archive::xml_iarchive &ar,
-        std::vector<boost::shared_ptr<ObjectHandler::ValueObject> >& valueObjects){
+        std::vector<boost::shared_ptr<reposit::ValueObject> >& valueObjects){
 
             tpl_register_classes(ar);
             ar >> boost::serialization::make_nvp("object_list", valueObjects);

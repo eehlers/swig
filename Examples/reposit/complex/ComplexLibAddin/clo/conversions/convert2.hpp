@@ -2,10 +2,10 @@
 #ifndef addinobjects_convert2_hpp
 #define addinobjects_convert2_hpp
 
-#include <oh/property.hpp>
+#include <rp/property.hpp>
 #include <cl/conversions.hpp>
 
-namespace ObjectHandler {
+namespace reposit {
 
     template<> 
     ComplexLib::Grade convert2<ComplexLib::Grade, property_t>(const property_t& p);

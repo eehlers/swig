@@ -111,54 +111,69 @@
 
 // rp_tm_add_* - typemaps for  the C++ addin
 
-//%typemap(rp_tm_add_ret) rp_tp_double "double";
-//%typemap(rp_tm_add_ret) void "bool";
-//%typemap(rp_tm_add_ret) SWIGTYPE "$1_type";
+%typemap(rp_tm_add_ret) rp_tp_double "double";
+%typemap(rp_tm_add_ret) void "bool";
+%typemap(rp_tm_add_ret) SWIGTYPE "$1_type";
 
-//%typemap(rp_tm_add_prm) rp_tp_double "double";
-//%typemap(rp_tm_add_prm) rp_tp_cnv "const reposit::property_t&";
-//%typemap(rp_tm_add_prm) rp_tp_crc "const reposit::property_t&";
-//%typemap(rp_tm_add_prm) rp_tp_enm "const std::string&";
-//%typemap(rp_tm_add_prm) rp_tp_enm_cls "const std::string&";
-//%typemap(rp_tm_add_prm) SWIGTYPE "$rp_typedef_resolved";
+%typemap(rp_tm_add_rt3) rp_tp_double "double";
+%typemap(rp_tm_add_rt3) void "bool";
+%typemap(rp_tm_add_rt3) SWIGTYPE "$1_type";
 
-//%typemap(rp_tm_add_cnv) rp_tp_cnv %{
-//    $1_type $1_name_cnv =
-//        reposit::convert2<$1_type, reposit::property_t>($1_name);
-//%}
+%typemap(rp_tm_add_prm) rp_tp_double "double";
+%typemap(rp_tm_add_prm) const rp_tp_double & "const double &";
+%typemap(rp_tm_add_prm) rp_tp_string "const std::string&";
+%typemap(rp_tm_add_prm) rp_tp_cnv "const reposit::property_t&";
+%typemap(rp_tm_add_prm) rp_tp_crc "const reposit::property_t&";
+%typemap(rp_tm_add_prm) rp_tp_enm "const std::string&";
+%typemap(rp_tm_add_prm) rp_tp_enm_cls "const std::string&";
+%typemap(rp_tm_add_prm) rp_tp_obj1 "const std::string&";
+%typemap(rp_tm_add_prm) SWIGTYPE "$rp_typedef_resolved";
 
-//%typemap(rp_tm_add_cnv) rp_tp_crc %{
-//    $1_type $1_name_crc = reposit::CoerceImpl<
-//        reposit::property_t,
-//        $1_type>()($1_name);
-//%}
+%typemap(rp_tm_add_cnv) rp_tp_cnv %{
+    $1_type $1_name_cnv =
+        reposit::convert2<$1_type, reposit::property_t>($1_name);
+%}
 
-//%typemap(rp_tm_add_cnv) rp_tp_enm %{
-//    $1_type $1_name_enm =
-//        reposit::Create<$1_type>()($1_name);
-//%}
+%typemap(rp_tm_add_cnv) rp_tp_crc %{
+    $1_type $1_name_crc = reposit::CoerceImpl<
+        reposit::property_t,
+        $1_type>()($1_name);
+%}
 
-//%typemap(rp_tm_add_cnv) rp_tp_enm_cls %{
-//    $1_type $1_name_enm_cls =
-//        reposit::Create<$1_type >()($1_name);
-//%}
+%typemap(rp_tm_add_cnv) rp_tp_enm %{
+    $rp_typedef_base $1_name_enm =
+        reposit::Create<$rp_typedef_base>()($1_name);
+%}
 
-//%typemap(rp_tm_add_cll) rp_tp_cnv "$1_name_cnv";
-//%typemap(rp_tm_add_cll) rp_tp_crc "$1_name_crc";
-//%typemap(rp_tm_add_cll) rp_tp_enm "$1_name_enm";
-//%typemap(rp_tm_add_cll) rp_tp_enm_cls "$1_name_enm_cls";
+%typemap(rp_tm_add_cnv) rp_tp_enm_cls %{
+    $1_type $1_name_enm_cls =
+        reposit::Create<$1_type >()($1_name);
+%}
+
+%typemap(rp_tm_add_cll) rp_tp_cnv "$1_name_cnv";
+%typemap(rp_tm_add_cll) rp_tp_crc "$1_name_crc";
+%typemap(rp_tm_add_cll) rp_tp_enm "$1_name_enm";
+%typemap(rp_tm_add_cll) rp_tp_enm_cls "$1_name_enm_cls";
 %typemap(rp_tm_add_cll) rp_tp_obj1 "$1_name_get";
 %typemap(rp_tm_add_cll) SWIGTYPE "$1_name";
 
-//%typemap(rp_add_ret) SWIGTYPE "return ";
+%typemap(rp_tm_add_ret1) rp_tp_double "double returnValue =";
+%typemap(rp_tm_add_ret1) void "";
+%typemap(rp_tm_add_ret1) SWIGTYPE "return";
+%typemap(rp_tm_add_ret2) rp_tp_double "return returnValue;";
+%typemap(rp_tm_add_ret2) void "return true;";
+%typemap(rp_tm_add_ret2) SWIGTYPE "";
 
-//%typemap(rp_add_ret) void "";
+%typemap(rp_add_ret) SWIGTYPE "return ";
+
+%typemap(rp_add_ret) void "";
 
 // rp_tm_xll_* - typemaps for the Excel addin
 
 %typemap(rp_tm_xll_cod) bool "L";
 %typemap(rp_tm_xll_cod) rp_tp_long "N";
 %typemap(rp_tm_xll_cod) rp_tp_double "E";
+%typemap(rp_tm_xll_cod) const rp_tp_double & "E";
 %typemap(rp_tm_xll_cod) rp_tp_string "C";
 %typemap(rp_tm_xll_cod) rp_tp_string * "C";
 %typemap(rp_tm_xll_cod) rp_tp_string & "C";
@@ -177,6 +192,7 @@
 %typemap(rp_tm_xll_prm) bool "bool*";
 %typemap(rp_tm_xll_prm) rp_tp_long "long*";
 %typemap(rp_tm_xll_prm) rp_tp_double "double*";
+%typemap(rp_tm_xll_prm) const rp_tp_double & "double*";
 %typemap(rp_tm_xll_prm) rp_tp_string "char*";
 %typemap(rp_tm_xll_prm) rp_tp_string * "char*";
 %typemap(rp_tm_xll_prm) rp_tp_string & "char*";
@@ -238,6 +254,7 @@
 %typemap(rp_tm_xll_cll_obj) bool "*$1_name";
 %typemap(rp_tm_xll_cll_obj) rp_tp_long "*$1_name";
 %typemap(rp_tm_xll_cll_obj) rp_tp_double "*$1_name";
+%typemap(rp_tm_xll_cll_obj) const rp_tp_double & "*$1_name";
 %typemap(rp_tm_xll_cll_obj) rp_tp_cnv "$1_name_cnv";
 %typemap(rp_tm_xll_cll_obj) rp_tp_cnv2 "$1_name_cnv";
 %typemap(rp_tm_xll_cll_obj) rp_tp_crc "$1_name_crc";
@@ -297,8 +314,6 @@
 %typemap(rp_tm_cfy_ret) void "bool";
 %typemap(rp_tm_cfy_ret) SWIGTYPE "$1_type";
 
-%typemap(rp_tm_cfy_rt2) SWIGTYPE "return 0;";
-
 %typemap(rp_tm_cfy_rt3) rp_tp_double "double";
 %typemap(rp_tm_cfy_rt3) void "bool";
 %typemap(rp_tm_cfy_rt3) SWIGTYPE "$1_type";
@@ -309,13 +324,13 @@
 %typemap(rp_tm_cfy_prm) rp_tp_double "double $1_name";
 //%typemap(rp_tm_cfy_prm) rp_tp_double const & "const double& $1_name";
 %typemap(rp_tm_cfy_prm) rp_tp_string "const char * $1_name";
-%typemap(rp_tm_cfy_prm) rp_tp_obj1 "const char * $1_name";
 //%typemap(rp_tm_cfy_prm) rp_tp_cnv "const reposit::property_t& $1_name";
 //%typemap(rp_tm_cfy_prm) rp_tp_crc "const reposit::property_t& $1_name";
 %typemap(rp_tm_cfy_prm) rp_tp_enm "const char * $1_name";
 //%typemap(rp_tm_cfy_prm) rp_tp_enm_cls "const char * $1_name";
+%typemap(rp_tm_cfy_prm) rp_tp_obj1 "const char * $1_name";
 // This is a temporary hack for trigger parameters, which are not supported by =countify.
-// Declare the value as a summy bool.  Later we will suppress it altogether.
+// Declare the value as a dummy bool.  Later we will suppress it altogether.
 %typemap(rp_tm_cfy_prm)  reposit::property_t const & "bool $1_name";
 %typemap(rp_tm_cfy_prm) SWIGTYPE "$rp_typedef_resolved $1_name";
 
@@ -364,6 +379,7 @@
 %apply rp_tp_long { long };
 
 %apply rp_tp_double { double };
+%apply const rp_tp_double & { const double & };
 
 %apply rp_tp_string { char * };
 %apply rp_tp_string { std::string };

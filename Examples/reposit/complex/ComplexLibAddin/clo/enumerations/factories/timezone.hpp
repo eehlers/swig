@@ -2,10 +2,10 @@
 #ifndef factories_timezone_hpp
 #define factories_timezone_hpp
 
-#include <oh/enumerations/typefactory.hpp>
+#include <rp/enumerations/typefactory.hpp>
 #include <cl/enumerated_classes.hpp>
 
-namespace ObjectHandler {
+namespace reposit {
 
     typedef boost::shared_ptr<ComplexLib::TimeZone>(*TimeZoneConstructor)();
 

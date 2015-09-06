@@ -2,13 +2,13 @@
 #ifndef clo_conversions_coerce_grade_hpp
 #define clo_conversions_coerce_grade_hpp
 
-#include <oh/property.hpp>
-#include <oh/conversions/coerce.hpp>
-#include <oh/exception.hpp>
+#include <rp/property.hpp>
+#include <rp/conversions/coerce.hpp>
+#include <rp/exception.hpp>
 #include <cl/coercions.hpp>
 #include <sstream>
 
-namespace ObjectHandler {
+namespace reposit {
 
     template <class T>
     inline bool doubleToGrade2(
@@ -42,10 +42,10 @@ namespace ObjectHandler {
     }
 
     template <class TypeIn, class TypeOut>
-    class CoerceImpl : public ObjectHandler::Coerce<
+    class CoerceImpl : public reposit::Coerce<
         TypeIn, TypeOut> {
-        typename ObjectHandler::Coerce<TypeIn, TypeOut>::Conversion *getConversions() {
-            static typename ObjectHandler::Coerce<TypeIn, TypeOut>::Conversion conversions[] = {
+        typename reposit::Coerce<TypeIn, TypeOut>::Conversion *getConversions() {
+            static typename reposit::Coerce<TypeIn, TypeOut>::Conversion conversions[] = {
                 doubleToGrade2,
                 stringToGrade2,
                 0

@@ -9,7 +9,7 @@ $(LIB): $(OBJECTS)
 	ar rcs $(LIB) $(OBJECTS)
 
 %.o: %.cpp
-	g++ -c -fPIC -g -Wall -I$(IDIR) -I../.. $< -o $@
+	g++ -c -fPIC -g -Wall -Wno-unused-local-typedefs -I$(IDIR) -I../.. $< -o $@
 
 .PHONY: SubDirs
 SubDirs:
