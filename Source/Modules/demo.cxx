@@ -13,7 +13,7 @@ class DEMO : public Language {
 
 public:
 
-  virtual void main(int argc, char *argv[]) {
+  virtual void main(int /*argc*/, char* /*argv[]*/) {
 
     printf("I'm the demo module.\n");
 
@@ -80,31 +80,31 @@ int namespaceDeclaration(Node *n) {
     return ret;
 }
 
-void processParm(Parm *p) {
-    String *name = Getattr(p, "name");
-    printf("BEGIN processParm - node name='%s'.\n", Char(name));
-    printNode(p);
-
-    SwigType *t1 = Getattr(p, "type");
-    SwigType *t2 = SwigType_base(t1);
-    printf("base = %s\n", Char(SwigType_str(t2, 0)));
-
-    SwigType *t3 = SwigType_str(SwigType_typedef_resolve_all(t1), 0);
-    printf("resolved = %s\n", Char(SwigType_str(t3, 0)));
-
-    printf("is_template=%d\n", SwigType_istemplate(t1));
-
-    String *s1 = SwigType_str(t1, 0);
-    char *c1 = Char(s1);
-    char *c2 = strchr(c1, '<');
-    char *c3 = strchr(c1, '>');
-    char x[100];
-    strncpy(x, c2+1, c3-c2-1);
-    x[c3-c2-1]=0;
-    printf("T=%s\n", x);
-
-    printf("END   processParm - node name='%s'.\n", Char(name));
-}
+//void processParm(Parm *p) {
+//    String *name = Getattr(p, "name");
+//    printf("BEGIN processParm - node name='%s'.\n", Char(name));
+//    printNode(p);
+//
+//    SwigType *t1 = Getattr(p, "type");
+//    SwigType *t2 = SwigType_base(t1);
+//    printf("base = %s\n", Char(SwigType_str(t2, 0)));
+//
+//    SwigType *t3 = SwigType_str(SwigType_typedef_resolve_all(t1), 0);
+//    printf("resolved = %s\n", Char(SwigType_str(t3, 0)));
+//
+//    printf("is_template=%d\n", SwigType_istemplate(t1));
+//
+//    String *s1 = SwigType_str(t1, 0);
+//    char *c1 = Char(s1);
+//    char *c2 = strchr(c1, '<');
+//    char *c3 = strchr(c1, '>');
+//    char x[100];
+//    strncpy(x, c2+1, c3-c2-1);
+//    x[c3-c2-1]=0;
+//    printf("T=%s\n", x);
+//
+//    printf("END   processParm - node name='%s'.\n", Char(name));
+//}
 
 int functionHandler(Node *n) {
     String *name = Getattr(n, "name");
@@ -112,9 +112,25 @@ int functionHandler(Node *n) {
 
     printNode(n);
 
-    //ParmList *parms  = Getattr(n,"parms");
-    //for (Parm *p = parms; p; p = nextSibling(p))
-    //    processParm(p);
+    printf("**************\n");
+    ParmList *parms  = Getattr(n, "parms");
+    for (Parm *p = parms; p; p = nextSibling(p)) {
+        SwigType *t1 = Getattr(p, "type");
+        // prints "t1 = std::vector< int >"
+        printf("t1 = %s\n", Char(SwigType_str(t1, 0)));
+        // prints "is_template=1"
+        printf("is_template=%d\n", SwigType_istemplate(t1));
+        // This doesn't compile :(
+        //SwigType *t2 = SwigType_pop_template(t1);
+
+        //SwigType *t2 = SwigType_prefix(t1);
+        //printf("t2 = %s\n", Char(SwigType_str(t2, 0)));
+        //SwigType *t2 = SwigType_base(t1);
+        //printf("t2 = %s\n", Char(SwigType_str(t2, 0)));
+        //SwigType *t3 = SwigType_str(SwigType_typedef_resolve_all(t2), 0);
+        //printf("t3 = %s\n", Char(SwigType_str(t3, 0)));
+    }
+    printf("**************\n");
 
     int ret=Language::functionHandler(n);
     printf("END   functionHandler - node name='%s'.\n", Char(name));
