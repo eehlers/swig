@@ -183,7 +183,7 @@ void emitParmList(
 
 String *excelParamCodes(Node *n, SwigType *type, ParmList *parms) {
     String *s = NewString("");
-    if (type) { // FIXME this logic looks weird, it parameter type needed?
+    if (type) { // FIXME this logic looks weird, is parameter type needed?
         String *tm = getTypeMap("rp_tm_xll_cod", n);
         Append(s, tm);
     }
@@ -336,7 +336,23 @@ struct Count {
     int created;
     int updated;
     int unchanged;
-    Count() : created(0), updated(0), unchanged(0) {}
+    int total;
+    int functions;
+    int constructors;
+    int members;
+    int total2;
+    Count() : created(0), updated(0), unchanged(0), total(0),
+        functions(0), constructors(0), members(0) {}
+    void add(const Count &c) {
+        created += c.created;
+        updated += c.updated;
+        unchanged += c.unchanged;
+        total += c.total;
+        //functions += c.functions;
+        //constructors += c.constructors;
+        //members += c.members;
+        //total2 += c.total2;
+    }
 };
 
 struct Buffer {
@@ -401,6 +417,7 @@ struct Buffer {
             count.created++;
             printf(".....Created\n");
         }
+        count.total++;
         Delete(outputBuffer_);
         Delete(name_);
     }
@@ -448,8 +465,9 @@ struct GroupLibraryObjects {
 
     Buffer *b_obj_hpp;
     Buffer *b_obj_cpp;
+    Count &count_;
 
-    GroupLibraryObjects() {
+    GroupLibraryObjects(Count &count) : count_(count) {
 
         if (automatic) {
             b_obj_hpp = new Buffer(NewStringf("%s/obj_%s.hpp", objDir, group_name));
@@ -482,7 +500,7 @@ struct GroupLibraryObjects {
         Printf(b_obj_cpp->b0, "\n");
     }
 
-    void clear(Count &count) {
+    void clear() {
 
         Printf(b_obj_hpp->b0, "} // namespace %s\n", module);
         Printf(b_obj_hpp->b0, "\n");
@@ -491,8 +509,8 @@ struct GroupLibraryObjects {
 
         Printf(b_obj_cpp->b0, "\n");
 
-        b_obj_hpp->clear(count);
-        b_obj_cpp->clear(count);
+        b_obj_hpp->clear(count_);
+        b_obj_cpp->clear(count_);
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
@@ -512,6 +530,9 @@ struct GroupLibraryObjects {
         emitParmList(p.parms, b_obj_cpp->b0, 0, "rp_tm_default", 3, ',', true, true);
         Printf(b_obj_cpp->b0,"        );\n");
         Printf(b_obj_cpp->b0,"}\n");
+
+        count_.functions++;
+        count_.total2++;
     }
 
     void functionWrapperImplCtor(ParmsCtor &p) {
@@ -551,6 +572,9 @@ struct GroupLibraryObjects {
             }
             Printf(b_obj_hpp->b0, "    // END   typemap rp_tm_obj_cls\n");
         }
+
+        count_.constructors++;
+        count_.total2++;
     }
 
     void functionWrapperImplMemb(ParmsMemb & /*p*/) {
@@ -561,8 +585,9 @@ struct GroupValueObjects {
 
     Buffer *b_val_hpp;
     Buffer *b_val_cpp;
+    Count &count_;
 
-    GroupValueObjects() {
+    GroupValueObjects(Count &count) : count_(count) {
 
         b_val_hpp = new Buffer(NewStringf("%s/valueobjects/vo_%s.hpp", objDir, group_name));
         b_val_cpp = new Buffer(NewStringf("%s/valueobjects/vo_%s.cpp", objDir, group_name));
@@ -593,7 +618,7 @@ struct GroupValueObjects {
         Printf(b_val_cpp->b0, "\n");
     }
 
-    void clear(Count &count) {
+    void clear() {
 
         Printf(b_val_hpp->b0, "} // namespace %s\n", module);
         Printf(b_val_hpp->b0, "\n");
@@ -608,8 +633,8 @@ struct GroupValueObjects {
         Printf(b_val_cpp->b0, "} // namespace ValueObjects\n");
         Printf(b_val_cpp->b0, "\n");
 
-        b_val_hpp->clear(count);
-        b_val_cpp->clear(count);
+        b_val_hpp->clear(count_);
+        b_val_cpp->clear(count_);
     }
 
     void functionWrapperImplFunc(ParmsFunc & /*p*/) {
@@ -708,6 +733,9 @@ struct GroupValueObjects {
             emitParmList(p.parms, b_val_cpp->b0, 1, "rp_tm_val_ini", 3, ',', true, false, true);
             Printf(b_val_cpp->b0,"            Permanent_(Permanent) {\n");
             Printf(b_val_cpp->b0,"        }\n");
+
+            count_.constructors++;
+            count_.total2++;
         }
     }
 
@@ -720,8 +748,9 @@ struct GroupSerializationCreate {
 
     Buffer *b_cre_hpp;
     Buffer *b_cre_cpp;
+    Count &count_;
 
-    GroupSerializationCreate() {
+    GroupSerializationCreate(Count &count) : count_(count) {
 
         b_cre_hpp = new Buffer(NewStringf("%s/serialization/create/create_%s.hpp", objDir, group_name));
         b_cre_cpp = new Buffer(NewStringf("%s/serialization/create/create_%s.cpp", objDir, group_name));
@@ -756,7 +785,7 @@ struct GroupSerializationCreate {
         Printf(b_cre_cpp->b0, "\n");
     }
 
-    void clear(Count &count) {
+    void clear() {
 
         Printf(b_cre_hpp->b0, "\n");
         Printf(b_cre_hpp->b0, "} // namespace %s\n", module);
@@ -766,8 +795,8 @@ struct GroupSerializationCreate {
 
         Printf(b_cre_cpp->b0, "\n");
 
-        b_cre_hpp->clear(count);
-        b_cre_cpp->clear(count);
+        b_cre_hpp->clear(count_);
+        b_cre_cpp->clear(count_);
     }
 
     void functionWrapperImplFunc(ParmsFunc & /*p*/) {
@@ -799,6 +828,9 @@ struct GroupSerializationCreate {
             Printf(b_cre_cpp->b0, "            Permanent));\n");
             Printf(b_cre_cpp->b0, "    return object;\n");
             Printf(b_cre_cpp->b0, "}\n");
+
+            count_.constructors++;
+            count_.total2++;
         }
     }
 
@@ -811,8 +843,9 @@ struct GroupSerializationRegister {
 
     Buffer *b_reg_hpp;
     Buffer *b_reg_cpp;
+    Count &count_;
 
-    GroupSerializationRegister() {
+    GroupSerializationRegister(Count &count) : count_(count) {
 
         b_reg_hpp = new Buffer(NewStringf("%s/serialization/register/serialization_%s.hpp", objDir, group_name));
         b_reg_cpp = new Buffer(NewStringf("%s/serialization/register/serialization_%s.cpp", objDir, group_name));
@@ -850,7 +883,7 @@ struct GroupSerializationRegister {
         Printf(b_reg_cpp->b1, "\n");
     }
 
-    void clear(Count &count) {
+    void clear() {
 
         Printf(b_reg_hpp->b0, "\n");
 
@@ -860,8 +893,8 @@ struct GroupSerializationRegister {
         Printf(b_reg_cpp->b1, "}\n");
         Printf(b_reg_cpp->b1, "\n");
 
-        b_reg_hpp->clear(count);
-        b_reg_cpp->clear(count);
+        b_reg_hpp->clear(count_);
+        b_reg_cpp->clear(count_);
     }
 
     void functionWrapperImplFunc(ParmsFunc & /*p*/) {
@@ -878,6 +911,9 @@ struct GroupSerializationRegister {
             Printf(b_reg_cpp->b1, "    ar.register_type<%s::ValueObjects::%s>();\n", module, p.funcRename);
 
             idNum++;
+
+            count_.constructors++;
+            count_.total2++;
         }
     }
 
@@ -890,8 +926,9 @@ struct GroupCpp {
 
     Buffer *b_add_hpp;
     Buffer *b_add_cpp;
+    Count &count_;
 
-    GroupCpp() {
+    GroupCpp(Count &count) : count_(count) {
 
         b_add_hpp = new Buffer(NewStringf("%s/add_%s.hpp", addDir, group_name));
         b_add_cpp = new Buffer(NewStringf("%s/add_%s.cpp", addDir, group_name));
@@ -932,7 +969,7 @@ struct GroupCpp {
         Printf(b_add_cpp->b0, "\n");
     }
 
-    void clear(Count &count) {
+    void clear() {
         Printf(b_add_hpp->b0, "\n");
         Printf(b_add_hpp->b0, "} // namespace %s\n", addinCppNameSpace);
         Printf(b_add_hpp->b0, "\n");
@@ -941,8 +978,8 @@ struct GroupCpp {
 
         Printf(b_add_cpp->b0, "\n");
 
-        b_add_hpp->clear(count);
-        b_add_cpp->clear(count);
+        b_add_hpp->clear(count_);
+        b_add_cpp->clear(count_);
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
@@ -965,6 +1002,9 @@ struct GroupCpp {
         Printf(b_add_cpp->b0,"    );\n");
         emitTypeMap(b_add_cpp->b0, "rp_tm_add_ret2", p.n, 2);
         Printf(b_add_cpp->b0,"}\n");
+
+        count_.functions++;
+        count_.total2++;
     }
 
     void functionWrapperImplCtor(ParmsCtor &p) {
@@ -998,6 +1038,9 @@ struct GroupCpp {
             Printf(b_add_cpp->b0,"            objectID, object, false, valueObject);\n");
             Printf(b_add_cpp->b0,"    return returnValue;\n");
             Printf(b_add_cpp->b0,"}\n\n");
+
+            count_.constructors++;
+            count_.total2++;
         }
     }
 
@@ -1021,14 +1064,18 @@ struct GroupCpp {
         Printf(b_add_cpp->b0,"        );\n", p.name);
         emitTypeMap(b_add_cpp->b0, "rp_tm_add_ret2", p.n, 2);
         Printf(b_add_cpp->b0,"}\n");
+
+        count_.members++;
+        count_.total2++;
     }
 };
 
 struct GroupExcelFunctions {
 
     Buffer *b_xll_cpp;
+    Count &count_;
 
-    GroupExcelFunctions() {
+    GroupExcelFunctions(Count &count) : count_(count) {
 
         b_xll_cpp = new Buffer(NewStringf("%s/functions/function_%s.cpp", xllDir, group_name));
 
@@ -1063,8 +1110,8 @@ struct GroupExcelFunctions {
         Printf(b_xll_cpp->b0, "\n");
     }
 
-    void clear(Count &count) {
-        b_xll_cpp->clear(count);
+    void clear() {
+        b_xll_cpp->clear(count_);
     }
 
     void emitLoopFunc(ParmsFunc &p, String *loopParameter) {
@@ -1127,6 +1174,9 @@ struct GroupExcelFunctions {
         Printf(b_xll_cpp->b0, "\n");
         Printf(b_xll_cpp->b0, "    }\n");
         Printf(b_xll_cpp->b0, "}\n");
+
+        count_.functions++;
+        count_.total2++;
     }
 
     void functionWrapperImplCtor(ParmsCtor &p) {
@@ -1173,6 +1223,9 @@ struct GroupExcelFunctions {
             Printf(b_xll_cpp->b0, "\n");
             Printf(b_xll_cpp->b0, "    }\n");
             Printf(b_xll_cpp->b0, "}\n");
+
+            count_.constructors++;
+            count_.total2++;
         }
     }
 
@@ -1236,14 +1289,18 @@ struct GroupExcelFunctions {
         Printf(b_xll_cpp->b0, "\n");
         Printf(b_xll_cpp->b0, "    }\n");
         Printf(b_xll_cpp->b0, "}\n");
+
+        count_.members++;
+        count_.total2++;
     }
 };
 
 struct GroupExcelRegister {
 
     Buffer *b_xll_reg;
+    Count &count_;
 
-    GroupExcelRegister() {
+    GroupExcelRegister(Count &count) : count_(count) {
 
         b_xll_reg = new Buffer(NewStringf("%s/register/register_%s.cpp", xllDir, group_name));
 
@@ -1259,30 +1316,40 @@ struct GroupExcelRegister {
         Printf(b_xll_reg->b1, "\n");
     }
 
-    void clear(Count &count) {
+    void clear() {
 
         Printf(b_xll_reg->b0, "}\n");
         Printf(b_xll_reg->b1, "}\n");
 
-        b_xll_reg->clear(count);
+        b_xll_reg->clear(count_);
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
 
         excelRegister(b_xll_reg->b0, p.n, p.type, p.parms2);
         excelUnregister(b_xll_reg->b1, p.n, p.type, p.parms2);
+
+        count_.functions++;
+        count_.total2++;
     }
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        // FIXME shouldn't we only generate this code if generateCtor==true?
-        excelRegister(b_xll_reg->b0, p.n, 0, p.parms3);
-        excelUnregister(b_xll_reg->b1, p.n, p.type, p.parms3);
+        if (generateCtor) {
+            excelRegister(b_xll_reg->b0, p.n, 0, p.parms3);
+            excelUnregister(b_xll_reg->b1, p.n, p.type, p.parms3);
+
+            count_.constructors++;
+            count_.total2++;
+        }
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
         excelRegister(b_xll_reg->b0, p.n, p.type, p.parms2);
         excelUnregister(b_xll_reg->b1, p.n, p.type, p.parms2);
+
+        count_.members++;
+        count_.total2++;
     }
 };
 
@@ -1330,8 +1397,9 @@ void mongoFunc(File *f, String *funcName1, String *funcName2, Node *n, ParmList 
 struct GroupCountify {
 
     Buffer *b_cfy_cpp;
+    Count &count_;
 
-    GroupCountify() {
+    GroupCountify(Count &count) : count_(count) {
 
         b_cfy_cpp = new Buffer(NewStringf("%s/cfy_%s.cpp", cfyDir, group_name));
 
@@ -1362,8 +1430,8 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0, "\n");
     }
 
-    void clear(Count &count) {
-        b_cfy_cpp->clear(count);
+    void clear() {
+        b_cfy_cpp->clear(count_);
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
@@ -1402,61 +1470,69 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"    }\n");
         Printf(b_cfy_cpp->b0,"}\n");
         Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
+
+        count_.functions++;
+        count_.total2++;
     }
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        // FIXME shouldn't we only generate this code if generateCtor==true?
-        Printf(b_cfy_cpp->b0,"//****CTOR*****\n");
-        Printf(b_cfy_cpp->b0,"extern \"C\" {\n");
-        Printf(b_cfy_cpp->b0,"COUNTIFY_API\n");
-        Printf(b_cfy_cpp->b0,"const char *%s(\n", p.funcName);
-        emitParmList(p.parms2, b_cfy_cpp->b0, 1, "rp_tm_cfy_prm", 2);
-        Printf(b_cfy_cpp->b0,"    ) {\n");
-        Printf(b_cfy_cpp->b0,"\n");
-        Printf(b_cfy_cpp->b0,"    try {\n");
-        Printf(b_cfy_cpp->b0,"\n");
-        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
-        Printf(b_cfy_cpp->b0,"\n");
-        Printf(b_cfy_cpp->b0,"        initializeAddin();\n");
-        Printf(b_cfy_cpp->b0,"\n");
-        Printf(b_cfy_cpp->b0,"        // Convert input types into Library types\n\n");
-        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cnv", 2, 0, false);
-        Printf(b_cfy_cpp->b0,"\n");
-        Printf(b_cfy_cpp->b0,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
-        Printf(b_cfy_cpp->b0,"            new %s::ValueObjects::%s(\n", module, p.funcName);
-        Printf(b_cfy_cpp->b0,"                objectID,\n");
-        emitParmList(p.parms, b_cfy_cpp->b0, 0, "rp_tm_default", 4, ',', true, false, true);
-        Printf(b_cfy_cpp->b0,"                false));\n");
-        Printf(b_cfy_cpp->b0,"        boost::shared_ptr<reposit::Object> object(\n");
-        Printf(b_cfy_cpp->b0,"            new %s::%s(\n", module, p.name);
-        Printf(b_cfy_cpp->b0,"                valueObject,\n");
-        emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cll", 4, ',', true, true, true);
-        Printf(b_cfy_cpp->b0,"                false));\n");
-        Printf(b_cfy_cpp->b0,"        static std::string returnValue;\n");
-        Printf(b_cfy_cpp->b0,"        returnValue =\n");
-        Printf(b_cfy_cpp->b0,"            reposit::Repository::instance().storeObject(\n");
-        Printf(b_cfy_cpp->b0,"                objectID, object, true, valueObject);\n");
-        Printf(b_cfy_cpp->b0,"\n");
-        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
-        Printf(b_cfy_cpp->b0,"\n");
-        Printf(b_cfy_cpp->b0,"        return returnValue.c_str();\n");
-        Printf(b_cfy_cpp->b0,"\n");
-        Printf(b_cfy_cpp->b0,"    } catch (const std::exception &e) {\n");
-        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
-        Printf(b_cfy_cpp->b0,"        static std::string errorMessage;\n");
-        Printf(b_cfy_cpp->b0,"        errorMessage = e.what();\n");
-        Printf(b_cfy_cpp->b0,"        return errorMessage.c_str();\n");
-        Printf(b_cfy_cpp->b0,"    } catch (...) {\n");
-        Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
-        Printf(b_cfy_cpp->b0,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
-        Printf(b_cfy_cpp->b0,"        return errorMessage.c_str();\n");
-        Printf(b_cfy_cpp->b0,"    }\n");
-        Printf(b_cfy_cpp->b0,"}\n\n");
-        Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
+        if (generateCtor) {
+            Printf(b_cfy_cpp->b0,"//****CTOR*****\n");
+            Printf(b_cfy_cpp->b0,"extern \"C\" {\n");
+            Printf(b_cfy_cpp->b0,"COUNTIFY_API\n");
+            Printf(b_cfy_cpp->b0,"const char *%s(\n", p.funcName);
+            emitParmList(p.parms2, b_cfy_cpp->b0, 1, "rp_tm_cfy_prm", 2);
+            Printf(b_cfy_cpp->b0,"    ) {\n");
+            Printf(b_cfy_cpp->b0,"\n");
+            Printf(b_cfy_cpp->b0,"    try {\n");
+            Printf(b_cfy_cpp->b0,"\n");
+            Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
+            Printf(b_cfy_cpp->b0,"\n");
+            Printf(b_cfy_cpp->b0,"        initializeAddin();\n");
+            Printf(b_cfy_cpp->b0,"\n");
+            Printf(b_cfy_cpp->b0,"        // Convert input types into Library types\n\n");
+            emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cnv", 2, 0, false);
+            Printf(b_cfy_cpp->b0,"\n");
+            Printf(b_cfy_cpp->b0,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+            Printf(b_cfy_cpp->b0,"            new %s::ValueObjects::%s(\n", module, p.funcName);
+            Printf(b_cfy_cpp->b0,"                objectID,\n");
+            emitParmList(p.parms, b_cfy_cpp->b0, 0, "rp_tm_default", 4, ',', true, false, true);
+            Printf(b_cfy_cpp->b0,"                false));\n");
+            Printf(b_cfy_cpp->b0,"        boost::shared_ptr<reposit::Object> object(\n");
+            Printf(b_cfy_cpp->b0,"            new %s::%s(\n", module, p.name);
+            Printf(b_cfy_cpp->b0,"                valueObject,\n");
+            emitParmList(p.parms, b_cfy_cpp->b0, 1, "rp_tm_cfy_cll", 4, ',', true, true, true);
+            Printf(b_cfy_cpp->b0,"                false));\n");
+            Printf(b_cfy_cpp->b0,"        static std::string returnValue;\n");
+            Printf(b_cfy_cpp->b0,"        returnValue =\n");
+            Printf(b_cfy_cpp->b0,"            reposit::Repository::instance().storeObject(\n");
+            Printf(b_cfy_cpp->b0,"                objectID, object, true, valueObject);\n");
+            Printf(b_cfy_cpp->b0,"\n");
+            Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
+            Printf(b_cfy_cpp->b0,"\n");
+            Printf(b_cfy_cpp->b0,"        return returnValue.c_str();\n");
+            Printf(b_cfy_cpp->b0,"\n");
+            Printf(b_cfy_cpp->b0,"    } catch (const std::exception &e) {\n");
+            Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
+            Printf(b_cfy_cpp->b0,"        static std::string errorMessage;\n");
+            Printf(b_cfy_cpp->b0,"        errorMessage = e.what();\n");
+            Printf(b_cfy_cpp->b0,"        return errorMessage.c_str();\n");
+            Printf(b_cfy_cpp->b0,"    } catch (...) {\n");
+            Printf(b_cfy_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
+            Printf(b_cfy_cpp->b0,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
+            Printf(b_cfy_cpp->b0,"        return errorMessage.c_str();\n");
+            Printf(b_cfy_cpp->b0,"    }\n");
+            Printf(b_cfy_cpp->b0,"}\n\n");
+            Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
+
+            count_.constructors++;
+            count_.total2++;
+        }
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
+
         Printf(b_cfy_cpp->b0,"//****MEMB*****\n");
         Printf(b_cfy_cpp->b0,"extern \"C\" {\n");
         Printf(b_cfy_cpp->b0,"COUNTIFY_API\n");
@@ -1494,6 +1570,9 @@ struct GroupCountify {
         Printf(b_cfy_cpp->b0,"    }\n");
         Printf(b_cfy_cpp->b0,"}\n");
         Printf(b_cfy_cpp->b0,"} // extern \"C\"\n");
+
+        count_.members++;
+        count_.total2++;
     }
 };
 
@@ -1523,7 +1602,7 @@ struct AddinImpl : public Addin {
     virtual Group *getGroup() {
         std::string name_ = Char(group_name);
         if (groupMap_.end() == groupMap_.find(name_)) {
-            groupMap_[name_] = new Group;
+            groupMap_[name_] = new Group(count);
             processGroup();
         }
         return groupMap_[name_];
@@ -1533,7 +1612,7 @@ struct AddinImpl : public Addin {
         printf("%s - Group Files", name_.c_str());
         printf("%s\n", std::string(66-name_.length(), '=').c_str());
         for (typename GroupMap::const_iterator i=groupMap_.begin(); i!=groupMap_.end(); ++i)
-            i->second->clear(count);
+            i->second->clear();
     }
 
     virtual void functionWrapperImplFunc(ParmsFunc &p) {
@@ -1869,13 +1948,31 @@ struct AddinList {
             addin->clear();
         }
         printf("%s\n", std::string(80, '=').c_str());
-        printf("Addin                                            Created     Updated   Unchanged\n");
+        printf("File Count                           Created     Updated   Unchanged       Total\n");
+        printf("%s\n", std::string(80, '=').c_str());
+        Count c;
+        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
+            Addin *addin = *i;
+            printf("%s", addin->name_.c_str());
+            printf("%s", std::string(32-addin->name_.length(), ' ').c_str());
+            printf("%12d%12d%12d%12d\n",
+                addin->count.created, addin->count.updated, addin->count.unchanged, addin->count.total);
+            c.add(addin->count);
+        }
+        printf("%s\n", std::string(80, '=').c_str());
+        printf("Total");
+        printf("%s", std::string(27, ' ').c_str());
+        printf("%12d%12d%12d%12d\n",
+            c.created, c.updated, c.unchanged, c.total);
+        printf("%s\n", std::string(80, '=').c_str());
+        printf("Function Count                      Function Constructor      Member       Total\n");
         printf("%s\n", std::string(80, '=').c_str());
         for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
             Addin *addin = *i;
             printf("%s", addin->name_.c_str());
-            printf("%s", std::string(44-addin->name_.length(), ' ').c_str());
-            printf("%12d%12d%12d\n", addin->count.created, addin->count.updated, addin->count.unchanged);
+            printf("%s", std::string(32-addin->name_.length(), ' ').c_str());
+            printf("%12d%12d%12d%12d\n",
+                addin->count.functions, addin->count.constructors, addin->count.members, addin->count.total2);
         }
         printf("%s\n", std::string(80, '=').c_str());
     }
