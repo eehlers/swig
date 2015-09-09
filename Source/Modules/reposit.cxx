@@ -73,7 +73,7 @@ void printList(Node *n, File *f) {
     }
 }
 
-String *getTypeMap(const char *m, Node *n, bool fatal = true) {
+String *getTypeMap(Node *n, const char *m, bool fatal = true) {
     if (String *tm = Swig_typemap_lookup(m, n, "", 0)) {
         Replaceall(tm, "$rp_typedef_resolved", Getattr(n, "rp_typedef_resolved"));
         Replaceall(tm, "$rp_typedef_base", Getattr(n, "rp_typedef_base"));
@@ -101,7 +101,7 @@ String *getType(Parm *p, const char *m, bool fatal) {
     if (0==strcmp(m, "rp_tm_default"))
         return t;
     else {
-        String *s = getTypeMap(m, p, fatal);
+        String *s = getTypeMap(p, m, fatal);
         return s;
     }
 }
@@ -111,12 +111,13 @@ void printIndent(File *buf, int indent) {
         Printf(buf, "    ");
 }
 
-void emitTypeMap(File *buf, const char *m, Node *n, int indent=0, bool fatal = true) {
+void emitTypeMap(File *buf, Node *n, const char *m, int indent=0, bool fatal = true) {
     SwigType *t  = Getattr(n, "type");
     printIndent(buf, indent);
     Printf(buf, "// BEGIN typemap %s %s\n", m, t);
     printIndent(buf, indent);
-    String *s = getTypeMap(m, n, fatal);
+    //String *s = getTypeMap(n, m, fatal);
+    String *s = getType(n, m, fatal);
     if (Len(s)) {
         Printf(buf, "%s\n", s);
         printIndent(buf, indent);
@@ -184,11 +185,11 @@ void emitParmList(
 String *excelParamCodes(Node *n, SwigType *type, ParmList *parms) {
     String *s = NewString("");
     if (type) { // FIXME this logic looks weird, is parameter type needed?
-        String *tm = getTypeMap("rp_tm_xll_cod", n);
+        String *tm = getTypeMap(n, "rp_tm_xll_cod");
         Append(s, tm);
     }
     for (Parm *p = parms; p; p = nextSibling(p)) {
-        String *tm = getTypeMap("rp_tm_xll_cod", p);
+        String *tm = getTypeMap(p, "rp_tm_xll_cod");
         Append(s, tm);
     }
     Append(s, "#");
@@ -314,7 +315,7 @@ void voSetProp(File *f, ParmList *parms) {
     for (Parm *p = parms; p; p = nextSibling(p)) {
         String *name = Getattr(p,"name");
         String *nameUpper = Getattr(p,"rp_name_upper");
-        String *cnv = getTypeMap("rp_tm_vob_cnv", p);
+        String *cnv = getTypeMap(p, "rp_tm_vob_cnv");
         Printf(f, "            else if(strcmp(nameUpper.c_str(), \"%s\")==0)\n", nameUpper);
         Printf(f, "                %s_ = %s;\n", name, cnv);
     }
@@ -528,16 +529,16 @@ struct GroupLibraryObjects {
     void functionWrapperImplFunc(ParmsFunc &p) {
 
         Printf(b_lib_grp_hpp->b0,"\n");
-        emitTypeMap(b_lib_grp_hpp->b0, "rp_tm_lib_ret", p.n, 1);
+        emitTypeMap(b_lib_grp_hpp->b0, p.n, "rp_tm_default", 1);
         Printf(b_lib_grp_hpp->b0,"    %s(\n", p.symname);
         emitParmList(p.parms, b_lib_grp_hpp->b0, 2, "rp_tm_default", 2);
         Printf(b_lib_grp_hpp->b0,"    );\n");
 
-        emitTypeMap(b_lib_grp_cpp->b0, "rp_tm_lib_ret", p.n);
+        emitTypeMap(b_lib_grp_cpp->b0, p.n, "rp_tm_default");
         Printf(b_lib_grp_cpp->b0,"%s::%s(\n", module, p.symname);
         emitParmList(p.parms, b_lib_grp_cpp->b0, 2, "rp_tm_default", 2);
         Printf(b_lib_grp_cpp->b0,"    ) {\n");
-        emitTypeMap(b_lib_grp_cpp->b0, "rp_tm_lib_rts", p.n, 2);
+        emitTypeMap(b_lib_grp_cpp->b0, p.n, "rp_tm_lib_rts", 2);
         Printf(b_lib_grp_cpp->b0,"        %s(\n", p.name);
         emitParmList(p.parms, b_lib_grp_cpp->b0, 0, "rp_tm_default", 3, ',', true, true);
         Printf(b_lib_grp_cpp->b0,"        );\n");
@@ -993,23 +994,23 @@ struct GroupCpp {
 
     void functionWrapperImplFunc(ParmsFunc &p) {
 
-        emitTypeMap(b_cpp_grp_hpp->b0, "rp_tm_cpp_ret", p.n, 1);
+        emitTypeMap(b_cpp_grp_hpp->b0, p.n, "rp_tm_cpp_ret", 1);
         Printf(b_cpp_grp_hpp->b0,"    %s(\n", p.funcName);
         emitParmList(p.parms, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_prm", 2);
         Printf(b_cpp_grp_hpp->b0,"    );\n");
 
         Printf(b_cpp_grp_cpp->b0,"//****FUNC*****\n");
-        emitTypeMap(b_cpp_grp_cpp->b0, "rp_tm_cpp_ret", p.n);
+        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_ret");
         Printf(b_cpp_grp_cpp->b0,"%s::%s(\n", addinCppNameSpace, p.funcName);
         emitParmList(p.parms, b_cpp_grp_cpp->b0, 2, "rp_tm_cpp_prm");
         Printf(b_cpp_grp_cpp->b0,") {\n");
         emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_cnv", 1, 0, false);
         Printf(b_cpp_grp_cpp->b0,"\n");
-        emitTypeMap(b_cpp_grp_cpp->b0, "rp_tm_cpp_rtd", p.n, 2);
+        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtd", 2);
         Printf(b_cpp_grp_cpp->b0,"    %s::%s(\n", module, p.symname);
         emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_arg", 2, ',', true, true);
         Printf(b_cpp_grp_cpp->b0,"    );\n");
-        emitTypeMap(b_cpp_grp_cpp->b0, "rp_tm_cpp_rts", p.n, 2);
+        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rts", 2);
         Printf(b_cpp_grp_cpp->b0,"}\n");
 
         count_.functions++;
@@ -1054,24 +1055,24 @@ struct GroupCpp {
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
-        emitTypeMap(b_cpp_grp_hpp->b0, "rp_tm_cpp_rtm", p.n, 1);
+        emitTypeMap(b_cpp_grp_hpp->b0, p.n, "rp_tm_cpp_rtm", 1);
         Printf(b_cpp_grp_hpp->b0,"    %s(\n", p.funcName);
         emitParmList(p.parms2, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_prm", 2);
         Printf(b_cpp_grp_hpp->b0,"    );\n\n");
 
         Printf(b_cpp_grp_cpp->b0,"//****MEMB*****\n");
-        emitTypeMap(b_cpp_grp_cpp->b0, "rp_tm_cpp_rtm", p.n);
+        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtm");
         Printf(b_cpp_grp_cpp->b0,"%s::%s(\n", addinCppNameSpace, p.funcName);
         emitParmList(p.parms2, b_cpp_grp_cpp->b0, 2, "rp_tm_cpp_prm", 2);
         Printf(b_cpp_grp_cpp->b0,"    ) {\n\n");
         emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_cnv", 1, 0, false);
         Printf(b_cpp_grp_cpp->b0,"\n");
-        emitTypeMap(b_cpp_grp_cpp->b0, "rp_tm_xxx_rp_get", p.node);
-        emitTypeMap(b_cpp_grp_cpp->b0, "rp_tm_cpp_rtd", p.n, 2);
+        emitTypeMap(b_cpp_grp_cpp->b0, p.node, "rp_tm_xxx_rp_get");
+        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtd", 2);
         Printf(b_cpp_grp_cpp->b0,"    xxx->%s(\n", p.name);
         emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_arg", 3, ',', true, true);
         Printf(b_cpp_grp_cpp->b0,"        );\n", p.name);
-        emitTypeMap(b_cpp_grp_cpp->b0, "rp_tm_cpp_rts", p.n, 2);
+        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rts", 2);
         Printf(b_cpp_grp_cpp->b0,"}\n");
 
         count_.members++;
@@ -1149,7 +1150,7 @@ struct GroupExcelFunctions {
         Printf(b_xlf_grp_cpp->b0, "\n");
         Printf(b_xlf_grp_cpp->b0,"//****FUNC*****\n");
         Printf(b_xlf_grp_cpp->b0, "DLLEXPORT\n");
-        emitTypeMap(b_xlf_grp_cpp->b0, "rp_tm_xll_ret", p.n);
+        emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_ret");
         Printf(b_xlf_grp_cpp->b0, "%s(\n", p.funcName);
         emitParmList(p.parms2, b_xlf_grp_cpp->b0, 2, "rp_tm_xll_prm", 1);
         Printf(b_xlf_grp_cpp->b0, ") {\n");
@@ -1168,11 +1169,11 @@ struct GroupExcelFunctions {
         if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
             emitLoopFunc(p, loopParameter);
         } else {
-            emitTypeMap(b_xlf_grp_cpp->b0, "rp_tm_xll_rtd", p.n, 2);
+            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtd", 2);
             Printf(b_xlf_grp_cpp->b0, "        %s::%s(\n", module, p.symname);
             emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_arg", 3, ',', true, true);
             Printf(b_xlf_grp_cpp->b0, "        );\n\n");
-            emitTypeMap(b_xlf_grp_cpp->b0, "rp_tm_xll_rts", p.n, 2);
+            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rts", 2);
         }
 
         Printf(b_xlf_grp_cpp->b0, "\n");
@@ -1265,7 +1266,7 @@ struct GroupExcelFunctions {
         Printf(b_xlf_grp_cpp->b0, "\n");
         Printf(b_xlf_grp_cpp->b0,"//****MEMB*****\n");
         Printf(b_xlf_grp_cpp->b0, "DLLEXPORT\n");
-        emitTypeMap(b_xlf_grp_cpp->b0, "rp_tm_xll_ret", p.n);
+        emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_ret");
         Printf(b_xlf_grp_cpp->b0, "%s(\n", p.funcName);
         emitParmList(p.parms2, b_xlf_grp_cpp->b0, 2, "rp_tm_xll_prm");
         Printf(b_xlf_grp_cpp->b0, ") {\n");
@@ -1279,16 +1280,16 @@ struct GroupExcelFunctions {
         Printf(b_xlf_grp_cpp->b0, "\n");
         emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_cnv", 2, 0, false);
         Printf(b_xlf_grp_cpp->b0, "\n");
-        emitTypeMap(b_xlf_grp_cpp->b0, "rp_tm_xxx_rp_get", p.node, 2);
+        emitTypeMap(b_xlf_grp_cpp->b0, p.node, "rp_tm_xxx_rp_get", 2);
         Printf(b_xlf_grp_cpp->b0, "\n");
         if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
             emitLoopFunc(p, loopParameter);
         } else {
-            emitTypeMap(b_xlf_grp_cpp->b0, "rp_tm_xll_rtd", p.n, 2);
+            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtd", 2);
             Printf(b_xlf_grp_cpp->b0, "        xxx->%s(\n", p.name);
             emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_arg", 3, ',', true, true);
             Printf(b_xlf_grp_cpp->b0, "        );\n\n");
-            emitTypeMap(b_xlf_grp_cpp->b0, "rp_tm_xll_rts", p.n, 2);
+            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rts", 2);
         }
         Printf(b_xlf_grp_cpp->b0, "\n");
         Printf(b_xlf_grp_cpp->b0, "    } catch (const std::exception &e) {\n");
@@ -1377,7 +1378,7 @@ void mongoParms(File *f, ParmList *parms) {
     Printf(f, "                {\n");
     Printf(f, "                    \"name\": \"%s\",\n", name);
     //SwigType *t  = Getattr(p, "type");
-    String *s = getTypeMap("rp_tm_cfy_mng", p);
+    String *s = getTypeMap(p, "rp_tm_cfy_mng");
     Printf(f, "                    \"dataType\": \"%s\",\n", s);
     Printf(f, "                    \"description\": \"\",\n");
     Printf(f, "                    \"optional\": false\n");
@@ -1396,7 +1397,7 @@ void mongoFunc(File *f, String *funcName1, String *funcName2, Node *n, ParmList 
     Printf(f, "            \"codeName\": \"%s\",\n", funcName2);
     Printf(f, "            \"description\": \"\",\n");
     Printf(f, "            \"returnValue\": {\n");
-    String *s = getTypeMap("rp_tm_cfy_mng", n);
+    String *s = getTypeMap(n, "rp_tm_cfy_mng");
     Printf(f, "                \"dataType\": \"%s\"\n", s);
     Printf(f, "            }");
     mongoParms(f, parms);
@@ -1447,7 +1448,7 @@ struct GroupCountify {
         Printf(b_cfy_grp_cpp->b0,"//****FUNC*****\n");
         Printf(b_cfy_grp_cpp->b0,"extern \"C\" {\n");
         Printf(b_cfy_grp_cpp->b0,"COUNTIFY_API\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, "rp_tm_cfy_ret", p.n);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_ret");
         Printf(b_cfy_grp_cpp->b0,"%s(\n", p.funcName);
         emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_prm");
         Printf(b_cfy_grp_cpp->b0,") {\n");
@@ -1461,21 +1462,21 @@ struct GroupCountify {
         Printf(b_cfy_grp_cpp->b0,"        // Convert input types into Library types\n\n");
         emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_cnv", 2, 0, false);
         Printf(b_cfy_grp_cpp->b0,"\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, "rp_tm_cfy_rtd", p.n, 2, false);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtd", 2, false);
         Printf(b_cfy_grp_cpp->b0,"        %s::%s(\n", module, p.symname);
         emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_arg", 2, ',', true, true);
         Printf(b_cfy_grp_cpp->b0,"        );\n");
         Printf(b_cfy_grp_cpp->b0,"\n");
         Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
         Printf(b_cfy_grp_cpp->b0,"\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, "rp_tm_cfy_rts", p.n, 2, false);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rts", 2, false);
         Printf(b_cfy_grp_cpp->b0,"\n");
         Printf(b_cfy_grp_cpp->b0,"    } catch (const std::exception &e) {\n");
         Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
-        emitTypeMap(b_cfy_grp_cpp->b0, "rp_tm_cfy_rte", p.n, 2, false);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rte", 2, false);
         Printf(b_cfy_grp_cpp->b0,"    } catch (...) {\n");
         Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
-        emitTypeMap(b_cfy_grp_cpp->b0, "rp_tm_cfy_rte", p.n, 2, false);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rte", 2, false);
         Printf(b_cfy_grp_cpp->b0,"    }\n");
         Printf(b_cfy_grp_cpp->b0,"}\n");
         Printf(b_cfy_grp_cpp->b0,"} // extern \"C\"\n");
@@ -1545,7 +1546,7 @@ struct GroupCountify {
         Printf(b_cfy_grp_cpp->b0,"//****MEMB*****\n");
         Printf(b_cfy_grp_cpp->b0,"extern \"C\" {\n");
         Printf(b_cfy_grp_cpp->b0,"COUNTIFY_API\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, "rp_tm_cfy_rtm", p.n);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtm");
         Printf(b_cfy_grp_cpp->b0,"%s(\n", p.funcName);
         emitParmList(p.parms2, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_prm", 2);
         Printf(b_cfy_grp_cpp->b0,"    ) {\n");
@@ -1559,23 +1560,23 @@ struct GroupCountify {
         Printf(b_cfy_grp_cpp->b0,"        // Convert input types into Library types\n\n");
         emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_cnv", 2, 0, false);
         Printf(b_cfy_grp_cpp->b0,"\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, "rp_tm_xxx_rp_get", p.node, 2);
-        emitTypeMap(b_cfy_grp_cpp->b0, "rp_tm_cfy_rt2", p.n, 2);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.node, "rp_tm_xxx_rp_get", 2);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rt2", 2);
         Printf(b_cfy_grp_cpp->b0,"        xxx->%s(\n", p.name);
         emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cpp_arg", 3, ',', true, true);
         Printf(b_cfy_grp_cpp->b0,"        );\n", p.name);
         Printf(b_cfy_grp_cpp->b0,"\n");
         Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
         Printf(b_cfy_grp_cpp->b0,"\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, "rp_tm_cfy_rtx", p.n, 2);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtx", 2);
         Printf(b_cfy_grp_cpp->b0,"\n");
         Printf(b_cfy_grp_cpp->b0,"    } catch (const std::exception &e) {\n");
         Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
-        emitTypeMap(b_cfy_grp_cpp->b0, "rp_tm_cfy_rte", p.n, 2, false);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rte", 2, false);
         Printf(b_cfy_grp_cpp->b0,"    } catch (...) {\n");
         Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
         Printf(b_cfy_grp_cpp->b0,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, "rp_tm_cfy_rte", p.n, 2, false);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rte", 2, false);
         Printf(b_cfy_grp_cpp->b0,"    }\n");
         Printf(b_cfy_grp_cpp->b0,"}\n");
         Printf(b_cfy_grp_cpp->b0,"} // extern \"C\"\n");
