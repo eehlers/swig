@@ -1957,6 +1957,16 @@ struct AddinList {
             addin->clear();
         }
         printf("%s\n", std::string(80, '=').c_str());
+        printf("Function Count                      Function Constructor      Member       Total\n");
+        printf("%s\n", std::string(80, '=').c_str());
+        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
+            Addin *addin = *i;
+            printf("%s", addin->name_.c_str());
+            printf("%s", std::string(32-addin->name_.length(), ' ').c_str());
+            printf("%12d%12d%12d%12d\n",
+                addin->count.functions, addin->count.constructors, addin->count.members, addin->count.total2);
+        }
+        printf("%s\n", std::string(80, '=').c_str());
         printf("File Count                           Created     Updated   Unchanged       Total\n");
         printf("%s\n", std::string(80, '=').c_str());
         Count c;
@@ -1973,16 +1983,6 @@ struct AddinList {
         printf("%s", std::string(27, ' ').c_str());
         printf("%12d%12d%12d%12d\n",
             c.created, c.updated, c.unchanged, c.total);
-        printf("%s\n", std::string(80, '=').c_str());
-        printf("Function Count                      Function Constructor      Member       Total\n");
-        printf("%s\n", std::string(80, '=').c_str());
-        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
-            Addin *addin = *i;
-            printf("%s", addin->name_.c_str());
-            printf("%s", std::string(32-addin->name_.length(), ' ').c_str());
-            printf("%12d%12d%12d%12d\n",
-                addin->count.functions, addin->count.constructors, addin->count.members, addin->count.total2);
-        }
         printf("%s\n", std::string(80, '=').c_str());
     }
 
