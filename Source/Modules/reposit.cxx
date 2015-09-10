@@ -185,11 +185,11 @@ void emitParmList(
 String *excelParamCodes(Node *n, SwigType *type, ParmList *parms) {
     String *s = NewString("");
     if (type) { // FIXME this logic looks weird, is parameter type needed?
-        String *tm = getTypeMap(n, "rp_tm_xll_cod");
+        String *tm = getTypeMap(n, "rp_tm_xll_code");
         Append(s, tm);
     }
     for (Parm *p = parms; p; p = nextSibling(p)) {
-        String *tm = getTypeMap(p, "rp_tm_xll_cod");
+        String *tm = getTypeMap(p, "rp_tm_xll_code");
         Append(s, tm);
     }
     Append(s, "#");
@@ -227,9 +227,9 @@ void excelRegister(File *b, Node *n, SwigType *type, ParmList *parms) {
     Printf(b, "            // parameter codes\n");
     String *xlParamCodes = excelParamCodes(n, type, parms);
     Printf(b, "            TempStrNoSize(\n");
-    Printf(b, "            // BEGIN func excelParamCodes (using typemap rp_tm_xll_cod)\n");
+    Printf(b, "            // BEGIN func excelParamCodes (using typemap rp_tm_xll_code)\n");
     Printf(b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamCodes).c_str(), xlParamCodes);
-    Printf(b, "            // END   func excelParamCodes (using typemap rp_tm_xll_cod)\n");
+    Printf(b, "            // END   func excelParamCodes (using typemap rp_tm_xll_code)\n");
     Printf(b, "            ),\n");
     Printf(b, "            // function display name\n");
     Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
@@ -257,9 +257,9 @@ void excelUnregister(File *b, Node *n, SwigType *type, ParmList *parms) {
     Printf(b, "            // parameter codes\n");
     String *xlParamCodes = excelParamCodes(n, type, parms);
     Printf(b, "            TempStrNoSize(\n");
-    Printf(b, "            // BEGIN func excelParamCodes (using typemap rp_tm_xll_cod)\n");
+    Printf(b, "            // BEGIN func excelParamCodes (using typemap rp_tm_xll_code)\n");
     Printf(b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamCodes).c_str(), xlParamCodes);
-    Printf(b, "            // END   func excelParamCodes (using typemap rp_tm_xll_cod)\n");
+    Printf(b, "            // END   func excelParamCodes (using typemap rp_tm_xll_code)\n");
     Printf(b, "            ),\n");
     Printf(b, "            // function display name\n");
     Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
@@ -311,15 +311,15 @@ void voGetProp(File *f, ParmList *parms) {
 }
 
 void voSetProp(File *f, ParmList *parms) {
-    Printf(f, "            // BEGIN func voSetProp (using typemap rp_tm_vob_cnv)\n");
+    Printf(f, "            // BEGIN func voSetProp (using typemap rp_tm_vob_cnvt)\n");
     for (Parm *p = parms; p; p = nextSibling(p)) {
         String *name = Getattr(p,"name");
         String *nameUpper = Getattr(p,"rp_name_upper");
-        String *cnv = getTypeMap(p, "rp_tm_vob_cnv");
+        String *cnv = getTypeMap(p, "rp_tm_vob_cnvt");
         Printf(f, "            else if(strcmp(nameUpper.c_str(), \"%s\")==0)\n", nameUpper);
         Printf(f, "                %s_ = %s;\n", name, cnv);
     }
-    Printf(f, "            // END   func voSetProp (using typemap rp_tm_vob_cnv)\n");
+    Printf(f, "            // END   func voSetProp (using typemap rp_tm_vob_cnvt)\n");
 }
 
 // END ***************************
@@ -538,7 +538,7 @@ struct GroupLibraryObjects {
         Printf(b_lib_grp_cpp->b0,"%s::%s(\n", module, p.symname);
         emitParmList(p.parms, b_lib_grp_cpp->b0, 2, "rp_tm_default", 2);
         Printf(b_lib_grp_cpp->b0,"    ) {\n");
-        emitTypeMap(b_lib_grp_cpp->b0, p.n, "rp_tm_lib_rts", 2);
+        emitTypeMap(b_lib_grp_cpp->b0, p.n, "rp_tm_lib_rtst", 2);
         Printf(b_lib_grp_cpp->b0,"        %s(\n", p.name);
         emitParmList(p.parms, b_lib_grp_cpp->b0, 0, "rp_tm_default", 3, ',', true, true);
         Printf(b_lib_grp_cpp->b0,"        );\n");
@@ -663,7 +663,7 @@ struct GroupValueObjects {
             Printf(b_vob_grp_hpp->b0,"            %s() {}\n", p.funcRename);
             Printf(b_vob_grp_hpp->b0,"            %s(\n", p.funcRename);
             Printf(b_vob_grp_hpp->b0,"                const std::string& ObjectId,\n");
-            emitParmList(p.parms, b_vob_grp_hpp->b0, 2, "rp_tm_vob_prm", 4, ',', true, false, true);
+            emitParmList(p.parms, b_vob_grp_hpp->b0, 2, "rp_tm_vob_parm", 4, ',', true, false, true);
             Printf(b_vob_grp_hpp->b0,"                bool Permanent);\n");
             Printf(b_vob_grp_hpp->b0,"\n");
             Printf(b_vob_grp_hpp->b0,"            const std::set<std::string>& getSystemPropertyNames() const;\n");
@@ -674,7 +674,7 @@ struct GroupValueObjects {
             Printf(b_vob_grp_hpp->b0,"        protected:\n");
             Printf(b_vob_grp_hpp->b0,"            static const char* mPropertyNames[];\n");
             Printf(b_vob_grp_hpp->b0,"            static std::set<std::string> mSystemPropertyNames;\n");
-            emitParmList(p.parms, b_vob_grp_hpp->b0, 1, "rp_tm_vob_mbv", 3, ';', true, false, true);
+            emitParmList(p.parms, b_vob_grp_hpp->b0, 1, "rp_tm_vob_mbvr", 3, ';', true, false, true);
             Printf(b_vob_grp_hpp->b0,"            bool Permanent_;\n");
             if (String *processorName = Getattr(p.n, "feature:rp:processorName"))
                 Printf(b_vob_grp_hpp->b0,"            virtual std::string processorName() { return \"%s\"; }\n", processorName);
@@ -684,7 +684,7 @@ struct GroupValueObjects {
             Printf(b_vob_grp_hpp->b0,"            boost::serialization::void_cast_register<%s, reposit::ValueObject>(this, this);\n", p.funcRename);
             Printf(b_vob_grp_hpp->b0,"                ar  & boost::serialization::make_nvp(\"ObjectId\", objectId_)\n");
             Printf(b_vob_grp_hpp->b0,"                    & boost::serialization::make_nvp(\"ClassName\", className_)\n");
-            emitParmList(p.parms, b_vob_grp_hpp->b0, 1, "rp_tm_vob_ser", 5, 0);
+            emitParmList(p.parms, b_vob_grp_hpp->b0, 1, "rp_tm_vob_srmv", 5, 0);
             Printf(b_vob_grp_hpp->b0,"                    & boost::serialization::make_nvp(\"Permanent\", Permanent_)\n");
             Printf(b_vob_grp_hpp->b0,"                    & boost::serialization::make_nvp(\"UserProperties\", userProperties);\n");
             Printf(b_vob_grp_hpp->b0,"            }\n");
@@ -692,7 +692,7 @@ struct GroupValueObjects {
             Printf(b_vob_grp_hpp->b0,"\n");
 
             Printf(b_vob_grp_cpp->b0,"        const char* %s::mPropertyNames[] = {\n", p.funcRename);
-            emitParmList(p.parms, b_vob_grp_cpp->b0, 1, "rp_tm_vob_nam", 3, ',', true, false, true);
+            emitParmList(p.parms, b_vob_grp_cpp->b0, 1, "rp_tm_vob_name", 3, ',', true, false, true);
             Printf(b_vob_grp_cpp->b0,"            \"Permanent\"\n");
             Printf(b_vob_grp_cpp->b0,"        };\n");
             Printf(b_vob_grp_cpp->b0,"\n");
@@ -740,10 +740,10 @@ struct GroupValueObjects {
             Printf(b_vob_grp_cpp->b0,"\n");
             Printf(b_vob_grp_cpp->b0,"        %s::%s(\n", p.funcRename, p.funcRename);
             Printf(b_vob_grp_cpp->b0,"                const std::string& ObjectId,\n");
-            emitParmList(p.parms, b_vob_grp_cpp->b0, 2, "rp_tm_vob_prm", 4, ',', true, false, true);
+            emitParmList(p.parms, b_vob_grp_cpp->b0, 2, "rp_tm_vob_parm", 4, ',', true, false, true);
             Printf(b_vob_grp_cpp->b0,"                bool Permanent) :\n");
             Printf(b_vob_grp_cpp->b0,"            reposit::ValueObject(ObjectId, \"%s\", Permanent),\n", p.funcRename);
-            emitParmList(p.parms, b_vob_grp_cpp->b0, 1, "rp_tm_vob_ini", 3, ',', true, false, true);
+            emitParmList(p.parms, b_vob_grp_cpp->b0, 1, "rp_tm_vob_init", 3, ',', true, false, true);
             Printf(b_vob_grp_cpp->b0,"            Permanent_(Permanent) {\n");
             Printf(b_vob_grp_cpp->b0,"        }\n");
 
@@ -826,7 +826,7 @@ struct GroupSerializationCreate {
             Printf(b_scr_grp_cpp->b0, "    const boost::shared_ptr<reposit::ValueObject> &valueObject) {\n");
             Printf(b_scr_grp_cpp->b0, "\n");
             Printf(b_scr_grp_cpp->b0, "    // conversions\n\n");
-            emitParmList(p.parms, b_scr_grp_cpp->b0, 1, "rp_tm_scr_cnv", 1, 0);
+            emitParmList(p.parms, b_scr_grp_cpp->b0, 1, "rp_tm_scr_cnvt", 1, 0);
             Printf(b_scr_grp_cpp->b0, "\n");
             Printf(b_scr_grp_cpp->b0, "    bool Permanent =\n");
             Printf(b_scr_grp_cpp->b0, "        reposit::convert2<bool>(valueObject->getProperty(\"Permanent\"));\n");
@@ -994,23 +994,23 @@ struct GroupCpp {
 
     void functionWrapperImplFunc(ParmsFunc &p) {
 
-        emitTypeMap(b_cpp_grp_hpp->b0, p.n, "rp_tm_cpp_ret", 1);
+        emitTypeMap(b_cpp_grp_hpp->b0, p.n, "rp_tm_cpp_rttp", 1);
         Printf(b_cpp_grp_hpp->b0,"    %s(\n", p.funcName);
-        emitParmList(p.parms, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_prm", 2);
+        emitParmList(p.parms, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", 2);
         Printf(b_cpp_grp_hpp->b0,"    );\n");
 
         Printf(b_cpp_grp_cpp->b0,"//****FUNC*****\n");
-        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_ret");
+        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rttp");
         Printf(b_cpp_grp_cpp->b0,"%s::%s(\n", addinCppNameSpace, p.funcName);
-        emitParmList(p.parms, b_cpp_grp_cpp->b0, 2, "rp_tm_cpp_prm");
+        emitParmList(p.parms, b_cpp_grp_cpp->b0, 2, "rp_tm_cpp_parm");
         Printf(b_cpp_grp_cpp->b0,") {\n");
-        emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_cnv", 1, 0, false);
+        emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_cnvt", 1, 0, false);
         Printf(b_cpp_grp_cpp->b0,"\n");
-        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtd", 2);
+        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtdc", 2);
         Printf(b_cpp_grp_cpp->b0,"    %s::%s(\n", module, p.symname);
-        emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_arg", 2, ',', true, true);
+        emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_args", 2, ',', true, true);
         Printf(b_cpp_grp_cpp->b0,"    );\n");
-        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rts", 2);
+        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtst", 2);
         Printf(b_cpp_grp_cpp->b0,"}\n");
 
         count_.functions++;
@@ -1022,16 +1022,16 @@ struct GroupCpp {
         if (generateCtor) {
             Printf(b_cpp_grp_hpp->b0,"\n");
             Printf(b_cpp_grp_hpp->b0,"    std::string %s(\n", p.funcName);
-            emitParmList(p.parms2, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_prm", 2);
+            emitParmList(p.parms2, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", 2);
             Printf(b_cpp_grp_hpp->b0,"    );\n\n");
 
             Printf(b_cpp_grp_cpp->b0,"//****CTOR*****\n");
             Printf(b_cpp_grp_cpp->b0,"std::string %s::%s(\n", addinCppNameSpace, p.funcName);
-            emitParmList(p.parms2, b_cpp_grp_cpp->b0, 2, "rp_tm_cpp_prm", 2);
+            emitParmList(p.parms2, b_cpp_grp_cpp->b0, 2, "rp_tm_cpp_parm", 2);
             Printf(b_cpp_grp_cpp->b0,"    ) {\n");
             Printf(b_cpp_grp_cpp->b0,"\n");
             Printf(b_cpp_grp_cpp->b0,"    // Convert input types into Library types\n\n");
-            emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_cnv", 1, 0, false);
+            emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_cnvt", 1, 0, false);
             Printf(b_cpp_grp_cpp->b0,"\n");
             Printf(b_cpp_grp_cpp->b0,"    boost::shared_ptr<reposit::ValueObject> valueObject(\n");
             Printf(b_cpp_grp_cpp->b0,"        new %s::ValueObjects::%s(\n", module, p.funcName);
@@ -1041,7 +1041,7 @@ struct GroupCpp {
             Printf(b_cpp_grp_cpp->b0,"    boost::shared_ptr<reposit::Object> object(\n");
             Printf(b_cpp_grp_cpp->b0,"        new %s::%s(\n", module, p.name);
             Printf(b_cpp_grp_cpp->b0,"            valueObject,\n");
-            emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_arg", 3, ',', true, true, true);
+            emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_args", 3, ',', true, true, true);
             Printf(b_cpp_grp_cpp->b0,"            false));\n");
             Printf(b_cpp_grp_cpp->b0,"    std::string returnValue =\n");
             Printf(b_cpp_grp_cpp->b0,"        reposit::Repository::instance().storeObject(\n");
@@ -1055,24 +1055,24 @@ struct GroupCpp {
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
-        emitTypeMap(b_cpp_grp_hpp->b0, p.n, "rp_tm_cpp_rtm", 1);
+        emitTypeMap(b_cpp_grp_hpp->b0, p.n, "rp_tm_cpp_rtmb", 1);
         Printf(b_cpp_grp_hpp->b0,"    %s(\n", p.funcName);
-        emitParmList(p.parms2, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_prm", 2);
+        emitParmList(p.parms2, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", 2);
         Printf(b_cpp_grp_hpp->b0,"    );\n\n");
 
         Printf(b_cpp_grp_cpp->b0,"//****MEMB*****\n");
-        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtm");
+        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtmb");
         Printf(b_cpp_grp_cpp->b0,"%s::%s(\n", addinCppNameSpace, p.funcName);
-        emitParmList(p.parms2, b_cpp_grp_cpp->b0, 2, "rp_tm_cpp_prm", 2);
+        emitParmList(p.parms2, b_cpp_grp_cpp->b0, 2, "rp_tm_cpp_parm", 2);
         Printf(b_cpp_grp_cpp->b0,"    ) {\n\n");
-        emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_cnv", 1, 0, false);
+        emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_cnvt", 1, 0, false);
         Printf(b_cpp_grp_cpp->b0,"\n");
         emitTypeMap(b_cpp_grp_cpp->b0, p.node, "rp_tm_xxx_rp_get");
-        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtd", 2);
+        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtdc", 2);
         Printf(b_cpp_grp_cpp->b0,"    xxx->%s(\n", p.name);
-        emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_arg", 3, ',', true, true);
+        emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_args", 3, ',', true, true);
         Printf(b_cpp_grp_cpp->b0,"        );\n", p.name);
-        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rts", 2);
+        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtst", 2);
         Printf(b_cpp_grp_cpp->b0,"}\n");
 
         count_.members++;
@@ -1134,7 +1134,7 @@ struct GroupExcelFunctions {
         Printf(b_xlf_grp_cpp->b0, "        %s::%sBind bindObject =\n", module, p.funcName);
         Printf(b_xlf_grp_cpp->b0, "            boost::bind(\n");
         Printf(b_xlf_grp_cpp->b0, "                %s,\n", p.name);
-        emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xxx_lop", 4, ',', true, true);
+        emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xxx_loop", 4, ',', true, true);
         Printf(b_xlf_grp_cpp->b0, "            );\n");
         Printf(b_xlf_grp_cpp->b0, "        reposit::loop\n");
         Printf(b_xlf_grp_cpp->b0, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
@@ -1150,9 +1150,9 @@ struct GroupExcelFunctions {
         Printf(b_xlf_grp_cpp->b0, "\n");
         Printf(b_xlf_grp_cpp->b0,"//****FUNC*****\n");
         Printf(b_xlf_grp_cpp->b0, "DLLEXPORT\n");
-        emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_ret");
+        emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtft");
         Printf(b_xlf_grp_cpp->b0, "%s(\n", p.funcName);
-        emitParmList(p.parms2, b_xlf_grp_cpp->b0, 2, "rp_tm_xll_prm", 1);
+        emitParmList(p.parms2, b_xlf_grp_cpp->b0, 2, "rp_tm_xll_parm", 1);
         Printf(b_xlf_grp_cpp->b0, ") {\n");
         Printf(b_xlf_grp_cpp->b0, "\n");
         Printf(b_xlf_grp_cpp->b0, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
@@ -1164,16 +1164,16 @@ struct GroupExcelFunctions {
         Printf(b_xlf_grp_cpp->b0, "\n");
         Printf(b_xlf_grp_cpp->b0, "        reposit::validateRange(Trigger, \"Trigger\");\n");
         Printf(b_xlf_grp_cpp->b0, "\n");
-        emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_cnv", 2, 0, false);
+        emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_cnvt", 2, 0, false);
         Printf(b_xlf_grp_cpp->b0, "\n");
         if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
             emitLoopFunc(p, loopParameter);
         } else {
-            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtd", 2);
+            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtdc", 2);
             Printf(b_xlf_grp_cpp->b0, "        %s::%s(\n", module, p.symname);
-            emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_arg", 3, ',', true, true);
+            emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_argf", 3, ',', true, true);
             Printf(b_xlf_grp_cpp->b0, "        );\n\n");
-            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rts", 2);
+            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtst", 2);
         }
 
         Printf(b_xlf_grp_cpp->b0, "\n");
@@ -1195,7 +1195,7 @@ struct GroupExcelFunctions {
             Printf(b_xlf_grp_cpp->b0, "\n");
             Printf(b_xlf_grp_cpp->b0,"//****CTOR*****\n");
             Printf(b_xlf_grp_cpp->b0, "DLLEXPORT char *%s(\n", p.funcRename);
-            emitParmList(p.parms2, b_xlf_grp_cpp->b0, 2, "rp_tm_xll_prm");
+            emitParmList(p.parms2, b_xlf_grp_cpp->b0, 2, "rp_tm_xll_parm");
             Printf(b_xlf_grp_cpp->b0, ") {\n");
             Printf(b_xlf_grp_cpp->b0, "\n");
             Printf(b_xlf_grp_cpp->b0, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
@@ -1205,18 +1205,18 @@ struct GroupExcelFunctions {
             Printf(b_xlf_grp_cpp->b0, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
             Printf(b_xlf_grp_cpp->b0, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcRename);
             Printf(b_xlf_grp_cpp->b0, "\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_cnv", 2, 0, false);
+            emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_cnvt", 2, 0, false);
             Printf(b_xlf_grp_cpp->b0, "\n");
             Printf(b_xlf_grp_cpp->b0, "        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
             Printf(b_xlf_grp_cpp->b0, "            new %s::ValueObjects::%s(\n", module, p.funcRename);
             Printf(b_xlf_grp_cpp->b0, "                objectID,\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_arv", 4, ',', true, true, true);
+            emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_argfv", 4, ',', true, true, true);
             Printf(b_xlf_grp_cpp->b0, "                false));\n");
             Printf(b_xlf_grp_cpp->b0, "\n");
             Printf(b_xlf_grp_cpp->b0, "        boost::shared_ptr<reposit::Object> object(\n");
             Printf(b_xlf_grp_cpp->b0, "            new %s::%s(\n", module, p.name);
             Printf(b_xlf_grp_cpp->b0, "                valueObject,\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_arg", 4, ',', true, true, true);
+            emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_argf", 4, ',', true, true, true);
             Printf(b_xlf_grp_cpp->b0, "                false));\n");
             Printf(b_xlf_grp_cpp->b0, "\n");
             Printf(b_xlf_grp_cpp->b0, "        std::string returnValue =\n");
@@ -1250,7 +1250,7 @@ struct GroupExcelFunctions {
         Printf(b_xlf_grp_cpp->b0, "            boost::bind(\n");
         Printf(b_xlf_grp_cpp->b0, "                &%s::%s,\n", p.pname, p.name);
         Printf(b_xlf_grp_cpp->b0, "                xxx,\n");
-        emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xxx_lop", 4, ',', true, true);
+        emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xxx_loop", 4, ',', true, true);
         Printf(b_xlf_grp_cpp->b0, "            );\n");
         Printf(b_xlf_grp_cpp->b0, "        reposit::loop\n");
         Printf(b_xlf_grp_cpp->b0, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
@@ -1266,9 +1266,9 @@ struct GroupExcelFunctions {
         Printf(b_xlf_grp_cpp->b0, "\n");
         Printf(b_xlf_grp_cpp->b0,"//****MEMB*****\n");
         Printf(b_xlf_grp_cpp->b0, "DLLEXPORT\n");
-        emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_ret");
+        emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtft");
         Printf(b_xlf_grp_cpp->b0, "%s(\n", p.funcName);
-        emitParmList(p.parms2, b_xlf_grp_cpp->b0, 2, "rp_tm_xll_prm");
+        emitParmList(p.parms2, b_xlf_grp_cpp->b0, 2, "rp_tm_xll_parm");
         Printf(b_xlf_grp_cpp->b0, ") {\n");
         Printf(b_xlf_grp_cpp->b0, "\n");
         Printf(b_xlf_grp_cpp->b0, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
@@ -1278,18 +1278,18 @@ struct GroupExcelFunctions {
         Printf(b_xlf_grp_cpp->b0, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
         Printf(b_xlf_grp_cpp->b0, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcName);
         Printf(b_xlf_grp_cpp->b0, "\n");
-        emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_cnv", 2, 0, false);
+        emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_cnvt", 2, 0, false);
         Printf(b_xlf_grp_cpp->b0, "\n");
         emitTypeMap(b_xlf_grp_cpp->b0, p.node, "rp_tm_xxx_rp_get", 2);
         Printf(b_xlf_grp_cpp->b0, "\n");
         if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
             emitLoopFunc(p, loopParameter);
         } else {
-            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtd", 2);
+            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtdc", 2);
             Printf(b_xlf_grp_cpp->b0, "        xxx->%s(\n", p.name);
-            emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_arg", 3, ',', true, true);
+            emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_argf", 3, ',', true, true);
             Printf(b_xlf_grp_cpp->b0, "        );\n\n");
-            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rts", 2);
+            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtst", 2);
         }
         Printf(b_xlf_grp_cpp->b0, "\n");
         Printf(b_xlf_grp_cpp->b0, "    } catch (const std::exception &e) {\n");
@@ -1378,7 +1378,7 @@ void mongoParms(File *f, ParmList *parms) {
     Printf(f, "                {\n");
     Printf(f, "                    \"name\": \"%s\",\n", name);
     //SwigType *t  = Getattr(p, "type");
-    String *s = getTypeMap(p, "rp_tm_cfy_mng");
+    String *s = getTypeMap(p, "rp_tm_cfy_mngo");
     Printf(f, "                    \"dataType\": \"%s\",\n", s);
     Printf(f, "                    \"description\": \"\",\n");
     Printf(f, "                    \"optional\": false\n");
@@ -1397,7 +1397,7 @@ void mongoFunc(File *f, String *funcName1, String *funcName2, Node *n, ParmList 
     Printf(f, "            \"codeName\": \"%s\",\n", funcName2);
     Printf(f, "            \"description\": \"\",\n");
     Printf(f, "            \"returnValue\": {\n");
-    String *s = getTypeMap(n, "rp_tm_cfy_mng");
+    String *s = getTypeMap(n, "rp_tm_cfy_mngo");
     Printf(f, "                \"dataType\": \"%s\"\n", s);
     Printf(f, "            }");
     mongoParms(f, parms);
@@ -1448,9 +1448,9 @@ struct GroupCountify {
         Printf(b_cfy_grp_cpp->b0,"//****FUNC*****\n");
         Printf(b_cfy_grp_cpp->b0,"extern \"C\" {\n");
         Printf(b_cfy_grp_cpp->b0,"COUNTIFY_API\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_ret");
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtfn");
         Printf(b_cfy_grp_cpp->b0,"%s(\n", p.funcName);
-        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_prm");
+        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_parm");
         Printf(b_cfy_grp_cpp->b0,") {\n");
         Printf(b_cfy_grp_cpp->b0,"\n");
         Printf(b_cfy_grp_cpp->b0,"    try {\n");
@@ -1460,23 +1460,23 @@ struct GroupCountify {
         Printf(b_cfy_grp_cpp->b0,"        initializeAddin();\n");
         Printf(b_cfy_grp_cpp->b0,"\n");
         Printf(b_cfy_grp_cpp->b0,"        // Convert input types into Library types\n\n");
-        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_cnv", 2, 0, false);
+        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_cnvt", 2, 0, false);
         Printf(b_cfy_grp_cpp->b0,"\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtd", 2, false);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtdf", 2, false);
         Printf(b_cfy_grp_cpp->b0,"        %s::%s(\n", module, p.symname);
-        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_arg", 2, ',', true, true);
+        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_args", 2, ',', true, true);
         Printf(b_cfy_grp_cpp->b0,"        );\n");
         Printf(b_cfy_grp_cpp->b0,"\n");
         Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
         Printf(b_cfy_grp_cpp->b0,"\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rts", 2, false);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtsf", 2, false);
         Printf(b_cfy_grp_cpp->b0,"\n");
         Printf(b_cfy_grp_cpp->b0,"    } catch (const std::exception &e) {\n");
         Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rte", 2, false);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtex", 2, false);
         Printf(b_cfy_grp_cpp->b0,"    } catch (...) {\n");
         Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rte", 2, false);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtex", 2, false);
         Printf(b_cfy_grp_cpp->b0,"    }\n");
         Printf(b_cfy_grp_cpp->b0,"}\n");
         Printf(b_cfy_grp_cpp->b0,"} // extern \"C\"\n");
@@ -1492,7 +1492,7 @@ struct GroupCountify {
             Printf(b_cfy_grp_cpp->b0,"extern \"C\" {\n");
             Printf(b_cfy_grp_cpp->b0,"COUNTIFY_API\n");
             Printf(b_cfy_grp_cpp->b0,"const char *%s(\n", p.funcName);
-            emitParmList(p.parms2, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_prm", 2);
+            emitParmList(p.parms2, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_parm", 2);
             Printf(b_cfy_grp_cpp->b0,"    ) {\n");
             Printf(b_cfy_grp_cpp->b0,"\n");
             Printf(b_cfy_grp_cpp->b0,"    try {\n");
@@ -1502,7 +1502,7 @@ struct GroupCountify {
             Printf(b_cfy_grp_cpp->b0,"        initializeAddin();\n");
             Printf(b_cfy_grp_cpp->b0,"\n");
             Printf(b_cfy_grp_cpp->b0,"        // Convert input types into Library types\n\n");
-            emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_cnv", 2, 0, false);
+            emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_cnvt", 2, 0, false);
             Printf(b_cfy_grp_cpp->b0,"\n");
             Printf(b_cfy_grp_cpp->b0,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
             Printf(b_cfy_grp_cpp->b0,"            new %s::ValueObjects::%s(\n", module, p.funcName);
@@ -1512,7 +1512,7 @@ struct GroupCountify {
             Printf(b_cfy_grp_cpp->b0,"        boost::shared_ptr<reposit::Object> object(\n");
             Printf(b_cfy_grp_cpp->b0,"            new %s::%s(\n", module, p.name);
             Printf(b_cfy_grp_cpp->b0,"                valueObject,\n");
-            emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_arg", 4, ',', true, true, true);
+            emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_args", 4, ',', true, true, true);
             Printf(b_cfy_grp_cpp->b0,"                false));\n");
             Printf(b_cfy_grp_cpp->b0,"        static std::string returnValue;\n");
             Printf(b_cfy_grp_cpp->b0,"        returnValue =\n");
@@ -1546,9 +1546,9 @@ struct GroupCountify {
         Printf(b_cfy_grp_cpp->b0,"//****MEMB*****\n");
         Printf(b_cfy_grp_cpp->b0,"extern \"C\" {\n");
         Printf(b_cfy_grp_cpp->b0,"COUNTIFY_API\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtm");
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtmb");
         Printf(b_cfy_grp_cpp->b0,"%s(\n", p.funcName);
-        emitParmList(p.parms2, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_prm", 2);
+        emitParmList(p.parms2, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_parm", 2);
         Printf(b_cfy_grp_cpp->b0,"    ) {\n");
         Printf(b_cfy_grp_cpp->b0,"\n");
         Printf(b_cfy_grp_cpp->b0,"    try {\n");
@@ -1558,25 +1558,25 @@ struct GroupCountify {
         Printf(b_cfy_grp_cpp->b0,"        initializeAddin();\n");
         Printf(b_cfy_grp_cpp->b0,"\n");
         Printf(b_cfy_grp_cpp->b0,"        // Convert input types into Library types\n\n");
-        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_cnv", 2, 0, false);
+        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_cnvt", 2, 0, false);
         Printf(b_cfy_grp_cpp->b0,"\n");
         emitTypeMap(b_cfy_grp_cpp->b0, p.node, "rp_tm_xxx_rp_get", 2);
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rt2", 2);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtdm", 2);
         Printf(b_cfy_grp_cpp->b0,"        xxx->%s(\n", p.name);
-        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cpp_arg", 3, ',', true, true);
+        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cpp_args", 3, ',', true, true);
         Printf(b_cfy_grp_cpp->b0,"        );\n", p.name);
         Printf(b_cfy_grp_cpp->b0,"\n");
         Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
         Printf(b_cfy_grp_cpp->b0,"\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtx", 2);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtsm", 2);
         Printf(b_cfy_grp_cpp->b0,"\n");
         Printf(b_cfy_grp_cpp->b0,"    } catch (const std::exception &e) {\n");
         Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rte", 2, false);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtex", 2, false);
         Printf(b_cfy_grp_cpp->b0,"    } catch (...) {\n");
         Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
         Printf(b_cfy_grp_cpp->b0,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rte", 2, false);
+        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtex", 2, false);
         Printf(b_cfy_grp_cpp->b0,"    }\n");
         Printf(b_cfy_grp_cpp->b0,"}\n");
         Printf(b_cfy_grp_cpp->b0,"} // extern \"C\"\n");
