@@ -2557,7 +2557,7 @@ int functionWrapperImplCtor(Node *n) {
             p.base = Getitem(baseList, 0);
             printf("base = %s\n", Char(p.base));
         } else {
-            printf("ERROR : Classs %s has multiple base classes.\n", Char(p.name));
+            printf("ERROR : Class %s has multiple base classes.\n", Char(p.name));
             SWIG_exit(EXIT_FAILURE);
         }
     } else {
