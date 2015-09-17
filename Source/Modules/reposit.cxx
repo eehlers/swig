@@ -394,7 +394,7 @@ struct Buffer {
         Dump(outputBuffer_, f);
         Delete(f);
     }
-    void clear(Count &count) {
+    void clearImpl(Count &count) {
         if (Len(path_)<68) {
             printf("%s", Char(path_));
             printf("%s", std::string(68-Len(path_), '.').c_str());
@@ -409,10 +409,6 @@ struct Buffer {
         Dump(b1, outputBuffer_);
         Dump(b2, outputBuffer_);
         Dump(b3, outputBuffer_);
-        Delete(b0);
-        Delete(b1);
-        Delete(b2);
-        Delete(b3);
         if (fileExists()) {
             if (fileChanged()) {
                 writeFile();
@@ -429,6 +425,14 @@ struct Buffer {
         }
         count.total++;
         Delete(outputBuffer_);
+    }
+    void clear(Count &count, bool generateFile = true) {
+        if (generateFile)
+            clearImpl(count);
+        Delete(b0);
+        Delete(b1);
+        Delete(b2);
+        Delete(b3);
         Delete(name_);
         Delete(path_);
     }
@@ -477,6 +481,7 @@ struct GroupLibraryObjects {
     Buffer *b_lib_grp_hpp;
     Buffer *b_lib_grp_cpp;
     Count &count_;
+    bool generateCppFile;
 
     GroupLibraryObjects(Count &count) : count_(count) {
 
@@ -511,6 +516,7 @@ struct GroupLibraryObjects {
             Printf(b_lib_grp_cpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, group_name);
         }
         Printf(b_lib_grp_cpp->b0, "\n");
+        generateCppFile = false;
     }
 
     void clear() {
@@ -523,7 +529,7 @@ struct GroupLibraryObjects {
         Printf(b_lib_grp_cpp->b0, "\n");
 
         b_lib_grp_hpp->clear(count_);
-        b_lib_grp_cpp->clear(count_);
+        b_lib_grp_cpp->clear(count_, generateCppFile);
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
@@ -546,6 +552,7 @@ struct GroupLibraryObjects {
 
         count_.functions++;
         count_.total2++;
+        generateCppFile = true;
     }
 
     void functionWrapperImplCtor(ParmsCtor &p) {
