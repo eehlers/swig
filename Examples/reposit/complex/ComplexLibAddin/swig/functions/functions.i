@@ -1,7 +1,7 @@
 
-%pragma(reposit) group="functions";
+%group(functions);
 
-%pragma(reposit) obj_include=%{
+%insert(functions_lib_inc) %{
 #include <cl/functions.hpp>
 %}
 

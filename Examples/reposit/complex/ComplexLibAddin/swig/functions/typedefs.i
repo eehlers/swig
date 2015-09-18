@@ -1,7 +1,7 @@
 
-%pragma(reposit) group="typedefs";
+%group(typedefs);
 
-%pragma(reposit) obj_include=%{
+%insert(typedefs_lib_inc) %{
 #include <cl/typedefs.hpp>
 %}
 

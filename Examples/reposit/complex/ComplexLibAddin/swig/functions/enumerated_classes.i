@@ -1,11 +1,11 @@
 
-%pragma(reposit) group="enumerated_classes";
+%group(enumerated_classes);
 
-%pragma(reposit) obj_include=%{
+%insert(enumerated_classes_lib_inc) %{
 #include <cl/enumerated_classes.hpp>
 %}
 
-%pragma(reposit) add_include=%{
+%insert(enumerated_classes_cpp_inc) %{
 #include <boost/shared_ptr.hpp>
 %}
 

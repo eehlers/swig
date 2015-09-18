@@ -1,7 +1,7 @@
 
-%pragma(reposit) group="enumerated_types";
+%group(enumerated_types);
 
-%pragma(reposit) obj_include=%{
+%insert(enumerated_types_lib_inc) %{
 #include <cl/enumerated_types.hpp>
 %}
 

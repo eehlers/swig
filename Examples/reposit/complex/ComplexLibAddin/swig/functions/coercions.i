@@ -1,7 +1,7 @@
 
-%pragma(reposit) group="coercions";
+%group(coercions);
 
-%pragma(reposit) obj_include=%{
+%insert(coercions_lib_inc) %{
 #include <cl/coercions.hpp>
 %}
 

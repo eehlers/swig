@@ -1,7 +1,7 @@
 
-%pragma(reposit) group="objects";
+%group(objects);
 
-%pragma(reposit) obj_include=%{
+%insert(objects_lib_inc) %{
 #include <cl/objects.hpp>
 %}
 

@@ -1,7 +1,7 @@
 
-%pragma(reposit) group="inheritance";
+%group(inheritance);
 
-%pragma(reposit) obj_include=%{
+%insert(inheritance_lib_inc) %{
 #include <cl/inheritance.hpp>
 %}
 

@@ -1,7 +1,7 @@
 
-%pragma(reposit) group="conversions";
+%group(conversions);
 
-%pragma(reposit) obj_include=%{
+%insert(conversions_lib_inc) %{
 #include <cl/conversions.hpp>
 %}
 

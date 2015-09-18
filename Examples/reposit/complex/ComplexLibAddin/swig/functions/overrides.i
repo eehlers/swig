@@ -1,12 +1,9 @@
 
-%pragma(reposit) group="overrides";
-%pragma(reposit) override_obj="true";
+%group(overrides);
+%override
 
-%pragma(reposit) obj_include=%{
+%insert(overrides_lib_inc) %{
 #include <cl/overrides.hpp>
-%}
-
-%pragma(reposit) add_include=%{
 %}
 
 namespace ComplexLib {
