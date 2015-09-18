@@ -1,13 +1,9 @@
 
 //*****************************************************************************
-// features
+// pragmas
 //*****************************************************************************
 
-// This does not work.
-//#define %overrideobj      %feature("rp:override_obj")
-//#define %clearoverrideobj %feature("rp:override_obj", "")
-//#define %overrideadd      %feature("rp:override_add")
-//#define %clearoverrideadd %feature("rp:override_add", "")
+#define %override %pragma(reposit) override_obj="true";
 
 //*****************************************************************************
 // rp_tm_xxx_* - typemaps shared by multiple addins
