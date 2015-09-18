@@ -354,12 +354,14 @@ struct Pragmas {
     const String *groupName_;
     String *lib_inc;
     String *cpp_inc;
+    String *scr_inc;
     bool automatic_;
-    Pragmas() : groupName_(0), lib_inc(0), cpp_inc(0), automatic_(true) {}
+    Pragmas() : groupName_(0), lib_inc(0), cpp_inc(0), scr_inc(0), automatic_(true) {}
     Pragmas & operator= (const Pragmas & other) {
         groupName_ = other.groupName_;
         lib_inc = other.lib_inc;
         cpp_inc = other.cpp_inc;
+        scr_inc = other.scr_inc;
         automatic_ = other.automatic_;
         return *this;
     }
@@ -367,8 +369,10 @@ struct Pragmas {
         groupName_ = groupName;
         lib_inc = NewString("");
         cpp_inc = NewString("");
+        scr_inc = NewString("");
         Swig_register_filebyname(NewStringf("%s_lib_inc", groupName), lib_inc);
         Swig_register_filebyname(NewStringf("%s_cpp_inc", groupName), cpp_inc);
+        Swig_register_filebyname(NewStringf("%s_scr_inc", groupName), scr_inc);
     }
 };
 
@@ -816,6 +820,7 @@ struct GroupSerializationCreate : public Group {
         } else {
             Printf(b_scr_grp_cpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, pragmas_.groupName_);
         }
+        Append(b_scr_grp_cpp->b0, pragmas_.scr_inc);
         Printf(b_scr_grp_cpp->b0, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, pragmas_.groupName_);
         Printf(b_scr_grp_cpp->b0, "\n");
         Printf(b_scr_grp_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
