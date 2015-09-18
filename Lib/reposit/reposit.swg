@@ -5,6 +5,7 @@
 
 #define %override %pragma(reposit) override_obj="true";
 #define %group(x)  %pragma(reposit) group="x";
+#define %loop(func, parm) %feature("rp:loopParameter", "parm") func;
 
 //*****************************************************************************
 // rp_tm_xxx_* - typemaps shared by multiple addins
