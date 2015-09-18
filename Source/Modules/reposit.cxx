@@ -2200,26 +2200,8 @@ virtual int top(Node *n) {
     }
     Delete(errorList);//FIXME also delete each item individually
 
-    //printf("Updated: %i Unchanged: %i Total: %i\n", fileCountUpdated, fileCountUnchanged, fileCountUpdated + fileCountUnchanged);
-
    return SWIG_OK;
 }
-
-//void getFeatures(Node *n) {
-//
-//    obj_include = Getattr(n, "feature:rp:obj_include");
-//    add_include = Getattr(n, "feature:rp:add_include");
-//
-//    // Check whether to generate all source code, or to omit some code to be handwritten by the user.
-//    // For the user writing the config file, it is easier to assume automatic (default)
-//    // unless overridden with '%feature("rp:override_obj");' :
-//    bool manual = 0 != checkAttribute(n, "feature:rp:override_obj", "1");
-//    // The source code for this SWIG module is cleaner if we think of it the opposite way:
-//    automatic = !manual;
-//
-//    group_name = Getattr(n, "feature:rp:group");
-//    printf(">>Group='%s'.\n", Char(group_name));
-//}
 
 // overrride base class members, write debug info to b_init,
 // and possibly pass control to a handler.
@@ -2241,7 +2223,6 @@ int classDeclaration(Node *n) {
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
     printf("classDeclaration\n");
-    //getFeatures(n);
     int ret=Language::classDeclaration(n);
     Printf(b_init, "END   classDeclaration - node name='%s'.\n", Char(nodename));
     return ret;
@@ -2264,7 +2245,6 @@ int namespaceDeclaration(Node *n) {
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
     printf("namespaceDeclaration\n");
-    //getFeatures(n);
     int ret=Language::namespaceDeclaration(n);
     Printf(b_init, "END   namespaceDeclaration - node name='%s'.\n", Char(nmspace));
     return ret;
@@ -2333,7 +2313,6 @@ int functionWrapper(Node *n) {
     printNode(n, b_init);
     Printf(b_init, "call parent\n");
     printf("functionWrapper\n");
-    //getFeatures(n);
     //int ret=Language::functionWrapper(n);
     int ret=functionWrapperImpl(n);
     Printf(b_init, "END   functionWrapper - node name='%s'.\n", Char(nodename));
@@ -2673,7 +2652,6 @@ void processLoopParameter(Node *n, String *functionName, ParmList *parms, String
             SwigType *t2 = SwigType_base(t);
             Parm *p2 = NewHash();
             Setattr(p2, "type", t2);
-            //SwigType *t3 = NewString("rp_tp_loop");
             SwigType *t3 = NewString("std::vector");
             SwigType_add_template(t3, p2);
             Setattr(p, "type", t3);
@@ -2704,8 +2682,6 @@ void functionWrapperImplAll(Node *n) {
     String *loopParameter = Getattr(n, "feature:rp:loopParameter");
     if (loopParameter)
         processLoopParameter(n, nodeName, parms, loopParameter);
-
-    //getFeatures(n);
 
     // Process the parameter list.
     for (Parm *p = parms; p; p = nextSibling(p))
