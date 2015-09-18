@@ -31,12 +31,6 @@ String *objInc = NewString("AddinObjects");
 String *addInc = NewString("AddinCpp");
 String *xllInc = NewString("AddinXl");
 
-// Features
-String *obj_include = 0;
-String *add_include = 0;
-String *group_name = 0;
-bool automatic = false;
-
 List *errorList = NewList();
 
 // BEGIN *************************
@@ -356,6 +350,28 @@ struct Count {
     }
 };
 
+struct Pragmas {
+    const String *groupName_;
+    String *lib_inc;
+    String *cpp_inc;
+    bool automatic_;
+    Pragmas() : groupName_(0), lib_inc(0), cpp_inc(0), automatic_(true) {}
+    Pragmas & operator= (const Pragmas & other) {
+        groupName_ = other.groupName_;
+        lib_inc = other.lib_inc;
+        cpp_inc = other.cpp_inc;
+        automatic_ = other.automatic_;
+        return *this;
+    }
+    void setGroupName(const String *groupName) {
+        groupName_ = groupName;
+        lib_inc = NewString("");
+        cpp_inc = NewString("");
+        Swig_register_filebyname(NewStringf("%s_lib_inc", groupName), lib_inc);
+        Swig_register_filebyname(NewStringf("%s_cpp_inc", groupName), cpp_inc);
+    }
+};
+
 struct Buffer {
     String *name_;
     String *path_;
@@ -368,12 +384,12 @@ struct Buffer {
     name_(NewString(name)),
     path_(Copy(path)) {
         b0 = NewString("");
-        Printf(b0, "\n");
-        Printf(b0, "// BEGIN buffer %s\n", name_);
-        Printf(b0, "\n");
         b1 = NewString("");
         b2 = NewString("");
         b3 = NewString("");
+        Printf(b0, "\n");
+        Printf(b0, "// BEGIN buffer %s\n", name_);
+        Printf(b0, "\n");
     }
     bool fileExists() {
 #ifdef WIN32
@@ -476,33 +492,39 @@ struct ParmsMemb {
     Node *node;
 };
 
-struct GroupLibraryObjects {
+struct Group {
+    Pragmas pragmas_;
+    Count &count_;
+    Group(const Pragmas &pragmas, Count &count) : pragmas_(pragmas), count_(count) {}
+};
+
+struct GroupLibraryObjects : public Group {
 
     Buffer *b_lib_grp_hpp;
     Buffer *b_lib_grp_cpp;
-    Count &count_;
     bool generateCppFile;
 
-    GroupLibraryObjects(Count &count) : count_(count) {
+    GroupLibraryObjects(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
 
-        if (automatic) {
-            b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/obj_%s.hpp", objDir, group_name));
-            b_lib_grp_cpp = new Buffer("b_lib_grp_cpp", NewStringf("%s/obj_%s.cpp", objDir, group_name));
+        if (pragmas_.automatic_) {
+            b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/obj_%s.hpp", objDir, pragmas_.groupName_));
+            b_lib_grp_cpp = new Buffer("b_lib_grp_cpp", NewStringf("%s/obj_%s.cpp", objDir, pragmas_.groupName_));
         } else {
-            b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/objmanual_%s.hpp.template", objDir, group_name));
-            b_lib_grp_cpp = new Buffer("b_lib_grp_cpp", NewStringf("%s/objmanual_%s.cpp.template", objDir, group_name));
+            b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/objmanual_%s.hpp.template", objDir, pragmas_.groupName_));
+            b_lib_grp_cpp = new Buffer("b_lib_grp_cpp", NewStringf("%s/objmanual_%s.cpp.template", objDir, pragmas_.groupName_));
         }
 
         Printf(b_lib_grp_hpp->b0, "\n");
-        Printf(b_lib_grp_hpp->b0, "#ifndef obj_%s_hpp\n", group_name);
-        Printf(b_lib_grp_hpp->b0, "#define obj_%s_hpp\n", group_name);
+        Printf(b_lib_grp_hpp->b0, "#ifndef obj_%s_hpp\n", pragmas_.groupName_);
+        Printf(b_lib_grp_hpp->b0, "#define obj_%s_hpp\n", pragmas_.groupName_);
         Printf(b_lib_grp_hpp->b0, "\n");
         Printf(b_lib_grp_hpp->b0, "#include <string>\n");
         Printf(b_lib_grp_hpp->b0, "#include <rp/libraryobject.hpp>\n");
         Printf(b_lib_grp_hpp->b0, "#include <rp/valueobject.hpp>\n");
         Printf(b_lib_grp_hpp->b0, "#include <boost/shared_ptr.hpp>");
-        if (obj_include)
-            Printf(b_lib_grp_hpp->b0, "%s\n", obj_include);
+
+        Append(b_lib_grp_hpp->b0, pragmas_.lib_inc);
+
         Printf(b_lib_grp_hpp->b0, "// FIXME get rid of this:\n", nmspace);
         Printf(b_lib_grp_hpp->b0, "using namespace %s;\n", nmspace);
         Printf(b_lib_grp_hpp->b0, "\n");
@@ -510,10 +532,10 @@ struct GroupLibraryObjects {
         Printf(b_lib_grp_hpp->b0, "\n");
 
         Printf(b_lib_grp_cpp->b0, "\n");
-        if (automatic) {
-            Printf(b_lib_grp_cpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, group_name);
+        if (pragmas_.automatic_) {
+            Printf(b_lib_grp_cpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, pragmas_.groupName_);
         } else {
-            Printf(b_lib_grp_cpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, group_name);
+            Printf(b_lib_grp_cpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, pragmas_.groupName_);
         }
         Printf(b_lib_grp_cpp->b0, "\n");
         generateCppFile = false;
@@ -601,20 +623,19 @@ struct GroupLibraryObjects {
     }
 };
 
-struct GroupValueObjects {
+struct GroupValueObjects : public Group {
 
     Buffer *b_vob_grp_hpp;
     Buffer *b_vob_grp_cpp;
-    Count &count_;
 
-    GroupValueObjects(Count &count) : count_(count) {
+    GroupValueObjects(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
 
-        b_vob_grp_hpp = new Buffer("b_vob_grp_hpp", NewStringf("%s/valueobjects/vo_%s.hpp", objDir, group_name));
-        b_vob_grp_cpp = new Buffer("b_vob_grp_cpp", NewStringf("%s/valueobjects/vo_%s.cpp", objDir, group_name));
+        b_vob_grp_hpp = new Buffer("b_vob_grp_hpp", NewStringf("%s/valueobjects/vo_%s.hpp", objDir, pragmas_.groupName_));
+        b_vob_grp_cpp = new Buffer("b_vob_grp_cpp", NewStringf("%s/valueobjects/vo_%s.cpp", objDir, pragmas_.groupName_));
 
         Printf(b_vob_grp_hpp->b0, "\n");
-        Printf(b_vob_grp_hpp->b0, "#ifndef vo_%s_hpp\n", group_name);
-        Printf(b_vob_grp_hpp->b0, "#define vo_%s_hpp\n", group_name);
+        Printf(b_vob_grp_hpp->b0, "#ifndef vo_%s_hpp\n", pragmas_.groupName_);
+        Printf(b_vob_grp_hpp->b0, "#define vo_%s_hpp\n", pragmas_.groupName_);
         Printf(b_vob_grp_hpp->b0, "\n");
         Printf(b_vob_grp_hpp->b0, "#include <rp/valueobject.hpp>\n");
         Printf(b_vob_grp_hpp->b0, "#include <string>\n");
@@ -629,7 +650,7 @@ struct GroupValueObjects {
         Printf(b_vob_grp_hpp->b0, "\n");
 
         Printf(b_vob_grp_cpp->b0, "\n");
-        Printf(b_vob_grp_cpp->b0, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, group_name);
+        Printf(b_vob_grp_cpp->b0, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, pragmas_.groupName_);
         Printf(b_vob_grp_cpp->b0, "#include <boost/algorithm/string/case_conv.hpp>\n");
         Printf(b_vob_grp_cpp->b0, "\n");
         Printf(b_vob_grp_cpp->b0,"namespace %s {\n", module);
@@ -763,20 +784,19 @@ struct GroupValueObjects {
     }
 };
 
-struct GroupSerializationCreate {
+struct GroupSerializationCreate : public Group {
 
     Buffer *b_scr_grp_hpp;
     Buffer *b_scr_grp_cpp;
-    Count &count_;
 
-    GroupSerializationCreate(Count &count) : count_(count) {
+    GroupSerializationCreate(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
 
-        b_scr_grp_hpp = new Buffer("b_scr_grp_hpp", NewStringf("%s/serialization/create/create_%s.hpp", objDir, group_name));
-        b_scr_grp_cpp = new Buffer("b_scr_grp_cpp", NewStringf("%s/serialization/create/create_%s.cpp", objDir, group_name));
+        b_scr_grp_hpp = new Buffer("b_scr_grp_hpp", NewStringf("%s/serialization/create/create_%s.hpp", objDir, pragmas_.groupName_));
+        b_scr_grp_cpp = new Buffer("b_scr_grp_cpp", NewStringf("%s/serialization/create/create_%s.cpp", objDir, pragmas_.groupName_));
 
         Printf(b_scr_grp_hpp->b0, "\n");
-        Printf(b_scr_grp_hpp->b0, "#ifndef create_%s_hpp\n", group_name);
-        Printf(b_scr_grp_hpp->b0, "#define create_%s_hpp\n", group_name);
+        Printf(b_scr_grp_hpp->b0, "#ifndef create_%s_hpp\n", pragmas_.groupName_);
+        Printf(b_scr_grp_hpp->b0, "#define create_%s_hpp\n", pragmas_.groupName_);
         Printf(b_scr_grp_hpp->b0, "\n");
         Printf(b_scr_grp_hpp->b0, "#include <rp/rpdefines.hpp>\n");
         Printf(b_scr_grp_hpp->b0, "#include <rp/object.hpp>\n");
@@ -786,17 +806,17 @@ struct GroupSerializationCreate {
         Printf(b_scr_grp_hpp->b0, "\n");
 
         Printf(b_scr_grp_cpp->b0, "\n");
-        Printf(b_scr_grp_cpp->b0, "#include <%s/serialization/create/create_%s.hpp>\n", objInc, group_name);
+        Printf(b_scr_grp_cpp->b0, "#include <%s/serialization/create/create_%s.hpp>\n", objInc, pragmas_.groupName_);
         Printf(b_scr_grp_cpp->b0, "//#include <%s/qladdindefines.hpp>\n", objInc);
         //Printf(b_scr_grp_cpp->b0, "#include <%s/conversions/convert2.hpp>\n", objInc);
         Printf(b_scr_grp_cpp->b0, "//#include <%s/handle.hpp>\n", objInc);
         Printf(b_scr_grp_cpp->b0, "\n");
-        if (automatic) {
-            Printf(b_scr_grp_cpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, group_name);
+        if (pragmas_.automatic_) {
+            Printf(b_scr_grp_cpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, pragmas_.groupName_);
         } else {
-            Printf(b_scr_grp_cpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, group_name);
+            Printf(b_scr_grp_cpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, pragmas_.groupName_);
         }
-        Printf(b_scr_grp_cpp->b0, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, group_name);
+        Printf(b_scr_grp_cpp->b0, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, pragmas_.groupName_);
         Printf(b_scr_grp_cpp->b0, "\n");
         Printf(b_scr_grp_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
         Printf(b_scr_grp_cpp->b0, "#include <%s/enumerations/factories/all.hpp>\n", objInc);
@@ -857,28 +877,27 @@ struct GroupSerializationCreate {
     }
 };
 
-struct GroupSerializationRegister {
+struct GroupSerializationRegister : public Group {
 
     Buffer *b_srg_grp_hpp;
     Buffer *b_srg_grp_cpp;
-    Count &count_;
 
-    GroupSerializationRegister(Count &count) : count_(count) {
+    GroupSerializationRegister(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
 
-        b_srg_grp_hpp = new Buffer("b_srg_grp_hpp", NewStringf("%s/serialization/register/serialization_%s.hpp", objDir, group_name));
-        b_srg_grp_cpp = new Buffer("b_srg_grp_cpp", NewStringf("%s/serialization/register/serialization_%s.cpp", objDir, group_name));
+        b_srg_grp_hpp = new Buffer("b_srg_grp_hpp", NewStringf("%s/serialization/register/serialization_%s.hpp", objDir, pragmas_.groupName_));
+        b_srg_grp_cpp = new Buffer("b_srg_grp_cpp", NewStringf("%s/serialization/register/serialization_%s.cpp", objDir, pragmas_.groupName_));
 
         Printf(b_srg_grp_hpp->b0, "\n");
-        Printf(b_srg_grp_hpp->b0, "#ifndef serialization_%s_hpp\n", group_name);
-        Printf(b_srg_grp_hpp->b0, "#define serialization_%s_hpp\n", group_name);
+        Printf(b_srg_grp_hpp->b0, "#ifndef serialization_%s_hpp\n", pragmas_.groupName_);
+        Printf(b_srg_grp_hpp->b0, "#define serialization_%s_hpp\n", pragmas_.groupName_);
         Printf(b_srg_grp_hpp->b0, "\n");
         Printf(b_srg_grp_hpp->b0, "#include <boost/archive/xml_iarchive.hpp>\n");
         Printf(b_srg_grp_hpp->b0, "#include <boost/archive/xml_oarchive.hpp>\n");
         Printf(b_srg_grp_hpp->b0, "\n");
         Printf(b_srg_grp_hpp->b0, "namespace %s {\n", module);
         Printf(b_srg_grp_hpp->b0, "\n");
-        Printf(b_srg_grp_hpp->b0, "    void register_%s(boost::archive::xml_oarchive &ar);\n", group_name);
-        Printf(b_srg_grp_hpp->b0, "    void register_%s(boost::archive::xml_iarchive &ar);\n", group_name);
+        Printf(b_srg_grp_hpp->b0, "    void register_%s(boost::archive::xml_oarchive &ar);\n", pragmas_.groupName_);
+        Printf(b_srg_grp_hpp->b0, "    void register_%s(boost::archive::xml_iarchive &ar);\n", pragmas_.groupName_);
         Printf(b_srg_grp_hpp->b0, "\n");
         Printf(b_srg_grp_hpp->b0, "} // namespace %s\n", module);
         Printf(b_srg_grp_hpp->b0, "\n");
@@ -887,17 +906,17 @@ struct GroupSerializationRegister {
 
         Printf(b_srg_grp_cpp->b0, "\n");
         Printf(b_srg_grp_cpp->b0, "#include <rp/rpdefines.hpp>\n");
-        Printf(b_srg_grp_cpp->b0, "#include <%s/serialization/register/serialization_%s.hpp>\n", objInc, group_name);
-        Printf(b_srg_grp_cpp->b0, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, group_name);
+        Printf(b_srg_grp_cpp->b0, "#include <%s/serialization/register/serialization_%s.hpp>\n", objInc, pragmas_.groupName_);
+        Printf(b_srg_grp_cpp->b0, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, pragmas_.groupName_);
         Printf(b_srg_grp_cpp->b0, "#include <boost/serialization/shared_ptr.hpp>\n");
         Printf(b_srg_grp_cpp->b0, "#include <boost/serialization/variant.hpp>\n");
         Printf(b_srg_grp_cpp->b0, "#include <boost/serialization/vector.hpp>\n");
         Printf(b_srg_grp_cpp->b0, "\n");
-        Printf(b_srg_grp_cpp->b0, "void %s::register_%s(boost::archive::xml_oarchive &ar) {\n", module, group_name);
+        Printf(b_srg_grp_cpp->b0, "void %s::register_%s(boost::archive::xml_oarchive &ar) {\n", module, pragmas_.groupName_);
         Printf(b_srg_grp_cpp->b0, "\n");
 
         Printf(b_srg_grp_cpp->b1, "\n");
-        Printf(b_srg_grp_cpp->b1, "void %s::register_%s(boost::archive::xml_iarchive &ar) {\n", module, group_name);
+        Printf(b_srg_grp_cpp->b1, "void %s::register_%s(boost::archive::xml_iarchive &ar) {\n", module, pragmas_.groupName_);
         Printf(b_srg_grp_cpp->b1, "\n");
     }
 
@@ -939,20 +958,19 @@ struct GroupSerializationRegister {
     }
 };
 
-struct GroupCpp {
+struct GroupCpp : public Group {
 
     Buffer *b_cpp_grp_hpp;
     Buffer *b_cpp_grp_cpp;
-    Count &count_;
 
-    GroupCpp(Count &count) : count_(count) {
+    GroupCpp(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
 
-        b_cpp_grp_hpp = new Buffer("b_cpp_grp_hpp", NewStringf("%s/add_%s.hpp", addDir, group_name));
-        b_cpp_grp_cpp = new Buffer("b_cpp_grp_cpp", NewStringf("%s/add_%s.cpp", addDir, group_name));
+        b_cpp_grp_hpp = new Buffer("b_cpp_grp_hpp", NewStringf("%s/add_%s.hpp", addDir, pragmas_.groupName_));
+        b_cpp_grp_cpp = new Buffer("b_cpp_grp_cpp", NewStringf("%s/add_%s.cpp", addDir, pragmas_.groupName_));
 
         Printf(b_cpp_grp_hpp->b0, "\n");
-        Printf(b_cpp_grp_hpp->b0, "#ifndef add_%s_hpp\n", group_name);
-        Printf(b_cpp_grp_hpp->b0, "#define add_%s_hpp\n", group_name);
+        Printf(b_cpp_grp_hpp->b0, "#ifndef add_%s_hpp\n", pragmas_.groupName_);
+        Printf(b_cpp_grp_hpp->b0, "#define add_%s_hpp\n", pragmas_.groupName_);
         Printf(b_cpp_grp_hpp->b0, "\n");
         Printf(b_cpp_grp_hpp->b0, "#include <string>\n");
         // FIXME this #include is only needed if a datatype conversion is taking place.
@@ -962,7 +980,7 @@ struct GroupCpp {
         Printf(b_cpp_grp_hpp->b0, "\n");
 
         Printf(b_cpp_grp_cpp->b0, "\n");
-        Printf(b_cpp_grp_cpp->b0, "#include <AddinCpp/add_%s.hpp>\n", group_name);
+        Printf(b_cpp_grp_cpp->b0, "#include <AddinCpp/add_%s.hpp>\n", pragmas_.groupName_);
         Printf(b_cpp_grp_cpp->b0, "//FIXME this #include is only required if the file contains conversions\n", objInc);
         Printf(b_cpp_grp_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
         Printf(b_cpp_grp_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
@@ -970,20 +988,20 @@ struct GroupCpp {
         // FIXME this #include is only required if the file contains enumerations.
         //Printf(b_cpp_grp_cpp->b0, "#include <rp/enumerations/typefactory.hpp>\n");
         Printf(b_cpp_grp_cpp->b0, "//FIXME this #include is only required if the file contains constructors\n", objInc);
-        Printf(b_cpp_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, group_name);
-        if (automatic) {
-            Printf(b_cpp_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, group_name);
+        Printf(b_cpp_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        if (pragmas_.automatic_) {
+            Printf(b_cpp_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
         } else {
-            Printf(b_cpp_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, group_name);
+            Printf(b_cpp_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
         }
-        if (add_include)
-            Printf(b_cpp_grp_cpp->b0, "%s\n", add_include);
         Printf(b_cpp_grp_cpp->b0, "//FIXME include only factories for types used in the current file\n", objInc);
         Printf(b_cpp_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_cpp_grp_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_cpp_grp_cpp->b0, "#include <rp/repository.hpp>\n");
         //Printf(b_cpp_grp_cpp->b0, "#include <AddinCpp/add_all.hpp>\n");
         Printf(b_cpp_grp_cpp->b0, "\n");
+
+        Append(b_cpp_grp_cpp->b0, pragmas_.cpp_inc);
     }
 
     void clear() {
@@ -1087,14 +1105,13 @@ struct GroupCpp {
     }
 };
 
-struct GroupExcelFunctions {
+struct GroupExcelFunctions : public Group {
 
     Buffer *b_xlf_grp_cpp;
-    Count &count_;
 
-    GroupExcelFunctions(Count &count) : count_(count) {
+    GroupExcelFunctions(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
 
-        b_xlf_grp_cpp = new Buffer("b_xlf_grp_cpp", NewStringf("%s/functions/function_%s.cpp", xllDir, group_name));
+        b_xlf_grp_cpp = new Buffer("b_xlf_grp_cpp", NewStringf("%s/functions/function_%s.cpp", xllDir, pragmas_.groupName_));
 
         Printf(b_xlf_grp_cpp->b0, "\n");
         Printf(b_xlf_grp_cpp->b0, "#include <rpxl/repositxl.hpp>\n");
@@ -1106,8 +1123,8 @@ struct GroupExcelFunctions {
         Printf(b_xlf_grp_cpp->b0, "#include <rpxl/loop.hpp>\n");
         Printf(b_xlf_grp_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
         Printf(b_xlf_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
-        Printf(b_xlf_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, group_name);
-        Printf(b_xlf_grp_cpp->b0, "//#include \"%s/obj_%s.hpp\"\n", objInc, group_name);
+        Printf(b_xlf_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        Printf(b_xlf_grp_cpp->b0, "//#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
         Printf(b_xlf_grp_cpp->b0, "#include \"%s/obj_all.hpp\"\n", objInc);
         //Printf(b_xlf_grp_cpp->b0, "#include \"%s/conversions/convert2.hpp\"\n", objInc);
         Printf(b_xlf_grp_cpp->b0, "#include \"%s/conversions/conversions.hpp\"\n", objInc);
@@ -1312,22 +1329,21 @@ struct GroupExcelFunctions {
     }
 };
 
-struct GroupExcelRegister {
+struct GroupExcelRegister : public Group {
 
     Buffer *b_xlr_grp_cpp;
-    Count &count_;
 
-    GroupExcelRegister(Count &count) : count_(count) {
+    GroupExcelRegister(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
 
-        b_xlr_grp_cpp = new Buffer("b_xlr_grp_cpp", NewStringf("%s/register/register_%s.cpp", xllDir, group_name));
+        b_xlr_grp_cpp = new Buffer("b_xlr_grp_cpp", NewStringf("%s/register/register_%s.cpp", xllDir, pragmas_.groupName_));
 
         Printf(b_xlr_grp_cpp->b0, "\n");
         Printf(b_xlr_grp_cpp->b0, "#include <xlsdk/xlsdkdefines.hpp>\n");
         Printf(b_xlr_grp_cpp->b0, "\n");
-        Printf(b_xlr_grp_cpp->b0, "void register_%s(const XLOPER &xDll) {\n", group_name);
+        Printf(b_xlr_grp_cpp->b0, "void register_%s(const XLOPER &xDll) {\n", pragmas_.groupName_);
         Printf(b_xlr_grp_cpp->b0, "\n");
         Printf(b_xlr_grp_cpp->b1, "\n");
-        Printf(b_xlr_grp_cpp->b1, "void unregister_%s(const XLOPER &xDll) {\n", group_name);
+        Printf(b_xlr_grp_cpp->b1, "void unregister_%s(const XLOPER &xDll) {\n", pragmas_.groupName_);
         Printf(b_xlr_grp_cpp->b1, "\n");
         Printf(b_xlr_grp_cpp->b1, "    XLOPER xlRegID;\n");
         Printf(b_xlr_grp_cpp->b1, "\n");
@@ -1411,19 +1427,18 @@ void mongoFunc(File *f, String *funcName1, String *funcName2, Node *n, ParmList 
     Printf(f, "        },\n");
 }
 
-struct GroupCountify {
+struct GroupCountify : public Group {
 
     Buffer *b_cfy_grp_cpp;
-    Count &count_;
 
-    GroupCountify(Count &count) : count_(count) {
+    GroupCountify(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
 
-        b_cfy_grp_cpp = new Buffer("b_cfy_grp_cpp", NewStringf("%s/cfy_%s.cpp", cfyDir, group_name));
+        b_cfy_grp_cpp = new Buffer("b_cfy_grp_cpp", NewStringf("%s/cfy_%s.cpp", cfyDir, pragmas_.groupName_));
 
         Printf(b_cfy_grp_cpp->b0, "\n");
         Printf(b_cfy_grp_cpp->b0, "#include \"init.hpp\"\n");
         Printf(b_cfy_grp_cpp->b0, "#include <rp/repository.hpp>\n");
-        Printf(b_cfy_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, group_name);
+        Printf(b_cfy_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
         Printf(b_cfy_grp_cpp->b0, "\n");
         Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains conversions\n", objInc);
         Printf(b_cfy_grp_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
@@ -1431,14 +1446,14 @@ struct GroupCountify {
         //Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains enumerations\n", objInc);
         //Printf(b_cfy_grp_cpp->b0, "#include <rp/enumerations/typefactory.hpp>\n");
         Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains constructors\n", objInc);
-        Printf(b_cfy_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, group_name);
-        if (automatic) {
-            Printf(b_cfy_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, group_name);
+        Printf(b_cfy_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        if (pragmas_.automatic_) {
+            Printf(b_cfy_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
         } else {
-            Printf(b_cfy_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, group_name);
+            Printf(b_cfy_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
         }
-        if (add_include)
-            Printf(b_cfy_grp_cpp->b0, "%s\n", add_include);
+        //if (add_include)
+        //    Printf(b_cfy_grp_cpp->b0, "%s\n", add_include);
         Printf(b_cfy_grp_cpp->b0, "//FIXME include only factories for types used in the current file\n", objInc);
         Printf(b_cfy_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_cfy_grp_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
@@ -1595,17 +1610,21 @@ struct GroupCountify {
 
 struct Addin {
 
+    std::string name_;
+    Pragmas pragmas_;
+    Count count;
+
+    Addin(const std::string &name) : name_(name) {}
+    virtual ~Addin() {}
+    void setPragmas(const Pragmas &pragmas = Pragmas()) {
+        pragmas_ = pragmas;
+    }
     virtual void functionWrapperImplFunc(ParmsFunc &p) = 0;
     virtual void functionWrapperImplCtor(ParmsCtor &p) = 0;
     virtual void functionWrapperImplMemb(ParmsMemb &p) = 0;
     virtual void clear() = 0;
     virtual void top() {}
-    virtual ~Addin() {}
     virtual void processGroup() {}
-    std::string name_;
-    Count count;
-
-    Addin(const std::string &name) : name_(name) {}
 };
 
 template <class Group>
@@ -1617,19 +1636,12 @@ struct AddinImpl : public Addin {
     AddinImpl(const std::string &name) : Addin(name) {}
 
     virtual Group *getGroup() {
-        std::string name_ = Char(group_name);
+        std::string name_ = Char(pragmas_.groupName_);
         if (groupMap_.end() == groupMap_.find(name_)) {
-            groupMap_[name_] = new Group(count);
+            groupMap_[name_] = new Group(pragmas_, count);
             processGroup();
         }
         return groupMap_[name_];
-    }
-
-    virtual void clear() {
-        printf("%s - Group Files", name_.c_str());
-        printf("%s\n", std::string(66-name_.length(), '=').c_str());
-        for (typename GroupMap::const_iterator i=groupMap_.begin(); i!=groupMap_.end(); ++i)
-            i->second->clear();
     }
 
     virtual void functionWrapperImplFunc(ParmsFunc &p) {
@@ -1646,6 +1658,13 @@ struct AddinImpl : public Addin {
         Group *group = getGroup();
         group->functionWrapperImplMemb(p);
     }
+
+    virtual void clear() {
+        printf("%s - Group Files", name_.c_str());
+        printf("%s\n", std::string(66-name_.length(), '=').c_str());
+        for (typename GroupMap::const_iterator i=groupMap_.begin(); i!=groupMap_.end(); ++i)
+            i->second->clear();
+    }
 };
 
 struct AddinLibraryObjects : public AddinImpl<GroupLibraryObjects> {
@@ -1655,10 +1674,10 @@ struct AddinLibraryObjects : public AddinImpl<GroupLibraryObjects> {
     AddinLibraryObjects() : AddinImpl("Library Objects") {}
 
     virtual void processGroup() {
-        if (automatic) {
-            Printf(b_lib_add_hpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, group_name);
+        if (pragmas_.automatic_) {
+            Printf(b_lib_add_hpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, pragmas_.groupName_);
         } else {
-            Printf(b_lib_add_hpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, group_name);
+            Printf(b_lib_add_hpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, pragmas_.groupName_);
         }
     }
 
@@ -1698,7 +1717,7 @@ struct AddinSerializationCreate : public AddinImpl<GroupSerializationCreate> {
     AddinSerializationCreate() : AddinImpl("Serialization - Create") {}
 
     virtual void processGroup() {
-        Printf(b_scr_add_hpp->b0, "#include <%s/serialization/create/create_%s.hpp>\n", objInc, group_name);
+        Printf(b_scr_add_hpp->b0, "#include <%s/serialization/create/create_%s.hpp>\n", objInc, pragmas_.groupName_);
     }
 
     virtual void clear() {
@@ -1733,8 +1752,8 @@ struct AddinSerializationRegister : public AddinImpl<GroupSerializationRegister>
     AddinSerializationRegister() : AddinImpl("Serialization - Register") {}
 
     virtual void processGroup() {
-        Printf(b_sra_add_hpp->b0, "#include <%s/serialization/register/serialization_%s.hpp>\n", objInc, group_name);
-        Printf(b_srg_add_hpp->b0, "        register_%s(ar);\n", group_name);
+        Printf(b_sra_add_hpp->b0, "#include <%s/serialization/register/serialization_%s.hpp>\n", objInc, pragmas_.groupName_);
+        Printf(b_srg_add_hpp->b0, "        register_%s(ar);\n", pragmas_.groupName_);
     }
 
     virtual void clear() {
@@ -1809,7 +1828,7 @@ struct AddinCpp : public AddinImpl<GroupCpp> {
     AddinCpp() : AddinImpl("C++ Addin") {}
 
     virtual void processGroup() {
-        Printf(b_cpp_add_all_hpp->b0, "#include <%s/add_%s.hpp>\n", addInc, group_name);
+        Printf(b_cpp_add_all_hpp->b0, "#include <%s/add_%s.hpp>\n", addInc, pragmas_.groupName_);
     }
 
     virtual void clear() {
@@ -1866,10 +1885,10 @@ struct AddinExcelRegister : public AddinImpl<GroupExcelRegister> {
     AddinExcelRegister() : AddinImpl("Excel Addin - Register") {}
 
     virtual void processGroup() {
-        Printf(b_xlr_add_all_cpp->b0, "extern void register_%s(const XLOPER&);\n", group_name);
-        Printf(b_xlr_add_all_cpp->b1, "extern void unregister_%s(const XLOPER&);\n", group_name);
-        Printf(b_xlr_add_all_cpp->b2, "    register_%s(xDll);\n", group_name);
-        Printf(b_xlr_add_all_cpp->b3, "    unregister_%s(xDll);\n", group_name);
+        Printf(b_xlr_add_all_cpp->b0, "extern void register_%s(const XLOPER&);\n", pragmas_.groupName_);
+        Printf(b_xlr_add_all_cpp->b1, "extern void unregister_%s(const XLOPER&);\n", pragmas_.groupName_);
+        Printf(b_xlr_add_all_cpp->b2, "    register_%s(xDll);\n", pragmas_.groupName_);
+        Printf(b_xlr_add_all_cpp->b3, "    unregister_%s(xDll);\n", pragmas_.groupName_);
     }
 
     virtual void clear() {
@@ -1951,6 +1970,7 @@ struct AddinCountify : public AddinImpl<GroupCountify> {
 
 struct AddinList {
 
+    Pragmas pragmas_;
     std::vector<Addin*> addinList_;
     typedef std::vector<Addin*>::const_iterator iter;
 
@@ -1993,10 +2013,18 @@ struct AddinList {
         printf("%s\n", std::string(80, '=').c_str());
     }
 
-    virtual void top() {
+    void top() {
         for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
             Addin *addin = *i;
             addin->top();
+        }
+    }
+
+    void setPragmas(const Pragmas &pragmas = Pragmas()) {
+        pragmas_ = pragmas;
+        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
+            Addin *addin = *i;
+            addin->setPragmas(pragmas);
         }
     }
 
@@ -2025,6 +2053,7 @@ struct AddinList {
 class REPOSIT : public Language {
 
     int functionType;//0=function, 1=constructor, 2=member
+    Pragmas pragmas_;
     AddinList addinList_;
 
 protected:
@@ -2337,10 +2366,8 @@ int includeDirective(Node *n) {
     Printf(b_init, "call parent\n");
     printf("includeDirective\n");
 
-    obj_include = 0;
-    add_include = 0;
-    group_name = 0;
-    automatic = true;
+    pragmas_ = Pragmas();
+    addinList_.setPragmas();
 
     int ret=Language::includeDirective(n);
     Printf(b_init, "END   includeDirective - node name='%s'.\n", Char(nodename));
@@ -2357,17 +2384,13 @@ int pragmaDirective(Node *n) {
             printf ("ABCDEF name=%s value=%s.\n", Char(name), Char(value));
 
             if (0 == Strcmp(name, "group")) {
-                group_name = NewString(value);
-            } else if (0 == Strcmp(name, "obj_include")) {
-                obj_include = NewString(value);
-            } else if (0 == Strcmp(name, "add_include")) {
-                add_include = NewString(value);
+                pragmas_.setGroupName(NewString(value));
             } else if (0 == Strcmp(name, "override_obj")) {
                 // For the user writing the config file, it is easier to assume automatic (default)
                 // unless overridden with '%feature("rp:override_obj");' :
                 bool manual = 0 == Strcmp(value, "true");
                 // The source code for this SWIG module is cleaner if we think of it the opposite way:
-                automatic = !manual;
+                pragmas_.automatic_ = !manual;
             } else {
                 Swig_error(input_file, line_number, "Unrecognized pragma.\n");
             }
@@ -2377,7 +2400,8 @@ int pragmaDirective(Node *n) {
   }
 
 int functionWrapperImpl(Node *n) {
-    if (!group_name) {
+
+    if (!pragmas_.groupName_) {
         Swig_error(input_file, line_number,
             "\n******************\n"
             "group name not set. You need this at the top of each *.i interface file:\n"
@@ -2386,6 +2410,7 @@ int functionWrapperImpl(Node *n) {
         );
         SWIG_exit(EXIT_FAILURE);
     }
+    addinList_.setPragmas(pragmas_);
 
     // Generate output appropriate to the given function type
     int ret;
