@@ -1,11 +1,11 @@
 
 %group(enumerated_classes);
 
-%insert(enumerated_classes_lib_inc) %{
+%insert(enumerated_classes_library_hpp) %{
 #include <cl/enumerated_classes.hpp>
 %}
 
-%insert(enumerated_classes_cpp_inc) %{
+%insert(enumerated_classes_cppaddin_cpp) %{
 #include <boost/shared_ptr.hpp>
 %}
 

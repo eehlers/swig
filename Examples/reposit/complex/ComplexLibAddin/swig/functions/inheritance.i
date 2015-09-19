@@ -1,7 +1,7 @@
 
 %group(inheritance);
 
-%insert(inheritance_lib_inc) %{
+%insert(inheritance_library_hpp) %{
 #include <cl/inheritance.hpp>
 %}
 

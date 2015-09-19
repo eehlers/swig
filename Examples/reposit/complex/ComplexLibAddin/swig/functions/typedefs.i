@@ -1,7 +1,7 @@
 
 %group(typedefs);
 
-%insert(typedefs_lib_inc) %{
+%insert(typedefs_library_hpp) %{
 #include <cl/typedefs.hpp>
 %}
 

@@ -1,7 +1,7 @@
 
 %group(conversions);
 
-%insert(conversions_lib_inc) %{
+%insert(conversions_library_hpp) %{
 #include <cl/conversions.hpp>
 %}
 

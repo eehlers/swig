@@ -2,7 +2,7 @@
 %group(overrides);
 %override
 
-%insert(overrides_lib_inc) %{
+%insert(overrides_library_hpp) %{
 #include <cl/overrides.hpp>
 %}
 

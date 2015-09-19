@@ -1,7 +1,7 @@
 
 %group(enumerated_types);
 
-%insert(enumerated_types_lib_inc) %{
+%insert(enumerated_types_library_hpp) %{
 #include <cl/enumerated_types.hpp>
 %}
 

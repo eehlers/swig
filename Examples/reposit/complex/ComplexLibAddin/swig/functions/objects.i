@@ -1,7 +1,7 @@
 
 %group(objects);
 
-%insert(objects_lib_inc) %{
+%insert(objects_library_hpp) %{
 #include <cl/objects.hpp>
 %}
 

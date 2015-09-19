@@ -1,7 +1,7 @@
 
 %group(coercions);
 
-%insert(coercions_lib_inc) %{
+%insert(coercions_library_hpp) %{
 #include <cl/coercions.hpp>
 %}
 

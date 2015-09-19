@@ -1,7 +1,7 @@
 
 %group(functions);
 
-%insert(functions_lib_inc) %{
+%insert(functions_library_hpp) %{
 #include <cl/functions.hpp>
 %}
 
