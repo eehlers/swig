@@ -370,9 +370,9 @@ struct Pragmas {
         lib_inc = NewString("");
         cpp_inc = NewString("");
         scr_inc = NewString("");
-        Swig_register_filebyname(NewStringf("%s_lib_inc", groupName), lib_inc);
-        Swig_register_filebyname(NewStringf("%s_cpp_inc", groupName), cpp_inc);
-        Swig_register_filebyname(NewStringf("%s_scr_inc", groupName), scr_inc);
+        Swig_register_filebyname(NewStringf("%s_library_hpp", groupName), lib_inc);
+        Swig_register_filebyname(NewStringf("%s_cppaddin_cpp", groupName), cpp_inc);
+        Swig_register_filebyname(NewStringf("%s_serialization_cpp", groupName), scr_inc);
     }
 };
 
