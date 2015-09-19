@@ -12,5 +12,8 @@
 //    };
 //}
 
-void f(std::vector<int>);
+//void f(std::vector<int>);
+
+enum X;
+void f(const X &x);
 

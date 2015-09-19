@@ -115,6 +115,9 @@ int functionHandler(Node *n) {
     printf("**************\n");
     ParmList *parms  = Getattr(n, "parms");
     for (Parm *p = parms; p; p = nextSibling(p)) {
+        printf("RRRRRRRRRRRRRR\n");
+        Swig_print_node(p);
+        printf("RRRRRRRRRRRRRR\n");
         SwigType *t1 = Getattr(p, "type");
         // prints "t1 = std::vector< int >"
         printf("t1 = %s\n", Char(SwigType_str(t1, 0)));
@@ -125,10 +128,10 @@ int functionHandler(Node *n) {
 
         //SwigType *t2 = SwigType_prefix(t1);
         //printf("t2 = %s\n", Char(SwigType_str(t2, 0)));
-        //SwigType *t2 = SwigType_base(t1);
-        //printf("t2 = %s\n", Char(SwigType_str(t2, 0)));
-        //SwigType *t3 = SwigType_str(SwigType_typedef_resolve_all(t2), 0);
-        //printf("t3 = %s\n", Char(SwigType_str(t3, 0)));
+        SwigType *t2 = SwigType_base(t1);
+        printf("t2 = %s\n", Char(SwigType_str(t2, 0)));
+        SwigType *t3 = SwigType_str(SwigType_typedef_resolve_all(t2), 0);
+        printf("t3 = %s\n", Char(SwigType_str(t3, 0)));
     }
     printf("**************\n");
 
