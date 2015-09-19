@@ -7,6 +7,7 @@
 #define %group(x)  %pragma(reposit) group="x";
 #define %loop(func, parm) %feature("rp:loopParameter", "parm") func;
 #define %processor(cls, proc) %feature("rp:processorName", "proc") cls;
+#define %generate(lang, id) %feature("rp:generate:lang") id;
 
 //*****************************************************************************
 // rp_tm_xxx_* - typemaps shared by multiple addins

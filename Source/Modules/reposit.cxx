@@ -1860,19 +1860,19 @@ struct AddinCpp : public AddinImpl<GroupCpp> {
     }
 
     virtual void functionWrapperImplFunc(ParmsFunc &p) {
-        if (checkAttribute(p.n, "feature:rp:generate_cpp", "1")) {
+        if (checkAttribute(p.n, "feature:rp:generate:cpp", "1")) {
             AddinImpl::functionWrapperImplFunc(p);
         }
     }
 
     virtual void functionWrapperImplCtor(ParmsCtor &p) {
-        if (checkAttribute(p.n, "feature:rp:generate_cpp", "1")) {
+        if (checkAttribute(p.n, "feature:rp:generate:cpp", "1")) {
             AddinImpl::functionWrapperImplCtor(p);
         }
     }
 
     virtual void functionWrapperImplMemb(ParmsMemb &p) {
-        if (checkAttribute(p.n, "feature:rp:generate_cpp", "1")) {
+        if (checkAttribute(p.n, "feature:rp:generate:cpp", "1")) {
             AddinImpl::functionWrapperImplMemb(p);
         }
     }
@@ -1952,21 +1952,21 @@ struct AddinCountify : public AddinImpl<GroupCountify> {
     }
 
     virtual void functionWrapperImplFunc(ParmsFunc &p) {
-        if (checkAttribute(p.n, "feature:rp:generate_countify", "1")) {
+        if (checkAttribute(p.n, "feature:rp:generate:countify", "1")) {
             AddinImpl::functionWrapperImplFunc(p);
             mongoFunc(b_cfy_add_mng_txt->b0, p.symnameUpper, p.funcName, p.n, p.parms);
         }
     }
 
     virtual void functionWrapperImplCtor(ParmsCtor &p) {
-        if (checkAttribute(p.n, "feature:rp:generate_countify", "1")) {
+        if (checkAttribute(p.n, "feature:rp:generate:countify", "1")) {
             AddinImpl::functionWrapperImplCtor(p);
             mongoFunc(b_cfy_add_mng_txt->b0, p.name, p.funcName, p.n, p.parms2);
         }
     }
 
     virtual void functionWrapperImplMemb(ParmsMemb &p) {
-        if (checkAttribute(p.n, "feature:rp:generate_countify", "1")) {
+        if (checkAttribute(p.n, "feature:rp:generate:countify", "1")) {
             AddinImpl::functionWrapperImplMemb(p);
             mongoFunc(b_cfy_add_mng_txt->b0, p.nameUpper, p.funcName, p.n, p.parms2);
         }
