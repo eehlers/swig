@@ -3,12 +3,12 @@
 // defines
 //*****************************************************************************
 
-#define %override %pragma(reposit) override_obj="true";
-#define %group(x)  %pragma(reposit) group="x";
-#define %loop(func, parm) %feature("rp:loopParameter", "parm") func;
-#define %processor(cls, proc) %feature("rp:processorName", "proc") cls;
-#define %generate(lang, id) %feature("rp:generate:lang") id;
-#define %generateall(lang) %feature("rp:generate:lang");
+#define %override %pragma(reposit) override_obj="true"
+#define %group(x)  %pragma(reposit) group="x"
+#define %loop(func, parm) %feature("rp:loopParameter", "parm") func
+#define %processor(cls, proc) %feature("rp:processorName", "proc") cls
+#define %generate(lang, id) %feature("rp:generate:lang") id
+#define %generateall(lang) %feature("rp:generate:lang")
 
 //*****************************************************************************
 // rp_tm_xxx_* - typemaps shared by multiple addins
