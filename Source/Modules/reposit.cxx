@@ -508,7 +508,7 @@ struct GroupLibraryObjects : public Group {
     Buffer *b_lib_grp_cpp;
     bool generateCppFile;
 
-    GroupLibraryObjects(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
+    GroupLibraryObjects(const Pragmas &pragmas, Count &count) : Group(pragmas, count), generateCppFile(false) {
 
         if (pragmas_.automatic_) {
             b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/obj_%s.hpp", objDir, pragmas_.groupName_));
@@ -542,7 +542,6 @@ struct GroupLibraryObjects : public Group {
             Printf(b_lib_grp_cpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, pragmas_.groupName_);
         }
         Printf(b_lib_grp_cpp->b0, "\n");
-        generateCppFile = false;
     }
 
     void clear() {
@@ -792,8 +791,9 @@ struct GroupSerializationCreate : public Group {
 
     Buffer *b_scr_grp_hpp;
     Buffer *b_scr_grp_cpp;
+    bool generateCppFile;
 
-    GroupSerializationCreate(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
+    GroupSerializationCreate(const Pragmas &pragmas, Count &count) : Group(pragmas, count), generateCppFile(false) {
 
         b_scr_grp_hpp = new Buffer("b_scr_grp_hpp", NewStringf("%s/serialization/create/create_%s.hpp", objDir, pragmas_.groupName_));
         b_scr_grp_cpp = new Buffer("b_scr_grp_cpp", NewStringf("%s/serialization/create/create_%s.cpp", objDir, pragmas_.groupName_));
@@ -840,7 +840,7 @@ struct GroupSerializationCreate : public Group {
         Printf(b_scr_grp_cpp->b0, "\n");
 
         b_scr_grp_hpp->clear(count_);
-        b_scr_grp_cpp->clear(count_);
+        b_scr_grp_cpp->clear(count_, generateCppFile);
     }
 
     void functionWrapperImplFunc(ParmsFunc & /*p*/) {
@@ -875,6 +875,8 @@ struct GroupSerializationCreate : public Group {
 
             count_.constructors++;
             count_.total2++;
+
+            generateCppFile = true;
         }
     }
 
