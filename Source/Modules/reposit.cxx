@@ -2406,15 +2406,11 @@ int pragmaDirective(Node *n) {
 
 int functionWrapperImpl(Node *n) {
 
-    if (!pragmas_.groupName_) {
-        Swig_error(input_file, line_number,
-            "\n******************\n"
-            "group name not set. You need this at the top of each *.i interface file:\n"
-            "%%pragma(reposit) group=\"xxx\";\n"
-            "******************\n"
-        );
-        SWIG_exit(EXIT_FAILURE);
-    }
+    // If no group name was set at the top of the current interface file,
+    // then do not generate any output for this file.
+    if (!pragmas_.groupName_)
+        return SWIG_OK;
+
     addinList_.setPragmas(pragmas_);
 
     // Generate output appropriate to the given function type
@@ -2525,7 +2521,7 @@ void processParm(Parm *p) {
     Setattr(p, "rp_typedef_resolved", SwigType_str(t2, 0));
 
     // From "const T&" extract "T"
-    SwigType *t3 = SwigType_base(t2);
+    SwigType *t3 = SwigType_base(t);
     Setattr(p, "rp_typedef_base", SwigType_str(t3, 0));
 
     // From A<B> extract B.  We do not yet support nested templates.

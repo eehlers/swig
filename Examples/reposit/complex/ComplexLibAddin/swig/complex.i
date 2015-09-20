@@ -10,7 +10,7 @@
     rp_cfy_inc="AddinCfy"
 ) ComplexLibAddin
 
-%feature("rp:generate_cpp");
+%feature("rp:generate:cpp");
 
 %include typemaps/all.i
 %include functions/all.i
