@@ -82,8 +82,6 @@ String *getTypeMap(Node *n, const char *m, bool fatal = true) {
     if (fatal) {
         SwigType *t  = Getattr(n, "type");
         Append(errorList, NewStringf("*** ERROR : typemap '%s' does not match type '%s'.\n", m, SwigType_str(t, 0)));
-        // Do not exit, instead keep running so that the user can see any other error messages.
-        //SWIG_exit(EXIT_FAILURE);
         // Return an error string, this will be inserted into the source code.
         return NewStringf("#error NEED THIS TYPEMAP: >>> %%typemap(%s) %s \"XXX\"; <<<", m, SwigType_str(t, 0));
     }
@@ -110,7 +108,6 @@ void emitTypeMap(File *buf, Node *n, const char *m, int indent=0, bool fatal = t
     printIndent(buf, indent);
     Printf(buf, "// BEGIN typemap %s %s\n", m, t);
     printIndent(buf, indent);
-    //String *s = getTypeMap(n, m, fatal);
     String *s = getType(n, m, fatal);
     if (Len(s)) {
         Printf(buf, "%s\n", s);
@@ -342,11 +339,11 @@ struct Count {
         created += c.created;
         updated += c.updated;
         unchanged += c.unchanged;
-        total += c.total;
-        //functions += c.functions;
-        //constructors += c.constructors;
-        //members += c.members;
-        //total2 += c.total2;
+        total += c.total;/*
+        functions += c.functions;
+        constructors += c.constructors;
+        members += c.members;
+        total2 += c.total2;*/
     }
 };
 
@@ -1407,7 +1404,6 @@ void mongoParms(File *f, ParmList *parms) {
     }
     Printf(f, "                {\n");
     Printf(f, "                    \"name\": \"%s\",\n", name);
-    //SwigType *t  = Getattr(p, "type");
     String *s = getTypeMap(p, "rp_tm_cfy_mngo");
     Printf(f, "                    \"dataType\": \"%s\",\n", s);
     Printf(f, "                    \"description\": \"\",\n");
@@ -1459,8 +1455,7 @@ struct GroupCountify : public Group {
         } else {
             Printf(b_cfy_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
         }
-        //if (add_include)
-        //    Printf(b_cfy_grp_cpp->b0, "%s\n", add_include);
+        //Append(b_cfy_grp_cpp->b0, pragmas_.cpp_inc);
         Printf(b_cfy_grp_cpp->b0, "//FIXME include only factories for types used in the current file\n", objInc);
         Printf(b_cfy_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_cfy_grp_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
