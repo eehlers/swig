@@ -49,7 +49,6 @@
 // rp_tm_xxx_loop - arguments to boost::bind object for a looping function (F/M)
 %typemap(rp_tm_xxx_loop) bool "*$1_name";
 %typemap(rp_tm_xxx_loop) std::vector "_1";
-%typemap(rp_tm_xxx_loop) rp_tp_cnv2 "$1_name_cnv";
 %typemap(rp_tm_xxx_loop) rp_tp_enm "$1_name_enm";
 %typemap(rp_tm_xxx_loop) SWIGTYPE "$1_name";
 
@@ -325,13 +324,6 @@
             reposit::Create<$rp_typedef_base>()($1_name);
 %}
 
-%typemap(rp_tm_xll_cnvt) rp_tp_cnv2 %{
-        $rp_typedef_base $1_name_cnv = reposit::convert2<$rp_typedef_base>(
-            reposit::ConvertOper(*$1_name), "$1_name", $rp_typedef_base());
-
-        reposit::property_t $1_name_cnv2 = reposit::convert2<reposit::property_t>(
-            reposit::ConvertOper(*$1_name));
-%}
 %typemap(rp_tm_xll_cnvt) rp_tp_obj1 %{
         RP_GET_REFERENCE($1_name_obj, $1_name,
             $rp_addin_namespace::$rp_typedef_no_namespace, $rp_typedef_no_template);
@@ -362,7 +354,6 @@
 %typemap(rp_tm_xll_argfv) int "*$1_name";
 %typemap(rp_tm_xll_argfv) long "*$1_name";
 %typemap(rp_tm_xll_argfv) double "*$1_name";
-%typemap(rp_tm_xll_argfv) rp_tp_cnv2 "$1_name_cnv2";
 %typemap(rp_tm_xll_argfv) std::vector const & "$1_name_vec";
 %typemap(rp_tm_xll_argfv) SWIGTYPE "$1_name";
 
@@ -372,7 +363,6 @@
 %typemap(rp_tm_xll_argf) long "*$1_name";
 %typemap(rp_tm_xll_argf) double "*$1_name";
 %typemap(rp_tm_xll_argf) rp_tp_cnv "$1_name_cnv";
-%typemap(rp_tm_xll_argf) rp_tp_cnv2 "$1_name_cnv";
 %typemap(rp_tm_xll_argf) rp_tp_crc "$1_name_crc";
 %typemap(rp_tm_xll_argf) rp_tp_enm "$1_name_enm";
 //%typemap(rp_tm_xll_argf) rp_tp_enm_cls "$1_name_enm_cls";
