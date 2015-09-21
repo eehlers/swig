@@ -73,7 +73,7 @@ String *getTypeMap(Node *n, const char *m, bool fatal = true) {
         Replaceall(tm, "$rp_typedef_base", Getattr(n, "rp_typedef_base"));
         Replaceall(tm, "$rp_typedef_no_template", Getattr(n, "rp_typedef_no_template"));
         Replaceall(tm, "$rp_typedef_no_namespace", Getattr(n, "rp_typedef_no_namespace"));
-        Replaceall(tm, "$rp_addin_namespace", NewString(module));
+        Replaceall(tm, "$rp_addin_namespace", module);
 
         Replaceall(tm, "$rp_typedef_obj_add", Getattr(n, "rp_typedef_obj_add"));
         Replaceall(tm, "$rp_typedef_obj_lib", Getattr(n, "rp_typedef_obj_lib"));
