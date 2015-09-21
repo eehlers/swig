@@ -404,6 +404,27 @@
         return &xRet;
 %}
 
+// rp_tm_xll_cdrt - code to register the return type with Excel
+%typemap(rp_tm_xll_cdrt) void "L";
+%typemap(rp_tm_xll_cdrt) bool "L";
+%typemap(rp_tm_xll_cdrt) int "N";
+%typemap(rp_tm_xll_cdrt) long "N";
+%typemap(rp_tm_xll_cdrt) double "E";
+%typemap(rp_tm_xll_cdrt) double const & "E";
+%typemap(rp_tm_xll_cdrt) rp_tp_string "C";
+%typemap(rp_tm_xll_cdrt) rp_tp_string * "C";
+%typemap(rp_tm_xll_cdrt) rp_tp_string & "C";
+%typemap(rp_tm_xll_cdrt) rp_tp_string const & "C";
+%typemap(rp_tm_xll_cdrt) rp_tp_cnv "P";
+%typemap(rp_tm_xll_cdrt) rp_tp_crc "P";
+%typemap(rp_tm_xll_cdrt) rp_tp_enm "C";
+%typemap(rp_tm_xll_cdrt) rp_tp_enm_cls "C";
+%typemap(rp_tm_xll_cdrt) rp_tp_any "P";
+%typemap(rp_tm_xll_cdrt) std::vector "P";
+%typemap(rp_tm_xll_cdrt) std::vector const & "P";
+%typemap(rp_tm_xll_cdrt) rp_tp_obj1 "C";
+%typemap(rp_tm_xll_cdrt) SWIGTYPE * "C";
+
 // rp_tm_xll_code - code to register the parameter with Excel
 %typemap(rp_tm_xll_code) void "L";
 %typemap(rp_tm_xll_code) bool "L";

@@ -173,12 +173,10 @@ void emitParmList(
     Printf(buf, "// END   typemap %s\n", map);
 }
 
-String *excelParamCodes(Node *n, SwigType *type, ParmList *parms) {
+String *excelParamCodes(Node *n, Node *returnType, ParmList *parms) {
     String *s = NewString("");
-    if (type) { // FIXME this logic looks weird, is parameter type needed?
-        String *tm = getTypeMap(n, "rp_tm_xll_code");
-        Append(s, tm);
-    }
+    String *tm = getTypeMap(n, "rp_tm_xll_cdrt");
+    Append(s, tm);
     for (Parm *p = parms; p; p = nextSibling(p)) {
         String *tm = getTypeMap(p, "rp_tm_xll_code");
         Append(s, tm);
@@ -209,14 +207,14 @@ std::string hexLen(String *c) {
     return s.str();
 }
 
-void excelRegister(File *b, Node *n, SwigType *type, ParmList *parms) {
+void excelRegister(File *b, Node *n, Node *returnType, ParmList *parms) {
     String *funcName   = Getattr(n, "rp:funcRename");
     Printf(b, "        // BEGIN function excelRegister\n");
     Printf(b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
     Printf(b, "            // function code name\n");
     Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
     Printf(b, "            // parameter codes\n");
-    String *xlParamCodes = excelParamCodes(n, type, parms);
+    String *xlParamCodes = excelParamCodes(n, returnType, parms);
     Printf(b, "            TempStrNoSize(\n");
     Printf(b, "            // BEGIN func excelParamCodes (using typemap rp_tm_xll_code)\n");
     Printf(b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamCodes).c_str(), xlParamCodes);
@@ -239,14 +237,14 @@ void excelRegister(File *b, Node *n, SwigType *type, ParmList *parms) {
     Printf(b, "        // END   function excelRegister\n\n");
 }
 
-void excelUnregister(File *b, Node *n, SwigType *type, ParmList *parms) {
+void excelUnregister(File *b, Node *n, Node *returnType, ParmList *parms) {
     String *funcName   = Getattr(n, "rp:funcRename");
     Printf(b, "        // BEGIN function excelUnregister\n");
     Printf(b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
     Printf(b, "            // function code name\n");
     Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
     Printf(b, "            // parameter codes\n");
-    String *xlParamCodes = excelParamCodes(n, type, parms);
+    String *xlParamCodes = excelParamCodes(n, returnType, parms);
     Printf(b, "            TempStrNoSize(\n");
     Printf(b, "            // BEGIN func excelParamCodes (using typemap rp_tm_xll_code)\n");
     Printf(b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamCodes).c_str(), xlParamCodes);
@@ -460,7 +458,6 @@ struct ParmsFunc {
     ParmList *parms;
     Parm *parms2;
     String *name;
-    SwigType *type;
     String *symname;
     String *symnameUpper;
     String* funcName;
@@ -470,19 +467,17 @@ struct ParmsCtor {
     Node *n;
     String *name;
     String *rename;
-    SwigType *type;
+    Parm *objectID;
     String *funcName;
     String *funcRename;
     ParmList *parms;
     ParmList *parms2;
-    Parm *parms3;
     String *pname;
     String *base;
 };
 
 struct ParmsMemb {
     Node *n;
-    SwigType *type;
     String *nameUpper;
     String *funcName;
     ParmList *parms;
@@ -1363,8 +1358,8 @@ struct GroupExcelRegister : public Group {
 
     void functionWrapperImplFunc(ParmsFunc &p) {
 
-        excelRegister(b_xlr_grp_cpp->b0, p.n, p.type, p.parms2);
-        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.type, p.parms2);
+        excelRegister(b_xlr_grp_cpp->b0, p.n, p.n, p.parms2);
+        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.n, p.parms2);
 
         count_.functions++;
         count_.total2++;
@@ -1373,8 +1368,8 @@ struct GroupExcelRegister : public Group {
     void functionWrapperImplCtor(ParmsCtor &p) {
 
         if (generateCtor) {
-            excelRegister(b_xlr_grp_cpp->b0, p.n, 0, p.parms3);
-            excelUnregister(b_xlr_grp_cpp->b1, p.n, p.type, p.parms3);
+            excelRegister(b_xlr_grp_cpp->b0, p.n, p.objectID, p.parms2);
+            excelUnregister(b_xlr_grp_cpp->b1, p.n, p.objectID, p.parms2);
 
             count_.constructors++;
             count_.total2++;
@@ -1382,8 +1377,8 @@ struct GroupExcelRegister : public Group {
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
-        excelRegister(b_xlr_grp_cpp->b0, p.n, p.type, p.parms2);
-        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.type, p.parms2);
+        excelRegister(b_xlr_grp_cpp->b0, p.n, p.n, p.parms2);
+        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.n, p.parms2);
 
         count_.members++;
         count_.total2++;
@@ -2455,7 +2450,6 @@ int functionWrapperImplFunc(Node *n) {
 
     p.n = n;
     p.name   = Getattr(n,"name");
-    p.type   = Getattr(n,"type");
     p.parms  = Getattr(n,"parms");
     p.symname   = Getattr(n,"sym:name");
     p.symnameUpper = copyUpper(p.symname);
@@ -2464,7 +2458,6 @@ int functionWrapperImplFunc(Node *n) {
     Setattr(n, "rp:funcRename", p.funcName);
     printf("funcName=%s\n", Char(p.funcName));
     Printf(b_init, "@@@ FUNC Name=%s\n", p.funcName);
-    Printf(b_init, "&&& p.type=%s\n", p.type);
     Printf(b_init, "&&& p.symname=%s\n", p.symname);
     Printf(b_init, "&&& prefix=%s\n", prefix);
     Printf(b_init, "&&& p.funcName=%s\n", p.funcName);
@@ -2555,7 +2548,6 @@ int functionWrapperImplCtor(Node *n) {
     p.n = n;
     p.name   = Getattr(n,"name");
     p.rename   = Getattr(n,"constructorDeclaration:sym:name");
-    p.type   = Getattr(n,"type");
     p.parms  = Getattr(n,"parms");
     Node *n1 = Getattr(n,"parentNode");
     p.pname   = Getattr(n1,"name");
@@ -2580,8 +2572,16 @@ int functionWrapperImplCtor(Node *n) {
     Setattr(n, "rp:funcName", p.funcName);
     Setattr(n, "rp:funcRename", p.funcRename);
     printf("funcName=%s\n", Char(p.funcName));
-    printf("type=%s\n", Char(SwigType_str(p.type, 0)));
     Printf(b_init, "@@@ CTOR Name=%s\n", Char(p.funcName));
+
+    // Create a node to represent the ctor return type - std::string objectID
+    p.objectID = NewHash();
+    Setattr(p.objectID, "name", "objectID");
+    String *nt  = NewString("std::string");
+    SwigType_add_qualifier(nt, "const");
+    SwigType_add_reference(nt);
+    Setattr(p.objectID, "type", nt);
+    processParm(p.objectID);
 
     // Create from parms another list parms2 - prepend an argument to represent
     // the object ID which is passed in as the first parameter to every ctor.
@@ -2589,10 +2589,6 @@ int functionWrapperImplCtor(Node *n) {
     Parm *temp2 = prependParm(temp1, "Overwrite", "bool", false);
     Parm *temp3 = prependParm(temp2, "objectID", "std::string");
     p.parms2 = prependParm(temp3, "Trigger", "reposit::property_t");
-
-    // Create from parms2 another list parms3 - prepend an argument to represent
-    // the object ID which is the return value of addin func that wraps ctor.
-    p.parms3 = prependParm(p.parms2, "objectID", "std::string", true, true);
 
     Printf(b_wrappers, "//***DEF\n");
     printList(p.parms2, b_wrappers);
@@ -2618,7 +2614,6 @@ int functionWrapperImplMemb(Node *n) {
 
     p.n = n;
     p.name   = Getattr(n,"name");
-    p.type   = Getattr(n,"type");
     Node *n1 = Getattr(n,"parentNode");
     String   *cls   = Getattr(n1,"sym:name");
     p.pname   = Getattr(n1,"name");
