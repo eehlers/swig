@@ -488,19 +488,19 @@ struct ParmsMemb {
     Node *node;
 };
 
-struct Group {
+struct GroupBase {
     Pragmas pragmas_;
     Count &count_;
-    Group(const Pragmas &pragmas, Count &count) : pragmas_(pragmas), count_(count) {}
+    GroupBase(const Pragmas &pragmas, Count &count) : pragmas_(pragmas), count_(count) {}
 };
 
-struct GroupLibraryObjects : public Group {
+struct GroupLibraryObjects : public GroupBase {
 
     Buffer *b_lib_grp_hpp;
     Buffer *b_lib_grp_cpp;
     bool generateCppFile;
 
-    GroupLibraryObjects(const Pragmas &pragmas, Count &count) : Group(pragmas, count), generateCppFile(false) {
+    GroupLibraryObjects(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), generateCppFile(false) {
 
         if (pragmas_.automatic_) {
             b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/obj_%s.hpp", objDir, pragmas_.groupName_));
@@ -536,19 +536,6 @@ struct GroupLibraryObjects : public Group {
         Printf(b_lib_grp_cpp->b0, "\n");
     }
 
-    void clear() {
-
-        Printf(b_lib_grp_hpp->b0, "} // namespace %s\n", module);
-        Printf(b_lib_grp_hpp->b0, "\n");
-        Printf(b_lib_grp_hpp->b0, "#endif\n");
-        Printf(b_lib_grp_hpp->b0, "\n");
-
-        Printf(b_lib_grp_cpp->b0, "\n");
-
-        b_lib_grp_hpp->clear(count_);
-        b_lib_grp_cpp->clear(count_, generateCppFile);
-    }
-
     void functionWrapperImplFunc(ParmsFunc &p) {
 
         Printf(b_lib_grp_hpp->b0,"\n");
@@ -575,6 +562,7 @@ struct GroupLibraryObjects : public Group {
     void functionWrapperImplCtor(ParmsCtor &p) {
 
         if (generateCtor) {
+
             String *s0 = NewString("");
             String *s1 = NewString("");
             if (p.base) {
@@ -599,6 +587,7 @@ struct GroupLibraryObjects : public Group {
             Printf(b_lib_grp_hpp->b0,"        }\n");
             Printf(b_lib_grp_hpp->b0,"    };\n");
             Printf(b_lib_grp_hpp->b0,"\n");
+
         } else { //!generateCtor
 
             Printf(b_lib_grp_hpp->b0, "    // BEGIN typemap rp_tm_lib_cls\n");
@@ -616,14 +605,28 @@ struct GroupLibraryObjects : public Group {
 
     void functionWrapperImplMemb(ParmsMemb & /*p*/) {
     }
+
+    void clear() {
+
+        Printf(b_lib_grp_hpp->b0, "} // namespace %s\n", module);
+        Printf(b_lib_grp_hpp->b0, "\n");
+        Printf(b_lib_grp_hpp->b0, "#endif\n");
+        Printf(b_lib_grp_hpp->b0, "\n");
+
+        Printf(b_lib_grp_cpp->b0, "\n");
+
+        b_lib_grp_hpp->clear(count_);
+        b_lib_grp_cpp->clear(count_, generateCppFile);
+    }
 };
 
-struct GroupValueObjects : public Group {
+struct GroupValueObjects : public GroupBase {
 
     Buffer *b_vob_grp_hpp;
     Buffer *b_vob_grp_cpp;
+    bool generateOutput;
 
-    GroupValueObjects(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
+    GroupValueObjects(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), generateOutput(false) {
 
         b_vob_grp_hpp = new Buffer("b_vob_grp_hpp", NewStringf("%s/valueobjects/vo_%s.hpp", objDir, pragmas_.groupName_));
         b_vob_grp_cpp = new Buffer("b_vob_grp_cpp", NewStringf("%s/valueobjects/vo_%s.cpp", objDir, pragmas_.groupName_));
@@ -652,25 +655,6 @@ struct GroupValueObjects : public Group {
         Printf(b_vob_grp_cpp->b0, "\n");
         Printf(b_vob_grp_cpp->b0, "namespace ValueObjects {\n");
         Printf(b_vob_grp_cpp->b0, "\n");
-    }
-
-    void clear() {
-
-        Printf(b_vob_grp_hpp->b0, "} // namespace %s\n", module);
-        Printf(b_vob_grp_hpp->b0, "\n");
-        Printf(b_vob_grp_hpp->b0, "} // namespace ValueObjects\n");
-        Printf(b_vob_grp_hpp->b0, "\n");
-        Printf(b_vob_grp_hpp->b0, "#endif\n");
-        Printf(b_vob_grp_hpp->b0, "\n");
-
-        Printf(b_vob_grp_cpp->b0, "\n");
-        Printf(b_vob_grp_cpp->b0, "} // namespace %s\n", module);
-        Printf(b_vob_grp_cpp->b0, "\n");
-        Printf(b_vob_grp_cpp->b0, "} // namespace ValueObjects\n");
-        Printf(b_vob_grp_cpp->b0, "\n");
-
-        b_vob_grp_hpp->clear(count_);
-        b_vob_grp_cpp->clear(count_);
     }
 
     void functionWrapperImplFunc(ParmsFunc & /*p*/) {
@@ -772,20 +756,41 @@ struct GroupValueObjects : public Group {
 
             count_.constructors++;
             count_.total2++;
+
+            generateOutput = true;
         }
     }
 
     void functionWrapperImplMemb(ParmsMemb & /*p*/) {
     }
+
+    void clear() {
+
+        Printf(b_vob_grp_hpp->b0, "} // namespace %s\n", module);
+        Printf(b_vob_grp_hpp->b0, "\n");
+        Printf(b_vob_grp_hpp->b0, "} // namespace ValueObjects\n");
+        Printf(b_vob_grp_hpp->b0, "\n");
+        Printf(b_vob_grp_hpp->b0, "#endif\n");
+        Printf(b_vob_grp_hpp->b0, "\n");
+
+        Printf(b_vob_grp_cpp->b0, "\n");
+        Printf(b_vob_grp_cpp->b0, "} // namespace %s\n", module);
+        Printf(b_vob_grp_cpp->b0, "\n");
+        Printf(b_vob_grp_cpp->b0, "} // namespace ValueObjects\n");
+        Printf(b_vob_grp_cpp->b0, "\n");
+
+        b_vob_grp_hpp->clear(count_, generateOutput);
+        b_vob_grp_cpp->clear(count_, generateOutput);
+    }
 };
 
-struct GroupSerializationCreate : public Group {
+struct GroupSerializationCreate : public GroupBase {
 
     Buffer *b_scr_grp_hpp;
     Buffer *b_scr_grp_cpp;
-    bool generateCppFile;
+    bool generateOutput;
 
-    GroupSerializationCreate(const Pragmas &pragmas, Count &count) : Group(pragmas, count), generateCppFile(false) {
+    GroupSerializationCreate(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), generateOutput(false) {
 
         b_scr_grp_hpp = new Buffer("b_scr_grp_hpp", NewStringf("%s/serialization/create/create_%s.hpp", objDir, pragmas_.groupName_));
         b_scr_grp_cpp = new Buffer("b_scr_grp_cpp", NewStringf("%s/serialization/create/create_%s.cpp", objDir, pragmas_.groupName_));
@@ -821,20 +826,6 @@ struct GroupSerializationCreate : public Group {
         Printf(b_scr_grp_cpp->b0, "\n");
     }
 
-    void clear() {
-
-        Printf(b_scr_grp_hpp->b0, "\n");
-        Printf(b_scr_grp_hpp->b0, "} // namespace %s\n", module);
-        Printf(b_scr_grp_hpp->b0, "\n");
-        Printf(b_scr_grp_hpp->b0, "#endif\n");
-        Printf(b_scr_grp_hpp->b0, "\n");
-
-        Printf(b_scr_grp_cpp->b0, "\n");
-
-        b_scr_grp_hpp->clear(count_);
-        b_scr_grp_cpp->clear(count_, generateCppFile);
-    }
-
     void functionWrapperImplFunc(ParmsFunc & /*p*/) {
     }
 
@@ -868,20 +859,35 @@ struct GroupSerializationCreate : public Group {
             count_.constructors++;
             count_.total2++;
 
-            generateCppFile = true;
+            generateOutput = true;
         }
     }
 
     void functionWrapperImplMemb(ParmsMemb & /*p*/) {
     }
+
+    void clear() {
+
+        Printf(b_scr_grp_hpp->b0, "\n");
+        Printf(b_scr_grp_hpp->b0, "} // namespace %s\n", module);
+        Printf(b_scr_grp_hpp->b0, "\n");
+        Printf(b_scr_grp_hpp->b0, "#endif\n");
+        Printf(b_scr_grp_hpp->b0, "\n");
+
+        Printf(b_scr_grp_cpp->b0, "\n");
+
+        b_scr_grp_hpp->clear(count_, generateOutput);
+        b_scr_grp_cpp->clear(count_, generateOutput);
+    }
 };
 
-struct GroupSerializationRegister : public Group {
+struct GroupSerializationRegister : public GroupBase {
 
     Buffer *b_srg_grp_hpp;
     Buffer *b_srg_grp_cpp;
+    bool generateOutput;
 
-    GroupSerializationRegister(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
+    GroupSerializationRegister(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), generateOutput(false) {
 
         b_srg_grp_hpp = new Buffer("b_srg_grp_hpp", NewStringf("%s/serialization/register/serialization_%s.hpp", objDir, pragmas_.groupName_));
         b_srg_grp_cpp = new Buffer("b_srg_grp_cpp", NewStringf("%s/serialization/register/serialization_%s.cpp", objDir, pragmas_.groupName_));
@@ -919,20 +925,6 @@ struct GroupSerializationRegister : public Group {
         Printf(b_srg_grp_cpp->b1, "\n");
     }
 
-    void clear() {
-
-        Printf(b_srg_grp_hpp->b0, "\n");
-
-        Printf(b_srg_grp_cpp->b0, "}\n");
-        Printf(b_srg_grp_cpp->b0, "\n");
-
-        Printf(b_srg_grp_cpp->b1, "}\n");
-        Printf(b_srg_grp_cpp->b1, "\n");
-
-        b_srg_grp_hpp->clear(count_);
-        b_srg_grp_cpp->clear(count_);
-    }
-
     void functionWrapperImplFunc(ParmsFunc & /*p*/) {
     }
 
@@ -950,19 +942,35 @@ struct GroupSerializationRegister : public Group {
 
             count_.constructors++;
             count_.total2++;
+
+            generateOutput = true;
         }
     }
 
     void functionWrapperImplMemb(ParmsMemb & /*p*/) {
     }
+
+    void clear() {
+
+        Printf(b_srg_grp_hpp->b0, "\n");
+
+        Printf(b_srg_grp_cpp->b0, "}\n");
+        Printf(b_srg_grp_cpp->b0, "\n");
+
+        Printf(b_srg_grp_cpp->b1, "}\n");
+        Printf(b_srg_grp_cpp->b1, "\n");
+
+        b_srg_grp_hpp->clear(count_, generateOutput);
+        b_srg_grp_cpp->clear(count_, generateOutput);
+    }
 };
 
-struct GroupCpp : public Group {
+struct GroupCpp : public GroupBase {
 
     Buffer *b_cpp_grp_hpp;
     Buffer *b_cpp_grp_cpp;
 
-    GroupCpp(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
+    GroupCpp(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count) {
 
         b_cpp_grp_hpp = new Buffer("b_cpp_grp_hpp", NewStringf("%s/add_%s.hpp", addDir, pragmas_.groupName_));
         b_cpp_grp_cpp = new Buffer("b_cpp_grp_cpp", NewStringf("%s/add_%s.cpp", addDir, pragmas_.groupName_));
@@ -1001,19 +1009,6 @@ struct GroupCpp : public Group {
         Printf(b_cpp_grp_cpp->b0, "\n");
 
         Append(b_cpp_grp_cpp->b0, pragmas_.cpp_inc);
-    }
-
-    void clear() {
-        Printf(b_cpp_grp_hpp->b0, "\n");
-        Printf(b_cpp_grp_hpp->b0, "} // namespace %s\n", addinCppNameSpace);
-        Printf(b_cpp_grp_hpp->b0, "\n");
-        Printf(b_cpp_grp_hpp->b0, "#endif\n");
-        Printf(b_cpp_grp_hpp->b0, "\n");
-
-        Printf(b_cpp_grp_cpp->b0, "\n");
-
-        b_cpp_grp_hpp->clear(count_);
-        b_cpp_grp_cpp->clear(count_);
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
@@ -1102,13 +1097,27 @@ struct GroupCpp : public Group {
         count_.members++;
         count_.total2++;
     }
+
+    void clear() {
+        Printf(b_cpp_grp_hpp->b0, "\n");
+        Printf(b_cpp_grp_hpp->b0, "} // namespace %s\n", addinCppNameSpace);
+        Printf(b_cpp_grp_hpp->b0, "\n");
+        Printf(b_cpp_grp_hpp->b0, "#endif\n");
+        Printf(b_cpp_grp_hpp->b0, "\n");
+
+        Printf(b_cpp_grp_cpp->b0, "\n");
+
+        b_cpp_grp_hpp->clear(count_);
+        b_cpp_grp_cpp->clear(count_);
+    }
 };
 
-struct GroupExcelFunctions : public Group {
+struct GroupExcelFunctions : public GroupBase {
 
     Buffer *b_xlf_grp_cpp;
+    bool voIncludeHasBeengenerated;
 
-    GroupExcelFunctions(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
+    GroupExcelFunctions(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), voIncludeHasBeengenerated(false) {
 
         b_xlf_grp_cpp = new Buffer("b_xlf_grp_cpp", NewStringf("%s/functions/function_%s.cpp", xllDir, pragmas_.groupName_));
 
@@ -1122,91 +1131,87 @@ struct GroupExcelFunctions : public Group {
         Printf(b_xlf_grp_cpp->b0, "#include <rpxl/loop.hpp>\n");
         Printf(b_xlf_grp_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
         Printf(b_xlf_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
-        Printf(b_xlf_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
-        Printf(b_xlf_grp_cpp->b0, "//#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
-        Printf(b_xlf_grp_cpp->b0, "#include \"%s/obj_all.hpp\"\n", objInc);
-        //Printf(b_xlf_grp_cpp->b0, "#include \"%s/conversions/convert2.hpp\"\n", objInc);
-        Printf(b_xlf_grp_cpp->b0, "#include \"%s/conversions/conversions.hpp\"\n", objInc);
-        Printf(b_xlf_grp_cpp->b0, "#include \"%s/conversions/all.hpp\"\n", xllInc);
-        Printf(b_xlf_grp_cpp->b0, "// FIXME only required if the file contains a looping function\n");
-        Printf(b_xlf_grp_cpp->b0, "#include \"%s/loop.hpp\"\n", objInc);
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
-        Printf(b_xlf_grp_cpp->b0, "   for example) also #define _MSC_VER\n");
-        Printf(b_xlf_grp_cpp->b0, "*/\n");
-        Printf(b_xlf_grp_cpp->b0, "#ifdef BOOST_MSVC\n");
-        Printf(b_xlf_grp_cpp->b0, "#  define BOOST_LIB_DIAGNOSTIC\n");
-        Printf(b_xlf_grp_cpp->b0, "#  include <rp/auto_link.hpp>\n");
-        Printf(b_xlf_grp_cpp->b0, "#  undef BOOST_LIB_DIAGNOSTIC\n");
-        Printf(b_xlf_grp_cpp->b0, "#endif\n");
-        Printf(b_xlf_grp_cpp->b0, "#include <sstream>\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-    }
 
-    void clear() {
-        b_xlf_grp_cpp->clear(count_);
+        Printf(b_xlf_grp_cpp->b1, "//#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        Printf(b_xlf_grp_cpp->b1, "#include \"%s/obj_all.hpp\"\n", objInc);
+        //Printf(b_xlf_grp_cpp->b1, "#include \"%s/conversions/convert2.hpp\"\n", objInc);
+        Printf(b_xlf_grp_cpp->b1, "#include \"%s/conversions/conversions.hpp\"\n", objInc);
+        Printf(b_xlf_grp_cpp->b1, "#include \"%s/conversions/all.hpp\"\n", xllInc);
+        Printf(b_xlf_grp_cpp->b1, "// FIXME only required if the file contains a looping function\n");
+        Printf(b_xlf_grp_cpp->b1, "#include \"%s/loop.hpp\"\n", objInc);
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
+        Printf(b_xlf_grp_cpp->b1, "   for example) also #define _MSC_VER\n");
+        Printf(b_xlf_grp_cpp->b1, "*/\n");
+        Printf(b_xlf_grp_cpp->b1, "#ifdef BOOST_MSVC\n");
+        Printf(b_xlf_grp_cpp->b1, "#  define BOOST_LIB_DIAGNOSTIC\n");
+        Printf(b_xlf_grp_cpp->b1, "#  include <rp/auto_link.hpp>\n");
+        Printf(b_xlf_grp_cpp->b1, "#  undef BOOST_LIB_DIAGNOSTIC\n");
+        Printf(b_xlf_grp_cpp->b1, "#endif\n");
+        Printf(b_xlf_grp_cpp->b1, "#include <sstream>\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
     }
 
     void emitLoopFunc(ParmsFunc &p, String *loopParameter) {
         String *loopParameterType = Getattr(p.n, "rp:loopParameterType");
         String *loopFunctionType = Getattr(p.n, "rp:loopFunctionType");
-        Printf(b_xlf_grp_cpp->b0, "        // BEGIN function emitLoopFunc\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "        static XLOPER returnValue;\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "        %s::%sBind bindObject =\n", module, p.funcName);
-        Printf(b_xlf_grp_cpp->b0, "            boost::bind(\n");
-        Printf(b_xlf_grp_cpp->b0, "                %s,\n", p.name);
-        emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xxx_loop", 4, ',', true, true);
-        Printf(b_xlf_grp_cpp->b0, "            );\n");
-        Printf(b_xlf_grp_cpp->b0, "        reposit::loop\n");
-        Printf(b_xlf_grp_cpp->b0, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
-        Printf(b_xlf_grp_cpp->b0, "            (functionCall, bindObject, %s, returnValue);\n", loopParameter);
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "        return &returnValue;\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "        // END   function emitLoopFunc\n");
+        Printf(b_xlf_grp_cpp->b1, "        // BEGIN function emitLoopFunc\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        static XLOPER returnValue;\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        %s::%sBind bindObject =\n", module, p.funcName);
+        Printf(b_xlf_grp_cpp->b1, "            boost::bind(\n");
+        Printf(b_xlf_grp_cpp->b1, "                %s,\n", p.name);
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xxx_loop", 4, ',', true, true);
+        Printf(b_xlf_grp_cpp->b1, "            );\n");
+        Printf(b_xlf_grp_cpp->b1, "        reposit::loop\n");
+        Printf(b_xlf_grp_cpp->b1, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
+        Printf(b_xlf_grp_cpp->b1, "            (functionCall, bindObject, %s, returnValue);\n", loopParameter);
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        return &returnValue;\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        // END   function emitLoopFunc\n");
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
 
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0,"//****FUNC*****\n");
-        Printf(b_xlf_grp_cpp->b0, "DLLEXPORT\n");
-        emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtft");
-        Printf(b_xlf_grp_cpp->b0, "%s(\n", p.funcName);
-        emitParmList(p.parms2, b_xlf_grp_cpp->b0, 2, "rp_tm_xll_parm", 1);
-        Printf(b_xlf_grp_cpp->b0, ") {\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "    try {\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
-        Printf(b_xlf_grp_cpp->b0, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcName);
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "        reposit::validateRange(Trigger, \"Trigger\");\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_cnvt", 2, 0, false);
-        Printf(b_xlf_grp_cpp->b0, "\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1,"//****FUNC*****\n");
+        Printf(b_xlf_grp_cpp->b1, "DLLEXPORT\n");
+        emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtft");
+        Printf(b_xlf_grp_cpp->b1, "%s(\n", p.funcName);
+        emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm", 1);
+        Printf(b_xlf_grp_cpp->b1, ") {\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    try {\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
+        Printf(b_xlf_grp_cpp->b1, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcName);
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        reposit::validateRange(Trigger, \"Trigger\");\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", 2, 0, false);
+        Printf(b_xlf_grp_cpp->b1, "\n");
         if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
             emitLoopFunc(p, loopParameter);
         } else {
-            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtdc", 2);
-            Printf(b_xlf_grp_cpp->b0, "        %s::%s(\n", module, p.symname);
-            emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_argf", 3, ',', true, true);
-            Printf(b_xlf_grp_cpp->b0, "        );\n\n");
-            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtst", 2);
+            emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtdc", 2);
+            Printf(b_xlf_grp_cpp->b1, "        %s::%s(\n", module, p.symname);
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", 3, ',', true, true);
+            Printf(b_xlf_grp_cpp->b1, "        );\n\n");
+            emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtst", 2);
         }
 
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "    } catch (const std::exception &e) {\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "        reposit::RepositoryXL::instance().logError(e.what(), functionCall);\n");
-        Printf(b_xlf_grp_cpp->b0, "        return 0;\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "    }\n");
-        Printf(b_xlf_grp_cpp->b0, "}\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    } catch (const std::exception &e) {\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        reposit::RepositoryXL::instance().logError(e.what(), functionCall);\n");
+        Printf(b_xlf_grp_cpp->b1, "        return 0;\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    }\n");
+        Printf(b_xlf_grp_cpp->b1, "}\n");
 
         count_.functions++;
         count_.total2++;
@@ -1215,47 +1220,52 @@ struct GroupExcelFunctions : public Group {
     void functionWrapperImplCtor(ParmsCtor &p) {
 
         if (generateCtor) {
-            Printf(b_xlf_grp_cpp->b0, "\n");
-            Printf(b_xlf_grp_cpp->b0,"//****CTOR*****\n");
-            Printf(b_xlf_grp_cpp->b0, "DLLEXPORT char *%s(\n", p.funcRename);
-            emitParmList(p.parms2, b_xlf_grp_cpp->b0, 2, "rp_tm_xll_parm");
-            Printf(b_xlf_grp_cpp->b0, ") {\n");
-            Printf(b_xlf_grp_cpp->b0, "\n");
-            Printf(b_xlf_grp_cpp->b0, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
-            Printf(b_xlf_grp_cpp->b0, "\n");
-            Printf(b_xlf_grp_cpp->b0, "    try {\n");
-            Printf(b_xlf_grp_cpp->b0, "\n");
-            Printf(b_xlf_grp_cpp->b0, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
-            Printf(b_xlf_grp_cpp->b0, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcRename);
-            Printf(b_xlf_grp_cpp->b0, "\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_cnvt", 2, 0, false);
-            Printf(b_xlf_grp_cpp->b0, "\n");
-            Printf(b_xlf_grp_cpp->b0, "        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
-            Printf(b_xlf_grp_cpp->b0, "            new %s::ValueObjects::%s(\n", module, p.funcRename);
-            Printf(b_xlf_grp_cpp->b0, "                objectID,\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_argfv", 4, ',', true, true, true);
-            Printf(b_xlf_grp_cpp->b0, "                false));\n");
-            Printf(b_xlf_grp_cpp->b0, "\n");
-            Printf(b_xlf_grp_cpp->b0, "        boost::shared_ptr<reposit::Object> object(\n");
-            Printf(b_xlf_grp_cpp->b0, "            new %s::%s(\n", module, p.name);
-            Printf(b_xlf_grp_cpp->b0, "                valueObject,\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_argf", 4, ',', true, true, true);
-            Printf(b_xlf_grp_cpp->b0, "                false));\n");
-            Printf(b_xlf_grp_cpp->b0, "\n");
-            Printf(b_xlf_grp_cpp->b0, "        std::string returnValue =\n");
-            Printf(b_xlf_grp_cpp->b0, "            reposit::RepositoryXL::instance().storeObject(objectID, object, true);\n");
-            Printf(b_xlf_grp_cpp->b0, "\n");
-            Printf(b_xlf_grp_cpp->b0, "        static char ret[XL_MAX_STR_LEN];\n");
-            Printf(b_xlf_grp_cpp->b0, "        reposit::stringToChar(returnValue, ret);\n");
-            Printf(b_xlf_grp_cpp->b0, "        return ret;\n");
-            Printf(b_xlf_grp_cpp->b0, "\n");
-            Printf(b_xlf_grp_cpp->b0, "    } catch (const std::exception &e) {\n");
-            Printf(b_xlf_grp_cpp->b0, "\n");
-            Printf(b_xlf_grp_cpp->b0, "        reposit::RepositoryXL::instance().logError(e.what(), functionCall);\n");
-            Printf(b_xlf_grp_cpp->b0, "        return 0;\n");
-            Printf(b_xlf_grp_cpp->b0, "\n");
-            Printf(b_xlf_grp_cpp->b0, "    }\n");
-            Printf(b_xlf_grp_cpp->b0, "}\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1,"//****CTOR*****\n");
+            Printf(b_xlf_grp_cpp->b1, "DLLEXPORT char *%s(\n", p.funcRename);
+            emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm");
+            Printf(b_xlf_grp_cpp->b1, ") {\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "    try {\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
+            Printf(b_xlf_grp_cpp->b1, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcRename);
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", 2, 0, false);
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+            Printf(b_xlf_grp_cpp->b1, "            new %s::ValueObjects::%s(\n", module, p.funcRename);
+            Printf(b_xlf_grp_cpp->b1, "                objectID,\n");
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argfv", 4, ',', true, true, true);
+            Printf(b_xlf_grp_cpp->b1, "                false));\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::Object> object(\n");
+            Printf(b_xlf_grp_cpp->b1, "            new %s::%s(\n", module, p.name);
+            Printf(b_xlf_grp_cpp->b1, "                valueObject,\n");
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", 4, ',', true, true, true);
+            Printf(b_xlf_grp_cpp->b1, "                false));\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "        std::string returnValue =\n");
+            Printf(b_xlf_grp_cpp->b1, "            reposit::RepositoryXL::instance().storeObject(objectID, object, true);\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "        static char ret[XL_MAX_STR_LEN];\n");
+            Printf(b_xlf_grp_cpp->b1, "        reposit::stringToChar(returnValue, ret);\n");
+            Printf(b_xlf_grp_cpp->b1, "        return ret;\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "    } catch (const std::exception &e) {\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "        reposit::RepositoryXL::instance().logError(e.what(), functionCall);\n");
+            Printf(b_xlf_grp_cpp->b1, "        return 0;\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "    }\n");
+            Printf(b_xlf_grp_cpp->b1, "}\n");
+
+            if (!voIncludeHasBeengenerated) {
+                Printf(b_xlf_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
+                voIncludeHasBeengenerated = true;
+            }
 
             count_.constructors++;
             count_.total2++;
@@ -1265,74 +1275,78 @@ struct GroupExcelFunctions : public Group {
     void emitLoopFunc(ParmsMemb &p, String *loopParameter) {
         String *loopParameterType = Getattr(p.n, "rp:loopParameterType");
         String *loopFunctionType = Getattr(p.n, "rp:loopFunctionType");
-        Printf(b_xlf_grp_cpp->b0, "        // BEGIN function emitLoopFunc\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "        static XLOPER returnValue;\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "        %s::%sBind bindObject =\n", module, p.funcName);
-        Printf(b_xlf_grp_cpp->b0, "            boost::bind(\n");
-        Printf(b_xlf_grp_cpp->b0, "                &%s::%s,\n", p.pname, p.name);
-        Printf(b_xlf_grp_cpp->b0, "                xxx,\n");
-        emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xxx_loop", 4, ',', true, true);
-        Printf(b_xlf_grp_cpp->b0, "            );\n");
-        Printf(b_xlf_grp_cpp->b0, "        reposit::loop\n");
-        Printf(b_xlf_grp_cpp->b0, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
-        Printf(b_xlf_grp_cpp->b0, "            (functionCall, bindObject, %s, returnValue);\n", loopParameter);
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "        return &returnValue;\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "        // END   function emitLoopFunc\n");
+        Printf(b_xlf_grp_cpp->b1, "        // BEGIN function emitLoopFunc\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        static XLOPER returnValue;\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        %s::%sBind bindObject =\n", module, p.funcName);
+        Printf(b_xlf_grp_cpp->b1, "            boost::bind(\n");
+        Printf(b_xlf_grp_cpp->b1, "                &%s::%s,\n", p.pname, p.name);
+        Printf(b_xlf_grp_cpp->b1, "                xxx,\n");
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xxx_loop", 4, ',', true, true);
+        Printf(b_xlf_grp_cpp->b1, "            );\n");
+        Printf(b_xlf_grp_cpp->b1, "        reposit::loop\n");
+        Printf(b_xlf_grp_cpp->b1, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
+        Printf(b_xlf_grp_cpp->b1, "            (functionCall, bindObject, %s, returnValue);\n", loopParameter);
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        return &returnValue;\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        // END   function emitLoopFunc\n");
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
 
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0,"//****MEMB*****\n");
-        Printf(b_xlf_grp_cpp->b0, "DLLEXPORT\n");
-        emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtft");
-        Printf(b_xlf_grp_cpp->b0, "%s(\n", p.funcName);
-        emitParmList(p.parms2, b_xlf_grp_cpp->b0, 2, "rp_tm_xll_parm");
-        Printf(b_xlf_grp_cpp->b0, ") {\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "    try {\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
-        Printf(b_xlf_grp_cpp->b0, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcName);
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_cnvt", 2, 0, false);
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        emitTypeMap(b_xlf_grp_cpp->b0, p.node, "rp_tm_xxx_rp_get", 2);
-        Printf(b_xlf_grp_cpp->b0, "\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1,"//****MEMB*****\n");
+        Printf(b_xlf_grp_cpp->b1, "DLLEXPORT\n");
+        emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtft");
+        Printf(b_xlf_grp_cpp->b1, "%s(\n", p.funcName);
+        emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm");
+        Printf(b_xlf_grp_cpp->b1, ") {\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    try {\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
+        Printf(b_xlf_grp_cpp->b1, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcName);
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", 2, 0, false);
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        emitTypeMap(b_xlf_grp_cpp->b1, p.node, "rp_tm_xxx_rp_get", 2);
+        Printf(b_xlf_grp_cpp->b1, "\n");
         if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
             emitLoopFunc(p, loopParameter);
         } else {
-            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtdc", 2);
-            Printf(b_xlf_grp_cpp->b0, "        xxx->%s(\n", p.name);
-            emitParmList(p.parms, b_xlf_grp_cpp->b0, 1, "rp_tm_xll_argf", 3, ',', true, true);
-            Printf(b_xlf_grp_cpp->b0, "        );\n\n");
-            emitTypeMap(b_xlf_grp_cpp->b0, p.n, "rp_tm_xll_rtst", 2);
+            emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtdc", 2);
+            Printf(b_xlf_grp_cpp->b1, "        xxx->%s(\n", p.name);
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", 3, ',', true, true);
+            Printf(b_xlf_grp_cpp->b1, "        );\n\n");
+            emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtst", 2);
         }
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "    } catch (const std::exception &e) {\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "        reposit::RepositoryXL::instance().logError(e.what(), functionCall);\n");
-        Printf(b_xlf_grp_cpp->b0, "        return 0;\n");
-        Printf(b_xlf_grp_cpp->b0, "\n");
-        Printf(b_xlf_grp_cpp->b0, "    }\n");
-        Printf(b_xlf_grp_cpp->b0, "}\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    } catch (const std::exception &e) {\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        reposit::RepositoryXL::instance().logError(e.what(), functionCall);\n");
+        Printf(b_xlf_grp_cpp->b1, "        return 0;\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    }\n");
+        Printf(b_xlf_grp_cpp->b1, "}\n");
 
         count_.members++;
         count_.total2++;
     }
+
+    void clear() {
+        b_xlf_grp_cpp->clear(count_);
+    }
 };
 
-struct GroupExcelRegister : public Group {
+struct GroupExcelRegister : public GroupBase {
 
     Buffer *b_xlr_grp_cpp;
 
-    GroupExcelRegister(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
+    GroupExcelRegister(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count) {
 
         b_xlr_grp_cpp = new Buffer("b_xlr_grp_cpp", NewStringf("%s/register/register_%s.cpp", xllDir, pragmas_.groupName_));
 
@@ -1346,14 +1360,6 @@ struct GroupExcelRegister : public Group {
         Printf(b_xlr_grp_cpp->b1, "\n");
         Printf(b_xlr_grp_cpp->b1, "    XLOPER xlRegID;\n");
         Printf(b_xlr_grp_cpp->b1, "\n");
-    }
-
-    void clear() {
-
-        Printf(b_xlr_grp_cpp->b0, "}\n");
-        Printf(b_xlr_grp_cpp->b1, "}\n");
-
-        b_xlr_grp_cpp->clear(count_);
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
@@ -1382,6 +1388,14 @@ struct GroupExcelRegister : public Group {
 
         count_.members++;
         count_.total2++;
+    }
+
+    void clear() {
+
+        Printf(b_xlr_grp_cpp->b0, "}\n");
+        Printf(b_xlr_grp_cpp->b1, "}\n");
+
+        b_xlr_grp_cpp->clear(count_);
     }
 };
 
@@ -1425,11 +1439,11 @@ void mongoFunc(File *f, String *funcName1, String *funcName2, Node *n, ParmList 
     Printf(f, "        },\n");
 }
 
-struct GroupCountify : public Group {
+struct GroupCountify : public GroupBase {
 
     Buffer *b_cfy_grp_cpp;
 
-    GroupCountify(const Pragmas &pragmas, Count &count) : Group(pragmas, count) {
+    GroupCountify(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count) {
 
         b_cfy_grp_cpp = new Buffer("b_cfy_grp_cpp", NewStringf("%s/cfy_%s.cpp", cfyDir, pragmas_.groupName_));
 
@@ -1457,10 +1471,6 @@ struct GroupCountify : public Group {
         Printf(b_cfy_grp_cpp->b0, "#include <rp/repository.hpp>\n");
         //Printf(b_cfy_grp_cpp->b0, "#include <AddinCpp/add_all.hpp>\n");
         Printf(b_cfy_grp_cpp->b0, "\n");
-    }
-
-    void clear() {
-        b_cfy_grp_cpp->clear(count_);
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
@@ -1603,6 +1613,10 @@ struct GroupCountify : public Group {
         count_.members++;
         count_.total2++;
     }
+
+    void clear() {
+        b_cfy_grp_cpp->clear(count_);
+    }
 };
 
 struct Addin {
@@ -1616,18 +1630,18 @@ struct Addin {
     void setPragmas(const Pragmas &pragmas = Pragmas()) {
         pragmas_ = pragmas;
     }
+    virtual void top() {}
     virtual void functionWrapperImplFunc(ParmsFunc &p) = 0;
     virtual void functionWrapperImplCtor(ParmsCtor &p) = 0;
     virtual void functionWrapperImplMemb(ParmsMemb &p) = 0;
     virtual void clear() = 0;
-    virtual void top() {}
-    virtual void processGroup() {}
 };
 
 template <class Group>
 struct AddinImpl : public Addin {
 
     typedef std::map<std::string, Group*> GroupMap;
+    typedef typename GroupMap::const_iterator GroupMapIter;
     GroupMap groupMap_;
 
     AddinImpl(const std::string &name) : Addin(name) {}
@@ -1636,7 +1650,6 @@ struct AddinImpl : public Addin {
         std::string name_ = Char(pragmas_.groupName_);
         if (groupMap_.end() == groupMap_.find(name_)) {
             groupMap_[name_] = new Group(pragmas_, count);
-            processGroup();
         }
         return groupMap_[name_];
     }
@@ -1659,7 +1672,7 @@ struct AddinImpl : public Addin {
     virtual void clear() {
         printf("%s - Group Files", name_.c_str());
         printf("%s\n", std::string(66-name_.length(), '=').c_str());
-        for (typename GroupMap::const_iterator i=groupMap_.begin(); i!=groupMap_.end(); ++i)
+        for (GroupMapIter i=groupMap_.begin(); i!=groupMap_.end(); ++i)
             i->second->clear();
     }
 };
@@ -1670,27 +1683,6 @@ struct AddinLibraryObjects : public AddinImpl<GroupLibraryObjects> {
 
     AddinLibraryObjects() : AddinImpl("Library Objects") {}
 
-    virtual void processGroup() {
-        if (pragmas_.automatic_) {
-            Printf(b_lib_add_hpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, pragmas_.groupName_);
-        } else {
-            Printf(b_lib_add_hpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, pragmas_.groupName_);
-        }
-    }
-
-    virtual void clear() {
-
-        AddinImpl::clear();
-
-        Printf(b_lib_add_hpp->b0, "\n");
-        Printf(b_lib_add_hpp->b0, "#endif\n");
-        Printf(b_lib_add_hpp->b0, "\n");
-
-        printf("%s - Addin Files", name_.c_str());
-        printf("%s\n", std::string(66-name_.length(), '=').c_str());
-        b_lib_add_hpp->clear(count);
-    }
-
     virtual void top() {
 
         b_lib_add_hpp = new Buffer("b_lib_add_hpp", NewStringf("%s/obj_all.hpp", objDir));
@@ -1699,6 +1691,28 @@ struct AddinLibraryObjects : public AddinImpl<GroupLibraryObjects> {
         Printf(b_lib_add_hpp->b0, "#ifndef obj_all_hpp\n");
         Printf(b_lib_add_hpp->b0, "#define obj_all_hpp\n");
         Printf(b_lib_add_hpp->b0, "\n");
+    }
+
+    virtual void clear() {
+
+        AddinImpl::clear();
+
+        for (GroupMapIter i=groupMap_.begin(); i!=groupMap_.end(); ++i) {
+            GroupLibraryObjects *group = i->second;
+            if (group->pragmas_.automatic_) {
+                Printf(b_lib_add_hpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, group->pragmas_.groupName_);
+            } else {
+                Printf(b_lib_add_hpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, group->pragmas_.groupName_);
+            }
+        }
+
+        Printf(b_lib_add_hpp->b0, "\n");
+        Printf(b_lib_add_hpp->b0, "#endif\n");
+        Printf(b_lib_add_hpp->b0, "\n");
+
+        printf("%s - Addin Files", name_.c_str());
+        printf("%s\n", std::string(66-name_.length(), '=').c_str());
+        b_lib_add_hpp->clear(count);
     }
 };
 
@@ -1713,13 +1727,24 @@ struct AddinSerializationCreate : public AddinImpl<GroupSerializationCreate> {
 
     AddinSerializationCreate() : AddinImpl("Serialization - Create") {}
 
-    virtual void processGroup() {
-        Printf(b_scr_add_hpp->b0, "#include <%s/serialization/create/create_%s.hpp>\n", objInc, pragmas_.groupName_);
+    virtual void top() {
+        b_scr_add_hpp = new Buffer("b_scr_add_hpp", NewStringf("%s/serialization/create/create_all.hpp", objDir));
+
+        Printf(b_scr_add_hpp->b0, "\n");
+        Printf(b_scr_add_hpp->b0, "#ifndef create_all_hpp\n");
+        Printf(b_scr_add_hpp->b0, "#define create_all_hpp\n");
+        Printf(b_scr_add_hpp->b0, "\n");
     }
 
     virtual void clear() {
 
         AddinImpl::clear();
+
+        for (GroupMapIter i=groupMap_.begin(); i!=groupMap_.end(); ++i) {
+            GroupSerializationCreate *group = i->second;
+            if (group->generateOutput)
+                Printf(b_scr_add_hpp->b0, "#include <%s/serialization/create/create_%s.hpp>\n", objInc, group->pragmas_.groupName_);
+        }
 
         Printf(b_scr_add_hpp->b0, "\n");
         Printf(b_scr_add_hpp->b0, "#endif\n");
@@ -1728,15 +1753,6 @@ struct AddinSerializationCreate : public AddinImpl<GroupSerializationCreate> {
         printf("%s - Addin Files", name_.c_str());
         printf("%s\n", std::string(66-name_.length(), '=').c_str());
         b_scr_add_hpp->clear(count);
-    }
-
-    virtual void top() {
-        b_scr_add_hpp = new Buffer("b_scr_add_hpp", NewStringf("%s/serialization/create/create_all.hpp", objDir));
-
-        Printf(b_scr_add_hpp->b0, "\n");
-        Printf(b_scr_add_hpp->b0, "#ifndef create_all_hpp\n");
-        Printf(b_scr_add_hpp->b0, "#define create_all_hpp\n");
-        Printf(b_scr_add_hpp->b0, "\n");
     }
 };
 
@@ -1747,38 +1763,6 @@ struct AddinSerializationRegister : public AddinImpl<GroupSerializationRegister>
     Buffer *b_sra_add_hpp;
 
     AddinSerializationRegister() : AddinImpl("Serialization - Register") {}
-
-    virtual void processGroup() {
-        Printf(b_sra_add_hpp->b0, "#include <%s/serialization/register/serialization_%s.hpp>\n", objInc, pragmas_.groupName_);
-        Printf(b_srg_add_hpp->b0, "        register_%s(ar);\n", pragmas_.groupName_);
-    }
-
-    virtual void clear() {
-
-        AddinImpl::clear();
-
-        Printf(b_srg_add_cpp->b0, "\n");
-        Printf(b_srg_add_cpp->b0, "}\n");
-        Printf(b_srg_add_cpp->b0, "\n");
-
-        Printf(b_srg_add_hpp->b0, "\n");
-        Printf(b_srg_add_hpp->b0, "    }\n");
-        Printf(b_srg_add_hpp->b0, "\n");
-        Printf(b_srg_add_hpp->b0, "}\n");
-        Printf(b_srg_add_hpp->b0, "\n");
-        Printf(b_srg_add_hpp->b0, "#endif\n");
-        Printf(b_srg_add_hpp->b0, "\n");
-
-        Printf(b_sra_add_hpp->b0, "\n");
-        Printf(b_sra_add_hpp->b0, "#endif\n");
-        Printf(b_sra_add_hpp->b0, "\n");
-
-        printf("%s - Addin Files", name_.c_str());
-        printf("%s\n", std::string(66-name_.length(), '=').c_str());
-        b_srg_add_cpp->clear(count);
-        b_srg_add_hpp->clear(count);
-        b_sra_add_hpp->clear(count);
-    }
 
     virtual void top() {
         b_srg_add_cpp = new Buffer("b_srg_add_cpp", NewStringf("%s/serialization/register_creators.cpp", objDir));
@@ -1816,6 +1800,41 @@ struct AddinSerializationRegister : public AddinImpl<GroupSerializationRegister>
             Printf(b_srg_add_cpp->b0, "    registerCreator(\"%s\", create_%s);\n", p.funcRename, p.funcRename);
         }
     }
+
+    virtual void clear() {
+
+        AddinImpl::clear();
+
+        for (GroupMapIter i=groupMap_.begin(); i!=groupMap_.end(); ++i) {
+            GroupSerializationRegister *group = i->second;
+            if (group->generateOutput) {
+                Printf(b_sra_add_hpp->b0, "#include <%s/serialization/register/serialization_%s.hpp>\n", objInc, group->pragmas_.groupName_);
+                Printf(b_srg_add_hpp->b0, "        register_%s(ar);\n", group->pragmas_.groupName_);
+            }
+        }
+
+        Printf(b_srg_add_cpp->b0, "\n");
+        Printf(b_srg_add_cpp->b0, "}\n");
+        Printf(b_srg_add_cpp->b0, "\n");
+
+        Printf(b_srg_add_hpp->b0, "\n");
+        Printf(b_srg_add_hpp->b0, "    }\n");
+        Printf(b_srg_add_hpp->b0, "\n");
+        Printf(b_srg_add_hpp->b0, "}\n");
+        Printf(b_srg_add_hpp->b0, "\n");
+        Printf(b_srg_add_hpp->b0, "#endif\n");
+        Printf(b_srg_add_hpp->b0, "\n");
+
+        Printf(b_sra_add_hpp->b0, "\n");
+        Printf(b_sra_add_hpp->b0, "#endif\n");
+        Printf(b_sra_add_hpp->b0, "\n");
+
+        printf("%s - Addin Files", name_.c_str());
+        printf("%s\n", std::string(66-name_.length(), '=').c_str());
+        b_srg_add_cpp->clear(count);
+        b_srg_add_hpp->clear(count);
+        b_sra_add_hpp->clear(count);
+    }
 };
 
 struct AddinCpp : public AddinImpl<GroupCpp> {
@@ -1823,23 +1842,6 @@ struct AddinCpp : public AddinImpl<GroupCpp> {
     Buffer *b_cpp_add_all_hpp;
 
     AddinCpp() : AddinImpl("C++ Addin") {}
-
-    virtual void processGroup() {
-        Printf(b_cpp_add_all_hpp->b0, "#include <%s/add_%s.hpp>\n", addInc, pragmas_.groupName_);
-    }
-
-    virtual void clear() {
-
-        AddinImpl::clear();
-
-        Printf(b_cpp_add_all_hpp->b0, "\n");
-        Printf(b_cpp_add_all_hpp->b0, "#endif\n");
-        Printf(b_cpp_add_all_hpp->b0, "\n");
-
-        printf("%s - Addin Files", name_.c_str());
-        printf("%s\n", std::string(66-name_.length(), '=').c_str());
-        b_cpp_add_all_hpp->clear(count);
-    }
 
     virtual void top() {
         b_cpp_add_all_hpp = new Buffer("b_cpp_add_all_hpp", NewStringf("%s/add_all.hpp", addDir));
@@ -1868,6 +1870,24 @@ struct AddinCpp : public AddinImpl<GroupCpp> {
             AddinImpl::functionWrapperImplMemb(p);
         }
     }
+
+    virtual void clear() {
+
+        AddinImpl::clear();
+
+        for (GroupMapIter i=groupMap_.begin(); i!=groupMap_.end(); ++i) {
+            GroupCpp *group = i->second;
+            Printf(b_cpp_add_all_hpp->b0, "#include <%s/add_%s.hpp>\n", addInc, group->pragmas_.groupName_);
+        }
+
+        Printf(b_cpp_add_all_hpp->b0, "\n");
+        Printf(b_cpp_add_all_hpp->b0, "#endif\n");
+        Printf(b_cpp_add_all_hpp->b0, "\n");
+
+        printf("%s - Addin Files", name_.c_str());
+        printf("%s\n", std::string(66-name_.length(), '=').c_str());
+        b_cpp_add_all_hpp->clear(count);
+    }
 };
 
 struct AddinExcelFunctions : public AddinImpl<GroupExcelFunctions> {
@@ -1880,29 +1900,6 @@ struct AddinExcelRegister : public AddinImpl<GroupExcelRegister> {
     Buffer *b_xlr_add_all_cpp;
 
     AddinExcelRegister() : AddinImpl("Excel Addin - Register") {}
-
-    virtual void processGroup() {
-        Printf(b_xlr_add_all_cpp->b0, "extern void register_%s(const XLOPER&);\n", pragmas_.groupName_);
-        Printf(b_xlr_add_all_cpp->b1, "extern void unregister_%s(const XLOPER&);\n", pragmas_.groupName_);
-        Printf(b_xlr_add_all_cpp->b2, "    register_%s(xDll);\n", pragmas_.groupName_);
-        Printf(b_xlr_add_all_cpp->b3, "    unregister_%s(xDll);\n", pragmas_.groupName_);
-    }
-
-    virtual void clear() {
-
-        AddinImpl::clear();
-
-        Printf(b_xlr_add_all_cpp->b2, "\n");
-        Printf(b_xlr_add_all_cpp->b2, "}\n");
-        Printf(b_xlr_add_all_cpp->b2, "\n");
-        Printf(b_xlr_add_all_cpp->b3, "\n");
-        Printf(b_xlr_add_all_cpp->b3, "}\n");
-        Printf(b_xlr_add_all_cpp->b3, "\n");
-
-        printf("%s - Addin Files", name_.c_str());
-        printf("%s\n", std::string(66-name_.length(), '=').c_str());
-        b_xlr_add_all_cpp->clear(count);
-    }
 
     virtual void top() {
         b_xlr_add_all_cpp = new Buffer("b_xlr_add_all_cpp", NewStringf("%s/register/register_all.cpp", xllDir));
@@ -1919,6 +1916,30 @@ struct AddinExcelRegister : public AddinImpl<GroupExcelRegister> {
         Printf(b_xlr_add_all_cpp->b3, "void unregisterFunctions(const XLOPER& xDll) {\n");
         Printf(b_xlr_add_all_cpp->b3, "\n");
     }
+
+    virtual void clear() {
+
+        AddinImpl::clear();
+
+        for (GroupMapIter i=groupMap_.begin(); i!=groupMap_.end(); ++i) {
+            GroupExcelRegister *group = i->second;
+            Printf(b_xlr_add_all_cpp->b0, "extern void register_%s(const XLOPER&);\n", group->pragmas_.groupName_);
+            Printf(b_xlr_add_all_cpp->b1, "extern void unregister_%s(const XLOPER&);\n", group->pragmas_.groupName_);
+            Printf(b_xlr_add_all_cpp->b2, "    register_%s(xDll);\n", group->pragmas_.groupName_);
+            Printf(b_xlr_add_all_cpp->b3, "    unregister_%s(xDll);\n", group->pragmas_.groupName_);
+        }
+
+        Printf(b_xlr_add_all_cpp->b2, "\n");
+        Printf(b_xlr_add_all_cpp->b2, "}\n");
+        Printf(b_xlr_add_all_cpp->b2, "\n");
+        Printf(b_xlr_add_all_cpp->b3, "\n");
+        Printf(b_xlr_add_all_cpp->b3, "}\n");
+        Printf(b_xlr_add_all_cpp->b3, "\n");
+
+        printf("%s - Addin Files", name_.c_str());
+        printf("%s\n", std::string(66-name_.length(), '=').c_str());
+        b_xlr_add_all_cpp->clear(count);
+    }
 };
 
 struct AddinCountify : public AddinImpl<GroupCountify> {
@@ -1926,18 +1947,6 @@ struct AddinCountify : public AddinImpl<GroupCountify> {
     Buffer *b_cfy_add_mng_txt;
 
     AddinCountify() : AddinImpl("Countify Addin") {}
-
-    virtual void processGroup() {
-    }
-
-    virtual void clear() {
-
-        AddinImpl::clear();
-
-        printf("%s - Addin Files", name_.c_str());
-        printf("%s\n", std::string(66-name_.length(), '=').c_str());
-        b_cfy_add_mng_txt->clear(count);
-    }
 
     virtual void top() {
         b_cfy_add_mng_txt = new Buffer("b_cfy_add_mng_txt", NewStringf("%s/cfy_mongo.txt", cfyDir));
@@ -1963,11 +1972,19 @@ struct AddinCountify : public AddinImpl<GroupCountify> {
             mongoFunc(b_cfy_add_mng_txt->b0, p.nameUpper, p.funcName, p.n, p.parms2);
         }
     }
+
+    virtual void clear() {
+
+        AddinImpl::clear();
+
+        printf("%s - Addin Files", name_.c_str());
+        printf("%s\n", std::string(66-name_.length(), '=').c_str());
+        b_cfy_add_mng_txt->clear(count);
+    }
 };
 
 struct AddinList {
 
-    Pragmas pragmas_;
     std::vector<Addin*> addinList_;
     typedef std::vector<Addin*>::const_iterator iter;
 
@@ -2018,7 +2035,6 @@ struct AddinList {
     }
 
     void setPragmas(const Pragmas &pragmas = Pragmas()) {
-        pragmas_ = pragmas;
         for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
             Addin *addin = *i;
             addin->setPragmas(pragmas);
@@ -2179,8 +2195,7 @@ virtual int top(Node *n) {
 
     // To help with troubleshooting, create an output file to which all of the
     // SWIG buffers will be written.  We are not going to compile this file but
-    // we give it a cpp extension so that the editor will apply syntax
-    // highlighting.
+    // we give it a cpp extension so that the editor will apply syntax highlighting.
     String *s_test = NewString("test.cpp");
     File *f_test = initFile(s_test);
     Delete(s_test);
@@ -2394,7 +2409,7 @@ int pragmaDirective(Node *n) {
         }
     }
     return Language::pragmaDirective(n);
-  }
+}
 
 int functionWrapperImpl(Node *n) {
 
