@@ -2459,6 +2459,33 @@ Parm *prependParm(ParmList *parms, const char *name, const char *type, bool cons
     return ret;
 }
 
+// Validate the function name.
+// For the moment, the only test that we perform is to check whether the function name
+// clashes with Excel range names.  It is possible that a function name could pass this
+// test but still be invalid for other reasons.
+// Excel cell names lie in the range A1 - XFD1048576.
+// For performance reason this function tests the range A1 - ZZZ9999999.
+// So this function could return a false positive, i.e. fail even though the name is OK.
+void validateFunctionName(const String *functionName) {
+    unsigned int len = Len(functionName);
+    if (len > 10)
+        return;
+    const char *s = Char(functionName);
+    unsigned int i=0;
+    for (; i<3 && i<len && isalpha(s[i]); i++)
+        ;
+    if (i==len)
+        return;
+    for (; i<len && isdigit(s[i]); i++)
+        ;
+    if (i==len) {
+        printf("Error : Invalid function name: '%s'.\n", s);
+        printf("This string is in the range of Excel cell names (A1...XFD1048576)\n");
+        printf("Rename this function with %%rename() in the SWIG interface file.\n");
+        SWIG_exit(EXIT_FAILURE);
+    }
+}
+
 int functionWrapperImplFunc(Node *n) {
 
     ParmsFunc p;
@@ -2469,6 +2496,7 @@ int functionWrapperImplFunc(Node *n) {
     p.symname   = Getattr(n,"sym:name");
     p.symnameUpper = copyUpper(p.symname);
     p.funcName = NewStringf("%s%s", prefix, p.symnameUpper);
+    validateFunctionName(p.funcName);
     Setattr(n, "rp:funcName", p.funcName);
     Setattr(n, "rp:funcRename", p.funcName);
     printf("funcName=%s\n", Char(p.funcName));
@@ -2586,6 +2614,7 @@ int functionWrapperImplCtor(Node *n) {
     p.funcRename = NewStringf("%s%s", prefix, tempx);
     Setattr(n, "rp:funcName", p.funcName);
     Setattr(n, "rp:funcRename", p.funcRename);
+    validateFunctionName(p.funcRename);
     printf("funcName=%s\n", Char(p.funcName));
     Printf(b_init, "@@@ CTOR Name=%s\n", Char(p.funcName));
 
@@ -2639,6 +2668,7 @@ int functionWrapperImplMemb(Node *n) {
     String *temp1 = copyUpper(p.name);
     p.nameUpper = NewStringf("%s%s", temp0, temp1);
     p.funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
+    validateFunctionName(p.funcName);
     Setattr(p.n, "rp:funcName", p.funcName);
     Setattr(n, "rp:funcRename", p.funcName);
     printf("funcName=%s\n", Char(p.funcName));
