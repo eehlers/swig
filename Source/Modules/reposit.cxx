@@ -1239,7 +1239,8 @@ struct GroupExcelFunctions : public GroupBase {
             emitLoopFunc(p, loopParameter);
         } else {
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtdc", 2);
-            Printf(b_xlf_grp_cpp->b1, "        %s::%s(\n", nmspace, p.symname);
+            //Printf(b_xlf_grp_cpp->b1, "        %s::%s(\n", nmspace, p.symname);
+            Printf(b_xlf_grp_cpp->b1, "        %s(\n", p.name);
             emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", 3, ',', true, true);
             Printf(b_xlf_grp_cpp->b1, "        );\n\n");
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtst", 2);
@@ -2554,12 +2555,21 @@ int functionWrapperImplFunc(Node *n) {
     p.name   = Getattr(n,"name");
     p.parms  = Getattr(n,"parms");
     p.symname   = Getattr(n,"sym:name");
+    bool staticMember = checkAttribute(p.n, "globalfunctionHandler:view", "staticmemberfunctionHandler");
+    if (staticMember)
+        Replaceall(p.symname, "_", "");
     p.symnameUpper = copyUpper(p.symname);
+
     p.funcName = NewStringf("%s%s", prefix, p.symnameUpper);
     validateFunctionName(p.funcName);
+
     Setattr(n, "rp:funcName", p.funcName);
     Setattr(n, "rp:funcRename", p.funcName);
-    printf("funcName=%s\n", Char(p.funcName));
+    printf("p.name=%s\n", Char(p.name));
+    printf("p.symname=%s\n", Char(p.symname));
+    printf("p.symnameUpper=%s\n", Char(p.symnameUpper));
+    printf("p.funcName=%s\n", Char(p.funcName));
+    printf("staticMember=%d\n", staticMember);
     Printf(b_init, "@@@ FUNC Name=%s\n", p.funcName);
     Printf(b_init, "&&& p.symname=%s\n", p.symname);
     Printf(b_init, "&&& prefix=%s\n", prefix);
@@ -2721,7 +2731,12 @@ int functionWrapperImplMemb(Node *n) {
     validateFunctionName(p.funcName);
     Setattr(p.n, "rp:funcName", p.funcName);
     Setattr(n, "rp:funcRename", p.funcName);
-    printf("funcName=%s\n", Char(p.funcName));
+    printf("cls=%s\n", Char(cls));
+    printf("p.name=%s\n", Char(p.name));
+    printf("temp0=%s\n", Char(temp0));
+    printf("temp1=%s\n", Char(temp1));
+    printf("p.nameUpper=%s\n", Char(p.nameUpper));
+    printf("p.funcName=%s\n", Char(p.funcName));
     Printf(b_init, "@@@ MEMB Name=%s\n", Char(p.funcName));
 
     // Create from parms another list parms2 - prepend an argument to represent
