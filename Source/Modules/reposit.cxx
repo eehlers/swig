@@ -577,27 +577,27 @@ struct GroupLibraryObjects : public GroupBase {
         Printf(b_lib_grp_cpp->b0, "\n");
     }
 
-    void functionWrapperImplFunc(ParmsFunc &p) {
+    void functionWrapperImplFunc(ParmsFunc & /*p*/) {
 
-        Printf(b_lib_grp_hpp->b0,"\n");
-        emitTypeMap(b_lib_grp_hpp->b0, p.n, "rp_tm_default", 1);
-        Printf(b_lib_grp_hpp->b0,"    %s(\n", p.symname);
-        emitParmList(p.parms, b_lib_grp_hpp->b0, 2, "rp_tm_default", 2);
-        Printf(b_lib_grp_hpp->b0,"    );\n");
+        //Printf(b_lib_grp_hpp->b0,"\n");
+        //emitTypeMap(b_lib_grp_hpp->b0, p.n, "rp_tm_default", 1);
+        //Printf(b_lib_grp_hpp->b0,"    %s(\n", p.symname);
+        //emitParmList(p.parms, b_lib_grp_hpp->b0, 2, "rp_tm_default", 2);
+        //Printf(b_lib_grp_hpp->b0,"    );\n");
 
-        emitTypeMap(b_lib_grp_cpp->b0, p.n, "rp_tm_default");
-        Printf(b_lib_grp_cpp->b0,"%s::%s(\n", module, p.symname);
-        emitParmList(p.parms, b_lib_grp_cpp->b0, 2, "rp_tm_default", 2);
-        Printf(b_lib_grp_cpp->b0,"    ) {\n");
-        emitTypeMap(b_lib_grp_cpp->b0, p.n, "rp_tm_lib_rtst", 2);
-        Printf(b_lib_grp_cpp->b0,"        %s(\n", p.name);
-        emitParmList(p.parms, b_lib_grp_cpp->b0, 0, "rp_tm_default", 3, ',', true, true);
-        Printf(b_lib_grp_cpp->b0,"        );\n");
-        Printf(b_lib_grp_cpp->b0,"}\n");
+        //emitTypeMap(b_lib_grp_cpp->b0, p.n, "rp_tm_default");
+        //Printf(b_lib_grp_cpp->b0,"%s::%s(\n", module, p.symname);
+        //emitParmList(p.parms, b_lib_grp_cpp->b0, 2, "rp_tm_default", 2);
+        //Printf(b_lib_grp_cpp->b0,"    ) {\n");
+        //emitTypeMap(b_lib_grp_cpp->b0, p.n, "rp_tm_lib_rtst", 2);
+        //Printf(b_lib_grp_cpp->b0,"        %s(\n", p.name);
+        //emitParmList(p.parms, b_lib_grp_cpp->b0, 0, "rp_tm_default", 3, ',', true, true);
+        //Printf(b_lib_grp_cpp->b0,"        );\n");
+        //Printf(b_lib_grp_cpp->b0,"}\n");
 
-        count_.functions++;
-        count_.total2++;
-        generateCppFile = true;
+        //count_.functions++;
+        //count_.total2++;
+        //generateCppFile = true;
     }
 
     void functionWrapperImplCtor(ParmsCtor &p) {
@@ -1239,7 +1239,7 @@ struct GroupExcelFunctions : public GroupBase {
             emitLoopFunc(p, loopParameter);
         } else {
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtdc", 2);
-            Printf(b_xlf_grp_cpp->b1, "        %s::%s(\n", module, p.symname);
+            Printf(b_xlf_grp_cpp->b1, "        %s::%s(\n", nmspace, p.symname);
             emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", 3, ',', true, true);
             Printf(b_xlf_grp_cpp->b1, "        );\n\n");
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtst", 2);
