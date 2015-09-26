@@ -31,16 +31,42 @@ String *objInc = NewString("AddinObjects");
 String *addInc = NewString("AddinCpp");
 String *xllInc = NewString("AddinXl");
 
+//*****************************************************************************
+// ERROR HANDLING
+//*****************************************************************************
+
 List *errorList = NewList();
 
-// BEGIN *************************
+// This macro is shared by the two below it and should not be called directly.
+#define REPOSIT_SWIG_ERROR(message) \
+std::ostringstream _rp_msg_stream; \
+_rp_msg_stream << message << std::endl; \
+printf("%s\n", std::string(80, '=').c_str()); \
+printf("FATAL ERROR - REPOSIT SWIG MODULE\n"); \
+printf("%s\n", std::string(80, '=').c_str()); \
+printf(_rp_msg_stream.str().c_str()); \
+printf("%s\n", std::string(80, '=').c_str()); \
+SWIG_exit(EXIT_FAILURE);
+
+// Instead of calling SWIG_exit() directly, use one of the two macros below.
+#define REPOSIT_SWIG_FAIL(message) \
+do { \
+    REPOSIT_SWIG_ERROR(message) \
+} while (false)
+
+#define REPOSIT_SWIG_REQUIRE(condition,message) \
+if (!(condition)) { \
+    REPOSIT_SWIG_ERROR(message) \
+} else
+
+//*****************************************************************************
+// UTILITY FUNCTIONS
+//*****************************************************************************
 
 Node *getNode(Node *n, const char *c) {
     Node *ret = 0;
-    if (!(ret = Getattr(n, c))) {
-        printf ("can't find node %s.\n", c);
-        SWIG_exit(EXIT_FAILURE);
-    }
+    REPOSIT_SWIG_REQUIRE((ret = Getattr(n, c)),
+        "Can't find node '" << c << "'");
     return ret;
 }
 
@@ -127,10 +153,7 @@ void emitParmList(
     bool skipHidden=false,
     bool append=false) {
 
-    if (0==map) {
-        printf ("Function emitParmList called with null type map.\n");
-        SWIG_exit(EXIT_FAILURE);
-    }
+    REPOSIT_SWIG_REQUIRE(map, "Function emitParmList called with null type map.");
 
     bool first = true;
 
@@ -311,16 +334,18 @@ void voSetProp(File *f, ParmList *parms) {
     Printf(f, "            // END   func voSetProp (using typemap rp_tm_vob_cnvt)\n");
 }
 
-// END ***************************
-
 File *initFile(String *outfile) {
    File *f = NewFile(outfile, "w", SWIG_output_files());
    if (!f) {
       FileErrorDisplay(outfile);
-      SWIG_exit(EXIT_FAILURE);
+      REPOSIT_SWIG_FAIL("Error initializing file '" << Char(outfile) << "'");
    }
     return f;
 }
+
+//*****************************************************************************
+// COUNT
+//*****************************************************************************
 
 struct Count {
     int created;
@@ -344,6 +369,10 @@ struct Count {
         total2 += c.total2;*/
     }
 };
+
+//*****************************************************************************
+// PRAGMAS
+//*****************************************************************************
 
 struct Pragmas {
     const String *groupName_;
@@ -370,6 +399,10 @@ struct Pragmas {
         Swig_register_filebyname(NewStringf("%s_serialization_cpp", groupName), scr_inc);
     }
 };
+
+//*****************************************************************************
+// BUFFER
+//*****************************************************************************
 
 struct Buffer {
     String *name_;
@@ -453,6 +486,10 @@ struct Buffer {
     }
 };
 
+//*****************************************************************************
+// PARAMETERS
+//*****************************************************************************
+
 struct ParmsFunc {
     Node *n;
     ParmList *parms;
@@ -487,6 +524,10 @@ struct ParmsMemb {
     String *name;
     Node *node;
 };
+
+//*****************************************************************************
+// GROUPS
+//*****************************************************************************
 
 struct GroupBase {
     Pragmas pragmas_;
@@ -1619,6 +1660,10 @@ struct GroupCountify : public GroupBase {
     }
 };
 
+//*****************************************************************************
+// ADDINS
+//*****************************************************************************
+
 struct Addin {
 
     std::string name_;
@@ -2063,6 +2108,10 @@ struct AddinList {
     }
 };
 
+//*****************************************************************************
+// LANGUAGE
+//*****************************************************************************
+
 class REPOSIT : public Language {
 
     int functionType;//0=function, 1=constructor, 2=member
@@ -2472,17 +2521,28 @@ void validateFunctionName(const String *functionName) {
         return;
     const char *s = Char(functionName);
     unsigned int i=0;
+    // Step through 0, 1, 2, or 3 letters at the start of the string.
     for (; i<3 && i<len && isalpha(s[i]); i++)
         ;
-    if (i==len)
+    if (i==0)
+        // If control arrives here it means that the first character of the function name is not a letter.
+        // This name does not clash with Excel, so return success, but the name is probably invalid.
         return;
+    if (i==len)
+        // If control arrives here it means that the entire string comprises 1-3 letters.
+        // This name does not clash with Excel, so return success, but the name is probably invalid.
+        return;
+    // Step through any numbers up to the end of the string.
     for (; i<len && isdigit(s[i]); i++)
         ;
     if (i==len) {
-        printf("Error : Invalid function name: '%s'.\n", s);
-        printf("This string is in the range of Excel cell names (A1...XFD1048576)\n");
-        printf("Rename this function with %%rename() in the SWIG interface file.\n");
-        SWIG_exit(EXIT_FAILURE);
+        // If we consumed the whole string, then it means that the function name comprises 1-3 letters
+        // followed by numbers and probably clashes with an Excel cell name.  Raise an error.
+        // TODO: If the function name > XFD1048576 then it's still valid.
+        REPOSIT_SWIG_FAIL(
+            "Error : Invalid function name: '" << s << "'.\n" <<
+            "This string is in the range of Excel cell names (A1...XFD1048576)\n" <<
+            "Rename this function with %%rename() in the SWIG interface file.");
     }
 }
 
@@ -2536,16 +2596,10 @@ int constructorHandlerImpl(Node *n) {
 void processParm(Parm *p) {
 
     String *name = Getattr(p,"name");
-    if (!name) {
-        printf("parameter has no name\n");
-        SWIG_exit(EXIT_FAILURE);
-    }
+    REPOSIT_SWIG_REQUIRE(name, "parameter has no name");
 
     SwigType *t = Getattr(p, "type");
-    if (!t) {
-        printf("parameter has no type\n");
-        SWIG_exit(EXIT_FAILURE);
-    }
+    REPOSIT_SWIG_REQUIRE(t, "parameter '" << Char(name) << "' has no type");
 
     String *nameUpper = copyUpper2(name);
     Setattr(p, "rp_name_upper", nameUpper);
@@ -2589,21 +2643,17 @@ int functionWrapperImplCtor(Node *n) {
     ParmsCtor p;
 
     p.n = n;
-    p.name   = Getattr(n,"name");
-    p.rename   = Getattr(n,"constructorDeclaration:sym:name");
-    p.parms  = Getattr(n,"parms");
-    Node *n1 = Getattr(n,"parentNode");
-    p.pname   = Getattr(n1,"name");
+    p.name = Getattr(n, "name");
+    p.rename = Getattr(n, "constructorDeclaration:sym:name");
+    p.parms = Getattr(n, "parms");
+    Node *n1 = Getattr(n, "parentNode");
+    p.pname = Getattr(n1, "name");
 
     p.base = 0;
-    if (List *baseList  = Getattr(n1,"baselist")) {
-        if (1==Len(baseList)) {
-            p.base = Getitem(baseList, 0);
-            printf("base = %s\n", Char(p.base));
-        } else {
-            printf("ERROR : Class %s has multiple base classes.\n", Char(p.name));
-            SWIG_exit(EXIT_FAILURE);
-        }
+    if (List *baseList = Getattr(n1, "baselist")) {
+        REPOSIT_SWIG_REQUIRE(1==Len(baseList), "Class '" << Char(p.name) << "' has multiple base classes.");
+        p.base = Getitem(baseList, 0);
+        printf("base = %s\n", Char(p.base));
     } else {
         printf("no bases\n");
     }
@@ -2731,9 +2781,10 @@ void processLoopParameter(Node *n, String *functionName, ParmList *parms, String
             return;
         }
     }
-    printf("Error processing function '%s' - you specified loop parameter '%s' "
-        "but the function has no parameter with that name.\n", Char(functionName), Char(loopParameter));
-    SWIG_exit(EXIT_FAILURE);
+    REPOSIT_SWIG_FAIL(
+        "Error processing function '" << Char(functionName) <<
+        "' - you specified loop parameter '" << Char(loopParameter) << "' " <<
+        "but the function has no parameter with that name.");
 }
 
 void functionWrapperImplAll(Node *n) {
