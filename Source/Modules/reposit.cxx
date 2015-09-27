@@ -1010,8 +1010,9 @@ struct GroupCpp : public GroupBase {
 
     Buffer *b_cpp_grp_hpp;
     Buffer *b_cpp_grp_cpp;
+    bool voIncludeHasBeengenerated;
 
-    GroupCpp(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count) {
+    GroupCpp(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), voIncludeHasBeengenerated(false) {
 
         b_cpp_grp_hpp = new Buffer("b_cpp_grp_hpp", NewStringf("%s/add_%s.hpp", addDir, pragmas_.groupName_));
         b_cpp_grp_cpp = new Buffer("b_cpp_grp_cpp", NewStringf("%s/add_%s.cpp", addDir, pragmas_.groupName_));
@@ -1020,8 +1021,8 @@ struct GroupCpp : public GroupBase {
         Printf(b_cpp_grp_hpp->b0, "#ifndef add_%s_hpp\n", pragmas_.groupName_);
         Printf(b_cpp_grp_hpp->b0, "#define add_%s_hpp\n", pragmas_.groupName_);
         Printf(b_cpp_grp_hpp->b0, "\n");
-        Printf(b_cpp_grp_hpp->b0, "#include <string>\n");
-        // FIXME this #include is only needed if a datatype conversion is taking place.
+        Printf(b_cpp_grp_hpp->b0, "#include <string>\n");        
+        Printf(b_cpp_grp_hpp->b0, "// FIXME this #include is only needed if a datatype conversion is taking place.\n");
         Printf(b_cpp_grp_hpp->b0, "#include <rp/property.hpp>\n");
         Printf(b_cpp_grp_hpp->b0, "\n");
         Printf(b_cpp_grp_hpp->b0, "namespace %s {\n", addinCppNameSpace);
@@ -1035,21 +1036,20 @@ struct GroupCpp : public GroupBase {
         Printf(b_cpp_grp_cpp->b0, "#include <%s/conversions/coercetermstructure.hpp>\n", objInc);
         // FIXME this #include is only required if the file contains enumerations.
         //Printf(b_cpp_grp_cpp->b0, "#include <rp/enumerations/typefactory.hpp>\n");
-        Printf(b_cpp_grp_cpp->b0, "//FIXME this #include is only required if the file contains constructors\n", objInc);
-        Printf(b_cpp_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
-        if (pragmas_.automatic_) {
-            Printf(b_cpp_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
-        } else {
-            Printf(b_cpp_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
-        }
-        Printf(b_cpp_grp_cpp->b0, "//FIXME include only factories for types used in the current file\n", objInc);
-        Printf(b_cpp_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
-        Printf(b_cpp_grp_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
-        Printf(b_cpp_grp_cpp->b0, "#include <rp/repository.hpp>\n");
-        //Printf(b_cpp_grp_cpp->b0, "#include <AddinCpp/add_all.hpp>\n");
-        Printf(b_cpp_grp_cpp->b0, "\n");
 
-        Append(b_cpp_grp_cpp->b0, pragmas_.cpp_inc);
+        if (pragmas_.automatic_) {
+            Printf(b_cpp_grp_cpp->b1, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        } else {
+            Printf(b_cpp_grp_cpp->b1, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        }
+        Printf(b_cpp_grp_cpp->b1, "//FIXME include only factories for types used in the current file\n", objInc);
+        Printf(b_cpp_grp_cpp->b1, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
+        Printf(b_cpp_grp_cpp->b1, "#include <boost/shared_ptr.hpp>\n");
+        Printf(b_cpp_grp_cpp->b1, "#include <rp/repository.hpp>\n");
+        //Printf(b_cpp_grp_cpp->b1, "#include <AddinCpp/add_all.hpp>\n");
+        Printf(b_cpp_grp_cpp->b1, "\n");
+
+        Append(b_cpp_grp_cpp->b1, pragmas_.cpp_inc);
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
@@ -1059,19 +1059,19 @@ struct GroupCpp : public GroupBase {
         emitParmList(p.parms, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", 2);
         Printf(b_cpp_grp_hpp->b0,"    );\n");
 
-        Printf(b_cpp_grp_cpp->b0,"//****FUNC*****\n");
-        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rttp");
-        Printf(b_cpp_grp_cpp->b0,"%s::%s(\n", addinCppNameSpace, p.funcName);
-        emitParmList(p.parms, b_cpp_grp_cpp->b0, 2, "rp_tm_cpp_parm");
-        Printf(b_cpp_grp_cpp->b0,") {\n");
-        emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_cnvt", 1, 0, false);
-        Printf(b_cpp_grp_cpp->b0,"\n");
-        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtdc", 2);
-        Printf(b_cpp_grp_cpp->b0,"    %s::%s(\n", module, p.symname);
-        emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_args", 2, ',', true, true);
-        Printf(b_cpp_grp_cpp->b0,"    );\n");
-        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtst", 2);
-        Printf(b_cpp_grp_cpp->b0,"}\n");
+        Printf(b_cpp_grp_cpp->b1,"//****FUNC*****\n");
+        emitTypeMap(b_cpp_grp_cpp->b1, p.n, "rp_tm_cpp_rttp");
+        Printf(b_cpp_grp_cpp->b1,"%s::%s(\n", addinCppNameSpace, p.funcName);
+        emitParmList(p.parms, b_cpp_grp_cpp->b1, 2, "rp_tm_cpp_parm");
+        Printf(b_cpp_grp_cpp->b1,") {\n");
+        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_cnvt", 1, 0, false);
+        Printf(b_cpp_grp_cpp->b1,"\n");
+        emitTypeMap(b_cpp_grp_cpp->b1, p.n, "rp_tm_cpp_rtdc", 2);
+        Printf(b_cpp_grp_cpp->b1,"    %s::%s(\n", module, p.symname);
+        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_args", 2, ',', true, true);
+        Printf(b_cpp_grp_cpp->b1,"    );\n");
+        emitTypeMap(b_cpp_grp_cpp->b1, p.n, "rp_tm_cpp_rtst", 2);
+        Printf(b_cpp_grp_cpp->b1,"}\n");
 
         count_.functions++;
         count_.total2++;
@@ -1085,29 +1085,34 @@ struct GroupCpp : public GroupBase {
             emitParmList(p.parms2, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", 2);
             Printf(b_cpp_grp_hpp->b0,"    );\n\n");
 
-            Printf(b_cpp_grp_cpp->b0,"//****CTOR*****\n");
-            Printf(b_cpp_grp_cpp->b0,"std::string %s::%s(\n", addinCppNameSpace, p.funcName);
-            emitParmList(p.parms2, b_cpp_grp_cpp->b0, 2, "rp_tm_cpp_parm", 2);
-            Printf(b_cpp_grp_cpp->b0,"    ) {\n");
-            Printf(b_cpp_grp_cpp->b0,"\n");
-            Printf(b_cpp_grp_cpp->b0,"    // Convert input types into Library types\n\n");
-            emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_cnvt", 1, 0, false);
-            Printf(b_cpp_grp_cpp->b0,"\n");
-            Printf(b_cpp_grp_cpp->b0,"    boost::shared_ptr<reposit::ValueObject> valueObject(\n");
-            Printf(b_cpp_grp_cpp->b0,"        new %s::ValueObjects::%s(\n", module, p.funcName);
-            Printf(b_cpp_grp_cpp->b0,"            objectID,\n");
-            emitParmList(p.parms, b_cpp_grp_cpp->b0, 0, "rp_tm_default", 3, ',', true, false, true);
-            Printf(b_cpp_grp_cpp->b0,"            false));\n");
-            Printf(b_cpp_grp_cpp->b0,"    boost::shared_ptr<reposit::Object> object(\n");
-            Printf(b_cpp_grp_cpp->b0,"        new %s::%s(\n", module, p.name);
-            Printf(b_cpp_grp_cpp->b0,"            valueObject,\n");
-            emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_args", 3, ',', true, true, true);
-            Printf(b_cpp_grp_cpp->b0,"            false));\n");
-            Printf(b_cpp_grp_cpp->b0,"    std::string returnValue =\n");
-            Printf(b_cpp_grp_cpp->b0,"        reposit::Repository::instance().storeObject(\n");
-            Printf(b_cpp_grp_cpp->b0,"            objectID, object, false, valueObject);\n");
-            Printf(b_cpp_grp_cpp->b0,"    return returnValue;\n");
-            Printf(b_cpp_grp_cpp->b0,"}\n\n");
+            Printf(b_cpp_grp_cpp->b1,"//****CTOR*****\n");
+            Printf(b_cpp_grp_cpp->b1,"std::string %s::%s(\n", addinCppNameSpace, p.funcName);
+            emitParmList(p.parms2, b_cpp_grp_cpp->b1, 2, "rp_tm_cpp_parm", 2);
+            Printf(b_cpp_grp_cpp->b1,"    ) {\n");
+            Printf(b_cpp_grp_cpp->b1,"\n");
+            Printf(b_cpp_grp_cpp->b1,"    // Convert input types into Library types\n\n");
+            emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_cnvt", 1, 0, false);
+            Printf(b_cpp_grp_cpp->b1,"\n");
+            Printf(b_cpp_grp_cpp->b1,"    boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+            Printf(b_cpp_grp_cpp->b1,"        new %s::ValueObjects::%s(\n", module, p.funcName);
+            Printf(b_cpp_grp_cpp->b1,"            objectID,\n");
+            emitParmList(p.parms, b_cpp_grp_cpp->b1, 0, "rp_tm_default", 3, ',', true, false, true);
+            Printf(b_cpp_grp_cpp->b1,"            false));\n");
+            Printf(b_cpp_grp_cpp->b1,"    boost::shared_ptr<reposit::Object> object(\n");
+            Printf(b_cpp_grp_cpp->b1,"        new %s::%s(\n", module, p.name);
+            Printf(b_cpp_grp_cpp->b1,"            valueObject,\n");
+            emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_args", 3, ',', true, true, true);
+            Printf(b_cpp_grp_cpp->b1,"            false));\n");
+            Printf(b_cpp_grp_cpp->b1,"    std::string returnValue =\n");
+            Printf(b_cpp_grp_cpp->b1,"        reposit::Repository::instance().storeObject(\n");
+            Printf(b_cpp_grp_cpp->b1,"            objectID, object, false, valueObject);\n");
+            Printf(b_cpp_grp_cpp->b1,"    return returnValue;\n");
+            Printf(b_cpp_grp_cpp->b1,"}\n\n");
+
+            if (!voIncludeHasBeengenerated) {
+                Printf(b_cpp_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
+                voIncludeHasBeengenerated = true;
+            }
 
             count_.constructors++;
             count_.total2++;
@@ -1120,20 +1125,20 @@ struct GroupCpp : public GroupBase {
         emitParmList(p.parms2, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", 2);
         Printf(b_cpp_grp_hpp->b0,"    );\n\n");
 
-        Printf(b_cpp_grp_cpp->b0,"//****MEMB*****\n");
-        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtmb");
-        Printf(b_cpp_grp_cpp->b0,"%s::%s(\n", addinCppNameSpace, p.funcName);
-        emitParmList(p.parms2, b_cpp_grp_cpp->b0, 2, "rp_tm_cpp_parm", 2);
-        Printf(b_cpp_grp_cpp->b0,"    ) {\n\n");
-        emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_cnvt", 1, 0, false);
-        Printf(b_cpp_grp_cpp->b0,"\n");
-        emitTypeMap(b_cpp_grp_cpp->b0, p.node, "rp_tm_xxx_rp_get");
-        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtdc", 2);
-        Printf(b_cpp_grp_cpp->b0,"    xxx->%s(\n", p.name);
-        emitParmList(p.parms, b_cpp_grp_cpp->b0, 1, "rp_tm_cpp_args", 3, ',', true, true);
-        Printf(b_cpp_grp_cpp->b0,"        );\n", p.name);
-        emitTypeMap(b_cpp_grp_cpp->b0, p.n, "rp_tm_cpp_rtst", 2);
-        Printf(b_cpp_grp_cpp->b0,"}\n");
+        Printf(b_cpp_grp_cpp->b1,"//****MEMB*****\n");
+        emitTypeMap(b_cpp_grp_cpp->b1, p.n, "rp_tm_cpp_rtmb");
+        Printf(b_cpp_grp_cpp->b1,"%s::%s(\n", addinCppNameSpace, p.funcName);
+        emitParmList(p.parms2, b_cpp_grp_cpp->b1, 2, "rp_tm_cpp_parm", 2);
+        Printf(b_cpp_grp_cpp->b1,"    ) {\n\n");
+        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_cnvt", 1, 0, false);
+        Printf(b_cpp_grp_cpp->b1,"\n");
+        emitTypeMap(b_cpp_grp_cpp->b1, p.node, "rp_tm_xxx_rp_get");
+        emitTypeMap(b_cpp_grp_cpp->b1, p.n, "rp_tm_cpp_rtdc", 2);
+        Printf(b_cpp_grp_cpp->b1,"    xxx->%s(\n", p.name);
+        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_args", 3, ',', true, true);
+        Printf(b_cpp_grp_cpp->b1,"        );\n", p.name);
+        emitTypeMap(b_cpp_grp_cpp->b1, p.n, "rp_tm_cpp_rtst", 2);
+        Printf(b_cpp_grp_cpp->b1,"}\n");
 
         count_.members++;
         count_.total2++;
@@ -1146,7 +1151,7 @@ struct GroupCpp : public GroupBase {
         Printf(b_cpp_grp_hpp->b0, "#endif\n");
         Printf(b_cpp_grp_hpp->b0, "\n");
 
-        Printf(b_cpp_grp_cpp->b0, "\n");
+        Printf(b_cpp_grp_cpp->b1, "\n");
 
         b_cpp_grp_hpp->clear(count_);
         b_cpp_grp_cpp->clear(count_);
