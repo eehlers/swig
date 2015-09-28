@@ -2097,7 +2097,7 @@ struct AddinCSharp : public AddinImpl<GroupCSharp> {
         Printf(b_csh_exp_all_cs->b0, "    class Export\n");
         Printf(b_csh_exp_all_cs->b0, "    {\n");
         Printf(b_csh_exp_all_cs->b0, "        // qlInitializeAddin\n");
-        Printf(b_csh_exp_all_cs->b0, "        [DllImport(\"..\\\\..\\\\..\\\\..\\\\bin\\\\AddinCSharp-vc90-mt-s-1_7_0.dll\", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+        Printf(b_csh_exp_all_cs->b0, "        [DllImport(\"..\\\\..\\\\..\\\\..\\\\..\\\\bin\\\\AddinCSharp-vc90-mt-s-1_7_0.dll\", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
         Printf(b_csh_exp_all_cs->b0, "        public static extern void qlInitializeAddin();\n");
     }
 
@@ -2106,7 +2106,7 @@ struct AddinCSharp : public AddinImpl<GroupCSharp> {
             AddinImpl::functionWrapperImplFunc(p);
             Printf(b_csh_exp_all_cs->b0, "\n");
             Printf(b_csh_exp_all_cs->b0, "        // %s\n", p.funcName);
-            Printf(b_csh_exp_all_cs->b0, "        [DllImport(\"..\\\\..\\\\..\\\\..\\\\bin\\\\AddinCSharp-vc90-mt-s-1_7_0.dll\", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+            Printf(b_csh_exp_all_cs->b0, "        [DllImport(\"..\\\\..\\\\..\\\\..\\\\..\\\\bin\\\\AddinCSharp-vc90-mt-s-1_7_0.dll\", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
             emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rtcp", 2);
             Printf(b_csh_exp_all_cs->b0, "        public static extern\n");
             emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rscp", 2);
@@ -2121,7 +2121,7 @@ struct AddinCSharp : public AddinImpl<GroupCSharp> {
             AddinImpl::functionWrapperImplCtor(p);
             Printf(b_csh_exp_all_cs->b0, "\n");
             Printf(b_csh_exp_all_cs->b0, "        // %s\n", p.funcName);
-            Printf(b_csh_exp_all_cs->b0, "        [DllImport(\"..\\\\..\\\\..\\\\..\\\\bin\\\\AddinCSharp-vc90-mt-s-1_7_0.dll\", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+            Printf(b_csh_exp_all_cs->b0, "        [DllImport(\"..\\\\..\\\\..\\\\..\\\\..\\\\bin\\\\AddinCSharp-vc90-mt-s-1_7_0.dll\", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
             Printf(b_csh_exp_all_cs->b0, "        [return: MarshalAs(UnmanagedType.LPStr)]\n");
             Printf(b_csh_exp_all_cs->b0, "        public static extern string %s(\n", p.funcName);
             emitParmList(p.parms2, b_csh_exp_all_cs->b0, 2, "rp_tm_csh_clcp", 3);
@@ -2134,7 +2134,7 @@ struct AddinCSharp : public AddinImpl<GroupCSharp> {
             AddinImpl::functionWrapperImplMemb(p);
             Printf(b_csh_exp_all_cs->b0, "\n");
             Printf(b_csh_exp_all_cs->b0, "        // %s\n", p.funcName);
-            Printf(b_csh_exp_all_cs->b0, "        [DllImport(\"..\\\\..\\\\..\\\\..\\\\bin\\\\AddinCSharp-vc90-mt-s-1_7_0.dll\", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+            Printf(b_csh_exp_all_cs->b0, "        [DllImport(\"..\\\\..\\\\..\\\\..\\\\..\\\\bin\\\\AddinCSharp-vc90-mt-s-1_7_0.dll\", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
             emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rtcp", 2);
             Printf(b_csh_exp_all_cs->b0, "        public static extern\n");
             emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rscp", 2);
