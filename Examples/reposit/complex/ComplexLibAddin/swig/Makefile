@@ -7,6 +7,6 @@ all:
 
 .PHONY: SWIG
 SWIG: complex.i
-#	$(SWIG) $(SWIG_DEBUG) -c++ -reposit -gencpp -prefix cl complex.i
-	$(SWIG) $(SWIG_DEBUG) -c++ -reposit -gencpp -genxll -prefix cl complex.i
+#	$(SWIG) $(SWIG_DEBUG) -c++ -reposit -genc++ -prefix cl complex.i
+	$(SWIG) $(SWIG_DEBUG) -c++ -reposit -genc++ -genxll -prefix cl complex.i
 

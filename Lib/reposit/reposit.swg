@@ -211,8 +211,8 @@
 %typemap(rp_tm_cpp_parm) double "double";
 %typemap(rp_tm_cpp_parm) double const & "const double &";
 %typemap(rp_tm_cpp_parm) rp_tp_string "const std::string&";
-%typemap(rp_tm_cpp_parm) rp_tp_cnv "const reposit::property_t&";
-%typemap(rp_tm_cpp_parm) rp_tp_crc "const reposit::property_t&";
+//%typemap(rp_tm_cpp_parm) rp_tp_cnv "const reposit::property_t&";
+//%typemap(rp_tm_cpp_parm) rp_tp_crc "const reposit::property_t&";
 %typemap(rp_tm_cpp_parm) rp_tp_enm "const std::string&";
 %typemap(rp_tm_cpp_parm) rp_tp_enm_cls "const std::string&";
 %typemap(rp_tm_cpp_parm) rp_tp_obj1 "const std::string&";
@@ -226,16 +226,16 @@
 // CPP
 
 // rp_tm_cpp_cnvt - Convert inputs from C++ Addin api types into underlying Library types (F/C/M)
-%typemap(rp_tm_cpp_cnvt) rp_tp_cnv %{
-    $1_type $1_name_cnv =
-        reposit::convert2<$1_type, reposit::property_t>($1_name);
-%}
+//%typemap(rp_tm_cpp_cnvt) rp_tp_cnv %{
+//    $1_type $1_name_cnv =
+//        reposit::convert2<$1_type, reposit::property_t>($1_name);
+//%}
 
-%typemap(rp_tm_cpp_cnvt) rp_tp_crc %{
-    $1_type $1_name_crc = reposit::CoerceImpl<
-        reposit::property_t,
-        $1_type>()($1_name);
-%}
+//%typemap(rp_tm_cpp_cnvt) rp_tp_crc %{
+//    $1_type $1_name_crc = reposit::CoerceImpl<
+//        reposit::property_t,
+//        $1_type>()($1_name);
+//%}
 
 %typemap(rp_tm_cpp_cnvt) rp_tp_enm %{
     $rp_typedef_base $1_name_enm =
@@ -258,12 +258,113 @@
 %typemap(rp_tm_cpp_rtst) SWIGTYPE "";
 
 // rp_tm_cpp_args - arguments to the underlying Library function (F/C/M)
-%typemap(rp_tm_cpp_args) rp_tp_cnv "$1_name_cnv";
-%typemap(rp_tm_cpp_args) rp_tp_crc "$1_name_crc";
+//%typemap(rp_tm_cpp_args) rp_tp_cnv "$1_name_cnv";
+//%typemap(rp_tm_cpp_args) rp_tp_crc "$1_name_crc";
 %typemap(rp_tm_cpp_args) rp_tp_enm "$1_name_enm";
 %typemap(rp_tm_cpp_args) rp_tp_enm_cls "$1_name_enm";
 %typemap(rp_tm_cpp_args) rp_tp_obj1 "$1_name_get";
 %typemap(rp_tm_cpp_args) SWIGTYPE "$1_name";
+
+//*****************************************************************************
+// rp_tm_csh_* - typemaps for the C# Addin
+//*****************************************************************************
+
+// GROUP
+
+// CPP
+
+// rp_tm_csh_rttp - Function return type (F)
+%typemap(rp_tm_csh_rttp) void "void";
+%typemap(rp_tm_csh_rttp) double "double";
+%typemap(rp_tm_csh_rttp) rp_tp_string "char *";
+
+// rp_tm_csh_parm - Function input parameter (F/C/M)
+%typemap(rp_tm_csh_parm) bool "bool";
+%typemap(rp_tm_csh_parm) long "long";
+%typemap(rp_tm_csh_parm) double "double";
+%typemap(rp_tm_csh_parm) rp_tp_string "const char *";
+%typemap(rp_tm_csh_parm) reposit::property_t const & "long";
+%typemap(rp_tm_csh_parm) rp_tp_enm "const char *";
+%typemap(rp_tm_csh_parm) rp_tp_enm_cls "const char *";
+%typemap(rp_tm_csh_parm) rp_tp_obj1 "const char *";
+
+// rp_tm_csh_rtmb - return type of a member function (M)
+//%typemap(rp_tm_csh_rtmb) void "void";
+//%typemap(rp_tm_csh_rtmb) SWIGTYPE "$1_type";
+
+// rp_tm_cpp_cnvt - Convert inputs from C# Addin api types into underlying Library types (F/C/M)
+%typemap(rp_tm_csh_cnvt) rp_tp_enm_cls %{
+            $rp_typedef_base $1_name_enm =
+                reposit::Create<$rp_typedef_base >()($1_name);
+%}
+
+//%typemap(rp_tm_csh_cnvt) rp_tp_cnv %{
+//    $1_type $1_name_cnv =
+//        reposit::convert2<$1_type, reposit::property_t>($1_name);
+//%}
+
+//%typemap(rp_tm_csh_cnvt) rp_tp_crc %{
+//        $1_type $1_name_crc = reposit::CoerceImpl<
+//            reposit::property_t,
+//            $1_type>()($1_name);
+//%}
+
+%typemap(rp_tm_csh_cnvt) rp_tp_enm %{
+        $rp_typedef_base $1_name_enm =
+            reposit::Create<$rp_typedef_base>()($1_name);
+%}
+
+%typemap(rp_tm_csh_cnvt) rp_tp_enm_cls %{
+        $rp_typedef_base $1_name_enm =
+            reposit::Create<$rp_typedef_base >()($1_name);
+%}
+
+// rp_tm_csh_rtdc - declare variable to capture return value of Library function (F/M)
+%typemap(rp_tm_csh_rtdc) void "";
+%typemap(rp_tm_csh_rtdc) double "double returnValue =";
+%typemap(rp_tm_csh_rtdc) rp_tp_string "std::string returnValue =";
+
+// rp_tm_csh_args - arguments to the underlying Library function (F/C/M)
+%typemap(rp_tm_csh_args) rp_tp_enm "$1_name_enm";
+%typemap(rp_tm_csh_args) rp_tp_enm_cls "$1_name_enm";
+%typemap(rp_tm_csh_args) rp_tp_obj1 "$1_name_get";
+%typemap(rp_tm_csh_args) SWIGTYPE "$1_name";
+
+// rp_tm_csh_rtst - return statement (F/M)
+%typemap(rp_tm_csh_rtst) rp_tp_string %{
+        ULONG size = returnValue.length() + sizeof(char);
+        char *ret = (char*)::CoTaskMemAlloc(size);
+        strcpy(ret, returnValue.c_str());
+        return ret;
+%}
+%typemap(rp_tm_csh_rtst) double "return returnValue;";
+%typemap(rp_tm_csh_rtst) SWIGTYPE "";
+
+// CS
+
+// rp_tm_csh_rtcp
+%typemap(rp_tm_csh_rtcp) rp_tp_string "[return: MarshalAs(UnmanagedType.LPStr)]";
+%typemap(rp_tm_csh_rtcp) SWIGTYPE "";
+
+//rp_tm_csh_clcp - declare the type in the Export.cs file
+%typemap(rp_tm_csh_clcp) bool "bool";
+%typemap(rp_tm_csh_clcp) long "int";
+%typemap(rp_tm_csh_clcp) double "double";
+%typemap(rp_tm_csh_clcp) rp_tp_string "StringBuilder";
+%typemap(rp_tm_csh_clcp) reposit::property_t const & "int";
+%typemap(rp_tm_csh_clcp) rp_tp_enm "StringBuilder";
+%typemap(rp_tm_csh_clcp) rp_tp_enm_cls "StringBuilder";
+%typemap(rp_tm_csh_clcp) rp_tp_obj1 "StringBuilder";
+
+//rp_tm_csh_rscp
+%typemap(rp_tm_csh_rscp) void "void";
+%typemap(rp_tm_csh_rscp) long "int";
+%typemap(rp_tm_csh_rscp) double "double";
+%typemap(rp_tm_csh_rscp) rp_tp_string "string";
+
+//rp_tm_csh_rtex - value to be returned in the event of an exception
+%typemap(rp_tm_csh_rtex) void "return;";
+%typemap(rp_tm_csh_rtex) SWIGTYPE "return 0;";
 
 //*****************************************************************************
 // rp_tm_xll_* - typemaps for the Excel Addin
@@ -293,8 +394,8 @@
 %typemap(rp_tm_xll_parm) rp_tp_string "char*";
 %typemap(rp_tm_xll_parm) rp_tp_string * "char*";
 %typemap(rp_tm_xll_parm) rp_tp_string & "char*";
-%typemap(rp_tm_xll_parm) rp_tp_cnv "OPER*";
-%typemap(rp_tm_xll_parm) rp_tp_crc "OPER*";
+//%typemap(rp_tm_xll_parm) rp_tp_cnv "OPER*";
+//%typemap(rp_tm_xll_parm) rp_tp_crc "OPER*";
 %typemap(rp_tm_xll_parm) rp_tp_any "OPER*";
 %typemap(rp_tm_xll_parm) rp_tp_enm "char*";
 %typemap(rp_tm_xll_parm) rp_tp_enm_cls "char*";
@@ -303,16 +404,16 @@
 %typemap(rp_tm_xll_parm) rp_tp_obj1 "char*";
 
 // rp_tm_xll_cnvt - convert from Excel datatypes to the datatypes of the underlying Library
-%typemap(rp_tm_xll_cnvt) rp_tp_cnv %{
-        $1_type $1_name_cnv = reposit::convert2<$1_type, reposit::ConvertOper>(
-            reposit::ConvertOper(*$1_name));
-%}
+//%typemap(rp_tm_xll_cnvt) rp_tp_cnv %{
+//        $1_type $1_name_cnv = reposit::convert2<$1_type, reposit::ConvertOper>(
+//            reposit::ConvertOper(*$1_name));
+//%}
 
-%typemap(rp_tm_xll_cnvt) rp_tp_crc %{
-        $1_type $1_name_crc = reposit::CoerceImpl<
-            reposit::ConvertOper, $1_type>()
-            (reposit::ConvertOper(*$1_name));
-%}
+//%typemap(rp_tm_xll_cnvt) rp_tp_crc %{
+//        $1_type $1_name_crc = reposit::CoerceImpl<
+//            reposit::ConvertOper, $1_type>()
+//            (reposit::ConvertOper(*$1_name));
+//%}
 
 %typemap(rp_tm_xll_cnvt) rp_tp_enm %{
         $rp_typedef_base $1_name_enm =
@@ -362,8 +463,8 @@
 %typemap(rp_tm_xll_argf) int "*$1_name";
 %typemap(rp_tm_xll_argf) long "*$1_name";
 %typemap(rp_tm_xll_argf) double "*$1_name";
-%typemap(rp_tm_xll_argf) rp_tp_cnv "$1_name_cnv";
-%typemap(rp_tm_xll_argf) rp_tp_crc "$1_name_crc";
+//%typemap(rp_tm_xll_argf) rp_tp_cnv "$1_name_cnv";
+//%typemap(rp_tm_xll_argf) rp_tp_crc "$1_name_crc";
 %typemap(rp_tm_xll_argf) rp_tp_enm "$1_name_enm";
 //%typemap(rp_tm_xll_argf) rp_tp_enm_cls "$1_name_enm_cls";
 %typemap(rp_tm_xll_argf) rp_tp_enm_cls "$1_name_enm";
@@ -415,8 +516,8 @@
 %typemap(rp_tm_xll_cdrt) rp_tp_string * "C";
 %typemap(rp_tm_xll_cdrt) rp_tp_string & "C";
 %typemap(rp_tm_xll_cdrt) rp_tp_string const & "C";
-%typemap(rp_tm_xll_cdrt) rp_tp_cnv "P";
-%typemap(rp_tm_xll_cdrt) rp_tp_crc "P";
+//%typemap(rp_tm_xll_cdrt) rp_tp_cnv "P";
+//%typemap(rp_tm_xll_cdrt) rp_tp_crc "P";
 %typemap(rp_tm_xll_cdrt) rp_tp_enm "C";
 %typemap(rp_tm_xll_cdrt) rp_tp_enm_cls "C";
 %typemap(rp_tm_xll_cdrt) rp_tp_any "P";
@@ -436,8 +537,8 @@
 %typemap(rp_tm_xll_code) rp_tp_string * "C";
 %typemap(rp_tm_xll_code) rp_tp_string & "C";
 %typemap(rp_tm_xll_code) rp_tp_string const & "C";
-%typemap(rp_tm_xll_code) rp_tp_cnv "P";
-%typemap(rp_tm_xll_code) rp_tp_crc "P";
+//%typemap(rp_tm_xll_code) rp_tp_cnv "P";
+//%typemap(rp_tm_xll_code) rp_tp_crc "P";
 %typemap(rp_tm_xll_code) rp_tp_enm "C";
 %typemap(rp_tm_xll_code) rp_tp_enm_cls "C";
 %typemap(rp_tm_xll_code) rp_tp_any "P";

@@ -25,6 +25,7 @@ String *parent = 0;
 // FIXME store these defaults in reposit.swg and retrieve them here.
 String *objDir = NewString("AddinObjects");
 String *addDir = NewString("AddinCpp");
+String *cshDir = NewString("AddinCSharp");
 String *cfyDir = NewString("AddinCfy");
 String *xllDir = NewString("AddinXl");
 String *objInc = NewString("AddinObjects");
@@ -703,103 +704,100 @@ struct GroupValueObjects : public GroupBase {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        if (generateCtor) {
+        Printf(b_vob_grp_hpp->b0,"        class %s : public reposit::ValueObject {\n", p.funcRename);
+        Printf(b_vob_grp_hpp->b0,"            friend class boost::serialization::access;\n");
+        Printf(b_vob_grp_hpp->b0,"        public:\n");
+        Printf(b_vob_grp_hpp->b0,"            %s() {}\n", p.funcRename);
+        Printf(b_vob_grp_hpp->b0,"            %s(\n", p.funcRename);
+        Printf(b_vob_grp_hpp->b0,"                const std::string& ObjectId,\n");
+        emitParmList(p.parms, b_vob_grp_hpp->b0, 2, "rp_tm_vob_parm", 4, ',', true, false, true);
+        Printf(b_vob_grp_hpp->b0,"                bool Permanent);\n");
+        Printf(b_vob_grp_hpp->b0,"\n");
+        Printf(b_vob_grp_hpp->b0,"            const std::set<std::string>& getSystemPropertyNames() const;\n");
+        Printf(b_vob_grp_hpp->b0,"            std::vector<std::string> getPropertyNamesVector() const;\n");
+        Printf(b_vob_grp_hpp->b0,"            reposit::property_t getSystemProperty(const std::string&) const;\n");
+        Printf(b_vob_grp_hpp->b0,"            void setSystemProperty(const std::string& name, const reposit::property_t& value);\n");
+        Printf(b_vob_grp_hpp->b0,"\n");
+        Printf(b_vob_grp_hpp->b0,"        protected:\n");
+        Printf(b_vob_grp_hpp->b0,"            static const char* mPropertyNames[];\n");
+        Printf(b_vob_grp_hpp->b0,"            static std::set<std::string> mSystemPropertyNames;\n");
+        emitParmList(p.parms, b_vob_grp_hpp->b0, 1, "rp_tm_vob_mbvr", 3, ';', true, false, true);
+        Printf(b_vob_grp_hpp->b0,"            bool Permanent_;\n");
+        if (String *processorName = Getattr(p.n, "feature:rp:processorName"))
+            Printf(b_vob_grp_hpp->b0,"            virtual std::string processorName() { return \"%s\"; }\n", processorName);
+        Printf(b_vob_grp_hpp->b0,"\n");
+        Printf(b_vob_grp_hpp->b0,"            template<class Archive>\n");
+        Printf(b_vob_grp_hpp->b0,"            void serialize(Archive& ar, const unsigned int) {\n");
+        Printf(b_vob_grp_hpp->b0,"            boost::serialization::void_cast_register<%s, reposit::ValueObject>(this, this);\n", p.funcRename);
+        Printf(b_vob_grp_hpp->b0,"                ar  & boost::serialization::make_nvp(\"ObjectId\", objectId_)\n");
+        Printf(b_vob_grp_hpp->b0,"                    & boost::serialization::make_nvp(\"ClassName\", className_)\n");
+        emitParmList(p.parms, b_vob_grp_hpp->b0, 1, "rp_tm_vob_srmv", 5, 0);
+        Printf(b_vob_grp_hpp->b0,"                    & boost::serialization::make_nvp(\"Permanent\", Permanent_)\n");
+        Printf(b_vob_grp_hpp->b0,"                    & boost::serialization::make_nvp(\"UserProperties\", userProperties);\n");
+        Printf(b_vob_grp_hpp->b0,"            }\n");
+        Printf(b_vob_grp_hpp->b0,"        };\n");
+        Printf(b_vob_grp_hpp->b0,"\n");
 
-            Printf(b_vob_grp_hpp->b0,"        class %s : public reposit::ValueObject {\n", p.funcRename);
-            Printf(b_vob_grp_hpp->b0,"            friend class boost::serialization::access;\n");
-            Printf(b_vob_grp_hpp->b0,"        public:\n");
-            Printf(b_vob_grp_hpp->b0,"            %s() {}\n", p.funcRename);
-            Printf(b_vob_grp_hpp->b0,"            %s(\n", p.funcRename);
-            Printf(b_vob_grp_hpp->b0,"                const std::string& ObjectId,\n");
-            emitParmList(p.parms, b_vob_grp_hpp->b0, 2, "rp_tm_vob_parm", 4, ',', true, false, true);
-            Printf(b_vob_grp_hpp->b0,"                bool Permanent);\n");
-            Printf(b_vob_grp_hpp->b0,"\n");
-            Printf(b_vob_grp_hpp->b0,"            const std::set<std::string>& getSystemPropertyNames() const;\n");
-            Printf(b_vob_grp_hpp->b0,"            std::vector<std::string> getPropertyNamesVector() const;\n");
-            Printf(b_vob_grp_hpp->b0,"            reposit::property_t getSystemProperty(const std::string&) const;\n");
-            Printf(b_vob_grp_hpp->b0,"            void setSystemProperty(const std::string& name, const reposit::property_t& value);\n");
-            Printf(b_vob_grp_hpp->b0,"\n");
-            Printf(b_vob_grp_hpp->b0,"        protected:\n");
-            Printf(b_vob_grp_hpp->b0,"            static const char* mPropertyNames[];\n");
-            Printf(b_vob_grp_hpp->b0,"            static std::set<std::string> mSystemPropertyNames;\n");
-            emitParmList(p.parms, b_vob_grp_hpp->b0, 1, "rp_tm_vob_mbvr", 3, ';', true, false, true);
-            Printf(b_vob_grp_hpp->b0,"            bool Permanent_;\n");
-            if (String *processorName = Getattr(p.n, "feature:rp:processorName"))
-                Printf(b_vob_grp_hpp->b0,"            virtual std::string processorName() { return \"%s\"; }\n", processorName);
-            Printf(b_vob_grp_hpp->b0,"\n");
-            Printf(b_vob_grp_hpp->b0,"            template<class Archive>\n");
-            Printf(b_vob_grp_hpp->b0,"            void serialize(Archive& ar, const unsigned int) {\n");
-            Printf(b_vob_grp_hpp->b0,"            boost::serialization::void_cast_register<%s, reposit::ValueObject>(this, this);\n", p.funcRename);
-            Printf(b_vob_grp_hpp->b0,"                ar  & boost::serialization::make_nvp(\"ObjectId\", objectId_)\n");
-            Printf(b_vob_grp_hpp->b0,"                    & boost::serialization::make_nvp(\"ClassName\", className_)\n");
-            emitParmList(p.parms, b_vob_grp_hpp->b0, 1, "rp_tm_vob_srmv", 5, 0);
-            Printf(b_vob_grp_hpp->b0,"                    & boost::serialization::make_nvp(\"Permanent\", Permanent_)\n");
-            Printf(b_vob_grp_hpp->b0,"                    & boost::serialization::make_nvp(\"UserProperties\", userProperties);\n");
-            Printf(b_vob_grp_hpp->b0,"            }\n");
-            Printf(b_vob_grp_hpp->b0,"        };\n");
-            Printf(b_vob_grp_hpp->b0,"\n");
+        Printf(b_vob_grp_cpp->b0,"        const char* %s::mPropertyNames[] = {\n", p.funcRename);
+        emitParmList(p.parms, b_vob_grp_cpp->b0, 1, "rp_tm_vob_name", 3, ',', true, false, true);
+        Printf(b_vob_grp_cpp->b0,"            \"Permanent\"\n");
+        Printf(b_vob_grp_cpp->b0,"        };\n");
+        Printf(b_vob_grp_cpp->b0,"\n");
+        Printf(b_vob_grp_cpp->b0,"        std::set<std::string> %s::mSystemPropertyNames(\n", p.funcRename);
+        Printf(b_vob_grp_cpp->b0,"            mPropertyNames, mPropertyNames + sizeof(mPropertyNames) / sizeof(const char*));\n");
+        Printf(b_vob_grp_cpp->b0,"\n");
+        Printf(b_vob_grp_cpp->b0,"        const std::set<std::string>& %s::getSystemPropertyNames() const {\n", p.funcRename);
+        Printf(b_vob_grp_cpp->b0,"            return mSystemPropertyNames;\n");
+        Printf(b_vob_grp_cpp->b0,"        }\n");
+        Printf(b_vob_grp_cpp->b0,"\n");
+        Printf(b_vob_grp_cpp->b0,"        std::vector<std::string> %s::getPropertyNamesVector() const {\n", p.funcRename);
+        Printf(b_vob_grp_cpp->b0,"            std::vector<std::string> ret(\n");
+        Printf(b_vob_grp_cpp->b0,"                mPropertyNames, mPropertyNames + sizeof(mPropertyNames) / sizeof(const char*));\n");
+        Printf(b_vob_grp_cpp->b0,"            for (std::map<std::string, reposit::property_t>::const_iterator i = userProperties.begin();\n");
+        Printf(b_vob_grp_cpp->b0,"                i != userProperties.end(); ++i)\n");
+        Printf(b_vob_grp_cpp->b0,"                ret.push_back(i->first);\n");
+        Printf(b_vob_grp_cpp->b0,"            return ret;\n");
+        Printf(b_vob_grp_cpp->b0,"        }\n");
+        Printf(b_vob_grp_cpp->b0,"\n");
+        Printf(b_vob_grp_cpp->b0,"        reposit::property_t %s::getSystemProperty(const std::string& name) const {\n", p.funcRename);
+        Printf(b_vob_grp_cpp->b0,"            std::string nameUpper = boost::algorithm::to_upper_copy(name);\n");
+        Printf(b_vob_grp_cpp->b0,"            if(strcmp(nameUpper.c_str(), \"OBJECTID\")==0)\n");
+        Printf(b_vob_grp_cpp->b0,"                return objectId_;\n");
+        Printf(b_vob_grp_cpp->b0,"            else if(strcmp(nameUpper.c_str(), \"CLASSNAME\")==0)\n");
+        Printf(b_vob_grp_cpp->b0,"                return className_;\n");
+        voGetProp(b_vob_grp_cpp->b0, p.parms);
+        Printf(b_vob_grp_cpp->b0,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
+        Printf(b_vob_grp_cpp->b0,"                return Permanent_;\n");
+        Printf(b_vob_grp_cpp->b0,"            else\n");
+        Printf(b_vob_grp_cpp->b0,"                RP_FAIL(\"Error: attempt to retrieve non-existent Property: '\" + name + \"'\");\n");
+        Printf(b_vob_grp_cpp->b0,"        }\n");
+        Printf(b_vob_grp_cpp->b0,"\n");
+        Printf(b_vob_grp_cpp->b0,"        void %s::setSystemProperty(const std::string& name, const reposit::property_t& value) {\n", p.funcRename);
+        Printf(b_vob_grp_cpp->b0,"            std::string nameUpper = boost::algorithm::to_upper_copy(name);\n");
+        Printf(b_vob_grp_cpp->b0,"            if(strcmp(nameUpper.c_str(), \"OBJECTID\")==0)\n");
+        Printf(b_vob_grp_cpp->b0,"                objectId_ = boost::get<std::string>(value);\n");
+        Printf(b_vob_grp_cpp->b0,"            else if(strcmp(nameUpper.c_str(), \"CLASSNAME\")==0)\n");
+        Printf(b_vob_grp_cpp->b0,"                className_ = boost::get<std::string>(value);\n");
+        voSetProp(b_vob_grp_cpp->b0, p.parms);
+        Printf(b_vob_grp_cpp->b0,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
+        Printf(b_vob_grp_cpp->b0,"                Permanent_ = reposit::convert2<bool>(value);\n");
+        Printf(b_vob_grp_cpp->b0,"            else\n");
+        Printf(b_vob_grp_cpp->b0,"                RP_FAIL(\"Error: attempt to set non-existent Property: '\" + name + \"'\");\n");
+        Printf(b_vob_grp_cpp->b0,"        }\n");
+        Printf(b_vob_grp_cpp->b0,"\n");
+        Printf(b_vob_grp_cpp->b0,"        %s::%s(\n", p.funcRename, p.funcRename);
+        Printf(b_vob_grp_cpp->b0,"                const std::string& ObjectId,\n");
+        emitParmList(p.parms, b_vob_grp_cpp->b0, 2, "rp_tm_vob_parm", 4, ',', true, false, true);
+        Printf(b_vob_grp_cpp->b0,"                bool Permanent) :\n");
+        Printf(b_vob_grp_cpp->b0,"            reposit::ValueObject(ObjectId, \"%s\", Permanent),\n", p.funcRename);
+        emitParmList(p.parms, b_vob_grp_cpp->b0, 1, "rp_tm_vob_init", 3, ',', true, false, true);
+        Printf(b_vob_grp_cpp->b0,"            Permanent_(Permanent) {\n");
+        Printf(b_vob_grp_cpp->b0,"        }\n");
 
-            Printf(b_vob_grp_cpp->b0,"        const char* %s::mPropertyNames[] = {\n", p.funcRename);
-            emitParmList(p.parms, b_vob_grp_cpp->b0, 1, "rp_tm_vob_name", 3, ',', true, false, true);
-            Printf(b_vob_grp_cpp->b0,"            \"Permanent\"\n");
-            Printf(b_vob_grp_cpp->b0,"        };\n");
-            Printf(b_vob_grp_cpp->b0,"\n");
-            Printf(b_vob_grp_cpp->b0,"        std::set<std::string> %s::mSystemPropertyNames(\n", p.funcRename);
-            Printf(b_vob_grp_cpp->b0,"            mPropertyNames, mPropertyNames + sizeof(mPropertyNames) / sizeof(const char*));\n");
-            Printf(b_vob_grp_cpp->b0,"\n");
-            Printf(b_vob_grp_cpp->b0,"        const std::set<std::string>& %s::getSystemPropertyNames() const {\n", p.funcRename);
-            Printf(b_vob_grp_cpp->b0,"            return mSystemPropertyNames;\n");
-            Printf(b_vob_grp_cpp->b0,"        }\n");
-            Printf(b_vob_grp_cpp->b0,"\n");
-            Printf(b_vob_grp_cpp->b0,"        std::vector<std::string> %s::getPropertyNamesVector() const {\n", p.funcRename);
-            Printf(b_vob_grp_cpp->b0,"            std::vector<std::string> ret(\n");
-            Printf(b_vob_grp_cpp->b0,"                mPropertyNames, mPropertyNames + sizeof(mPropertyNames) / sizeof(const char*));\n");
-            Printf(b_vob_grp_cpp->b0,"            for (std::map<std::string, reposit::property_t>::const_iterator i = userProperties.begin();\n");
-            Printf(b_vob_grp_cpp->b0,"                i != userProperties.end(); ++i)\n");
-            Printf(b_vob_grp_cpp->b0,"                ret.push_back(i->first);\n");
-            Printf(b_vob_grp_cpp->b0,"            return ret;\n");
-            Printf(b_vob_grp_cpp->b0,"        }\n");
-            Printf(b_vob_grp_cpp->b0,"\n");
-            Printf(b_vob_grp_cpp->b0,"        reposit::property_t %s::getSystemProperty(const std::string& name) const {\n", p.funcRename);
-            Printf(b_vob_grp_cpp->b0,"            std::string nameUpper = boost::algorithm::to_upper_copy(name);\n");
-            Printf(b_vob_grp_cpp->b0,"            if(strcmp(nameUpper.c_str(), \"OBJECTID\")==0)\n");
-            Printf(b_vob_grp_cpp->b0,"                return objectId_;\n");
-            Printf(b_vob_grp_cpp->b0,"            else if(strcmp(nameUpper.c_str(), \"CLASSNAME\")==0)\n");
-            Printf(b_vob_grp_cpp->b0,"                return className_;\n");
-            voGetProp(b_vob_grp_cpp->b0, p.parms);
-            Printf(b_vob_grp_cpp->b0,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
-            Printf(b_vob_grp_cpp->b0,"                return Permanent_;\n");
-            Printf(b_vob_grp_cpp->b0,"            else\n");
-            Printf(b_vob_grp_cpp->b0,"                RP_FAIL(\"Error: attempt to retrieve non-existent Property: '\" + name + \"'\");\n");
-            Printf(b_vob_grp_cpp->b0,"        }\n");
-            Printf(b_vob_grp_cpp->b0,"\n");
-            Printf(b_vob_grp_cpp->b0,"        void %s::setSystemProperty(const std::string& name, const reposit::property_t& value) {\n", p.funcRename);
-            Printf(b_vob_grp_cpp->b0,"            std::string nameUpper = boost::algorithm::to_upper_copy(name);\n");
-            Printf(b_vob_grp_cpp->b0,"            if(strcmp(nameUpper.c_str(), \"OBJECTID\")==0)\n");
-            Printf(b_vob_grp_cpp->b0,"                objectId_ = boost::get<std::string>(value);\n");
-            Printf(b_vob_grp_cpp->b0,"            else if(strcmp(nameUpper.c_str(), \"CLASSNAME\")==0)\n");
-            Printf(b_vob_grp_cpp->b0,"                className_ = boost::get<std::string>(value);\n");
-            voSetProp(b_vob_grp_cpp->b0, p.parms);
-            Printf(b_vob_grp_cpp->b0,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
-            Printf(b_vob_grp_cpp->b0,"                Permanent_ = reposit::convert2<bool>(value);\n");
-            Printf(b_vob_grp_cpp->b0,"            else\n");
-            Printf(b_vob_grp_cpp->b0,"                RP_FAIL(\"Error: attempt to set non-existent Property: '\" + name + \"'\");\n");
-            Printf(b_vob_grp_cpp->b0,"        }\n");
-            Printf(b_vob_grp_cpp->b0,"\n");
-            Printf(b_vob_grp_cpp->b0,"        %s::%s(\n", p.funcRename, p.funcRename);
-            Printf(b_vob_grp_cpp->b0,"                const std::string& ObjectId,\n");
-            emitParmList(p.parms, b_vob_grp_cpp->b0, 2, "rp_tm_vob_parm", 4, ',', true, false, true);
-            Printf(b_vob_grp_cpp->b0,"                bool Permanent) :\n");
-            Printf(b_vob_grp_cpp->b0,"            reposit::ValueObject(ObjectId, \"%s\", Permanent),\n", p.funcRename);
-            emitParmList(p.parms, b_vob_grp_cpp->b0, 1, "rp_tm_vob_init", 3, ',', true, false, true);
-            Printf(b_vob_grp_cpp->b0,"            Permanent_(Permanent) {\n");
-            Printf(b_vob_grp_cpp->b0,"        }\n");
+        count_.constructors++;
+        count_.total2++;
 
-            count_.constructors++;
-            count_.total2++;
-
-            generateOutput = true;
-        }
+        generateOutput = true;
     }
 
     void functionWrapperImplMemb(ParmsMemb & /*p*/) {
@@ -872,36 +870,34 @@ struct GroupSerializationCreate : public GroupBase {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        if (generateCtor) {
-            Printf(b_scr_grp_hpp->b0, "\n");
-            Printf(b_scr_grp_hpp->b0, "boost::shared_ptr<reposit::Object> create_%s(\n", p.funcRename);
-            Printf(b_scr_grp_hpp->b0, "    const boost::shared_ptr<reposit::ValueObject>&);\n");
+        Printf(b_scr_grp_hpp->b0, "\n");
+        Printf(b_scr_grp_hpp->b0, "boost::shared_ptr<reposit::Object> create_%s(\n", p.funcRename);
+        Printf(b_scr_grp_hpp->b0, "    const boost::shared_ptr<reposit::ValueObject>&);\n");
 
-            Printf(b_scr_grp_cpp->b0, "\n");
-            Printf(b_scr_grp_cpp->b0, "boost::shared_ptr<reposit::Object> %s::create_%s(\n", module, p.funcRename);
-            Printf(b_scr_grp_cpp->b0, "    const boost::shared_ptr<reposit::ValueObject> &valueObject) {\n");
-            Printf(b_scr_grp_cpp->b0, "\n");
-            Printf(b_scr_grp_cpp->b0, "    // conversions\n\n");
-            emitParmList(p.parms, b_scr_grp_cpp->b0, 1, "rp_tm_scr_cnvt", 1, 0);
-            Printf(b_scr_grp_cpp->b0, "\n");
-            Printf(b_scr_grp_cpp->b0, "    bool Permanent =\n");
-            Printf(b_scr_grp_cpp->b0, "        reposit::convert2<bool>(valueObject->getProperty(\"Permanent\"));\n");
-            Printf(b_scr_grp_cpp->b0, "\n");
-            Printf(b_scr_grp_cpp->b0, "    // construct and return the object\n");
-            Printf(b_scr_grp_cpp->b0, "\n");
-            Printf(b_scr_grp_cpp->b0, "    boost::shared_ptr<reposit::Object> object(\n");
-            Printf(b_scr_grp_cpp->b0, "        new %s::%s(\n", module, p.name);
-            Printf(b_scr_grp_cpp->b0, "            valueObject,\n");
-            emitParmList(p.parms, b_scr_grp_cpp->b0, 0, "rp_tm_default", 3, ',', true, false, true);
-            Printf(b_scr_grp_cpp->b0, "            Permanent));\n");
-            Printf(b_scr_grp_cpp->b0, "    return object;\n");
-            Printf(b_scr_grp_cpp->b0, "}\n");
+        Printf(b_scr_grp_cpp->b0, "\n");
+        Printf(b_scr_grp_cpp->b0, "boost::shared_ptr<reposit::Object> %s::create_%s(\n", module, p.funcRename);
+        Printf(b_scr_grp_cpp->b0, "    const boost::shared_ptr<reposit::ValueObject> &valueObject) {\n");
+        Printf(b_scr_grp_cpp->b0, "\n");
+        Printf(b_scr_grp_cpp->b0, "    // conversions\n\n");
+        emitParmList(p.parms, b_scr_grp_cpp->b0, 1, "rp_tm_scr_cnvt", 1, 0);
+        Printf(b_scr_grp_cpp->b0, "\n");
+        Printf(b_scr_grp_cpp->b0, "    bool Permanent =\n");
+        Printf(b_scr_grp_cpp->b0, "        reposit::convert2<bool>(valueObject->getProperty(\"Permanent\"));\n");
+        Printf(b_scr_grp_cpp->b0, "\n");
+        Printf(b_scr_grp_cpp->b0, "    // construct and return the object\n");
+        Printf(b_scr_grp_cpp->b0, "\n");
+        Printf(b_scr_grp_cpp->b0, "    boost::shared_ptr<reposit::Object> object(\n");
+        Printf(b_scr_grp_cpp->b0, "        new %s::%s(\n", module, p.name);
+        Printf(b_scr_grp_cpp->b0, "            valueObject,\n");
+        emitParmList(p.parms, b_scr_grp_cpp->b0, 0, "rp_tm_default", 3, ',', true, false, true);
+        Printf(b_scr_grp_cpp->b0, "            Permanent));\n");
+        Printf(b_scr_grp_cpp->b0, "    return object;\n");
+        Printf(b_scr_grp_cpp->b0, "}\n");
 
-            count_.constructors++;
-            count_.total2++;
+        count_.constructors++;
+        count_.total2++;
 
-            generateOutput = true;
-        }
+        generateOutput = true;
     }
 
     void functionWrapperImplMemb(ParmsMemb & /*p*/) {
@@ -971,21 +967,18 @@ struct GroupSerializationRegister : public GroupBase {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        if (generateCtor) {
+        Printf(b_srg_grp_cpp->b0, "    // class ID %d in the boost serialization framework\n", idNum);
+        Printf(b_srg_grp_cpp->b0, "    ar.register_type<%s::ValueObjects::%s>();\n", module, p.funcRename);
 
-            Printf(b_srg_grp_cpp->b0, "    // class ID %d in the boost serialization framework\n", idNum);
-            Printf(b_srg_grp_cpp->b0, "    ar.register_type<%s::ValueObjects::%s>();\n", module, p.funcRename);
+        Printf(b_srg_grp_cpp->b1, "    // class ID %d in the boost serialization framework\n", idNum);
+        Printf(b_srg_grp_cpp->b1, "    ar.register_type<%s::ValueObjects::%s>();\n", module, p.funcRename);
 
-            Printf(b_srg_grp_cpp->b1, "    // class ID %d in the boost serialization framework\n", idNum);
-            Printf(b_srg_grp_cpp->b1, "    ar.register_type<%s::ValueObjects::%s>();\n", module, p.funcRename);
+        idNum++;
 
-            idNum++;
+        count_.constructors++;
+        count_.total2++;
 
-            count_.constructors++;
-            count_.total2++;
-
-            generateOutput = true;
-        }
+        generateOutput = true;
     }
 
     void functionWrapperImplMemb(ParmsMemb & /*p*/) {
@@ -1079,44 +1072,42 @@ struct GroupCpp : public GroupBase {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        if (generateCtor) {
-            Printf(b_cpp_grp_hpp->b0,"\n");
-            Printf(b_cpp_grp_hpp->b0,"    std::string %s(\n", p.funcName);
-            emitParmList(p.parms2, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", 2);
-            Printf(b_cpp_grp_hpp->b0,"    );\n\n");
+        Printf(b_cpp_grp_hpp->b0,"\n");
+        Printf(b_cpp_grp_hpp->b0,"    std::string %s(\n", p.funcName);
+        emitParmList(p.parms2, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", 2);
+        Printf(b_cpp_grp_hpp->b0,"    );\n\n");
 
-            Printf(b_cpp_grp_cpp->b1,"//****CTOR*****\n");
-            Printf(b_cpp_grp_cpp->b1,"std::string %s::%s(\n", addinCppNameSpace, p.funcName);
-            emitParmList(p.parms2, b_cpp_grp_cpp->b1, 2, "rp_tm_cpp_parm", 2);
-            Printf(b_cpp_grp_cpp->b1,"    ) {\n");
-            Printf(b_cpp_grp_cpp->b1,"\n");
-            Printf(b_cpp_grp_cpp->b1,"    // Convert input types into Library types\n\n");
-            emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_cnvt", 1, 0, false);
-            Printf(b_cpp_grp_cpp->b1,"\n");
-            Printf(b_cpp_grp_cpp->b1,"    boost::shared_ptr<reposit::ValueObject> valueObject(\n");
-            Printf(b_cpp_grp_cpp->b1,"        new %s::ValueObjects::%s(\n", module, p.funcName);
-            Printf(b_cpp_grp_cpp->b1,"            objectID,\n");
-            emitParmList(p.parms, b_cpp_grp_cpp->b1, 0, "rp_tm_default", 3, ',', true, false, true);
-            Printf(b_cpp_grp_cpp->b1,"            false));\n");
-            Printf(b_cpp_grp_cpp->b1,"    boost::shared_ptr<reposit::Object> object(\n");
-            Printf(b_cpp_grp_cpp->b1,"        new %s::%s(\n", module, p.name);
-            Printf(b_cpp_grp_cpp->b1,"            valueObject,\n");
-            emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_args", 3, ',', true, true, true);
-            Printf(b_cpp_grp_cpp->b1,"            false));\n");
-            Printf(b_cpp_grp_cpp->b1,"    std::string returnValue =\n");
-            Printf(b_cpp_grp_cpp->b1,"        reposit::Repository::instance().storeObject(\n");
-            Printf(b_cpp_grp_cpp->b1,"            objectID, object, false, valueObject);\n");
-            Printf(b_cpp_grp_cpp->b1,"    return returnValue;\n");
-            Printf(b_cpp_grp_cpp->b1,"}\n\n");
+        Printf(b_cpp_grp_cpp->b1,"//****CTOR*****\n");
+        Printf(b_cpp_grp_cpp->b1,"std::string %s::%s(\n", addinCppNameSpace, p.funcName);
+        emitParmList(p.parms2, b_cpp_grp_cpp->b1, 2, "rp_tm_cpp_parm", 2);
+        Printf(b_cpp_grp_cpp->b1,"    ) {\n");
+        Printf(b_cpp_grp_cpp->b1,"\n");
+        Printf(b_cpp_grp_cpp->b1,"    // Convert input types into Library types\n\n");
+        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_cnvt", 1, 0, false);
+        Printf(b_cpp_grp_cpp->b1,"\n");
+        Printf(b_cpp_grp_cpp->b1,"    boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+        Printf(b_cpp_grp_cpp->b1,"        new %s::ValueObjects::%s(\n", module, p.funcName);
+        Printf(b_cpp_grp_cpp->b1,"            objectID,\n");
+        emitParmList(p.parms, b_cpp_grp_cpp->b1, 0, "rp_tm_default", 3, ',', true, false, true);
+        Printf(b_cpp_grp_cpp->b1,"            false));\n");
+        Printf(b_cpp_grp_cpp->b1,"    boost::shared_ptr<reposit::Object> object(\n");
+        Printf(b_cpp_grp_cpp->b1,"        new %s::%s(\n", module, p.name);
+        Printf(b_cpp_grp_cpp->b1,"            valueObject,\n");
+        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_args", 3, ',', true, true, true);
+        Printf(b_cpp_grp_cpp->b1,"            false));\n");
+        Printf(b_cpp_grp_cpp->b1,"    std::string returnValue =\n");
+        Printf(b_cpp_grp_cpp->b1,"        reposit::Repository::instance().storeObject(\n");
+        Printf(b_cpp_grp_cpp->b1,"            objectID, object, false, valueObject);\n");
+        Printf(b_cpp_grp_cpp->b1,"    return returnValue;\n");
+        Printf(b_cpp_grp_cpp->b1,"}\n\n");
 
-            if (!voIncludeHasBeengenerated) {
-                Printf(b_cpp_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
-                voIncludeHasBeengenerated = true;
-            }
-
-            count_.constructors++;
-            count_.total2++;
+        if (!voIncludeHasBeengenerated) {
+            Printf(b_cpp_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            voIncludeHasBeengenerated = true;
         }
+
+        count_.constructors++;
+        count_.total2++;
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
@@ -1155,6 +1146,144 @@ struct GroupCpp : public GroupBase {
 
         b_cpp_grp_hpp->clear(count_);
         b_cpp_grp_cpp->clear(count_);
+    }
+};
+
+struct GroupCSharp : public GroupBase {
+
+    Buffer *b_csh_grp_cpp;
+    bool voIncludeHasBeengenerated;
+
+    GroupCSharp(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), voIncludeHasBeengenerated(false) {
+
+        b_csh_grp_cpp = new Buffer("b_csh_grp_cpp", NewStringf("%s/csh_%s.cpp", cshDir, pragmas_.groupName_));
+
+        if (pragmas_.automatic_) {
+            Printf(b_csh_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        } else {
+            Printf(b_csh_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        }
+
+        Printf(b_csh_grp_cpp->b0, "#include <rp/repository.hpp>\n");
+        Printf(b_csh_grp_cpp->b0, "//FIXME include only factories for types used in the current file\n", objInc);
+        Printf(b_csh_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
+        Printf(b_csh_grp_cpp->b0, "#include <windows.h>\n");
+        Printf(b_csh_grp_cpp->b1, "\n");
+
+        Append(b_csh_grp_cpp->b1, pragmas_.cpp_inc);
+    }
+
+    void functionWrapperImplFunc(ParmsFunc &p) {
+
+        Printf(b_csh_grp_cpp->b1, "extern \"C\" __declspec(dllexport)\n");
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rttp");
+        Printf(b_csh_grp_cpp->b1, "__stdcall %s(\n", p.funcName);
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", 2);
+        Printf(b_csh_grp_cpp->b1, ") {\n");
+        Printf(b_csh_grp_cpp->b1, "    try {\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"BEGIN - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+        Printf(b_csh_grp_cpp->b1, "\n");
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", 2, 0, false);
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtdc", 2);
+        Printf(b_csh_grp_cpp->b1, "        %s(\n", p.name);
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", 3, ',', true, true);
+        Printf(b_csh_grp_cpp->b1, "        );\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"END   - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtst", 2);
+        Printf(b_csh_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - \" << e.what() << std::endl;\n", p.funcName);
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtex", 2, false);
+        Printf(b_csh_grp_cpp->b1,"    } catch (...) {\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - UNKNOWN EXCEPTION\" << std::endl;\n", p.funcName);
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtex", 2, false);
+        Printf(b_csh_grp_cpp->b1,"    }\n");
+        Printf(b_csh_grp_cpp->b1, "}\n");
+
+        count_.functions++;
+        count_.total2++;
+    }
+
+    void functionWrapperImplCtor(ParmsCtor &p) {
+        Printf(b_csh_grp_cpp->b1, "extern \"C\" __declspec(dllexport) char * __stdcall %s(\n", p.funcName);
+        emitParmList(p.parms2, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", 1);
+        Printf(b_csh_grp_cpp->b1, ") {\n");
+        Printf(b_csh_grp_cpp->b1, "    try {\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"BEGIN - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+        Printf(b_csh_grp_cpp->b1, "\n");
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", 2, 0, false);
+        Printf(b_csh_grp_cpp->b1,"\n");
+        Printf(b_csh_grp_cpp->b1,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+        Printf(b_csh_grp_cpp->b1,"            new %s::ValueObjects::%s(\n", module, p.funcName);
+        Printf(b_csh_grp_cpp->b1,"                objectID,\n");
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 0, "rp_tm_default", 4, ',', true, false, true);
+        Printf(b_csh_grp_cpp->b1,"                false));\n");
+        Printf(b_csh_grp_cpp->b1,"        boost::shared_ptr<reposit::Object> object(\n");
+        Printf(b_csh_grp_cpp->b1,"            new %s::%s(\n", module, p.name);
+        Printf(b_csh_grp_cpp->b1,"                valueObject,\n");
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", 4, ',', true, true, true);
+        Printf(b_csh_grp_cpp->b1,"                false));\n");
+        Printf(b_csh_grp_cpp->b1,"        std::string returnValue =\n");
+        Printf(b_csh_grp_cpp->b1,"            reposit::Repository::instance().storeObject(\n");
+        Printf(b_csh_grp_cpp->b1,"                objectID, object, false, valueObject);\n");
+        Printf(b_csh_grp_cpp->b1,"\n");
+        Printf(b_csh_grp_cpp->b1,"        ULONG size = returnValue.length() + sizeof(char);\n");
+        Printf(b_csh_grp_cpp->b1,"        char *ret = (char*)::CoTaskMemAlloc(size);\n");
+        Printf(b_csh_grp_cpp->b1,"        strcpy(ret, returnValue.c_str());\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"END   - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+        Printf(b_csh_grp_cpp->b1,"        return ret;\n");
+        Printf(b_csh_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - \" << e.what() << std::endl;\n", p.funcName);
+        Printf(b_csh_grp_cpp->b1,"        return 0;\n");
+        Printf(b_csh_grp_cpp->b1,"    } catch (...) {\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - UNKNOWN EXCEPTION\" << std::endl;\n", p.funcName);
+        Printf(b_csh_grp_cpp->b1,"        return 0;\n");
+        Printf(b_csh_grp_cpp->b1,"    }\n");
+        Printf(b_csh_grp_cpp->b1,"}\n\n");
+
+        if (!voIncludeHasBeengenerated) {
+            Printf(b_csh_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            voIncludeHasBeengenerated = true;
+        }
+
+        count_.constructors++;
+        count_.total2++;
+    }
+
+    void functionWrapperImplMemb(ParmsMemb &p) {
+        Printf(b_csh_grp_cpp->b1, "extern \"C\" __declspec(dllexport)\n");
+        //emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtmb");
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rttp");
+        Printf(b_csh_grp_cpp->b1, "__stdcall %s(\n", p.funcName);
+        emitParmList(p.parms2, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", 2);
+        Printf(b_csh_grp_cpp->b1,"    ) {\n");
+        Printf(b_csh_grp_cpp->b1, "    try {\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"BEGIN - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+        Printf(b_csh_grp_cpp->b1, "\n");
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", 1, 0, false);
+        Printf(b_csh_grp_cpp->b1,"\n");
+        emitTypeMap(b_csh_grp_cpp->b1, p.node, "rp_tm_xxx_rp_get");
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtdc", 2);
+        Printf(b_csh_grp_cpp->b1,"        xxx->%s(\n", p.name);
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", 3, ',', true, true);
+        Printf(b_csh_grp_cpp->b1,"        );\n", p.name);
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"END   - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtst", 2);
+        Printf(b_csh_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - \" << e.what() << std::endl;\n", p.funcName);
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtex", 2, false);
+        Printf(b_csh_grp_cpp->b1,"    } catch (...) {\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - UNKNOWN EXCEPTION\" << std::endl;\n", p.funcName);
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtex", 2, false);
+        Printf(b_csh_grp_cpp->b1,"    }\n");
+        Printf(b_csh_grp_cpp->b1,"}\n");
+
+        count_.members++;
+        count_.total2++;
+    }
+
+    void clear() {
+        Printf(b_csh_grp_cpp->b1, "\n");
+        b_csh_grp_cpp->clear(count_);
     }
 };
 
@@ -1266,57 +1395,55 @@ struct GroupExcelFunctions : public GroupBase {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        if (generateCtor) {
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1,"//****CTOR*****\n");
-            Printf(b_xlf_grp_cpp->b1, "DLLEXPORT char *%s(\n", p.funcRename);
-            emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm");
-            Printf(b_xlf_grp_cpp->b1, ") {\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "    try {\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
-            Printf(b_xlf_grp_cpp->b1, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcRename);
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", 2, 0, false);
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
-            Printf(b_xlf_grp_cpp->b1, "            new %s::ValueObjects::%s(\n", module, p.funcRename);
-            Printf(b_xlf_grp_cpp->b1, "                objectID,\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argfv", 4, ',', true, true, true);
-            Printf(b_xlf_grp_cpp->b1, "                false));\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::Object> object(\n");
-            Printf(b_xlf_grp_cpp->b1, "            new %s::%s(\n", module, p.name);
-            Printf(b_xlf_grp_cpp->b1, "                valueObject,\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", 4, ',', true, true, true);
-            Printf(b_xlf_grp_cpp->b1, "                false));\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "        std::string returnValue =\n");
-            Printf(b_xlf_grp_cpp->b1, "            reposit::RepositoryXL::instance().storeObject(objectID, object, true);\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "        static char ret[XL_MAX_STR_LEN];\n");
-            Printf(b_xlf_grp_cpp->b1, "        reposit::stringToChar(returnValue, ret);\n");
-            Printf(b_xlf_grp_cpp->b1, "        return ret;\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "    } catch (const std::exception &e) {\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "        reposit::RepositoryXL::instance().logError(e.what(), functionCall);\n");
-            Printf(b_xlf_grp_cpp->b1, "        return 0;\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "    }\n");
-            Printf(b_xlf_grp_cpp->b1, "}\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1,"//****CTOR*****\n");
+        Printf(b_xlf_grp_cpp->b1, "DLLEXPORT char *%s(\n", p.funcRename);
+        emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm");
+        Printf(b_xlf_grp_cpp->b1, ") {\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    try {\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
+        Printf(b_xlf_grp_cpp->b1, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcRename);
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", 2, 0, false);
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+        Printf(b_xlf_grp_cpp->b1, "            new %s::ValueObjects::%s(\n", module, p.funcRename);
+        Printf(b_xlf_grp_cpp->b1, "                objectID,\n");
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argfv", 4, ',', true, true, true);
+        Printf(b_xlf_grp_cpp->b1, "                false));\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::Object> object(\n");
+        Printf(b_xlf_grp_cpp->b1, "            new %s::%s(\n", module, p.name);
+        Printf(b_xlf_grp_cpp->b1, "                valueObject,\n");
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", 4, ',', true, true, true);
+        Printf(b_xlf_grp_cpp->b1, "                false));\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        std::string returnValue =\n");
+        Printf(b_xlf_grp_cpp->b1, "            reposit::RepositoryXL::instance().storeObject(objectID, object, true);\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        static char ret[XL_MAX_STR_LEN];\n");
+        Printf(b_xlf_grp_cpp->b1, "        reposit::stringToChar(returnValue, ret);\n");
+        Printf(b_xlf_grp_cpp->b1, "        return ret;\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    } catch (const std::exception &e) {\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        reposit::RepositoryXL::instance().logError(e.what(), functionCall);\n");
+        Printf(b_xlf_grp_cpp->b1, "        return 0;\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    }\n");
+        Printf(b_xlf_grp_cpp->b1, "}\n");
 
-            if (!voIncludeHasBeengenerated) {
-                Printf(b_xlf_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
-                voIncludeHasBeengenerated = true;
-            }
-
-            count_.constructors++;
-            count_.total2++;
+        if (!voIncludeHasBeengenerated) {
+            Printf(b_xlf_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            voIncludeHasBeengenerated = true;
         }
+
+        count_.constructors++;
+        count_.total2++;
     }
 
     void emitLoopFunc(ParmsMemb &p, String *loopParameter) {
@@ -1420,13 +1547,11 @@ struct GroupExcelRegister : public GroupBase {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        if (generateCtor) {
-            excelRegister(b_xlr_grp_cpp->b0, p.n, p.objectID, p.parms2);
-            excelUnregister(b_xlr_grp_cpp->b1, p.n, p.objectID, p.parms2);
+        excelRegister(b_xlr_grp_cpp->b0, p.n, p.objectID, p.parms2);
+        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.objectID, p.parms2);
 
-            count_.constructors++;
-            count_.total2++;
-        }
+        count_.constructors++;
+        count_.total2++;
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
@@ -1563,58 +1688,56 @@ struct GroupCountify : public GroupBase {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        if (generateCtor) {
-            Printf(b_cfy_grp_cpp->b0,"//****CTOR*****\n");
-            Printf(b_cfy_grp_cpp->b0,"extern \"C\" {\n");
-            Printf(b_cfy_grp_cpp->b0,"COUNTIFY_API\n");
-            Printf(b_cfy_grp_cpp->b0,"const char *%s(\n", p.funcName);
-            emitParmList(p.parms2, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_parm", 2);
-            Printf(b_cfy_grp_cpp->b0,"    ) {\n");
-            Printf(b_cfy_grp_cpp->b0,"\n");
-            Printf(b_cfy_grp_cpp->b0,"    try {\n");
-            Printf(b_cfy_grp_cpp->b0,"\n");
-            Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
-            Printf(b_cfy_grp_cpp->b0,"\n");
-            Printf(b_cfy_grp_cpp->b0,"        initializeAddin();\n");
-            Printf(b_cfy_grp_cpp->b0,"\n");
-            Printf(b_cfy_grp_cpp->b0,"        // Convert input types into Library types\n\n");
-            emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_cnvt", 2, 0, false);
-            Printf(b_cfy_grp_cpp->b0,"\n");
-            Printf(b_cfy_grp_cpp->b0,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
-            Printf(b_cfy_grp_cpp->b0,"            new %s::ValueObjects::%s(\n", module, p.funcName);
-            Printf(b_cfy_grp_cpp->b0,"                objectID,\n");
-            emitParmList(p.parms, b_cfy_grp_cpp->b0, 0, "rp_tm_default", 4, ',', true, false, true);
-            Printf(b_cfy_grp_cpp->b0,"                false));\n");
-            Printf(b_cfy_grp_cpp->b0,"        boost::shared_ptr<reposit::Object> object(\n");
-            Printf(b_cfy_grp_cpp->b0,"            new %s::%s(\n", module, p.name);
-            Printf(b_cfy_grp_cpp->b0,"                valueObject,\n");
-            emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_args", 4, ',', true, true, true);
-            Printf(b_cfy_grp_cpp->b0,"                false));\n");
-            Printf(b_cfy_grp_cpp->b0,"        static std::string returnValue;\n");
-            Printf(b_cfy_grp_cpp->b0,"        returnValue =\n");
-            Printf(b_cfy_grp_cpp->b0,"            reposit::Repository::instance().storeObject(\n");
-            Printf(b_cfy_grp_cpp->b0,"                objectID, object, true, valueObject);\n");
-            Printf(b_cfy_grp_cpp->b0,"\n");
-            Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
-            Printf(b_cfy_grp_cpp->b0,"\n");
-            Printf(b_cfy_grp_cpp->b0,"        return returnValue.c_str();\n");
-            Printf(b_cfy_grp_cpp->b0,"\n");
-            Printf(b_cfy_grp_cpp->b0,"    } catch (const std::exception &e) {\n");
-            Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
-            Printf(b_cfy_grp_cpp->b0,"        static std::string errorMessage;\n");
-            Printf(b_cfy_grp_cpp->b0,"        errorMessage = e.what();\n");
-            Printf(b_cfy_grp_cpp->b0,"        return errorMessage.c_str();\n");
-            Printf(b_cfy_grp_cpp->b0,"    } catch (...) {\n");
-            Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
-            Printf(b_cfy_grp_cpp->b0,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
-            Printf(b_cfy_grp_cpp->b0,"        return errorMessage.c_str();\n");
-            Printf(b_cfy_grp_cpp->b0,"    }\n");
-            Printf(b_cfy_grp_cpp->b0,"}\n\n");
-            Printf(b_cfy_grp_cpp->b0,"} // extern \"C\"\n");
+        Printf(b_cfy_grp_cpp->b0,"//****CTOR*****\n");
+        Printf(b_cfy_grp_cpp->b0,"extern \"C\" {\n");
+        Printf(b_cfy_grp_cpp->b0,"COUNTIFY_API\n");
+        Printf(b_cfy_grp_cpp->b0,"const char *%s(\n", p.funcName);
+        emitParmList(p.parms2, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_parm", 2);
+        Printf(b_cfy_grp_cpp->b0,"    ) {\n");
+        Printf(b_cfy_grp_cpp->b0,"\n");
+        Printf(b_cfy_grp_cpp->b0,"    try {\n");
+        Printf(b_cfy_grp_cpp->b0,"\n");
+        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b0,"\n");
+        Printf(b_cfy_grp_cpp->b0,"        initializeAddin();\n");
+        Printf(b_cfy_grp_cpp->b0,"\n");
+        Printf(b_cfy_grp_cpp->b0,"        // Convert input types into Library types\n\n");
+        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_cnvt", 2, 0, false);
+        Printf(b_cfy_grp_cpp->b0,"\n");
+        Printf(b_cfy_grp_cpp->b0,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+        Printf(b_cfy_grp_cpp->b0,"            new %s::ValueObjects::%s(\n", module, p.funcName);
+        Printf(b_cfy_grp_cpp->b0,"                objectID,\n");
+        emitParmList(p.parms, b_cfy_grp_cpp->b0, 0, "rp_tm_default", 4, ',', true, false, true);
+        Printf(b_cfy_grp_cpp->b0,"                false));\n");
+        Printf(b_cfy_grp_cpp->b0,"        boost::shared_ptr<reposit::Object> object(\n");
+        Printf(b_cfy_grp_cpp->b0,"            new %s::%s(\n", module, p.name);
+        Printf(b_cfy_grp_cpp->b0,"                valueObject,\n");
+        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_args", 4, ',', true, true, true);
+        Printf(b_cfy_grp_cpp->b0,"                false));\n");
+        Printf(b_cfy_grp_cpp->b0,"        static std::string returnValue;\n");
+        Printf(b_cfy_grp_cpp->b0,"        returnValue =\n");
+        Printf(b_cfy_grp_cpp->b0,"            reposit::Repository::instance().storeObject(\n");
+        Printf(b_cfy_grp_cpp->b0,"                objectID, object, true, valueObject);\n");
+        Printf(b_cfy_grp_cpp->b0,"\n");
+        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b0,"\n");
+        Printf(b_cfy_grp_cpp->b0,"        return returnValue.c_str();\n");
+        Printf(b_cfy_grp_cpp->b0,"\n");
+        Printf(b_cfy_grp_cpp->b0,"    } catch (const std::exception &e) {\n");
+        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b0,"        static std::string errorMessage;\n");
+        Printf(b_cfy_grp_cpp->b0,"        errorMessage = e.what();\n");
+        Printf(b_cfy_grp_cpp->b0,"        return errorMessage.c_str();\n");
+        Printf(b_cfy_grp_cpp->b0,"    } catch (...) {\n");
+        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b0,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
+        Printf(b_cfy_grp_cpp->b0,"        return errorMessage.c_str();\n");
+        Printf(b_cfy_grp_cpp->b0,"    }\n");
+        Printf(b_cfy_grp_cpp->b0,"}\n\n");
+        Printf(b_cfy_grp_cpp->b0,"} // extern \"C\"\n");
 
-            count_.constructors++;
-            count_.total2++;
-        }
+        count_.constructors++;
+        count_.total2++;
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
@@ -1770,6 +1893,12 @@ struct AddinLibraryObjects : public AddinImpl<GroupLibraryObjects> {
 struct AddinValueObjects : public AddinImpl<GroupValueObjects> {
 
     AddinValueObjects() : AddinImpl("Value Objects") {}
+
+    virtual void functionWrapperImplCtor(ParmsCtor &p) {
+        if (generateCtor) {
+            AddinImpl::functionWrapperImplCtor(p);
+        }
+    }
 };
 
 struct AddinSerializationCreate : public AddinImpl<GroupSerializationCreate> {
@@ -1785,6 +1914,12 @@ struct AddinSerializationCreate : public AddinImpl<GroupSerializationCreate> {
         Printf(b_scr_add_hpp->b0, "#ifndef create_all_hpp\n");
         Printf(b_scr_add_hpp->b0, "#define create_all_hpp\n");
         Printf(b_scr_add_hpp->b0, "\n");
+    }
+
+    virtual void functionWrapperImplCtor(ParmsCtor &p) {
+        if (generateCtor) {
+            AddinImpl::functionWrapperImplCtor(p);
+        }
     }
 
     virtual void clear() {
@@ -1846,8 +1981,8 @@ struct AddinSerializationRegister : public AddinImpl<GroupSerializationRegister>
     }
 
     virtual void functionWrapperImplCtor(ParmsCtor &p) {
-        AddinImpl::functionWrapperImplCtor(p);
         if (generateCtor) {
+            AddinImpl::functionWrapperImplCtor(p);
             Printf(b_srg_add_cpp->b0, "    registerCreator(\"%s\", create_%s);\n", p.funcRename, p.funcRename);
         }
     }
@@ -1905,19 +2040,19 @@ struct AddinCpp : public AddinImpl<GroupCpp> {
     }
 
     virtual void functionWrapperImplFunc(ParmsFunc &p) {
-        if (checkAttribute(p.n, "feature:rp:generate:cpp", "1")) {
+        if (checkAttribute(p.n, "feature:rp:generate:c++", "1")) {
             AddinImpl::functionWrapperImplFunc(p);
         }
     }
 
     virtual void functionWrapperImplCtor(ParmsCtor &p) {
-        if (checkAttribute(p.n, "feature:rp:generate:cpp", "1")) {
+        if (checkAttribute(p.n, "feature:rp:generate:c++", "1") && generateCtor) {
             AddinImpl::functionWrapperImplCtor(p);
         }
     }
 
     virtual void functionWrapperImplMemb(ParmsMemb &p) {
-        if (checkAttribute(p.n, "feature:rp:generate:cpp", "1")) {
+        if (checkAttribute(p.n, "feature:rp:generate:c++", "1")) {
             AddinImpl::functionWrapperImplMemb(p);
         }
     }
@@ -1941,9 +2076,97 @@ struct AddinCpp : public AddinImpl<GroupCpp> {
     }
 };
 
+struct AddinCSharp : public AddinImpl<GroupCSharp> {
+
+    Buffer *b_csh_exp_all_cs;
+
+    AddinCSharp() : AddinImpl("C# Addin") {}
+
+    virtual void top() {
+        b_csh_exp_all_cs = new Buffer("b_csh_exp_all_cs", NewStringf("%s/Export.cs", cshDir));
+
+        Printf(b_csh_exp_all_cs->b0, "\n");
+        Printf(b_csh_exp_all_cs->b0, "using System;\n");
+        Printf(b_csh_exp_all_cs->b0, "using System.Collections.Generic;\n");
+        Printf(b_csh_exp_all_cs->b0, "using System.Linq;\n");
+        Printf(b_csh_exp_all_cs->b0, "using System.Text;\n");
+        Printf(b_csh_exp_all_cs->b0, "using System.Runtime.InteropServices;\n");
+        Printf(b_csh_exp_all_cs->b0, "\n");
+        Printf(b_csh_exp_all_cs->b0, "namespace QuantLibAddin\n");
+        Printf(b_csh_exp_all_cs->b0, "{\n");
+        Printf(b_csh_exp_all_cs->b0, "    class Export\n");
+        Printf(b_csh_exp_all_cs->b0, "    {\n");
+        Printf(b_csh_exp_all_cs->b0, "        // qlInitializeAddin\n");
+        Printf(b_csh_exp_all_cs->b0, "        [DllImport(\"..\\\\..\\\\..\\\\..\\\\bin\\\\AddinCSharp-vc90-mt-s-1_7_0.dll\", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+        Printf(b_csh_exp_all_cs->b0, "        public static extern void qlInitializeAddin();\n");
+    }
+
+    virtual void functionWrapperImplFunc(ParmsFunc &p) {
+        if (checkAttribute(p.n, "feature:rp:generate:c#", "1")) {
+            AddinImpl::functionWrapperImplFunc(p);
+            Printf(b_csh_exp_all_cs->b0, "\n");
+            Printf(b_csh_exp_all_cs->b0, "        // %s\n", p.funcName);
+            Printf(b_csh_exp_all_cs->b0, "        [DllImport(\"..\\\\..\\\\..\\\\..\\\\bin\\\\AddinCSharp-vc90-mt-s-1_7_0.dll\", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+            emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rtcp", 2);
+            Printf(b_csh_exp_all_cs->b0, "        public static extern\n");
+            emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rscp", 2);
+            Printf(b_csh_exp_all_cs->b0, "        %s(\n", p.funcName);
+            emitParmList(p.parms, b_csh_exp_all_cs->b0, 2, "rp_tm_csh_clcp", 3);
+            Printf(b_csh_exp_all_cs->b0, "        );\n");
+        }
+    }
+
+    virtual void functionWrapperImplCtor(ParmsCtor &p) {
+        if (checkAttribute(p.n, "feature:rp:generate:c#", "1") && generateCtor) {
+            AddinImpl::functionWrapperImplCtor(p);
+            Printf(b_csh_exp_all_cs->b0, "\n");
+            Printf(b_csh_exp_all_cs->b0, "        // %s\n", p.funcName);
+            Printf(b_csh_exp_all_cs->b0, "        [DllImport(\"..\\\\..\\\\..\\\\..\\\\bin\\\\AddinCSharp-vc90-mt-s-1_7_0.dll\", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+            Printf(b_csh_exp_all_cs->b0, "        [return: MarshalAs(UnmanagedType.LPStr)]\n");
+            Printf(b_csh_exp_all_cs->b0, "        public static extern string %s(\n", p.funcName);
+            emitParmList(p.parms2, b_csh_exp_all_cs->b0, 2, "rp_tm_csh_clcp", 3);
+            Printf(b_csh_exp_all_cs->b0, "        );\n");
+        }
+    }
+
+    virtual void functionWrapperImplMemb(ParmsMemb &p) {
+        if (checkAttribute(p.n, "feature:rp:generate:c#", "1")) {
+            AddinImpl::functionWrapperImplMemb(p);
+            Printf(b_csh_exp_all_cs->b0, "\n");
+            Printf(b_csh_exp_all_cs->b0, "        // %s\n", p.funcName);
+            Printf(b_csh_exp_all_cs->b0, "        [DllImport(\"..\\\\..\\\\..\\\\..\\\\bin\\\\AddinCSharp-vc90-mt-s-1_7_0.dll\", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+            emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rtcp", 2);
+            Printf(b_csh_exp_all_cs->b0, "        public static extern\n");
+            emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rscp", 2);
+            Printf(b_csh_exp_all_cs->b0, "        %s(\n", p.funcName);
+            emitParmList(p.parms2, b_csh_exp_all_cs->b0, 2, "rp_tm_csh_clcp", 3);
+            Printf(b_csh_exp_all_cs->b0, "        );\n");
+        }
+    }
+
+    virtual void clear() {
+
+        AddinImpl::clear();
+
+        Printf(b_csh_exp_all_cs->b0, "    }\n");
+        Printf(b_csh_exp_all_cs->b0, "}\n");
+        Printf(b_csh_exp_all_cs->b0, "\n");
+
+        printf("%s - Addin Files", name_.c_str());
+        printf("%s\n", std::string(66-name_.length(), '=').c_str());
+        b_csh_exp_all_cs->clear(count);
+    }
+};
+
 struct AddinExcelFunctions : public AddinImpl<GroupExcelFunctions> {
 
     AddinExcelFunctions() : AddinImpl("Excel Addin - Functions") {}
+
+    virtual void functionWrapperImplCtor(ParmsCtor &p) {
+        if (generateCtor) {
+            AddinImpl::functionWrapperImplCtor(p);
+        }
+    }
 };
 
 struct AddinExcelRegister : public AddinImpl<GroupExcelRegister> {
@@ -1966,6 +2189,12 @@ struct AddinExcelRegister : public AddinImpl<GroupExcelRegister> {
         Printf(b_xlr_add_all_cpp->b3, "\n");
         Printf(b_xlr_add_all_cpp->b3, "void unregisterFunctions(const XLOPER& xDll) {\n");
         Printf(b_xlr_add_all_cpp->b3, "\n");
+    }
+
+    virtual void functionWrapperImplCtor(ParmsCtor &p) {
+        if (generateCtor) {
+            AddinImpl::functionWrapperImplCtor(p);
+        }
     }
 
     virtual void clear() {
@@ -2011,7 +2240,7 @@ struct AddinCountify : public AddinImpl<GroupCountify> {
     }
 
     virtual void functionWrapperImplCtor(ParmsCtor &p) {
-        if (checkAttribute(p.n, "feature:rp:generate:countify", "1")) {
+        if (checkAttribute(p.n, "feature:rp:generate:countify", "1") && generateCtor) {
             AddinImpl::functionWrapperImplCtor(p);
             mongoFunc(b_cfy_add_mng_txt->b0, p.name, p.funcName, p.n, p.parms2);
         }
@@ -2041,41 +2270,6 @@ struct AddinList {
 
     void appendAddin(Addin *addin) {
         addinList_.push_back(addin);
-    }
-
-    void clear() {
-        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
-            Addin *addin = *i;
-            addin->clear();
-        }
-        printf("%s\n", std::string(80, '=').c_str());
-        printf("Function Count                      Function Constructor      Member       Total\n");
-        printf("%s\n", std::string(80, '=').c_str());
-        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
-            Addin *addin = *i;
-            printf("%s", addin->name_.c_str());
-            printf("%s", std::string(32-addin->name_.length(), ' ').c_str());
-            printf("%12d%12d%12d%12d\n",
-                addin->count.functions, addin->count.constructors, addin->count.members, addin->count.total2);
-        }
-        printf("%s\n", std::string(80, '=').c_str());
-        printf("File Count                           Created     Updated   Unchanged       Total\n");
-        printf("%s\n", std::string(80, '=').c_str());
-        Count c;
-        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
-            Addin *addin = *i;
-            printf("%s", addin->name_.c_str());
-            printf("%s", std::string(32-addin->name_.length(), ' ').c_str());
-            printf("%12d%12d%12d%12d\n",
-                addin->count.created, addin->count.updated, addin->count.unchanged, addin->count.total);
-            c.add(addin->count);
-        }
-        printf("%s\n", std::string(80, '=').c_str());
-        printf("Total");
-        printf("%s", std::string(27, ' ').c_str());
-        printf("%12d%12d%12d%12d\n",
-            c.created, c.updated, c.unchanged, c.total);
-        printf("%s\n", std::string(80, '=').c_str());
     }
 
     void top() {
@@ -2111,6 +2305,41 @@ struct AddinList {
             Addin *addin = *i;
             addin->functionWrapperImplMemb(p);
         }
+    }
+
+    void clear() {
+        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
+            Addin *addin = *i;
+            addin->clear();
+        }
+        printf("%s\n", std::string(80, '=').c_str());
+        printf("Function Count                      Function Constructor      Member       Total\n");
+        printf("%s\n", std::string(80, '=').c_str());
+        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
+            Addin *addin = *i;
+            printf("%s", addin->name_.c_str());
+            printf("%s", std::string(32-addin->name_.length(), ' ').c_str());
+            printf("%12d%12d%12d%12d\n",
+                addin->count.functions, addin->count.constructors, addin->count.members, addin->count.total2);
+        }
+        printf("%s\n", std::string(80, '=').c_str());
+        printf("File Count                           Created     Updated   Unchanged       Total\n");
+        printf("%s\n", std::string(80, '=').c_str());
+        Count c;
+        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
+            Addin *addin = *i;
+            printf("%s", addin->name_.c_str());
+            printf("%s", std::string(32-addin->name_.length(), ' ').c_str());
+            printf("%12d%12d%12d%12d\n",
+                addin->count.created, addin->count.updated, addin->count.unchanged, addin->count.total);
+            c.add(addin->count);
+        }
+        printf("%s\n", std::string(80, '=').c_str());
+        printf("Total");
+        printf("%s", std::string(27, ' ').c_str());
+        printf("%12d%12d%12d%12d\n",
+            c.created, c.updated, c.unchanged, c.total);
+        printf("%s\n", std::string(80, '=').c_str());
     }
 };
 
@@ -2159,8 +2388,11 @@ public:
    addinList_.appendAddin(new AddinSerializationRegister);
 
     for (int i = 1; i < argc; i++) {
-        if ( (strcmp(argv[i],"-gencpp") == 0)) {
+        if ( (strcmp(argv[i],"-genc++") == 0)) {
             addinList_.appendAddin(new AddinCpp);
+            Swig_mark_arg(i);
+        } else if ( (strcmp(argv[i],"-genc#") == 0)) {
+            addinList_.appendAddin(new AddinCSharp);
             Swig_mark_arg(i);
         } else if ( (strcmp(argv[i],"-genxll") == 0)) {
             addinList_.appendAddin(new AddinExcelFunctions);
@@ -2194,8 +2426,10 @@ virtual int top(Node *n) {
     if (Node *n3 = Getattr(n2, "options")) {
         if (String *n4 = getNode(n3, "rp_obj_dir"))
             objDir = n4;
-        if (String *n5 = getNode(n3, "rp_add_dir"))
-            addDir = n5;
+        if (String *s = getNode(n3, "rp_add_dir"))
+            addDir = s;
+        if (String *s = getNode(n3, "rp_csh_dir"))
+            cshDir = s;
         if (String *n6 = getNode(n3, "rp_xll_dir"))
             xllDir = n6;
         if (String *n6a = getNode(n3, "rp_cfy_dir"))
@@ -2212,6 +2446,7 @@ virtual int top(Node *n) {
     printf("addinCppNameSpace=%s\n", Char(addinCppNameSpace));
     printf("rp_obj_dir=%s\n", Char(objDir));
     printf("rp_add_dir=%s\n", Char(addDir));
+    printf("rp_csh_dir=%s\n", Char(cshDir));
     printf("rp_xll_dir=%s\n", Char(xllDir));
     printf("rp_cfy_dir=%s\n", Char(cfyDir));
     printf("rp_obj_inc=%s\n", Char(objInc));
@@ -2560,7 +2795,7 @@ int functionWrapperImplFunc(Node *n) {
     p.name   = Getattr(n,"name");
     p.parms  = Getattr(n,"parms");
     p.symname   = Getattr(n,"sym:name");
-    bool staticMember = checkAttribute(p.n, "globalfunctionHandler:view", "staticmemberfunctionHandler");
+    bool staticMember = 1 == checkAttribute(p.n, "globalfunctionHandler:view", "staticmemberfunctionHandler");
     if (staticMember)
         Replaceall(p.symname, "_", "");
     p.symnameUpper = copyUpper(p.symname);
