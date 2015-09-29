@@ -1269,16 +1269,6 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "// FIXME only required if the file contains a looping function\n");
         Printf(b_xlf_grp_cpp->b1, "#include \"%s/loop.hpp\"\n", objInc);
         Printf(b_xlf_grp_cpp->b1, "\n");
-        Printf(b_xlf_grp_cpp->b1, "/* Use BOOST_MSVC instead of _MSC_VER since some other vendors (Metrowerks,\n");
-        Printf(b_xlf_grp_cpp->b1, "   for example) also #define _MSC_VER\n");
-        Printf(b_xlf_grp_cpp->b1, "*/\n");
-        Printf(b_xlf_grp_cpp->b1, "#ifdef BOOST_MSVC\n");
-        Printf(b_xlf_grp_cpp->b1, "#  define BOOST_LIB_DIAGNOSTIC\n");
-        Printf(b_xlf_grp_cpp->b1, "#  include <rp/auto_link.hpp>\n");
-        Printf(b_xlf_grp_cpp->b1, "#  undef BOOST_LIB_DIAGNOSTIC\n");
-        Printf(b_xlf_grp_cpp->b1, "#endif\n");
-        Printf(b_xlf_grp_cpp->b1, "#include <sstream>\n");
-        Printf(b_xlf_grp_cpp->b1, "\n");
     }
 
     void emitLoopFunc(ParmsFunc &p, String *loopParameter) {
