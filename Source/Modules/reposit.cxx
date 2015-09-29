@@ -953,9 +953,10 @@ struct GroupCpp : public GroupBase {
 
     Buffer *b_cpp_grp_hpp;
     Buffer *b_cpp_grp_cpp;
-    bool voIncludeHasBeengenerated;
+    bool groupContainsClass;
+    bool groupContainsConstructor;
 
-    GroupCpp(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), voIncludeHasBeengenerated(false) {
+    GroupCpp(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), groupContainsClass(false), groupContainsConstructor(false) {
 
         b_cpp_grp_hpp = new Buffer("b_cpp_grp_hpp", NewStringf("%s/add_%s.hpp", addDir, pragmas_.groupName_));
         b_cpp_grp_cpp = new Buffer("b_cpp_grp_cpp", NewStringf("%s/add_%s.cpp", addDir, pragmas_.groupName_));
@@ -980,19 +981,15 @@ struct GroupCpp : public GroupBase {
         // FIXME this #include is only required if the file contains enumerations.
         //Printf(b_cpp_grp_cpp->b0, "#include <rp/enumerations/typefactory.hpp>\n");
 
-        if (pragmas_.automatic_) {
-            Printf(b_cpp_grp_cpp->b1, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
-        } else {
-            Printf(b_cpp_grp_cpp->b1, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
-        }
+        // From this point on we stop writing to b0 and write to b1 instead.
+        // After all processing finishes we will append some more #includes to b0 depending on what code this group requires.
+
         Printf(b_cpp_grp_cpp->b1, "//FIXME include only factories for types used in the current file\n", objInc);
         Printf(b_cpp_grp_cpp->b1, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_cpp_grp_cpp->b1, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_cpp_grp_cpp->b1, "#include <rp/repository.hpp>\n");
         //Printf(b_cpp_grp_cpp->b1, "#include <AddinCpp/add_all.hpp>\n");
         Printf(b_cpp_grp_cpp->b1, "\n");
-
-        Append(b_cpp_grp_cpp->b1, pragmas_.add_inc);
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
@@ -1022,42 +1019,41 @@ struct GroupCpp : public GroupBase {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        Printf(b_cpp_grp_hpp->b0,"\n");
-        Printf(b_cpp_grp_hpp->b0,"    std::string %s(\n", p.funcName);
-        emitParmList(p.parms2, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", 2);
-        Printf(b_cpp_grp_hpp->b0,"    );\n\n");
+        if (generateCtor) {
+            Printf(b_cpp_grp_hpp->b0,"\n");
+            Printf(b_cpp_grp_hpp->b0,"    std::string %s(\n", p.funcName);
+            emitParmList(p.parms2, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", 2);
+            Printf(b_cpp_grp_hpp->b0,"    );\n\n");
 
-        Printf(b_cpp_grp_cpp->b1,"//****CTOR*****\n");
-        Printf(b_cpp_grp_cpp->b1,"std::string %s::%s(\n", addinCppNameSpace, p.funcName);
-        emitParmList(p.parms2, b_cpp_grp_cpp->b1, 2, "rp_tm_cpp_parm", 2);
-        Printf(b_cpp_grp_cpp->b1,"    ) {\n");
-        Printf(b_cpp_grp_cpp->b1,"\n");
-        Printf(b_cpp_grp_cpp->b1,"    // Convert input types into Library types\n\n");
-        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_cnvt", 1, 0, false);
-        Printf(b_cpp_grp_cpp->b1,"\n");
-        Printf(b_cpp_grp_cpp->b1,"    boost::shared_ptr<reposit::ValueObject> valueObject(\n");
-        Printf(b_cpp_grp_cpp->b1,"        new %s::ValueObjects::%s(\n", module, p.funcName);
-        Printf(b_cpp_grp_cpp->b1,"            objectID,\n");
-        emitParmList(p.parms, b_cpp_grp_cpp->b1, 0, "rp_tm_default", 3, ',', true, false, true);
-        Printf(b_cpp_grp_cpp->b1,"            false));\n");
-        Printf(b_cpp_grp_cpp->b1,"    boost::shared_ptr<reposit::Object> object(\n");
-        Printf(b_cpp_grp_cpp->b1,"        new %s::%s(\n", module, p.name);
-        Printf(b_cpp_grp_cpp->b1,"            valueObject,\n");
-        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_args", 3, ',', true, true, true);
-        Printf(b_cpp_grp_cpp->b1,"            false));\n");
-        Printf(b_cpp_grp_cpp->b1,"    std::string returnValue =\n");
-        Printf(b_cpp_grp_cpp->b1,"        reposit::Repository::instance().storeObject(\n");
-        Printf(b_cpp_grp_cpp->b1,"            objectID, object, false, valueObject);\n");
-        Printf(b_cpp_grp_cpp->b1,"    return returnValue;\n");
-        Printf(b_cpp_grp_cpp->b1,"}\n\n");
+            Printf(b_cpp_grp_cpp->b1,"//****CTOR*****\n");
+            Printf(b_cpp_grp_cpp->b1,"std::string %s::%s(\n", addinCppNameSpace, p.funcName);
+            emitParmList(p.parms2, b_cpp_grp_cpp->b1, 2, "rp_tm_cpp_parm", 2);
+            Printf(b_cpp_grp_cpp->b1,"    ) {\n");
+            Printf(b_cpp_grp_cpp->b1,"\n");
+            Printf(b_cpp_grp_cpp->b1,"    // Convert input types into Library types\n\n");
+            emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_cnvt", 1, 0, false);
+            Printf(b_cpp_grp_cpp->b1,"\n");
+            Printf(b_cpp_grp_cpp->b1,"    boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+            Printf(b_cpp_grp_cpp->b1,"        new %s::ValueObjects::%s(\n", module, p.funcName);
+            Printf(b_cpp_grp_cpp->b1,"            objectID,\n");
+            emitParmList(p.parms, b_cpp_grp_cpp->b1, 0, "rp_tm_default", 3, ',', true, false, true);
+            Printf(b_cpp_grp_cpp->b1,"            false));\n");
+            Printf(b_cpp_grp_cpp->b1,"    boost::shared_ptr<reposit::Object> object(\n");
+            Printf(b_cpp_grp_cpp->b1,"        new %s::%s(\n", module, p.name);
+            Printf(b_cpp_grp_cpp->b1,"            valueObject,\n");
+            emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_args", 3, ',', true, true, true);
+            Printf(b_cpp_grp_cpp->b1,"            false));\n");
+            Printf(b_cpp_grp_cpp->b1,"    std::string returnValue =\n");
+            Printf(b_cpp_grp_cpp->b1,"        reposit::Repository::instance().storeObject(\n");
+            Printf(b_cpp_grp_cpp->b1,"            objectID, object, false, valueObject);\n");
+            Printf(b_cpp_grp_cpp->b1,"    return returnValue;\n");
+            Printf(b_cpp_grp_cpp->b1,"}\n\n");
 
-        if (!voIncludeHasBeengenerated) {
-            Printf(b_cpp_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
-            voIncludeHasBeengenerated = true;
+            count_.constructors++;
+            count_.total2++;
+            groupContainsConstructor = true;
         }
-
-        count_.constructors++;
-        count_.total2++;
+        groupContainsClass = true;
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
@@ -1086,6 +1082,18 @@ struct GroupCpp : public GroupBase {
     }
 
     void clear() {
+
+        if (groupContainsConstructor)
+            Printf(b_cpp_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        if (groupContainsClass) {
+            if (pragmas_.automatic_) {
+                Printf(b_cpp_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            } else {
+                Printf(b_cpp_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            }
+        }
+        Append(b_cpp_grp_cpp->b0, pragmas_.add_inc);
+
         Printf(b_cpp_grp_hpp->b0, "\n");
         Printf(b_cpp_grp_hpp->b0, "} // namespace %s\n", addinCppNameSpace);
         Printf(b_cpp_grp_hpp->b0, "\n");
@@ -1102,9 +1110,10 @@ struct GroupCpp : public GroupBase {
 struct GroupCSharp : public GroupBase {
 
     Buffer *b_csh_grp_cpp;
-    bool voIncludeHasBeengenerated;
+    bool groupContainsClass;
+    bool groupContainsConstructor;
 
-    GroupCSharp(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), voIncludeHasBeengenerated(false) {
+    GroupCSharp(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), groupContainsClass(false), groupContainsConstructor(false) {
 
         b_csh_grp_cpp = new Buffer("b_csh_grp_cpp", NewStringf("%s/csh_%s.cpp", cshDir, pragmas_.groupName_));
 
@@ -1118,9 +1127,8 @@ struct GroupCSharp : public GroupBase {
         Printf(b_csh_grp_cpp->b0, "//FIXME include only factories for types used in the current file\n", objInc);
         Printf(b_csh_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_csh_grp_cpp->b0, "#include <windows.h>\n");
-        Printf(b_csh_grp_cpp->b1, "\n");
-
-        Append(b_csh_grp_cpp->b1, pragmas_.add_inc);
+        // From this point on we stop writing to b0 and write to b1 instead.
+        // After all processing finishes we will append some more #includes to b0 depending on what code this group requires.
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
@@ -1154,49 +1162,48 @@ struct GroupCSharp : public GroupBase {
     }
 
     void functionWrapperImplCtor(ParmsCtor &p) {
-        Printf(b_csh_grp_cpp->b1, "extern \"C\" __declspec(dllexport) char * __stdcall %s(\n", p.funcName);
-        emitParmList(p.parms2, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", 1);
-        Printf(b_csh_grp_cpp->b1, ") {\n");
-        Printf(b_csh_grp_cpp->b1, "    try {\n");
-        Printf(b_csh_grp_cpp->b1,"        std::cout << \"BEGIN - FUNCTION '%s'\" << std::endl;\n", p.funcName);
-        Printf(b_csh_grp_cpp->b1, "\n");
-        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", 2, 0, false);
-        Printf(b_csh_grp_cpp->b1,"\n");
-        Printf(b_csh_grp_cpp->b1,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
-        Printf(b_csh_grp_cpp->b1,"            new %s::ValueObjects::%s(\n", module, p.funcName);
-        Printf(b_csh_grp_cpp->b1,"                objectID,\n");
-        emitParmList(p.parms, b_csh_grp_cpp->b1, 0, "rp_tm_default", 4, ',', true, false, true);
-        Printf(b_csh_grp_cpp->b1,"                false));\n");
-        Printf(b_csh_grp_cpp->b1,"        boost::shared_ptr<reposit::Object> object(\n");
-        Printf(b_csh_grp_cpp->b1,"            new %s::%s(\n", module, p.name);
-        Printf(b_csh_grp_cpp->b1,"                valueObject,\n");
-        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", 4, ',', true, true, true);
-        Printf(b_csh_grp_cpp->b1,"                false));\n");
-        Printf(b_csh_grp_cpp->b1,"        std::string returnValue =\n");
-        Printf(b_csh_grp_cpp->b1,"            reposit::Repository::instance().storeObject(\n");
-        Printf(b_csh_grp_cpp->b1,"                objectID, object, false, valueObject);\n");
-        Printf(b_csh_grp_cpp->b1,"\n");
-        Printf(b_csh_grp_cpp->b1,"        ULONG size = returnValue.length() + sizeof(char);\n");
-        Printf(b_csh_grp_cpp->b1,"        char *ret = (char*)::CoTaskMemAlloc(size);\n");
-        Printf(b_csh_grp_cpp->b1,"        strcpy(ret, returnValue.c_str());\n");
-        Printf(b_csh_grp_cpp->b1,"        std::cout << \"END   - FUNCTION '%s'\" << std::endl;\n", p.funcName);
-        Printf(b_csh_grp_cpp->b1,"        return ret;\n");
-        Printf(b_csh_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
-        Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - \" << e.what() << std::endl;\n", p.funcName);
-        Printf(b_csh_grp_cpp->b1,"        return 0;\n");
-        Printf(b_csh_grp_cpp->b1,"    } catch (...) {\n");
-        Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - UNKNOWN EXCEPTION\" << std::endl;\n", p.funcName);
-        Printf(b_csh_grp_cpp->b1,"        return 0;\n");
-        Printf(b_csh_grp_cpp->b1,"    }\n");
-        Printf(b_csh_grp_cpp->b1,"}\n\n");
+        if (generateCtor) {
+            Printf(b_csh_grp_cpp->b1, "extern \"C\" __declspec(dllexport) char * __stdcall %s(\n", p.funcName);
+            emitParmList(p.parms2, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", 1);
+            Printf(b_csh_grp_cpp->b1, ") {\n");
+            Printf(b_csh_grp_cpp->b1, "    try {\n");
+            Printf(b_csh_grp_cpp->b1,"        std::cout << \"BEGIN - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+            Printf(b_csh_grp_cpp->b1, "\n");
+            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", 2, 0, false);
+            Printf(b_csh_grp_cpp->b1,"\n");
+            Printf(b_csh_grp_cpp->b1,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+            Printf(b_csh_grp_cpp->b1,"            new %s::ValueObjects::%s(\n", module, p.funcName);
+            Printf(b_csh_grp_cpp->b1,"                objectID,\n");
+            emitParmList(p.parms, b_csh_grp_cpp->b1, 0, "rp_tm_default", 4, ',', true, false, true);
+            Printf(b_csh_grp_cpp->b1,"                false));\n");
+            Printf(b_csh_grp_cpp->b1,"        boost::shared_ptr<reposit::Object> object(\n");
+            Printf(b_csh_grp_cpp->b1,"            new %s::%s(\n", module, p.name);
+            Printf(b_csh_grp_cpp->b1,"                valueObject,\n");
+            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", 4, ',', true, true, true);
+            Printf(b_csh_grp_cpp->b1,"                false));\n");
+            Printf(b_csh_grp_cpp->b1,"        std::string returnValue =\n");
+            Printf(b_csh_grp_cpp->b1,"            reposit::Repository::instance().storeObject(\n");
+            Printf(b_csh_grp_cpp->b1,"                objectID, object, false, valueObject);\n");
+            Printf(b_csh_grp_cpp->b1,"\n");
+            Printf(b_csh_grp_cpp->b1,"        ULONG size = returnValue.length() + sizeof(char);\n");
+            Printf(b_csh_grp_cpp->b1,"        char *ret = (char*)::CoTaskMemAlloc(size);\n");
+            Printf(b_csh_grp_cpp->b1,"        strcpy(ret, returnValue.c_str());\n");
+            Printf(b_csh_grp_cpp->b1,"        std::cout << \"END   - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+            Printf(b_csh_grp_cpp->b1,"        return ret;\n");
+            Printf(b_csh_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
+            Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - \" << e.what() << std::endl;\n", p.funcName);
+            Printf(b_csh_grp_cpp->b1,"        return 0;\n");
+            Printf(b_csh_grp_cpp->b1,"    } catch (...) {\n");
+            Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - UNKNOWN EXCEPTION\" << std::endl;\n", p.funcName);
+            Printf(b_csh_grp_cpp->b1,"        return 0;\n");
+            Printf(b_csh_grp_cpp->b1,"    }\n");
+            Printf(b_csh_grp_cpp->b1,"}\n\n");
 
-        if (!voIncludeHasBeengenerated) {
-            Printf(b_csh_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
-            voIncludeHasBeengenerated = true;
+            count_.constructors++;
+            count_.total2++;
+            groupContainsConstructor = true;
         }
-
-        count_.constructors++;
-        count_.total2++;
+        groupContainsClass = true;
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
@@ -1232,6 +1239,18 @@ struct GroupCSharp : public GroupBase {
     }
 
     void clear() {
+
+        if (groupContainsConstructor)
+            Printf(b_csh_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        if (groupContainsClass) {
+            if (pragmas_.automatic_) {
+                Printf(b_csh_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            } else {
+                Printf(b_csh_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            }
+        }
+        Append(b_csh_grp_cpp->b0, pragmas_.add_inc);
+
         Printf(b_csh_grp_cpp->b1, "\n");
         b_csh_grp_cpp->clear(count_);
     }
@@ -1240,9 +1259,10 @@ struct GroupCSharp : public GroupBase {
 struct GroupExcelFunctions : public GroupBase {
 
     Buffer *b_xlf_grp_cpp;
+    bool groupContainsClass;
     bool groupContainsConstructor;
 
-    GroupExcelFunctions(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), groupContainsConstructor(false) {
+    GroupExcelFunctions(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), groupContainsClass(false), groupContainsConstructor(false) {
 
         b_xlf_grp_cpp = new Buffer("b_xlf_grp_cpp", NewStringf("%s/functions/function_%s.cpp", xllDir, pragmas_.groupName_));
 
@@ -1335,51 +1355,54 @@ struct GroupExcelFunctions : public GroupBase {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        Printf(b_xlf_grp_cpp->b1, "\n");
-        Printf(b_xlf_grp_cpp->b1,"//****CTOR*****\n");
-        Printf(b_xlf_grp_cpp->b1, "DLLEXPORT char *%s(\n", p.funcRename);
-        emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm");
-        Printf(b_xlf_grp_cpp->b1, ") {\n");
-        Printf(b_xlf_grp_cpp->b1, "\n");
-        Printf(b_xlf_grp_cpp->b1, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
-        Printf(b_xlf_grp_cpp->b1, "\n");
-        Printf(b_xlf_grp_cpp->b1, "    try {\n");
-        Printf(b_xlf_grp_cpp->b1, "\n");
-        Printf(b_xlf_grp_cpp->b1, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
-        Printf(b_xlf_grp_cpp->b1, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcRename);
-        Printf(b_xlf_grp_cpp->b1, "\n");
-        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", 2, 0, false);
-        Printf(b_xlf_grp_cpp->b1, "\n");
-        Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
-        Printf(b_xlf_grp_cpp->b1, "            new %s::ValueObjects::%s(\n", module, p.funcRename);
-        Printf(b_xlf_grp_cpp->b1, "                objectID,\n");
-        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argfv", 4, ',', true, true, true);
-        Printf(b_xlf_grp_cpp->b1, "                false));\n");
-        Printf(b_xlf_grp_cpp->b1, "\n");
-        Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::Object> object(\n");
-        Printf(b_xlf_grp_cpp->b1, "            new %s::%s(\n", module, p.name);
-        Printf(b_xlf_grp_cpp->b1, "                valueObject,\n");
-        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", 4, ',', true, true, true);
-        Printf(b_xlf_grp_cpp->b1, "                false));\n");
-        Printf(b_xlf_grp_cpp->b1, "\n");
-        Printf(b_xlf_grp_cpp->b1, "        std::string returnValue =\n");
-        Printf(b_xlf_grp_cpp->b1, "            reposit::RepositoryXL::instance().storeObject(objectID, object, true);\n");
-        Printf(b_xlf_grp_cpp->b1, "\n");
-        Printf(b_xlf_grp_cpp->b1, "        static char ret[XL_MAX_STR_LEN];\n");
-        Printf(b_xlf_grp_cpp->b1, "        reposit::stringToChar(returnValue, ret);\n");
-        Printf(b_xlf_grp_cpp->b1, "        return ret;\n");
-        Printf(b_xlf_grp_cpp->b1, "\n");
-        Printf(b_xlf_grp_cpp->b1, "    } catch (const std::exception &e) {\n");
-        Printf(b_xlf_grp_cpp->b1, "\n");
-        Printf(b_xlf_grp_cpp->b1, "        reposit::RepositoryXL::instance().logError(e.what(), functionCall);\n");
-        Printf(b_xlf_grp_cpp->b1, "        return 0;\n");
-        Printf(b_xlf_grp_cpp->b1, "\n");
-        Printf(b_xlf_grp_cpp->b1, "    }\n");
-        Printf(b_xlf_grp_cpp->b1, "}\n");
+        if (generateCtor) {
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1,"//****CTOR*****\n");
+            Printf(b_xlf_grp_cpp->b1, "DLLEXPORT char *%s(\n", p.funcRename);
+            emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm");
+            Printf(b_xlf_grp_cpp->b1, ") {\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "    try {\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
+            Printf(b_xlf_grp_cpp->b1, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcRename);
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", 2, 0, false);
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+            Printf(b_xlf_grp_cpp->b1, "            new %s::ValueObjects::%s(\n", module, p.funcRename);
+            Printf(b_xlf_grp_cpp->b1, "                objectID,\n");
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argfv", 4, ',', true, true, true);
+            Printf(b_xlf_grp_cpp->b1, "                false));\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::Object> object(\n");
+            Printf(b_xlf_grp_cpp->b1, "            new %s::%s(\n", module, p.name);
+            Printf(b_xlf_grp_cpp->b1, "                valueObject,\n");
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", 4, ',', true, true, true);
+            Printf(b_xlf_grp_cpp->b1, "                false));\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "        std::string returnValue =\n");
+            Printf(b_xlf_grp_cpp->b1, "            reposit::RepositoryXL::instance().storeObject(objectID, object, true);\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "        static char ret[XL_MAX_STR_LEN];\n");
+            Printf(b_xlf_grp_cpp->b1, "        reposit::stringToChar(returnValue, ret);\n");
+            Printf(b_xlf_grp_cpp->b1, "        return ret;\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "    } catch (const std::exception &e) {\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "        reposit::RepositoryXL::instance().logError(e.what(), functionCall);\n");
+            Printf(b_xlf_grp_cpp->b1, "        return 0;\n");
+            Printf(b_xlf_grp_cpp->b1, "\n");
+            Printf(b_xlf_grp_cpp->b1, "    }\n");
+            Printf(b_xlf_grp_cpp->b1, "}\n");
 
-        groupContainsConstructor = true;
-        count_.constructors++;
-        count_.total2++;
+            count_.constructors++;
+            count_.total2++;
+            groupContainsConstructor = true;
+        }
+        groupContainsClass = true;
     }
 
     void emitLoopFunc(ParmsMemb &p, String *loopParameter) {
@@ -1449,8 +1472,9 @@ struct GroupExcelFunctions : public GroupBase {
 
     void clear() {
 
-        if (groupContainsConstructor) {
+        if (groupContainsConstructor)
             Printf(b_xlf_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        if (groupContainsClass) {
             if (pragmas_.automatic_) {
                 Printf(b_xlf_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
             } else {
@@ -1993,7 +2017,7 @@ struct AddinCpp : public AddinImpl<GroupCpp> {
     }
 
     virtual void functionWrapperImplCtor(ParmsCtor &p) {
-        if (checkAttribute(p.n, "feature:rp:generate:c++", "1") && generateCtor) {
+        if (checkAttribute(p.n, "feature:rp:generate:c++", "1")) {
             AddinImpl::functionWrapperImplCtor(p);
         }
     }
@@ -2064,7 +2088,7 @@ struct AddinCSharp : public AddinImpl<GroupCSharp> {
     }
 
     virtual void functionWrapperImplCtor(ParmsCtor &p) {
-        if (checkAttribute(p.n, "feature:rp:generate:c#", "1") && generateCtor) {
+        if (checkAttribute(p.n, "feature:rp:generate:c#", "1")) {
             AddinImpl::functionWrapperImplCtor(p);
             Printf(b_csh_exp_all_cs->b0, "\n");
             Printf(b_csh_exp_all_cs->b0, "        // %s\n", p.funcName);
@@ -2110,9 +2134,7 @@ struct AddinExcelFunctions : public AddinImpl<GroupExcelFunctions> {
     AddinExcelFunctions() : AddinImpl("Excel Addin - Functions") {}
 
     virtual void functionWrapperImplCtor(ParmsCtor &p) {
-        if (generateCtor) {
-            AddinImpl::functionWrapperImplCtor(p);
-        }
+        AddinImpl::functionWrapperImplCtor(p);
     }
 };
 
