@@ -379,26 +379,26 @@ struct Count {
 struct Pragmas {
     const String *groupName_;
     String *lib_inc;
-    String *cpp_inc;
     String *scr_inc;
+    String *add_inc;
     bool automatic_;
-    Pragmas() : groupName_(0), lib_inc(0), cpp_inc(0), scr_inc(0), automatic_(true) {}
+    Pragmas() : groupName_(0), lib_inc(0), add_inc(0), scr_inc(0), automatic_(true) {}
     Pragmas & operator= (const Pragmas & other) {
         groupName_ = other.groupName_;
         lib_inc = other.lib_inc;
-        cpp_inc = other.cpp_inc;
         scr_inc = other.scr_inc;
+        add_inc = other.add_inc;
         automatic_ = other.automatic_;
         return *this;
     }
     void setGroupName(const String *groupName) {
         groupName_ = groupName;
         lib_inc = NewString("");
-        cpp_inc = NewString("");
         scr_inc = NewString("");
+        add_inc = NewString("");
         Swig_register_filebyname(NewStringf("%s_library_hpp", groupName), lib_inc);
-        Swig_register_filebyname(NewStringf("%s_cppaddin_cpp", groupName), cpp_inc);
         Swig_register_filebyname(NewStringf("%s_serialization_cpp", groupName), scr_inc);
+        Swig_register_filebyname(NewStringf("%s_addin_cpp", groupName), add_inc);
     }
 };
 
@@ -535,22 +535,23 @@ struct GroupBase {
     Pragmas pragmas_;
     Count &count_;
     GroupBase(const Pragmas &pragmas, Count &count) : pragmas_(pragmas), count_(count) {}
+    virtual ~GroupBase() {}
+    virtual void functionWrapperImplFunc(ParmsFunc &) {}
+    virtual void functionWrapperImplMemb(ParmsMemb &) {}
+    virtual void functionWrapperImplCtor(ParmsCtor &) {}
 };
 
 struct GroupLibraryObjects : public GroupBase {
 
     Buffer *b_lib_grp_hpp;
-    Buffer *b_lib_grp_cpp;
-    bool generateCppFile;
+    bool generateHppFile;
 
-    GroupLibraryObjects(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), generateCppFile(false) {
+    GroupLibraryObjects(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), generateHppFile(false) {
 
         if (pragmas_.automatic_) {
             b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/obj_%s.hpp", objDir, pragmas_.groupName_));
-            b_lib_grp_cpp = new Buffer("b_lib_grp_cpp", NewStringf("%s/obj_%s.cpp", objDir, pragmas_.groupName_));
         } else {
             b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/objmanual_%s.hpp.template", objDir, pragmas_.groupName_));
-            b_lib_grp_cpp = new Buffer("b_lib_grp_cpp", NewStringf("%s/objmanual_%s.cpp.template", objDir, pragmas_.groupName_));
         }
 
         Printf(b_lib_grp_hpp->b0, "\n");
@@ -569,37 +570,6 @@ struct GroupLibraryObjects : public GroupBase {
         Printf(b_lib_grp_hpp->b0, "\n");
         Printf(b_lib_grp_hpp->b0,"namespace %s {\n", module);
         Printf(b_lib_grp_hpp->b0, "\n");
-
-        Printf(b_lib_grp_cpp->b0, "\n");
-        if (pragmas_.automatic_) {
-            Printf(b_lib_grp_cpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, pragmas_.groupName_);
-        } else {
-            Printf(b_lib_grp_cpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, pragmas_.groupName_);
-        }
-        Printf(b_lib_grp_cpp->b0, "\n");
-    }
-
-    void functionWrapperImplFunc(ParmsFunc & /*p*/) {
-
-        //Printf(b_lib_grp_hpp->b0,"\n");
-        //emitTypeMap(b_lib_grp_hpp->b0, p.n, "rp_tm_default", 1);
-        //Printf(b_lib_grp_hpp->b0,"    %s(\n", p.symname);
-        //emitParmList(p.parms, b_lib_grp_hpp->b0, 2, "rp_tm_default", 2);
-        //Printf(b_lib_grp_hpp->b0,"    );\n");
-
-        //emitTypeMap(b_lib_grp_cpp->b0, p.n, "rp_tm_default");
-        //Printf(b_lib_grp_cpp->b0,"%s::%s(\n", module, p.symname);
-        //emitParmList(p.parms, b_lib_grp_cpp->b0, 2, "rp_tm_default", 2);
-        //Printf(b_lib_grp_cpp->b0,"    ) {\n");
-        //emitTypeMap(b_lib_grp_cpp->b0, p.n, "rp_tm_lib_rtst", 2);
-        //Printf(b_lib_grp_cpp->b0,"        %s(\n", p.name);
-        //emitParmList(p.parms, b_lib_grp_cpp->b0, 0, "rp_tm_default", 3, ',', true, true);
-        //Printf(b_lib_grp_cpp->b0,"        );\n");
-        //Printf(b_lib_grp_cpp->b0,"}\n");
-
-        //count_.functions++;
-        //count_.total2++;
-        //generateCppFile = true;
     }
 
     void functionWrapperImplCtor(ParmsCtor &p) {
@@ -644,9 +614,7 @@ struct GroupLibraryObjects : public GroupBase {
 
         count_.constructors++;
         count_.total2++;
-    }
-
-    void functionWrapperImplMemb(ParmsMemb & /*p*/) {
+        generateHppFile = true;
     }
 
     void clear() {
@@ -656,10 +624,7 @@ struct GroupLibraryObjects : public GroupBase {
         Printf(b_lib_grp_hpp->b0, "#endif\n");
         Printf(b_lib_grp_hpp->b0, "\n");
 
-        Printf(b_lib_grp_cpp->b0, "\n");
-
-        b_lib_grp_hpp->clear(count_);
-        b_lib_grp_cpp->clear(count_, generateCppFile);
+        b_lib_grp_hpp->clear(count_, generateHppFile);
     }
 };
 
@@ -698,9 +663,6 @@ struct GroupValueObjects : public GroupBase {
         Printf(b_vob_grp_cpp->b0, "\n");
         Printf(b_vob_grp_cpp->b0, "namespace ValueObjects {\n");
         Printf(b_vob_grp_cpp->b0, "\n");
-    }
-
-    void functionWrapperImplFunc(ParmsFunc & /*p*/) {
     }
 
     void functionWrapperImplCtor(ParmsCtor &p) {
@@ -901,9 +863,6 @@ struct GroupSerializationCreate : public GroupBase {
         generateOutput = true;
     }
 
-    void functionWrapperImplMemb(ParmsMemb & /*p*/) {
-    }
-
     void clear() {
 
         Printf(b_scr_grp_hpp->b0, "\n");
@@ -963,9 +922,6 @@ struct GroupSerializationRegister : public GroupBase {
         Printf(b_srg_grp_cpp->b1, "\n");
     }
 
-    void functionWrapperImplFunc(ParmsFunc & /*p*/) {
-    }
-
     void functionWrapperImplCtor(ParmsCtor &p) {
 
         Printf(b_srg_grp_cpp->b0, "    // class ID %d in the boost serialization framework\n", idNum);
@@ -980,9 +936,6 @@ struct GroupSerializationRegister : public GroupBase {
         count_.total2++;
 
         generateOutput = true;
-    }
-
-    void functionWrapperImplMemb(ParmsMemb & /*p*/) {
     }
 
     void clear() {
@@ -1043,7 +996,7 @@ struct GroupCpp : public GroupBase {
         //Printf(b_cpp_grp_cpp->b1, "#include <AddinCpp/add_all.hpp>\n");
         Printf(b_cpp_grp_cpp->b1, "\n");
 
-        Append(b_cpp_grp_cpp->b1, pragmas_.cpp_inc);
+        Append(b_cpp_grp_cpp->b1, pragmas_.add_inc);
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
@@ -1171,7 +1124,7 @@ struct GroupCSharp : public GroupBase {
         Printf(b_csh_grp_cpp->b0, "#include <windows.h>\n");
         Printf(b_csh_grp_cpp->b1, "\n");
 
-        Append(b_csh_grp_cpp->b1, pragmas_.cpp_inc);
+        Append(b_csh_grp_cpp->b1, pragmas_.add_inc);
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
@@ -1291,9 +1244,9 @@ struct GroupCSharp : public GroupBase {
 struct GroupExcelFunctions : public GroupBase {
 
     Buffer *b_xlf_grp_cpp;
-    bool voIncludeHasBeengenerated;
+    bool groupContainsConstructor;
 
-    GroupExcelFunctions(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), voIncludeHasBeengenerated(false) {
+    GroupExcelFunctions(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), groupContainsConstructor(false) {
 
         b_xlf_grp_cpp = new Buffer("b_xlf_grp_cpp", NewStringf("%s/functions/function_%s.cpp", xllDir, pragmas_.groupName_));
 
@@ -1307,10 +1260,10 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b0, "#include <rpxl/loop.hpp>\n");
         Printf(b_xlf_grp_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
         Printf(b_xlf_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
+        // From this point on we stop writing to b0 and write to b1 instead.
+        // After all processing finishes we will append some more #includes to b0 depending on what code this group requires.
 
-        Printf(b_xlf_grp_cpp->b1, "//#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
-        Printf(b_xlf_grp_cpp->b1, "#include \"%s/obj_all.hpp\"\n", objInc);
-        //Printf(b_xlf_grp_cpp->b1, "#include \"%s/conversions/convert2.hpp\"\n", objInc);
+        Printf(b_xlf_grp_cpp->b1, "//#include \"%s/conversions/convert2.hpp\"\n", objInc);
         Printf(b_xlf_grp_cpp->b1, "#include \"%s/conversions/conversions.hpp\"\n", objInc);
         Printf(b_xlf_grp_cpp->b1, "#include \"%s/conversions/all.hpp\"\n", xllInc);
         Printf(b_xlf_grp_cpp->b1, "// FIXME only required if the file contains a looping function\n");
@@ -1438,11 +1391,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "    }\n");
         Printf(b_xlf_grp_cpp->b1, "}\n");
 
-        if (!voIncludeHasBeengenerated) {
-            Printf(b_xlf_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
-            voIncludeHasBeengenerated = true;
-        }
-
+        groupContainsConstructor = true;
         count_.constructors++;
         count_.total2++;
     }
@@ -1513,6 +1462,17 @@ struct GroupExcelFunctions : public GroupBase {
     }
 
     void clear() {
+
+        if (groupContainsConstructor) {
+            Printf(b_xlf_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            if (pragmas_.automatic_) {
+                Printf(b_xlf_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            } else {
+                Printf(b_xlf_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            }
+        }
+        Append(b_xlf_grp_cpp->b0, pragmas_.add_inc);
+
         b_xlf_grp_cpp->clear(count_);
     }
 };
@@ -1637,7 +1597,7 @@ struct GroupCountify : public GroupBase {
         } else {
             Printf(b_cfy_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
         }
-        //Append(b_cfy_grp_cpp->b0, pragmas_.cpp_inc);
+        //Append(b_cfy_grp_cpp->b0, pragmas_.add_inc);
         Printf(b_cfy_grp_cpp->b0, "//FIXME include only factories for types used in the current file\n", objInc);
         Printf(b_cfy_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_cfy_grp_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
