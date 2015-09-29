@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <sstream>
 #include <map>
+#include <algorithm>
 #ifdef WIN32
 #include <io.h>
 #else
@@ -2760,31 +2761,46 @@ void validateFunctionName(const String *functionName) {
     unsigned int len = Len(functionName);
     if (len > 10)
         return;
-    const char *s = Char(functionName);
-    unsigned int i=0;
+    const char *c = Char(functionName);
+    unsigned int a=0; // the number of characters at the start of the string
+    unsigned int n=0; // the number of digits at the end of the string
     // Step through 0, 1, 2, or 3 letters at the start of the string.
-    for (; i<3 && i<len && isalpha(s[i]); i++)
+    for (; a<3 && a<len && isalpha(c[a]); a++)
         ;
-    if (i==0)
+    if (a==0)
         // If control arrives here it means that the first character of the function name is not a letter.
         // This name does not clash with Excel, so return success, but the name is probably invalid.
         return;
-    if (i==len)
+    if (a==len)
         // If control arrives here it means that the entire string comprises 1-3 letters.
         // This name does not clash with Excel, so return success, but the name is probably invalid.
         return;
     // Step through any numbers up to the end of the string.
-    for (; i<len && isdigit(s[i]); i++)
+    for (; n<len-a && isdigit(c[n+a]); n++)
         ;
-    if (i==len) {
-        // If we consumed the whole string, then it means that the function name comprises 1-3 letters
-        // followed by numbers and probably clashes with an Excel cell name.  Raise an error.
-        // TODO: If the function name > XFD1048576 then it's still valid.
-        REPOSIT_SWIG_FAIL(
-            "Error : Invalid function name: '" << s << "'.\n" <<
-            "This string is in the range of Excel cell names (A1...XFD1048576)\n" <<
-            "Rename this function with %%rename() in the SWIG interface file.");
+    if (len > a+n)
+        // If control arrives here it means that the string contains additional characters after
+        // any letters and numbers.  This name does not clash with Excel, so return success.
+        return;
+    if (n>7)
+        // If control arrives here it means that the string ends in more than 7 digits.
+        // This name does not clash with Excel, so return success.
+        return;
+    // If control arrives here it means that the string comprises 1, 2, or 3 letters, followed by
+    // numbers.  At this point the only way the string could not clash with Excel is if it
+    // comprises exactly 3 letters and 7 numbers and is greater than the Excel max (XFD1048576).
+    // So test for that case:
+    if (3==a && 7==n) {
+        std::string s(c);
+        std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+        if (s>"XFD1048576")
+            return;
     }
+    // OK, this function name is also the name of a cell in Excel.  Fail.
+    REPOSIT_SWIG_FAIL(
+        "Error : Invalid function name: '" << c << "'.\n" <<
+        "This string is in the range of Excel cell names (A1...XFD1048576)\n" <<
+        "Rename this function with %%rename() in the SWIG interface file.");
 }
 
 int functionWrapperImplFunc(Node *n) {
