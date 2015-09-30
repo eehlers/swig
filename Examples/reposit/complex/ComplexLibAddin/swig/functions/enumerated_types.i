@@ -6,6 +6,7 @@
 %}
 
 namespace ComplexLib {
+    enum AccountType;
     long getInterestRate(AccountType accountType);
     long getInterestRate2(Account2::Type2 accountType2);
 }

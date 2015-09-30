@@ -6,6 +6,7 @@
 %}
 
 namespace ComplexLib {
+    struct Grade;
     std::string showGrade(Grade score);
 }
 

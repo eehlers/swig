@@ -8,6 +8,7 @@
 %module(
     rp_obj_dir="../AddinObjects",
     rp_add_dir="../AddinCpp",
+    rp_csh_dir="../AddinCSharp",
     rp_xll_dir="../AddinXl",
     rp_cfy_dir="../AddinCfy",
     rp_obj_inc="AddinObjects",
@@ -29,7 +30,7 @@
 // This feature says that we want all functions encountered from this point
 // on to be included in the C++ addin.  Everything is included in the Excel
 // addin by default.
-%generateall(cpp);
+%generateall(c++);
 
 // This code indicates which functionality from the SimpleLib library should be
 // included in the addin.

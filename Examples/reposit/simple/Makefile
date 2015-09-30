@@ -3,7 +3,8 @@
 SWIG = ../../../preinst-swig
 #SWIG_DEBUG = -debug-top 4 -debug-tmsearch
 
-all: Library AddinObjects AddinCpp AddinCfy Main
+#all: Library AddinObjects AddinCpp AddinCfy Main
+all: Library AddinObjects AddinCpp Main
 
 .PHONY: SWIG
 SWIG:
@@ -21,9 +22,9 @@ AddinObjects:
 AddinCpp:
 	$(MAKE) -C AddinCpp
 
-.PHONY: AddinCfy
-AddinCfy:
-	$(MAKE) -C AddinCfy
+#.PHONY: AddinCfy
+#AddinCfy:
+#	$(MAKE) -C AddinCfy
 
 .PHONY: Main
 Main:
@@ -33,6 +34,6 @@ clean :
 	$(MAKE) -C Library clean
 	$(MAKE) -C AddinObjects clean
 	$(MAKE) -C AddinCpp clean
-	$(MAKE) -C AddinCfy clean
+	#$(MAKE) -C AddinCfy clean
 	$(MAKE) -C Main clean
 
