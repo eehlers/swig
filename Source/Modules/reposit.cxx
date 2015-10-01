@@ -101,7 +101,6 @@ void printList(Node *n, File *f) {
 
 String *getTypeMap(Node *n, const char *m, bool fatal = true) {
     if (String *tm = Swig_typemap_lookup(m, n, "", 0)) {
-        Replaceall(tm, "$rp_typedef_resolved", Getattr(n, "rp_typedef_resolved"));
         Replaceall(tm, "$rp_typedef_base", Getattr(n, "rp_typedef_base"));
         Replaceall(tm, "$rp_typedef_no_template", Getattr(n, "rp_typedef_no_template"));
         Replaceall(tm, "$rp_typedef_no_namespace", Getattr(n, "rp_typedef_no_namespace"));
@@ -2840,9 +2839,6 @@ void processParm(Parm *p) {
 
     String *nameUpper = copyUpper2(name);
     Setattr(p, "rp_name_upper", nameUpper);
-
-    SwigType *t2 = SwigType_typedef_resolve_all(t);
-    Setattr(p, "rp_typedef_resolved", SwigType_str(t2, 0));
 
     // From "const T&" extract "T"
     SwigType *t3 = SwigType_base(t);

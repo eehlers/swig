@@ -216,7 +216,7 @@
 %typemap(rp_tm_cpp_parm) rp_tp_enm "const std::string&";
 %typemap(rp_tm_cpp_parm) rp_tp_enm_cls "const std::string&";
 %typemap(rp_tm_cpp_parm) rp_tp_obj1 "const std::string&";
-%typemap(rp_tm_cpp_parm) SWIGTYPE "$rp_typedef_resolved";
+%typemap(rp_tm_cpp_parm) SWIGTYPE "$1_type";
 
 // rp_tm_cpp_rtmb - return type of a member function (M)
 %typemap(rp_tm_cpp_rtmb) void "bool";
@@ -572,7 +572,7 @@
 // This is a temporary hack for trigger parameters, which are not supported by =countify.
 // Declare the value as a dummy bool.  Later we will suppress it altogether.
 %typemap(rp_tm_cfy_parm)  reposit::property_t const & "bool $1_name";
-%typemap(rp_tm_cfy_parm) SWIGTYPE "$rp_typedef_resolved $1_name";
+%typemap(rp_tm_cfy_parm) SWIGTYPE "$1_type";
 
 // rp_tm_cfy_cnvt - convert input values from =countify datatypes into datatypes of the underlying Library (F/C/M)
 %typemap(rp_tm_cfy_cnvt) rp_tp_enm %{
