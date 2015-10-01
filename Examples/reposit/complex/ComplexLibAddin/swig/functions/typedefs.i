@@ -5,6 +5,10 @@
 #include <cl/typedefs.hpp>
 %}
 
+%insert(typedefs_addin_cpp) %{
+#include <cl/typedefs.hpp>
+%}
+
 namespace ComplexLib {
 
     typedef double Double;

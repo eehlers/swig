@@ -158,10 +158,6 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\obj_adder.cpp"
-			>
-		</File>
-		<File
 			RelativePath=".\obj_adder.hpp"
 			>
 		</File>

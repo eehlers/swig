@@ -6,7 +6,7 @@
 %}
 
 %insert(enumerated_classes_addin_cpp) %{
-#include <boost/shared_ptr.hpp>
+#include <cl/enumerated_classes.hpp>
 %}
 
 namespace ComplexLib {

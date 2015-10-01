@@ -15,4 +15,3 @@
 
 %include typemaps/all.i
 %include functions/all.i
-

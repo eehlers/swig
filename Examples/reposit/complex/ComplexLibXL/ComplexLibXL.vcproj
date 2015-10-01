@@ -233,10 +233,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\clxl\register\register_all.hpp"
-				>
-			</File>
-			<File
 				RelativePath=".\clxl\register\register_coercions.cpp"
 				>
 			</File>

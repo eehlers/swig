@@ -211,8 +211,8 @@
 %typemap(rp_tm_cpp_parm) double "double";
 %typemap(rp_tm_cpp_parm) double const & "const double &";
 %typemap(rp_tm_cpp_parm) rp_tp_string "const std::string&";
-//%typemap(rp_tm_cpp_parm) rp_tp_cnv "const reposit::property_t&";
-//%typemap(rp_tm_cpp_parm) rp_tp_crc "const reposit::property_t&";
+%typemap(rp_tm_cpp_parm) rp_tp_cnv "const reposit::property_t&";
+%typemap(rp_tm_cpp_parm) rp_tp_crc "const reposit::property_t&";
 %typemap(rp_tm_cpp_parm) rp_tp_enm "const std::string&";
 %typemap(rp_tm_cpp_parm) rp_tp_enm_cls "const std::string&";
 %typemap(rp_tm_cpp_parm) rp_tp_obj1 "const std::string&";
@@ -226,16 +226,16 @@
 // CPP
 
 // rp_tm_cpp_cnvt - Convert inputs from C++ Addin api types into underlying Library types (F/C/M)
-//%typemap(rp_tm_cpp_cnvt) rp_tp_cnv %{
-//    $1_type $1_name_cnv =
-//        reposit::convert2<$1_type, reposit::property_t>($1_name);
-//%}
+%typemap(rp_tm_cpp_cnvt) rp_tp_cnv %{
+    $1_type $1_name_cnv =
+        reposit::convert2<$1_type, reposit::property_t>($1_name);
+%}
 
-//%typemap(rp_tm_cpp_cnvt) rp_tp_crc %{
-//    $1_type $1_name_crc = reposit::CoerceImpl<
-//        reposit::property_t,
-//        $1_type>()($1_name);
-//%}
+%typemap(rp_tm_cpp_cnvt) rp_tp_crc %{
+    $1_type $1_name_crc = reposit::CoerceImpl<
+        reposit::property_t,
+        $1_type>()($1_name);
+%}
 
 %typemap(rp_tm_cpp_cnvt) rp_tp_enm %{
     $rp_typedef_base $1_name_enm =
@@ -258,8 +258,8 @@
 %typemap(rp_tm_cpp_rtst) SWIGTYPE "";
 
 // rp_tm_cpp_args - arguments to the underlying Library function (F/C/M)
-//%typemap(rp_tm_cpp_args) rp_tp_cnv "$1_name_cnv";
-//%typemap(rp_tm_cpp_args) rp_tp_crc "$1_name_crc";
+%typemap(rp_tm_cpp_args) rp_tp_cnv "$1_name_cnv";
+%typemap(rp_tm_cpp_args) rp_tp_crc "$1_name_crc";
 %typemap(rp_tm_cpp_args) rp_tp_enm "$1_name_enm";
 %typemap(rp_tm_cpp_args) rp_tp_enm_cls "$1_name_enm";
 %typemap(rp_tm_cpp_args) rp_tp_obj1 "$1_name_get";
@@ -298,16 +298,16 @@
                 reposit::Create<$rp_typedef_base >()($1_name);
 %}
 
-//%typemap(rp_tm_csh_cnvt) rp_tp_cnv %{
-//    $1_type $1_name_cnv =
-//        reposit::convert2<$1_type, reposit::property_t>($1_name);
-//%}
+%typemap(rp_tm_csh_cnvt) rp_tp_cnv %{
+    $1_type $1_name_cnv =
+        reposit::convert2<$1_type, reposit::property_t>($1_name);
+%}
 
-//%typemap(rp_tm_csh_cnvt) rp_tp_crc %{
-//        $1_type $1_name_crc = reposit::CoerceImpl<
-//            reposit::property_t,
-//            $1_type>()($1_name);
-//%}
+%typemap(rp_tm_csh_cnvt) rp_tp_crc %{
+        $1_type $1_name_crc = reposit::CoerceImpl<
+            reposit::property_t,
+            $1_type>()($1_name);
+%}
 
 %typemap(rp_tm_csh_cnvt) rp_tp_enm %{
         $rp_typedef_base $1_name_enm =
@@ -394,8 +394,8 @@
 %typemap(rp_tm_xll_parm) rp_tp_string "char*";
 %typemap(rp_tm_xll_parm) rp_tp_string * "char*";
 %typemap(rp_tm_xll_parm) rp_tp_string & "char*";
-//%typemap(rp_tm_xll_parm) rp_tp_cnv "OPER*";
-//%typemap(rp_tm_xll_parm) rp_tp_crc "OPER*";
+%typemap(rp_tm_xll_parm) rp_tp_cnv "OPER*";
+%typemap(rp_tm_xll_parm) rp_tp_crc "OPER*";
 %typemap(rp_tm_xll_parm) rp_tp_any "OPER*";
 %typemap(rp_tm_xll_parm) rp_tp_enm "char*";
 %typemap(rp_tm_xll_parm) rp_tp_enm_cls "char*";
@@ -404,16 +404,16 @@
 %typemap(rp_tm_xll_parm) rp_tp_obj1 "char*";
 
 // rp_tm_xll_cnvt - convert from Excel datatypes to the datatypes of the underlying Library
-//%typemap(rp_tm_xll_cnvt) rp_tp_cnv %{
-//        $1_type $1_name_cnv = reposit::convert2<$1_type, reposit::ConvertOper>(
-//            reposit::ConvertOper(*$1_name));
-//%}
+%typemap(rp_tm_xll_cnvt) rp_tp_cnv %{
+        $1_type $1_name_cnv = reposit::convert2<$1_type, reposit::ConvertOper>(
+            reposit::ConvertOper(*$1_name));
+%}
 
-//%typemap(rp_tm_xll_cnvt) rp_tp_crc %{
-//        $1_type $1_name_crc = reposit::CoerceImpl<
-//            reposit::ConvertOper, $1_type>()
-//            (reposit::ConvertOper(*$1_name));
-//%}
+%typemap(rp_tm_xll_cnvt) rp_tp_crc %{
+        $1_type $1_name_crc = reposit::CoerceImpl<
+            reposit::ConvertOper, $1_type>()
+            (reposit::ConvertOper(*$1_name));
+%}
 
 %typemap(rp_tm_xll_cnvt) rp_tp_enm %{
         $rp_typedef_base $1_name_enm =
@@ -463,10 +463,10 @@
 %typemap(rp_tm_xll_argf) int "*$1_name";
 %typemap(rp_tm_xll_argf) long "*$1_name";
 %typemap(rp_tm_xll_argf) double "*$1_name";
-//%typemap(rp_tm_xll_argf) rp_tp_cnv "$1_name_cnv";
-//%typemap(rp_tm_xll_argf) rp_tp_crc "$1_name_crc";
+%typemap(rp_tm_xll_argf) double const & "*$1_name";
+%typemap(rp_tm_xll_argf) rp_tp_cnv "$1_name_cnv";
+%typemap(rp_tm_xll_argf) rp_tp_crc "$1_name_crc";
 %typemap(rp_tm_xll_argf) rp_tp_enm "$1_name_enm";
-//%typemap(rp_tm_xll_argf) rp_tp_enm_cls "$1_name_enm_cls";
 %typemap(rp_tm_xll_argf) rp_tp_enm_cls "$1_name_enm";
 %typemap(rp_tm_xll_argf) std::vector<bool> "$1_name_vec";
 %typemap(rp_tm_xll_argf) std::vector<bool> const & "$1_name_vec";
@@ -516,8 +516,8 @@
 %typemap(rp_tm_xll_cdrt) rp_tp_string * "C";
 %typemap(rp_tm_xll_cdrt) rp_tp_string & "C";
 %typemap(rp_tm_xll_cdrt) rp_tp_string const & "C";
-//%typemap(rp_tm_xll_cdrt) rp_tp_cnv "P";
-//%typemap(rp_tm_xll_cdrt) rp_tp_crc "P";
+%typemap(rp_tm_xll_cdrt) rp_tp_cnv "P";
+%typemap(rp_tm_xll_cdrt) rp_tp_crc "P";
 %typemap(rp_tm_xll_cdrt) rp_tp_enm "C";
 %typemap(rp_tm_xll_cdrt) rp_tp_enm_cls "C";
 %typemap(rp_tm_xll_cdrt) rp_tp_any "P";
@@ -537,8 +537,8 @@
 %typemap(rp_tm_xll_code) rp_tp_string * "C";
 %typemap(rp_tm_xll_code) rp_tp_string & "C";
 %typemap(rp_tm_xll_code) rp_tp_string const & "C";
-//%typemap(rp_tm_xll_code) rp_tp_cnv "P";
-//%typemap(rp_tm_xll_code) rp_tp_crc "P";
+%typemap(rp_tm_xll_code) rp_tp_cnv "P";
+%typemap(rp_tm_xll_code) rp_tp_crc "P";
 %typemap(rp_tm_xll_code) rp_tp_enm "C";
 %typemap(rp_tm_xll_code) rp_tp_enm_cls "C";
 %typemap(rp_tm_xll_code) rp_tp_any "P";

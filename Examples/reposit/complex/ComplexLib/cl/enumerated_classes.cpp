@@ -4,6 +4,10 @@
 #include <sstream>
 #include <iomanip>
 
+#ifdef WIN32
+#pragma warning(disable : 4996)
+#endif
+
 std::string ComplexLib::timeString(boost::shared_ptr<TimeZone> timeZone) {
     time_t rawtime;
     time( &rawtime);

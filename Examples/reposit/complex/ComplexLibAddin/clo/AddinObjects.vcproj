@@ -149,46 +149,6 @@
 			Name="valueobjects"
 			>
 			<File
-				RelativePath=".\valueobjects\vo_coercions.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\valueobjects\vo_coercions.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\valueobjects\vo_conversions.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\valueobjects\vo_conversions.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\valueobjects\vo_enumerated_classes.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\valueobjects\vo_enumerated_classes.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\valueobjects\vo_enumerated_types.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\valueobjects\vo_enumerated_types.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\valueobjects\vo_functions.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\valueobjects\vo_functions.hpp"
-				>
-			</File>
-			<File
 				RelativePath=".\valueobjects\vo_inheritance.cpp"
 				>
 			</File>
@@ -210,14 +170,6 @@
 			</File>
 			<File
 				RelativePath=".\valueobjects\vo_overrides.hpp"
-				>
-			</File>
-			<File
-				RelativePath=".\valueobjects\vo_typedefs.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\valueobjects\vo_typedefs.hpp"
 				>
 			</File>
 		</Filter>
@@ -308,46 +260,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\serialization\create\create_coercions.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\create\create_coercions.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\create\create_conversions.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\create\create_conversions.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\create\create_enumerated_classes.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\create\create_enumerated_classes.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\create\create_enumerated_types.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\create\create_enumerated_types.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\create\create_functions.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\create\create_functions.hpp"
-					>
-				</File>
-				<File
 					RelativePath=".\serialization\create\create_inheritance.cpp"
 					>
 				</File>
@@ -371,60 +283,12 @@
 					RelativePath=".\serialization\create\create_overrides.hpp"
 					>
 				</File>
-				<File
-					RelativePath=".\serialization\create\create_typedefs.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\create\create_typedefs.hpp"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="register"
 				>
 				<File
 					RelativePath=".\serialization\register\serialization_all.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\register\serialization_coercions.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\register\serialization_coercions.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\register\serialization_conversions.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\register\serialization_conversions.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\register\serialization_enumerated_classes.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\register\serialization_enumerated_classes.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\register\serialization_enumerated_types.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\register\serialization_enumerated_types.hpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\register\serialization_functions.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\register\serialization_functions.hpp"
 					>
 				</File>
 				<File
@@ -455,14 +319,6 @@
 					RelativePath=".\serialization\register\serialization_register.hpp"
 					>
 				</File>
-				<File
-					RelativePath=".\serialization\register\serialization_typedefs.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serialization\register\serialization_typedefs.hpp"
-					>
-				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -490,67 +346,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\obj_coercions.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\obj_coercions.hpp"
-			>
-		</File>
-		<File
-			RelativePath=".\obj_conversions.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\obj_conversions.hpp"
-			>
-		</File>
-		<File
-			RelativePath=".\obj_enumerated_classes.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\obj_enumerated_classes.hpp"
-			>
-		</File>
-		<File
-			RelativePath=".\obj_enumerated_types.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\obj_enumerated_types.hpp"
-			>
-		</File>
-		<File
-			RelativePath=".\obj_functions.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\obj_functions.hpp"
-			>
-		</File>
-		<File
-			RelativePath=".\obj_inheritance.cpp"
-			>
-		</File>
-		<File
 			RelativePath=".\obj_inheritance.hpp"
 			>
 		</File>
 		<File
-			RelativePath=".\obj_objects.cpp"
-			>
-		</File>
-		<File
 			RelativePath=".\obj_objects.hpp"
-			>
-		</File>
-		<File
-			RelativePath=".\obj_typedefs.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\obj_typedefs.hpp"
 			>
 		</File>
 		<File
