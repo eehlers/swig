@@ -14,6 +14,7 @@ namespace ComplexLib {
     typedef double Double;
     std::string doubleToString(const Double &d);
 
+    typedef double LongDouble;
     std::string longDoubleToString(const LongDouble &d);
 }
 

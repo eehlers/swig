@@ -1,7 +1,4 @@
 
-%apply double { LongDouble };
-%apply const double & { const LongDouble & };
-
 %apply rp_tp_cnv { ComplexLib::Grade };
 
 %apply rp_tp_crc { ComplexLib::Grade2 };

@@ -463,6 +463,7 @@
 %typemap(rp_tm_xll_argf) int "*$1_name";
 %typemap(rp_tm_xll_argf) long "*$1_name";
 %typemap(rp_tm_xll_argf) double "*$1_name";
+%typemap(rp_tm_xll_argf) double const & "*$1_name";
 %typemap(rp_tm_xll_argf) rp_tp_cnv "$1_name_cnv";
 %typemap(rp_tm_xll_argf) rp_tp_crc "$1_name_crc";
 %typemap(rp_tm_xll_argf) rp_tp_enm "$1_name_enm";
