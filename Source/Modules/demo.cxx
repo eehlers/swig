@@ -110,28 +110,21 @@ int functionHandler(Node *n) {
     String *name = Getattr(n, "name");
     printf("BEGIN functionHandler - node name='%s'.\n", Char(name));
 
-    printNode(n);
+    //printNode(n);
 
     printf("**************\n");
     ParmList *parms  = Getattr(n, "parms");
     for (Parm *p = parms; p; p = nextSibling(p)) {
-        printf("RRRRRRRRRRRRRR\n");
-        Swig_print_node(p);
-        printf("RRRRRRRRRRRRRR\n");
+        //printf("RRRRRRRRRRRRRR\n");
+        //Swig_print_node(p);
+        //printf("RRRRRRRRRRRRRR\n");
         SwigType *t1 = Getattr(p, "type");
         // prints "t1 = std::vector< int >"
         printf("t1 = %s\n", Char(SwigType_str(t1, 0)));
-        // prints "is_template=1"
-        printf("is_template=%d\n", SwigType_istemplate(t1));
-        // This doesn't compile :(
-        //SwigType *t2 = SwigType_pop_template(t1);
-
-        //SwigType *t2 = SwigType_prefix(t1);
-        //printf("t2 = %s\n", Char(SwigType_str(t2, 0)));
-        SwigType *t2 = SwigType_base(t1);
-        printf("t2 = %s\n", Char(SwigType_str(t2, 0)));
-        SwigType *t3 = SwigType_str(SwigType_typedef_resolve_all(t2), 0);
-        printf("t3 = %s\n", Char(SwigType_str(t3, 0)));
+        if (String *tm = Swig_typemap_lookup("foo", p, "", 0))
+            printf("%s\n", Char(tm));
+        else
+            printf("NO TM\n");
     }
     printf("**************\n");
 

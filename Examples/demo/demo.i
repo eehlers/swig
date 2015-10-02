@@ -1,19 +1,18 @@
 
 %module demo
 
-//void f(Foo<Bar> x);
-//
-//%feature("rp:loop", "immDate") QuantLib::IMM::code;
-//
-//namespace QuantLib {
-//
-//    struct IMM {
-//        static std::string code(const Date& immDate);
-//    };
-//}
+%define SWIG_STD_VECTOR_ENHANCED(CTYPE...)
+%typemap(foo) const boost::shared_ptr<CTYPE> & %{
+XXXXXXXXXXXXXXX
+CTYPE
+XXXXXXXXXXXXXXX
+%}
+%enddef
 
-//void f(std::vector<int>);
+%typemap(foo) SWIGTYPE "NO MATCH";
 
-enum X;
-void f(const X &x);
+SWIG_STD_VECTOR_ENHANCED(Calendar)
+SWIG_STD_VECTOR_ENHANCED(DayCounter)
 
+void f0(const boost::shared_ptr<Calendar> &x);
+void f1(const boost::shared_ptr<DayCounter> &x);

@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "swig", "swig_vc9.vcproj", "{1BCA73BB-0CAD-4653-89E0-99C04C989CEC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "demo", "Examples\demo\demo.vcproj", "{55343C5A-EB5B-4F35-84CB-2A28D48E4F8E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1BCA73BB-0CAD-4653-89E0-99C04C989CEC} = {1BCA73BB-0CAD-4653-89E0-99C04C989CEC}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,6 +21,7 @@ Global
 		{55343C5A-EB5B-4F35-84CB-2A28D48E4F8E}.Debug|Win32.ActiveCfg = Debug|Win32
 		{55343C5A-EB5B-4F35-84CB-2A28D48E4F8E}.Debug|Win32.Build.0 = Debug|Win32
 		{55343C5A-EB5B-4F35-84CB-2A28D48E4F8E}.Release|Win32.ActiveCfg = Release|Win32
+		{55343C5A-EB5B-4F35-84CB-2A28D48E4F8E}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
