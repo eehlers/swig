@@ -7,6 +7,8 @@ BUILD_DIR=build\vc
 BUILDFLAG=$(BUILD_DIR)\buildflag
 MAKEFILE=Makefile.vc
 SWIG_FILE=demo.i
+#SWIG_DEBUG=-debug-top 4 -debug-tmsearch
+SWIG_DEBUG=-debug-tmsearch
 
 ALL : $(BUILDFLAG)
 
@@ -14,7 +16,7 @@ $(BUILD_DIR) :
     if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
 
 $(BUILDFLAG) : $(BUILD_DIR) $(SWIG_FILE) $(SWIG_EXE)
-	$(SWIG_EXE) -DSWIG_MSVC -I$(SWIG_INC) -I$(DEMO_INC) -c++ -demo $(SWIG_FILE)
+	$(SWIG_EXE) $(SWIG_DEBUG) -DSWIG_MSVC -I$(SWIG_INC) -I$(DEMO_INC) -c++ -demo $(SWIG_FILE)
 	echo flagged > $@
 
 CLEAN :

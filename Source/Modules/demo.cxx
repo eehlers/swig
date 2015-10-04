@@ -121,7 +121,7 @@ int functionHandler(Node *n) {
         SwigType *t1 = Getattr(p, "type");
         // prints "t1 = std::vector< int >"
         printf("t1 = %s\n", Char(SwigType_str(t1, 0)));
-        if (String *tm = Swig_typemap_lookup("foo", p, "", 0))
+        if (String *tm = Swig_typemap_lookup("tm1", p, "", 0))
             printf("%s\n", Char(tm));
         else
             printf("NO TM\n");

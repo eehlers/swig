@@ -1,18 +1,17 @@
 
 %module demo
 
-%define SWIG_STD_VECTOR_ENHANCED(CTYPE...)
-%typemap(foo) const boost::shared_ptr<CTYPE> & %{
-XXXXXXXXXXXXXXX
-CTYPE
-XXXXXXXXXXXXXXX
-%}
+%define MACRO1(T...)
+%typemap(tm1) Wrapper<T> "TYPE=T";
 %enddef
 
-%typemap(foo) SWIGTYPE "NO MATCH";
+%typemap(tm1) SWIGTYPE "NO MATCH";
 
-SWIG_STD_VECTOR_ENHANCED(Calendar)
-SWIG_STD_VECTOR_ENHANCED(DayCounter)
+template<class T> class Wrapper {
+  MACRO1(T)
+};
 
-void f0(const boost::shared_ptr<Calendar> &x);
-void f1(const boost::shared_ptr<DayCounter> &x);
+%template(temp1) Wrapper<A>;
+
+void f0(Wrapper<A> x);
+void f1(Wrapper<B> x);
