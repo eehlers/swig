@@ -100,16 +100,8 @@ void printList(Node *n, File *f) {
 }
 
 String *getTypeMap(Node *n, const char *m, bool fatal = true) {
-    if (String *tm = Swig_typemap_lookup(m, n, "", 0)) {
-        Replaceall(tm, "$rp_typedef_base", Getattr(n, "rp_typedef_base"));
-        Replaceall(tm, "$rp_typedef_no_template", Getattr(n, "rp_typedef_no_template"));
-        Replaceall(tm, "$rp_typedef_no_namespace", Getattr(n, "rp_typedef_no_namespace"));
-        Replaceall(tm, "$rp_addin_namespace", module);
-
-        Replaceall(tm, "$rp_typedef_obj_add", Getattr(n, "rp_typedef_obj_add"));
-        Replaceall(tm, "$rp_typedef_obj_lib", Getattr(n, "rp_typedef_obj_lib"));
+    if (String *tm = Swig_typemap_lookup(m, n, "", 0)) 
         return tm;
-    }
     if (fatal) {
         SwigType *t  = Getattr(n, "type");
         Append(errorList, NewStringf("*** ERROR : typemap '%s' does not match type '%s'.\n", m, SwigType_str(t, 0)));
@@ -2839,36 +2831,6 @@ void processParm(Parm *p) {
 
     String *nameUpper = copyUpper2(name);
     Setattr(p, "rp_name_upper", nameUpper);
-
-    // From "const T&" extract "T"
-    SwigType *t3 = SwigType_base(t);
-    Setattr(p, "rp_typedef_base", SwigType_str(t3, 0));
-
-    // From A<B> extract B.  We do not yet support nested templates.
-    char no_template[100];
-    if (SwigType_istemplate(t3)) {
-        String *s1 = SwigType_str(t3, 0);
-        char *c1 = Char(s1);
-        char *c2 = strchr(c1, '<');
-        char *c3 = strchr(c1, '>');
-        strncpy(no_template, c2+1, c3-c2-1);
-        no_template[c3-c2-1]=0;
-    } else {
-        strcpy(no_template, Char(SwigType_str(t3, 0)));
-    }
-    String *s2 = NewString(no_template);
-    Setattr(p, "rp_typedef_no_template", s2);
-
-    // From namespace::type extract type.  We do not yet support nested namespaces.
-    char no_namespace[100];
-    char *c1 = strchr(no_template, ':');
-    if (c1) {
-        strcpy(no_namespace, c1+2);
-    } else {
-        strcpy(no_namespace, no_template);
-    }
-    String *s3 = NewString(no_namespace);
-    Setattr(p, "rp_typedef_no_namespace", s3);
 }
 
 int functionWrapperImplCtor(Node *n) {
@@ -2966,9 +2928,6 @@ int functionWrapperImplMemb(Node *n) {
     Setfile(p.node, Getfile(p.n));
     Setline(p.node, Getline(p.n));
     Setattr(p.node, "type", p.pname);
-    // Attach to the node some values that might be referenced by the typemap:
-    Setattr(p.node, "rp_typedef_obj_add", p.addinClass);    // The type of the addin wrapper object
-    Setattr(p.node, "rp_typedef_obj_lib", p.pname);         // The type of the library object
 
     Printf(b_wrappers, "//***ABC\n");
     printList(p.parms2, b_wrappers);

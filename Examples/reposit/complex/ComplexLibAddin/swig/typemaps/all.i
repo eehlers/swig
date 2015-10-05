@@ -3,10 +3,15 @@
 
 %apply rp_tp_crc { ComplexLib::Grade2 };
 
-%apply rp_tp_enm { ComplexLib::AccountType };
-%apply rp_tp_enm { ComplexLib::Account2::Type2 };
-%apply rp_tp_enm_cls { boost::shared_ptr<ComplexLib::TimeZone> };
+ENUMERATED_TYPE(ComplexLib::AccountType)
+ENUMERATED_TYPE(ComplexLib::Account2::Type2)
+ENUMERATED_CLASS(boost::shared_ptr<ComplexLib::TimeZone>)
 
 // For this class, instead of extracting the underlying library object,
 // we want to extract the addin wrapper object.
-%apply rp_tp_add_obj { ComplexLib::Test2 };
+OBJECT_WRAPPER(ComplexLibAddin::Test, ComplexLib::Test)
+OBJECT_WRAPPER(ComplexLibAddin::Test2, ComplexLib::Test2)
+OBJECT_WRAPPER(ComplexLibAddin::Base, ComplexLib::Base)
+OBJECT_WRAPPER(ComplexLibAddin::Derived, ComplexLib::Derived)
+OBJECT_WRAPPER(ComplexLibAddin::A, ComplexLib::A)
+OBJECT_WRAPPER(ComplexLibAddin::B, ComplexLib::B)
