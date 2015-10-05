@@ -101,10 +101,10 @@ void printList(Node *n, File *f) {
 
 String *getTypeMap(Node *n, const char *m, bool fatal = true) {
     if (String *tm = Swig_typemap_lookup(m, n, "", 0)) {
-        Replaceall(tm, "$rp_typedef_base", Getattr(n, "rp_typedef_base"));
-        Replaceall(tm, "$rp_typedef_no_template", Getattr(n, "rp_typedef_no_template"));
-        Replaceall(tm, "$rp_typedef_no_namespace", Getattr(n, "rp_typedef_no_namespace"));
-        Replaceall(tm, "$rp_addin_namespace", module);
+        //Replaceall(tm, "$rp_typedef_base", Getattr(n, "rp_typedef_base"));
+        //Replaceall(tm, "$rp_typedef_no_template", Getattr(n, "rp_typedef_no_template"));
+        //Replaceall(tm, "$rp_typedef_no_namespace", Getattr(n, "rp_typedef_no_namespace"));
+        //Replaceall(tm, "$rp_addin_namespace", module);
 
         Replaceall(tm, "$rp_typedef_obj_add", Getattr(n, "rp_typedef_obj_add"));
         Replaceall(tm, "$rp_typedef_obj_lib", Getattr(n, "rp_typedef_obj_lib"));
@@ -587,6 +587,7 @@ struct GroupLibraryObjects : public GroupBase {
             Printf(b_lib_grp_hpp->b0,"    class %s : \n", p.name);
             Printf(b_lib_grp_hpp->b0,"        public %s {\n", s0);
             Printf(b_lib_grp_hpp->b0,"    public:\n");
+            Printf(b_lib_grp_hpp->b0,"        typedef %s lib_type;\n", p.pname);
             Printf(b_lib_grp_hpp->b0,"        %s(\n", p.name);
             Printf(b_lib_grp_hpp->b0,"            const boost::shared_ptr<reposit::ValueObject>& properties,\n");
             emitParmList(p.parms, b_lib_grp_hpp->b0, 2, "rp_tm_default", 3, ',', true, false, true);
@@ -603,9 +604,29 @@ struct GroupLibraryObjects : public GroupBase {
 
             Printf(b_lib_grp_hpp->b0, "    // BEGIN typemap rp_tm_lib_cls\n");
             if (parent) {
-                Printf(b_lib_grp_hpp->b0, "    RP_OBJ_CLASS(%s, %s);\n", p.name, parent);
+                Printf(b_lib_grp_hpp->b0, "    //RP_OBJ_CLASS(%s, %s);\n", p.name, parent);
+                Printf(b_lib_grp_hpp->b0, "    class %s :\n", p.name);
+                Printf(b_lib_grp_hpp->b0, "    public %s {\n", parent);
+                Printf(b_lib_grp_hpp->b0, "    public:\n");
+                Printf(b_lib_grp_hpp->b0, "    typedef %s lib_type;\n", libraryClass);
+                Printf(b_lib_grp_hpp->b0, "    protected:\n");
+                Printf(b_lib_grp_hpp->b0, "    %s(\n", p.name);
+                Printf(b_lib_grp_hpp->b0, "    const boost::shared_ptr<reposit::ValueObject>& properties,\n");
+                Printf(b_lib_grp_hpp->b0, "    bool permanent)\n");
+                Printf(b_lib_grp_hpp->b0, "    : %s(properties, permanent) {}\n", parent);
+                Printf(b_lib_grp_hpp->b0, "    };\n");
             } else {
-                Printf(b_lib_grp_hpp->b0, "    RP_LIB_CLASS(%s, %s);\n", p.name, libraryClass);
+                Printf(b_lib_grp_hpp->b0, "    //RP_LIB_CLASS(%s, %s);\n", p.name, libraryClass);
+                Printf(b_lib_grp_hpp->b0, "    class %s :\n", p.name);
+                Printf(b_lib_grp_hpp->b0, "    public reposit::LibraryObject<%s> {\n", libraryClass);
+                Printf(b_lib_grp_hpp->b0, "    public:\n");
+                Printf(b_lib_grp_hpp->b0, "    typedef %s lib_type;\n", libraryClass);
+                Printf(b_lib_grp_hpp->b0, "    protected:\n");
+                Printf(b_lib_grp_hpp->b0, "    %s(\n", p.name);
+                Printf(b_lib_grp_hpp->b0, "    const boost::shared_ptr<reposit::ValueObject>& properties,\n");
+                Printf(b_lib_grp_hpp->b0, "    bool permanent)\n");
+                Printf(b_lib_grp_hpp->b0, "    : reposit::LibraryObject<%s>(properties, permanent) {}\n", libraryClass);
+                Printf(b_lib_grp_hpp->b0, "    };\n");
             }
             Printf(b_lib_grp_hpp->b0, "    // END   typemap rp_tm_lib_cls\n");
         }
@@ -2841,34 +2862,34 @@ void processParm(Parm *p) {
     Setattr(p, "rp_name_upper", nameUpper);
 
     // From "const T&" extract "T"
-    SwigType *t3 = SwigType_base(t);
-    Setattr(p, "rp_typedef_base", SwigType_str(t3, 0));
+    //SwigType *t3 = SwigType_base(t);
+    //Setattr(p, "rp_typedef_base", SwigType_str(t3, 0));
 
     // From A<B> extract B.  We do not yet support nested templates.
-    char no_template[100];
-    if (SwigType_istemplate(t3)) {
-        String *s1 = SwigType_str(t3, 0);
-        char *c1 = Char(s1);
-        char *c2 = strchr(c1, '<');
-        char *c3 = strchr(c1, '>');
-        strncpy(no_template, c2+1, c3-c2-1);
-        no_template[c3-c2-1]=0;
-    } else {
-        strcpy(no_template, Char(SwigType_str(t3, 0)));
-    }
-    String *s2 = NewString(no_template);
-    Setattr(p, "rp_typedef_no_template", s2);
+    //char no_template[100];
+    //if (SwigType_istemplate(t3)) {
+    //    String *s1 = SwigType_str(t3, 0);
+    //    char *c1 = Char(s1);
+    //    char *c2 = strchr(c1, '<');
+    //    char *c3 = strchr(c1, '>');
+    //    strncpy(no_template, c2+1, c3-c2-1);
+    //    no_template[c3-c2-1]=0;
+    //} else {
+    //    strcpy(no_template, Char(SwigType_str(t3, 0)));
+    //}
+    //String *s2 = NewString(no_template);
+    //Setattr(p, "rp_typedef_no_template", s2);
 
     // From namespace::type extract type.  We do not yet support nested namespaces.
-    char no_namespace[100];
-    char *c1 = strchr(no_template, ':');
-    if (c1) {
-        strcpy(no_namespace, c1+2);
-    } else {
-        strcpy(no_namespace, no_template);
-    }
-    String *s3 = NewString(no_namespace);
-    Setattr(p, "rp_typedef_no_namespace", s3);
+    //char no_namespace[100];
+    //char *c1 = strchr(no_template, ':');
+    //if (c1) {
+    //    strcpy(no_namespace, c1+2);
+    //} else {
+    //    strcpy(no_namespace, no_template);
+    //}
+    //String *s3 = NewString(no_namespace);
+    //Setattr(p, "rp_typedef_no_namespace", s3);
 }
 
 int functionWrapperImplCtor(Node *n) {
