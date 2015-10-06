@@ -16,15 +16,8 @@
 
 // rp_tm_default - not a real typemap, implemented in code.  Always returns the type.
 
-// rp_tm_xxx_rp_get:  This typemap is used for class member functions in the addin.
-// We retrieve the object from the repository, and then extract the required reference.
-
-%typemap(rp_tm_xxx_rp_get) rp_tp_add_obj %{
-        RP_GET_OBJECT(xxx, objectID, $1_type);
-%}
-
-// Call a member function on an addin object rather than a library object
-%typemap(rp_tm_xxx_rp_get) rp_tp_obj2 %{
+// rp_tm_xxx_rp_get:  Retrieve an object from the repository.
+%typemap(rp_tm_xxx_rp_get) SWIGTYPE %{
         RP_GET_OBJECT(xxx, objectID, $1_type);
 %}
 
