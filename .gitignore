@@ -133,7 +133,6 @@ tags
 *.ncb
 *.suo
 *.user
-Release
-Debug
+build
 
 !Source/Swig/swigconfig_win.h
