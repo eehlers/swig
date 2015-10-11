@@ -555,7 +555,7 @@ struct GroupLibraryObjects : public GroupBase {
 
         Append(b_lib_grp_hpp->b0, pragmas_.lib_inc);
 
-        Printf(b_lib_grp_hpp->b0, "// FIXME get rid of this:\n", nmspace);
+        Printf(b_lib_grp_hpp->b0, "// FIXME get rid of this:\n");
         Printf(b_lib_grp_hpp->b0, "using namespace %s;\n", nmspace);
         Printf(b_lib_grp_hpp->b0, "\n");
         Printf(b_lib_grp_hpp->b0,"namespace %s {\n", module);
@@ -968,7 +968,7 @@ struct GroupCpp : public GroupBase {
 
         Printf(b_cpp_grp_cpp->b0, "\n");
         Printf(b_cpp_grp_cpp->b0, "#include <AddinCpp/add_%s.hpp>\n", pragmas_.groupName_);
-        Printf(b_cpp_grp_cpp->b0, "//FIXME this #include is only required if the file contains conversions\n", objInc);
+        Printf(b_cpp_grp_cpp->b0, "//FIXME this #include is only required if the file contains conversions\n");
         Printf(b_cpp_grp_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
         Printf(b_cpp_grp_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
         Printf(b_cpp_grp_cpp->b0, "#include <%s/conversions/coercetermstructure.hpp>\n", objInc);
@@ -978,7 +978,7 @@ struct GroupCpp : public GroupBase {
         // From this point on we stop writing to b0 and write to b1 instead.
         // After all processing finishes we will append some more #includes to b0 depending on what code this group requires.
 
-        Printf(b_cpp_grp_cpp->b1, "//FIXME include only factories for types used in the current file\n", objInc);
+        Printf(b_cpp_grp_cpp->b1, "//FIXME include only factories for types used in the current file\n");
         Printf(b_cpp_grp_cpp->b1, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_cpp_grp_cpp->b1, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_cpp_grp_cpp->b1, "#include <rp/repository.hpp>\n");
@@ -1118,8 +1118,12 @@ struct GroupCSharp : public GroupBase {
         }
 
         Printf(b_csh_grp_cpp->b0, "#include <rp/repository.hpp>\n");
-        Printf(b_csh_grp_cpp->b0, "//FIXME include only factories for types used in the current file\n", objInc);
+        Printf(b_csh_grp_cpp->b0, "//FIXME include only factories for types used in the current file\n");
         Printf(b_csh_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
+        Printf(b_csh_grp_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
+        Printf(b_csh_grp_cpp->b0, "// FIXME only required if the file contains a looping function\n");
+        Printf(b_csh_grp_cpp->b0, "#include \"%s/loop.hpp\"\n", objInc);
+        Printf(b_csh_grp_cpp->b0, "#include \"loop.hpp\"\n"/*, rp_csh_inc*/);
         Printf(b_csh_grp_cpp->b0, "#include <windows.h>\n");
         // From this point on we stop writing to b0 and write to b1 instead.
         // After all processing finishes we will append some more #includes to b0 depending on what code this group requires.
@@ -1157,18 +1161,18 @@ struct GroupCSharp : public GroupBase {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
         if (generateCtor) {
-            Printf(b_csh_grp_cpp->b1, "extern \"C\" __declspec(dllexport) char * __stdcall %s(\n", p.funcName);
+            Printf(b_csh_grp_cpp->b1, "extern \"C\" __declspec(dllexport) char * __stdcall %s(\n", p.funcRename);
             emitParmList(p.parms2, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", 1);
             Printf(b_csh_grp_cpp->b1, ") {\n");
             Printf(b_csh_grp_cpp->b1, "    try {\n");
-            Printf(b_csh_grp_cpp->b1,"        std::cout << \"BEGIN - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+            Printf(b_csh_grp_cpp->b1,"        std::cout << \"BEGIN - FUNCTION '%s'\" << std::endl;\n", p.funcRename);
             Printf(b_csh_grp_cpp->b1, "\n");
             emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", 2, 0, false);
             Printf(b_csh_grp_cpp->b1,"\n");
             Printf(b_csh_grp_cpp->b1,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
-            Printf(b_csh_grp_cpp->b1,"            new %s::ValueObjects::%s(\n", module, p.funcName);
+            Printf(b_csh_grp_cpp->b1,"            new %s::ValueObjects::%s(\n", module, p.funcRename);
             Printf(b_csh_grp_cpp->b1,"                objectID,\n");
-            emitParmList(p.parms, b_csh_grp_cpp->b1, 0, "rp_tm_default", 4, ',', true, false, true);
+            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_argfv", 4, ',', true, true, true);
             Printf(b_csh_grp_cpp->b1,"                false));\n");
             Printf(b_csh_grp_cpp->b1,"        boost::shared_ptr<reposit::Object> object(\n");
             Printf(b_csh_grp_cpp->b1,"            new %s::%s(\n", module, p.name);
@@ -1182,13 +1186,13 @@ struct GroupCSharp : public GroupBase {
             Printf(b_csh_grp_cpp->b1,"        ULONG size = returnValue.length() + sizeof(char);\n");
             Printf(b_csh_grp_cpp->b1,"        char *ret = (char*)::CoTaskMemAlloc(size);\n");
             Printf(b_csh_grp_cpp->b1,"        strcpy(ret, returnValue.c_str());\n");
-            Printf(b_csh_grp_cpp->b1,"        std::cout << \"END   - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+            Printf(b_csh_grp_cpp->b1,"        std::cout << \"END   - FUNCTION '%s'\" << std::endl;\n", p.funcRename);
             Printf(b_csh_grp_cpp->b1,"        return ret;\n");
             Printf(b_csh_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
-            Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - \" << e.what() << std::endl;\n", p.funcName);
+            Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - \" << e.what() << std::endl;\n", p.funcRename);
             Printf(b_csh_grp_cpp->b1,"        return 0;\n");
             Printf(b_csh_grp_cpp->b1,"    } catch (...) {\n");
-            Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - UNKNOWN EXCEPTION\" << std::endl;\n", p.funcName);
+            Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - UNKNOWN EXCEPTION\" << std::endl;\n", p.funcRename);
             Printf(b_csh_grp_cpp->b1,"        return 0;\n");
             Printf(b_csh_grp_cpp->b1,"    }\n");
             Printf(b_csh_grp_cpp->b1,"}\n\n");
@@ -1200,9 +1204,27 @@ struct GroupCSharp : public GroupBase {
         groupContainsClass = true;
     }
 
+    void emitLoopFunc(ParmsMemb &p, String *loopParameter) {
+        String *loopParameterType = Getattr(p.n, "rp:loopParameterType");
+        String *loopFunctionType = Getattr(p.n, "rp:loopFunctionType");
+        Printf(b_csh_grp_cpp->b1, "        // BEGIN function emitLoopFunc\n");
+        Printf(b_csh_grp_cpp->b1, "\n");
+        Printf(b_csh_grp_cpp->b1, "        %s::%sBind bindObject =\n", module, p.funcName);
+        Printf(b_csh_grp_cpp->b1, "            boost::bind(\n");
+        Printf(b_csh_grp_cpp->b1, "                &%s::%s,\n", p.pname, p.name);
+        Printf(b_csh_grp_cpp->b1, "                xxx,\n");
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_loop", 4, ',', true, true);
+        Printf(b_csh_grp_cpp->b1, "            );\n");
+        Printf(b_csh_grp_cpp->b1, "\n");
+        Printf(b_csh_grp_cpp->b1, "        std::vector<%s> returnValue = loop\n", loopFunctionType);
+        Printf(b_csh_grp_cpp->b1, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
+        Printf(b_csh_grp_cpp->b1, "            (bindObject, %s_vec2);\n", loopParameter);
+        Printf(b_csh_grp_cpp->b1, "\n");
+        Printf(b_csh_grp_cpp->b1, "        // END   function emitLoopFunc\n");
+    }
+
     void functionWrapperImplMemb(ParmsMemb &p) {
         Printf(b_csh_grp_cpp->b1, "extern \"C\" __declspec(dllexport)\n");
-        //emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtmb");
         emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rttp");
         Printf(b_csh_grp_cpp->b1, "__stdcall %s(\n", p.funcName);
         emitParmList(p.parms2, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", 2);
@@ -1213,11 +1235,15 @@ struct GroupCSharp : public GroupBase {
         emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", 1, 0, false);
         Printf(b_csh_grp_cpp->b1,"\n");
         emitTypeMap(b_csh_grp_cpp->b1, p.node, "rp_tm_xxx_rp_get");
-        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtdc", 2);
-        Printf(b_csh_grp_cpp->b1,"        xxx->%s(\n", p.name);
-        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", 3, ',', true, true);
-        Printf(b_csh_grp_cpp->b1,"        );\n", p.name);
-        Printf(b_csh_grp_cpp->b1,"        std::cout << \"END   - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+        if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
+            emitLoopFunc(p, loopParameter);
+        } else {
+            emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtdc", 2);
+            Printf(b_csh_grp_cpp->b1,"        xxx->%s(\n", p.name);
+            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", 3, ',', true, true);
+            Printf(b_csh_grp_cpp->b1,"        );\n", p.name);
+            Printf(b_csh_grp_cpp->b1,"        std::cout << \"END   - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+        }
         emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtst", 2);
         Printf(b_csh_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
         Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - \" << e.what() << std::endl;\n", p.funcName);
@@ -1244,8 +1270,7 @@ struct GroupCSharp : public GroupBase {
             }
         }
         Append(b_csh_grp_cpp->b0, pragmas_.add_inc);
-
-        Printf(b_csh_grp_cpp->b1, "\n");
+        Printf(b_csh_grp_cpp->b0, "\n");
         b_csh_grp_cpp->clear(count_);
     }
 };
@@ -1291,7 +1316,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "        %s::%sBind bindObject =\n", module, p.funcName);
         Printf(b_xlf_grp_cpp->b1, "            boost::bind(\n");
         Printf(b_xlf_grp_cpp->b1, "                %s,\n", p.name);
-        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xxx_loop", 4, ',', true, true);
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_loop", 4, ',', true, true);
         Printf(b_xlf_grp_cpp->b1, "            );\n");
         Printf(b_xlf_grp_cpp->b1, "        reposit::loop\n");
         Printf(b_xlf_grp_cpp->b1, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
@@ -1410,7 +1435,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "            boost::bind(\n");
         Printf(b_xlf_grp_cpp->b1, "                &%s::%s,\n", p.pname, p.name);
         Printf(b_xlf_grp_cpp->b1, "                xxx,\n");
-        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xxx_loop", 4, ',', true, true);
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_loop", 4, ',', true, true);
         Printf(b_xlf_grp_cpp->b1, "            );\n");
         Printf(b_xlf_grp_cpp->b1, "        reposit::loop\n");
         Printf(b_xlf_grp_cpp->b1, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
@@ -1589,12 +1614,12 @@ struct GroupCountify : public GroupBase {
         Printf(b_cfy_grp_cpp->b0, "#include <rp/repository.hpp>\n");
         Printf(b_cfy_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
         Printf(b_cfy_grp_cpp->b0, "\n");
-        Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains conversions\n", objInc);
+        Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains conversions\n");
         Printf(b_cfy_grp_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
         Printf(b_cfy_grp_cpp->b0, "#include <%s/conversions/coercetermstructure.hpp>\n", objInc);
-        //Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains enumerations\n", objInc);
+        //Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains enumerations\n");
         //Printf(b_cfy_grp_cpp->b0, "#include <rp/enumerations/typefactory.hpp>\n");
-        Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains constructors\n", objInc);
+        Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains constructors\n");
         Printf(b_cfy_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
         if (pragmas_.automatic_) {
             Printf(b_cfy_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
@@ -1602,7 +1627,7 @@ struct GroupCountify : public GroupBase {
             Printf(b_cfy_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
         }
         //Append(b_cfy_grp_cpp->b0, pragmas_.add_inc);
-        Printf(b_cfy_grp_cpp->b0, "//FIXME include only factories for types used in the current file\n", objInc);
+        Printf(b_cfy_grp_cpp->b0, "//FIXME include only factories for types used in the current file\n");
         Printf(b_cfy_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_cfy_grp_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
         Printf(b_cfy_grp_cpp->b0, "#include <rp/repository.hpp>\n");
@@ -2069,6 +2094,10 @@ struct AddinCSharp : public AddinImpl<GroupCSharp> {
         Printf(b_csh_exp_all_cs->b0, "        // qlInitializeAddin\n");
         Printf(b_csh_exp_all_cs->b0, "        [DllImport(QUANTLIB_ADDIN_DLL, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
         Printf(b_csh_exp_all_cs->b0, "        public static extern void qlInitializeAddin();\n");
+        Printf(b_csh_exp_all_cs->b0, "\n");
+        Printf(b_csh_exp_all_cs->b0, "        // qlReleaseMemory\n");
+        Printf(b_csh_exp_all_cs->b0, "        [DllImport(QUANTLIB_ADDIN_DLL, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+        Printf(b_csh_exp_all_cs->b0, "        public static extern void qlReleaseMemory(IntPtr p);\n");
     }
 
     virtual void functionWrapperImplFunc(ParmsFunc &p) {
@@ -2090,10 +2119,10 @@ struct AddinCSharp : public AddinImpl<GroupCSharp> {
         if (checkAttribute(p.n, "feature:rp:generate:c#", "1")) {
             AddinImpl::functionWrapperImplCtor(p);
             Printf(b_csh_exp_all_cs->b0, "\n");
-            Printf(b_csh_exp_all_cs->b0, "        // %s\n", p.funcName);
+            Printf(b_csh_exp_all_cs->b0, "        // %s\n", p.funcRename);
             Printf(b_csh_exp_all_cs->b0, "        [DllImport(QUANTLIB_ADDIN_DLL, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
             Printf(b_csh_exp_all_cs->b0, "        [return: MarshalAs(UnmanagedType.LPStr)]\n");
-            Printf(b_csh_exp_all_cs->b0, "        public static extern string %s(\n", p.funcName);
+            Printf(b_csh_exp_all_cs->b0, "        public static extern string %s(\n", p.funcRename);
             emitParmList(p.parms2, b_csh_exp_all_cs->b0, 2, "rp_tm_csh_clcp", 3);
             Printf(b_csh_exp_all_cs->b0, "        );\n");
         }
