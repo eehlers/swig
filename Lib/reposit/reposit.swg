@@ -277,7 +277,7 @@
 %typemap(rp_tm_csh_rtex) void "return;";
 %typemap(rp_tm_csh_rtex) SWIGTYPE "return 0;";
 
-// rp_tm_xll_loop - arguments to boost::bind object for a looping function (F/M)
+// rp_tm_csh_loop - arguments to boost::bind object for a looping function (F/M)
 %typemap(rp_tm_csh_loop) std::vector "_1";
 %typemap(rp_tm_csh_loop) SWIGTYPE "$1_name";
 
