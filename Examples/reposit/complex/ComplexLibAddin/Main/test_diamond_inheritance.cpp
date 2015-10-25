@@ -22,7 +22,6 @@ void testDiamondInheritance() {
     std::cout << ComplexLibAddinCpp::clFoo2F(trigger, "foobar2") << std::endl;
     std::cout << ComplexLibAddinCpp::clBar2F(trigger, "bar2") << std::endl;
     std::cout << ComplexLibAddinCpp::clBar2F(trigger, "foobar2") << std::endl;
-    std::cout << ComplexLibAddinCpp::clFooBar2F(trigger, "foobar2") << std::endl;
     std::cout << ComplexLibAddinCpp::clFunctionUsingFoo2("foo2") << std::endl;
     std::cout << ComplexLibAddinCpp::clFunctionUsingFoo2("foobar2") << std::endl;
     std::cout << ComplexLibAddinCpp::clFunctionUsingBar2("bar2") << std::endl;

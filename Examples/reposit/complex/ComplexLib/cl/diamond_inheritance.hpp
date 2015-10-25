@@ -13,19 +13,18 @@ namespace ComplexLib {
 
     class Foo2 {
     public:
-        virtual std::string f() const { return "ComplexLib::Foo2::f()"; }
+        std::string f() const { return "ComplexLib::Foo2::f()"; }
         virtual ~Foo2() {}
     };
 
     class Bar2 {
     public:
-        virtual std::string f() const { return "ComplexLib::Bar2::f()"; }
+        std::string f() const { return "ComplexLib::Bar2::f()"; }
         virtual ~Bar2() {}
     };
 
     class FooBar2 : public Foo2, public Bar2 {
     public:
-        virtual std::string f() const { return "ComplexLib::FooBar2::f()"; }
         virtual ~FooBar2() {}
     };
 

@@ -11,19 +11,18 @@ namespace ComplexLib {
     class Foo2 {
     public:
         Foo2();
-        virtual std::string f() const;
+        std::string f() const;
     };
 
     class Bar2 {
     public:
         Bar2();
-        virtual std::string f() const;
+        std::string f() const;
     };
 
     class FooBar2 : public Foo2, public Bar2 {
     public:
         FooBar2();
-        virtual std::string f() const;
     };
 
     std::string functionUsingFoo2(const boost::shared_ptr<Foo2> &f);
