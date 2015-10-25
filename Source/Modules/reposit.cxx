@@ -2880,7 +2880,7 @@ int functionWrapperImplCtor(Node *n) {
 
     p.base = 0;
     if (List *baseList = Getattr(n1, "baselist")) {
-        REPOSIT_SWIG_REQUIRE(1==Len(baseList), "Class '" << Char(p.name) << "' has multiple base classes.");
+        //REPOSIT_SWIG_REQUIRE(1==Len(baseList), "Class '" << Char(p.name) << "' has multiple base classes.");
         p.base = Getitem(baseList, 0);
         printf("base = %s\n", Char(p.base));
     } else {

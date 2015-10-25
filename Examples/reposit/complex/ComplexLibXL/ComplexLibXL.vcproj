@@ -197,6 +197,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\clxl\functions\function_diamond_inheritance.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\clxl\functions\function_enumerated_classes.cpp"
 				>
 			</File>
@@ -210,6 +214,10 @@
 			</File>
 			<File
 				RelativePath=".\clxl\functions\function_inheritance.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\clxl\functions\function_multiple_inheritance.cpp"
 				>
 			</File>
 			<File
@@ -241,6 +249,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\clxl\register\register_diamond_inheritance.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\clxl\register\register_enumerated_classes.cpp"
 				>
 			</File>
@@ -254,6 +266,10 @@
 			</File>
 			<File
 				RelativePath=".\clxl\register\register_inheritance.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\clxl\register\register_multiple_inheritance.cpp"
 				>
 			</File>
 			<File

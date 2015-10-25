@@ -178,6 +178,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\add_diamond_inheritance.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_diamond_inheritance.hpp"
+			>
+		</File>
+		<File
 			RelativePath=".\add_enumerated_classes.cpp"
 			>
 		</File>
@@ -207,6 +215,14 @@
 		</File>
 		<File
 			RelativePath=".\add_inheritance.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_multiple_inheritance.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_multiple_inheritance.hpp"
 			>
 		</File>
 		<File

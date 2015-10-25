@@ -20,6 +20,8 @@ int main() {
         testEnumeratedTypes();
         testEnumeratedClasses();
         testOverrides();
+        testMultipleInheritance();
+        testDiamondInheritance();
 
         ComplexLibAddinCpp::closeAddin();
 

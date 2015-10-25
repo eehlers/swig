@@ -149,11 +149,27 @@
 			Name="valueobjects"
 			>
 			<File
+				RelativePath=".\valueobjects\vo_diamond_inheritance.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_diamond_inheritance.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\valueobjects\vo_inheritance.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\valueobjects\vo_inheritance.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_multiple_inheritance.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_multiple_inheritance.hpp"
 				>
 			</File>
 			<File
@@ -260,11 +276,27 @@
 					>
 				</File>
 				<File
+					RelativePath=".\serialization\create\create_diamond_inheritance.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_diamond_inheritance.hpp"
+					>
+				</File>
+				<File
 					RelativePath=".\serialization\create\create_inheritance.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\serialization\create\create_inheritance.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_multiple_inheritance.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_multiple_inheritance.hpp"
 					>
 				</File>
 				<File
@@ -292,11 +324,27 @@
 					>
 				</File>
 				<File
+					RelativePath=".\serialization\register\serialization_diamond_inheritance.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_diamond_inheritance.hpp"
+					>
+				</File>
+				<File
 					RelativePath=".\serialization\register\serialization_inheritance.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\serialization\register\serialization_inheritance.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_multiple_inheritance.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_multiple_inheritance.hpp"
 					>
 				</File>
 				<File
@@ -350,7 +398,15 @@
 			>
 		</File>
 		<File
+			RelativePath=".\obj_multiple_inheritance.hpp"
+			>
+		</File>
+		<File
 			RelativePath=".\obj_objects.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\objmanual_diamond_inheritance.hpp"
 			>
 		</File>
 		<File

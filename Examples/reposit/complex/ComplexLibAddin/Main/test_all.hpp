@@ -11,6 +11,8 @@
 #define TEST_ENUMERATED_TYPES
 #define TEST_ENUMERATED_CLASSES
 #define TEST_OVERRIDES
+#define TEST_MULTIPLE_INHERITANCE
+#define TEST_DIAMOND_INHERITANCE
 
 void testFunctions();
 void testObjects();
@@ -21,6 +23,8 @@ void testCoercions();
 void testEnumeratedTypes();
 void testEnumeratedClasses();
 void testOverrides();
+void testMultipleInheritance();
+void testDiamondInheritance();
 
 #endif
 

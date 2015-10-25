@@ -55,6 +55,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\functions\diamond_inheritance.i"
+				>
+			</File>
+			<File
 				RelativePath=".\functions\echo.i"
 				>
 			</File>
@@ -72,6 +76,10 @@
 			</File>
 			<File
 				RelativePath=".\functions\inheritance.i"
+				>
+			</File>
+			<File
+				RelativePath=".\functions\multiple_inheritance.i"
 				>
 			</File>
 			<File
@@ -96,6 +104,14 @@
 			>
 			<File
 				RelativePath=".\typemaps\all.i"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="typedefs"
+			>
+			<File
+				RelativePath=".\typedefs\all.i"
 				>
 			</File>
 		</Filter>

@@ -169,6 +169,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cl\diamond_inheritance.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\diamond_inheritance.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\cl\echo.cpp"
 				>
 			</File>
@@ -202,6 +210,14 @@
 			</File>
 			<File
 				RelativePath=".\cl\inheritance.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\multiple_inheritance.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\multiple_inheritance.hpp"
 				>
 			</File>
 			<File
