@@ -503,6 +503,7 @@ struct ParmsCtor {
     ParmList *parms2;
     String *pname;
     String *base;
+    bool multipleBaseClasses;
 };
 
 struct ParmsMemb {
@@ -569,6 +570,11 @@ struct GroupLibraryObjects : public GroupBase {
             String *s0 = NewString("");
             String *s1 = NewString("");
             if (p.base) {
+                // Autogeneration of object wrapper code is not supported for multiple inheritance.
+                REPOSIT_SWIG_REQUIRE(!pragmas_.automatic_ || !p.multipleBaseClasses,
+                    "Class '" << Char(p.name) << "' has multiple base classes.\n"
+                    "Autogeneration of object wrapper code is not supported for multiple inheritance.\n"
+                    "Use the %override directive to suppress autogeneration, and implement the code manually.");
                 s0 = p.base;
                 s1 = NewStringf("%s::%s", nmspace, p.base);
             } else {
@@ -2880,7 +2886,7 @@ int functionWrapperImplCtor(Node *n) {
 
     p.base = 0;
     if (List *baseList = Getattr(n1, "baselist")) {
-        //REPOSIT_SWIG_REQUIRE(1==Len(baseList), "Class '" << Char(p.name) << "' has multiple base classes.");
+        p.multipleBaseClasses = Len(baseList) > 1;
         p.base = Getitem(baseList, 0);
         printf("base = %s\n", Char(p.base));
     } else {

@@ -20,7 +20,6 @@ namespace ComplexLibAddin {
     class Foo2 : 
         virtual public reposit::Object {
     public:
-        boost::shared_ptr<ComplexLib::Foo2> foo2_;
         Foo2(
             const boost::shared_ptr<reposit::ValueObject>& properties,
             // BEGIN typemap rp_tm_default
@@ -32,17 +31,18 @@ namespace ComplexLibAddin {
                 // END   typemap rp_tm_default
             ));
         }
-        Foo2() {}
         void getLibraryObject(boost::shared_ptr<ComplexLib::Foo2> &ret) const {
             ret = foo2_;
         }
+    protected:
+        Foo2() {}
+        boost::shared_ptr<ComplexLib::Foo2> foo2_;
     };
 
 
     class Bar2 : 
         virtual public reposit::Object {
     public:
-        boost::shared_ptr<ComplexLib::Bar2> bar2_;
         Bar2(
             const boost::shared_ptr<reposit::ValueObject>& properties,
             // BEGIN typemap rp_tm_default
@@ -54,10 +54,12 @@ namespace ComplexLibAddin {
                 // END   typemap rp_tm_default
             ));
         }
-        Bar2() {}
         void getLibraryObject(boost::shared_ptr<ComplexLib::Bar2> &ret) const {
             ret = bar2_;
         }
+    protected:
+        Bar2() {}
+        boost::shared_ptr<ComplexLib::Bar2> bar2_;
     };
 
 

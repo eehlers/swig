@@ -9,7 +9,9 @@
 
 namespace ComplexLib {
 
-    // An example of multiple inheritance.
+    // The classes below exhibit multiple inheritance.
+    // All of these classes are exported to the addin, where they all share
+    // class Object as a common ancestor, resulting in diamond inheritance.
 
     class Foo2 {
     public:
