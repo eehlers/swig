@@ -205,6 +205,7 @@
 %typemap(rp_tm_csh_rttp) void "void";
 %typemap(rp_tm_csh_rttp) double "double";
 %typemap(rp_tm_csh_rttp) rp_tp_string "char *";
+%typemap(rp_tm_csh_rttp) std::vector<double> "double *";
 
 // rp_tm_csh_parm - Function input parameter (F/C/M)
 %typemap(rp_tm_csh_parm) bool "bool";
@@ -253,6 +254,14 @@
 %typemap(rp_tm_csh_rtst) double "return returnValue;";
 %typemap(rp_tm_csh_rtst) SWIGTYPE "";
 
+%typemap(rp_tm_csh_rtst) std::vector<double> %{
+        double *ret = new double[returnValue.size()+1];
+        ret[0]=returnValue.size();
+        for (unsigned int i=0;i<returnValue.size();i++)
+            ret[i+1]=returnValue[i];
+        return ret;
+%}
+
 // CS
 
 // rp_tm_csh_rtcp
@@ -272,6 +281,7 @@
 %typemap(rp_tm_csh_rscp) long "int";
 %typemap(rp_tm_csh_rscp) double "double";
 %typemap(rp_tm_csh_rscp) rp_tp_string "string";
+%typemap(rp_tm_csh_rscp) std::vector<double> "IntPtr";
 
 //rp_tm_csh_rtex - value to be returned in the event of an exception
 %typemap(rp_tm_csh_rtex) void "return;";

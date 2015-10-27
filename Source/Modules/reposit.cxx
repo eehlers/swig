@@ -2101,9 +2101,13 @@ struct AddinCSharp : public AddinImpl<GroupCSharp> {
         Printf(b_csh_exp_all_cs->b0, "        [DllImport(QUANTLIB_ADDIN_DLL, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
         Printf(b_csh_exp_all_cs->b0, "        public static extern void qlInitializeAddin();\n");
         Printf(b_csh_exp_all_cs->b0, "\n");
-        Printf(b_csh_exp_all_cs->b0, "        // qlReleaseMemory\n");
+        Printf(b_csh_exp_all_cs->b0, "        // qlReleaseMemoryInt\n");
         Printf(b_csh_exp_all_cs->b0, "        [DllImport(QUANTLIB_ADDIN_DLL, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
-        Printf(b_csh_exp_all_cs->b0, "        public static extern void qlReleaseMemory(IntPtr p);\n");
+        Printf(b_csh_exp_all_cs->b0, "        public static extern void qlReleaseMemoryInt(IntPtr p);\n");
+        Printf(b_csh_exp_all_cs->b0, "\n");
+        Printf(b_csh_exp_all_cs->b0, "        // qlReleaseMemoryDbl\n");
+        Printf(b_csh_exp_all_cs->b0, "        [DllImport(QUANTLIB_ADDIN_DLL, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+        Printf(b_csh_exp_all_cs->b0, "        public static extern void qlReleaseMemoryDbl(IntPtr p);\n");
     }
 
     virtual void functionWrapperImplFunc(ParmsFunc &p) {
