@@ -25,6 +25,7 @@ String *libraryClass = 0;
 long idNum = 4;
 bool generateCtor = false;
 String *parent = 0;
+bool legacy = false;
 
 // Default names for directories for source code and headers.
 // FIXME store these defaults in reposit.swg and retrieve them here.
@@ -2417,6 +2418,9 @@ public:
             } else {
                 Swig_arg_error();
             }
+        } else if ( (strcmp(argv[i],"-backwardcompatible") == 0)) {
+            legacy = true;
+            Swig_mark_arg(i);
         }
     }
   }
@@ -2740,7 +2744,7 @@ int functionHandlerImpl(Node *n) {
     return Language::functionHandler(n);
 }
 
-Parm *prependParm(ParmList *parms, const char *name, const char *type, bool constRef = true, bool hidden = false) {
+Parm *createParm(const char *name, const char *type, bool constRef, bool hidden) {
     Parm *ret = NewHash();
     Setattr(ret, "name", name);
     String *nt  = NewString(type);
@@ -2752,8 +2756,26 @@ Parm *prependParm(ParmList *parms, const char *name, const char *type, bool cons
     if (hidden)
         Setattr(ret, "hidden", "1");
     processParm(ret);
+    return ret;
+}
+
+ParmList *prependParm(ParmList *parms, const char *name, const char *type, bool constRef = true, bool hidden = false) {
+    Parm *ret = createParm(name, type, constRef, hidden);
     Setattr(ret, "nextSibling", parms);
     return ret;
+}
+
+ParmList *appendParm(ParmList *parms, const char *name, const char *type, bool constRef = true, bool hidden = false) {
+    Parm *p = createParm(name, type, constRef, hidden);
+    if (parms && ParmList_len(parms)) {
+        Parm *lastParm;
+        for (Parm *p2 = parms; p2; p2 = nextSibling(p2))
+            lastParm = p2;
+        Setattr(lastParm, "nextSibling", p);
+        return parms;
+    } else {
+        return p;
+    }
 }
 
 // Validate the function name.
@@ -2837,9 +2859,15 @@ int functionWrapperImplFunc(Node *n) {
     Printf(b_init, "&&& prefix=%s\n", prefix);
     Printf(b_init, "&&& p.funcName=%s\n", p.funcName);
 
-    // Create from parms another list parms2 - prepend an argument to represent
-    // the dependency trigger which is the first argument of every addin function.
-    p.parms2 = prependParm(p.parms, "Trigger", "reposit::property_t");
+    // Create from parms another list parms2 with argument Trigger.
+    if (legacy) {
+        // In legacy mode, append the argument to the list.
+        p.parms2 = CopyParmList(p.parms);
+        p.parms2 = appendParm(p.parms2, "Trigger", "reposit::property_t");
+    } else {
+        // For new projects, Trigger is the first argument.
+        p.parms2 = prependParm(p.parms, "Trigger", "reposit::property_t");
+    }
 
     addinList_.functionWrapperImplFunc(p);
 
@@ -2907,12 +2935,21 @@ int functionWrapperImplCtor(Node *n) {
     printf("funcName=%s\n", Char(p.funcName));
     Printf(b_init, "@@@ CTOR Name=%s\n", Char(p.funcName));
 
-    // Create from parms another list parms2 - prepend an argument to represent
-    // the object ID which is passed in as the first parameter to every ctor.
-    Parm *temp1 = prependParm(p.parms, "Permanent", "bool", false);
-    Parm *temp2 = prependParm(temp1, "Overwrite", "bool", false);
-    Parm *temp3 = prependParm(temp2, "objectID", "std::string");
-    p.parms2 = prependParm(temp3, "Trigger", "reposit::property_t");
+    // Create from parms another list parms2 containing additional parameters.
+    if (legacy) {
+        // In legacy mode the signature is: (ObjectId, ..., Permanent, Trigger, Overwrite)
+        p.parms2 = CopyParmList(p.parms);
+        p.parms2 = appendParm(p.parms2, "Permanent", "bool", false);
+        p.parms2 = appendParm(p.parms2, "Trigger", "reposit::property_t");
+        p.parms2 = appendParm(p.parms2, "Overwrite", "bool", false);
+        p.parms2 = prependParm(p.parms2, "objectID", "std::string");
+    } else {
+        // For new projects the signature is: (Trigger, ObjectId, Overwrite, Permanent, ...)
+        Parm *temp1 = prependParm(p.parms, "Permanent", "bool", false);
+        Parm *temp2 = prependParm(temp1, "Overwrite", "bool", false);
+        Parm *temp3 = prependParm(temp2, "objectID", "std::string");
+        p.parms2 = prependParm(temp3, "Trigger", "reposit::property_t");
+    }
 
     Printf(b_wrappers, "//***DEF\n");
     printList(p.parms2, b_wrappers);
@@ -2959,11 +2996,18 @@ int functionWrapperImplMemb(Node *n) {
     printf("p.funcName=%s\n", Char(p.funcName));
     Printf(b_init, "@@@ MEMB Name=%s\n", Char(p.funcName));
 
-    // Create from parms another list parms2 - prepend an argument to represent
-    // the object ID which is passed in as the first parameter to every ctor.
-    ParmList *parmsTemp = Getattr(p.parms, "nextSibling");
-    Parm *parmsTemp2 = prependParm(parmsTemp, "objectID", "std::string");
-    p.parms2 = prependParm(parmsTemp2, "Trigger", "reposit::property_t");
+    // Create from parms another list parms2 containing additional parameters.
+    if (legacy) {
+        // In legacy mode the signature is: (ObjectId, ..., Trigger)
+        p.parms2 = CopyParmList(Getattr(p.parms, "nextSibling"));
+        p.parms2 = appendParm(p.parms2, "Trigger", "reposit::property_t");
+        p.parms2 = prependParm(p.parms2, "objectID", "std::string");
+    } else {
+        // For new projects the signature is: (Trigger, ObjectId, ...)
+        ParmList *parmsTemp = Getattr(p.parms, "nextSibling");
+        Parm *parmsTemp2 = prependParm(parmsTemp, "objectID", "std::string");
+        p.parms2 = prependParm(parmsTemp2, "Trigger", "reposit::property_t");
+    }
 
     // We are invoking the member function of a class.
     // Create a dummy node and attach to it the type of the class.
