@@ -2783,8 +2783,6 @@ ParmList *appendParm(ParmList *parms, const char *name, const char *type, bool c
 // clashes with Excel range names.  It is possible that a function name could pass this
 // test but still be invalid for other reasons.
 // Excel cell names lie in the range A1 - XFD1048576.
-// For performance reason this function tests the range A1 - ZZZ9999999.
-// So this function could return a false positive, i.e. fail even though the name is OK.
 void validateFunctionName(const String *functionName) {
     unsigned int len = Len(functionName);
     if (len > 10)
