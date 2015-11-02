@@ -2418,7 +2418,7 @@ public:
             } else {
                 Swig_arg_error();
             }
-        } else if ( (strcmp(argv[i],"-backwardcompatible") == 0)) {
+        } else if ( (strcmp(argv[i],"-legacy") == 0)) {
             legacy = true;
             Swig_mark_arg(i);
         }

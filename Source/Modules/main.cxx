@@ -646,6 +646,9 @@ void SWIG_getoptions(int argc, char *argv[]) {
 	fprintf(stdout, "Copyright (c) 2005-2006\n");
 	fprintf(stdout, "Arizona Board of Regents (University of Arizona)\n");
 	SWIG_exit(EXIT_SUCCESS);
+      } else if (strcmp(argv[i], "-legacy") == 0) {
+          // ignore this argument so that it can be received by the reposit module
+          // without conflicting with the -l argument below.
       } else if (strncmp(argv[i], "-l", 2) == 0) {
 	// Add a new directory search path
 	Append(libfiles, argv[i] + 2);
