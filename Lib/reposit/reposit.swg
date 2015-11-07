@@ -472,7 +472,7 @@
 // This is a temporary hack for trigger parameters, which are not supported by =countify.
 // Declare the value as a dummy bool.  Later we will suppress it altogether.
 %typemap(rp_tm_cfy_parm)  reposit::property_t const & "bool $1_name";
-%typemap(rp_tm_cfy_parm) SWIGTYPE "$1_type";
+%typemap(rp_tm_cfy_parm) SWIGTYPE "$1_type $1_name";
 
 // rp_tm_cfy_cnvt - convert input values from =countify datatypes into datatypes of the underlying Library (F/C/M)
 
@@ -674,6 +674,13 @@
 %typemap(rp_tm_xll_cdrt) T "C";
 %typemap(rp_tm_xll_code) T "C";
 
+%typemap(rp_tm_cfy_parm) T "const char * $1_name";
+%typemap(rp_tm_cfy_cnvt) T %{
+    T $1_name_enm =
+        reposit::Create<T >()($1_name);
+%}
+%typemap(rp_tm_cfy_args) T "$1_name_enm";
+
 // T &
 %typemap(rp_tm_xxx_rp_get) T & %{
         T xxx =
@@ -726,6 +733,14 @@
 %typemap(rp_tm_xll_argf) T & "$1_name_enm";
 %typemap(rp_tm_xll_cdrt) T & "C";
 %typemap(rp_tm_xll_code) T & "C";
+
+%typemap(rp_tm_cfy_parm) T & "const char * $1_name";
+%typemap(rp_tm_cfy_cnvt) T & %{
+    T $1_name_enm =
+        reposit::Create<T >()($1_name);
+%}
+%typemap(rp_tm_cfy_args) T & "$1_name_enm";
+
 %enddef
 
 // repository objects

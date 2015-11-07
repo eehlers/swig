@@ -1095,13 +1095,13 @@ struct GroupCpp : public GroupBase {
         }
         Append(b_cpp_grp_cpp->b0, pragmas_.add_inc);
 
+        Printf(b_cpp_grp_cpp->b1, "\n");
+
         Printf(b_cpp_grp_hpp->b0, "\n");
         Printf(b_cpp_grp_hpp->b0, "} // namespace %s\n", addinCppNameSpace);
         Printf(b_cpp_grp_hpp->b0, "\n");
         Printf(b_cpp_grp_hpp->b0, "#endif\n");
         Printf(b_cpp_grp_hpp->b0, "\n");
-
-        Printf(b_cpp_grp_cpp->b1, "\n");
 
         b_cpp_grp_hpp->clear(count_);
         b_cpp_grp_cpp->clear(count_);
@@ -1633,51 +1633,54 @@ struct GroupCountify : public GroupBase {
         } else {
             Printf(b_cfy_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
         }
-        //Append(b_cfy_grp_cpp->b0, pragmas_.add_inc);
-        Printf(b_cfy_grp_cpp->b0, "//FIXME include only factories for types used in the current file\n");
-        Printf(b_cfy_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
-        Printf(b_cfy_grp_cpp->b0, "#include <boost/shared_ptr.hpp>\n");
-        Printf(b_cfy_grp_cpp->b0, "#include <rp/repository.hpp>\n");
-        //Printf(b_cfy_grp_cpp->b0, "#include <AddinCpp/add_all.hpp>\n");
-        Printf(b_cfy_grp_cpp->b0, "\n");
+
+        // From this point on we stop writing to b0 and write to b1 instead.
+        // After all processing finishes we will append some more #includes to b0 depending on what code this group requires.
+
+        Printf(b_cfy_grp_cpp->b1, "//FIXME include only factories for types used in the current file\n");
+        Printf(b_cfy_grp_cpp->b1, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
+        Printf(b_cfy_grp_cpp->b1, "#include <boost/shared_ptr.hpp>\n");
+        Printf(b_cfy_grp_cpp->b1, "#include <rp/repository.hpp>\n");
+        //Printf(b_cfy_grp_cpp->b1, "#include <AddinCpp/add_all.hpp>\n");
+        Printf(b_cfy_grp_cpp->b1, "\n");
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
-        Printf(b_cfy_grp_cpp->b0,"//****FUNC*****\n");
-        Printf(b_cfy_grp_cpp->b0,"extern \"C\" {\n");
-        Printf(b_cfy_grp_cpp->b0,"COUNTIFY_API\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtfn");
-        Printf(b_cfy_grp_cpp->b0,"%s(\n", p.funcName);
-        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_parm");
-        Printf(b_cfy_grp_cpp->b0,") {\n");
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"    try {\n");
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"        initializeAddin();\n");
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"        // Convert input types into Library types\n\n");
-        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_cnvt", 2, 0, false);
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtdf", 2, false);
-        Printf(b_cfy_grp_cpp->b0,"        %s::%s(\n", module, p.symname);
-        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_args", 2, ',', true, true);
-        Printf(b_cfy_grp_cpp->b0,"        );\n");
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtsf", 2, false);
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"    } catch (const std::exception &e) {\n");
-        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtex", 2, false);
-        Printf(b_cfy_grp_cpp->b0,"    } catch (...) {\n");
-        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtex", 2, false);
-        Printf(b_cfy_grp_cpp->b0,"    }\n");
-        Printf(b_cfy_grp_cpp->b0,"}\n");
-        Printf(b_cfy_grp_cpp->b0,"} // extern \"C\"\n");
+        Printf(b_cfy_grp_cpp->b1,"//****FUNC*****\n");
+        Printf(b_cfy_grp_cpp->b1,"extern \"C\" {\n");
+        Printf(b_cfy_grp_cpp->b1,"COUNTIFY_API\n");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtfn");
+        Printf(b_cfy_grp_cpp->b1,"%s(\n", p.funcName);
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm");
+        Printf(b_cfy_grp_cpp->b1,") {\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"    try {\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        initializeAddin();\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        // Convert input types into Library types\n\n");
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", 2, 0, false);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtdf", 2, false);
+        Printf(b_cfy_grp_cpp->b1,"        %s::%s(\n", module, p.symname);
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_args", 2, ',', true, true);
+        Printf(b_cfy_grp_cpp->b1,"        );\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtsf", 2, false);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtex", 2, false);
+        Printf(b_cfy_grp_cpp->b1,"    } catch (...) {\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtex", 2, false);
+        Printf(b_cfy_grp_cpp->b1,"    }\n");
+        Printf(b_cfy_grp_cpp->b1,"}\n");
+        Printf(b_cfy_grp_cpp->b1,"} // extern \"C\"\n");
 
         count_.functions++;
         count_.total2++;
@@ -1685,53 +1688,53 @@ struct GroupCountify : public GroupBase {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        Printf(b_cfy_grp_cpp->b0,"//****CTOR*****\n");
-        Printf(b_cfy_grp_cpp->b0,"extern \"C\" {\n");
-        Printf(b_cfy_grp_cpp->b0,"COUNTIFY_API\n");
-        Printf(b_cfy_grp_cpp->b0,"const char *%s(\n", p.funcName);
-        emitParmList(p.parms2, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_parm", 2);
-        Printf(b_cfy_grp_cpp->b0,"    ) {\n");
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"    try {\n");
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"        initializeAddin();\n");
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"        // Convert input types into Library types\n\n");
-        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_cnvt", 2, 0, false);
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
-        Printf(b_cfy_grp_cpp->b0,"            new %s::ValueObjects::%s(\n", module, p.funcName);
-        Printf(b_cfy_grp_cpp->b0,"                objectID,\n");
-        emitParmList(p.parms, b_cfy_grp_cpp->b0, 0, "rp_tm_default", 4, ',', true, false, true);
-        Printf(b_cfy_grp_cpp->b0,"                false));\n");
-        Printf(b_cfy_grp_cpp->b0,"        boost::shared_ptr<reposit::Object> object(\n");
-        Printf(b_cfy_grp_cpp->b0,"            new %s::%s(\n", module, p.name);
-        Printf(b_cfy_grp_cpp->b0,"                valueObject,\n");
-        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_args", 4, ',', true, true, true);
-        Printf(b_cfy_grp_cpp->b0,"                false));\n");
-        Printf(b_cfy_grp_cpp->b0,"        static std::string returnValue;\n");
-        Printf(b_cfy_grp_cpp->b0,"        returnValue =\n");
-        Printf(b_cfy_grp_cpp->b0,"            reposit::Repository::instance().storeObject(\n");
-        Printf(b_cfy_grp_cpp->b0,"                objectID, object, true, valueObject);\n");
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"        return returnValue.c_str();\n");
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"    } catch (const std::exception &e) {\n");
-        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
-        Printf(b_cfy_grp_cpp->b0,"        static std::string errorMessage;\n");
-        Printf(b_cfy_grp_cpp->b0,"        errorMessage = e.what();\n");
-        Printf(b_cfy_grp_cpp->b0,"        return errorMessage.c_str();\n");
-        Printf(b_cfy_grp_cpp->b0,"    } catch (...) {\n");
-        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
-        Printf(b_cfy_grp_cpp->b0,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
-        Printf(b_cfy_grp_cpp->b0,"        return errorMessage.c_str();\n");
-        Printf(b_cfy_grp_cpp->b0,"    }\n");
-        Printf(b_cfy_grp_cpp->b0,"}\n\n");
-        Printf(b_cfy_grp_cpp->b0,"} // extern \"C\"\n");
+        Printf(b_cfy_grp_cpp->b1,"//****CTOR*****\n");
+        Printf(b_cfy_grp_cpp->b1,"extern \"C\" {\n");
+        Printf(b_cfy_grp_cpp->b1,"COUNTIFY_API\n");
+        Printf(b_cfy_grp_cpp->b1,"const char *%s(\n", p.funcName);
+        emitParmList(p.parms2, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm", 2);
+        Printf(b_cfy_grp_cpp->b1,"    ) {\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"    try {\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        initializeAddin();\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        // Convert input types into Library types\n\n");
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", 2, 0, false);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+        Printf(b_cfy_grp_cpp->b1,"            new %s::ValueObjects::%s(\n", module, p.funcName);
+        Printf(b_cfy_grp_cpp->b1,"                objectID,\n");
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 0, "rp_tm_default", 4, ',', true, false, true);
+        Printf(b_cfy_grp_cpp->b1,"                false));\n");
+        Printf(b_cfy_grp_cpp->b1,"        boost::shared_ptr<reposit::Object> object(\n");
+        Printf(b_cfy_grp_cpp->b1,"            new %s::%s(\n", module, p.name);
+        Printf(b_cfy_grp_cpp->b1,"                valueObject,\n");
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_args", 4, ',', true, true, true);
+        Printf(b_cfy_grp_cpp->b1,"                false));\n");
+        Printf(b_cfy_grp_cpp->b1,"        static std::string returnValue;\n");
+        Printf(b_cfy_grp_cpp->b1,"        returnValue =\n");
+        Printf(b_cfy_grp_cpp->b1,"            reposit::Repository::instance().storeObject(\n");
+        Printf(b_cfy_grp_cpp->b1,"                objectID, object, true, valueObject);\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        return returnValue.c_str();\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b1,"        static std::string errorMessage;\n");
+        Printf(b_cfy_grp_cpp->b1,"        errorMessage = e.what();\n");
+        Printf(b_cfy_grp_cpp->b1,"        return errorMessage.c_str();\n");
+        Printf(b_cfy_grp_cpp->b1,"    } catch (...) {\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b1,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
+        Printf(b_cfy_grp_cpp->b1,"        return errorMessage.c_str();\n");
+        Printf(b_cfy_grp_cpp->b1,"    }\n");
+        Printf(b_cfy_grp_cpp->b1,"}\n\n");
+        Printf(b_cfy_grp_cpp->b1,"} // extern \"C\"\n");
 
         count_.constructors++;
         count_.total2++;
@@ -1739,49 +1742,50 @@ struct GroupCountify : public GroupBase {
 
     void functionWrapperImplMemb(ParmsMemb &p) {
 
-        Printf(b_cfy_grp_cpp->b0,"//****MEMB*****\n");
-        Printf(b_cfy_grp_cpp->b0,"extern \"C\" {\n");
-        Printf(b_cfy_grp_cpp->b0,"COUNTIFY_API\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtmb");
-        Printf(b_cfy_grp_cpp->b0,"%s(\n", p.funcName);
-        emitParmList(p.parms2, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_parm", 2);
-        Printf(b_cfy_grp_cpp->b0,"    ) {\n");
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"    try {\n");
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"        initializeAddin();\n");
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"        // Convert input types into Library types\n\n");
-        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cfy_cnvt", 2, 0, false);
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, p.node, "rp_tm_xxx_rp_get", 2);
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtdm", 2);
-        Printf(b_cfy_grp_cpp->b0,"        xxx->%s(\n", p.name);
-        emitParmList(p.parms, b_cfy_grp_cpp->b0, 1, "rp_tm_cpp_args", 3, ',', true, true);
-        Printf(b_cfy_grp_cpp->b0,"        );\n", p.name);
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtsm", 2);
-        Printf(b_cfy_grp_cpp->b0,"\n");
-        Printf(b_cfy_grp_cpp->b0,"    } catch (const std::exception &e) {\n");
-        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtex", 2, false);
-        Printf(b_cfy_grp_cpp->b0,"    } catch (...) {\n");
-        Printf(b_cfy_grp_cpp->b0,"        RP_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
-        Printf(b_cfy_grp_cpp->b0,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
-        emitTypeMap(b_cfy_grp_cpp->b0, p.n, "rp_tm_cfy_rtex", 2, false);
-        Printf(b_cfy_grp_cpp->b0,"    }\n");
-        Printf(b_cfy_grp_cpp->b0,"}\n");
-        Printf(b_cfy_grp_cpp->b0,"} // extern \"C\"\n");
+        Printf(b_cfy_grp_cpp->b1,"//****MEMB*****\n");
+        Printf(b_cfy_grp_cpp->b1,"extern \"C\" {\n");
+        Printf(b_cfy_grp_cpp->b1,"COUNTIFY_API\n");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtmb");
+        Printf(b_cfy_grp_cpp->b1,"%s(\n", p.funcName);
+        emitParmList(p.parms2, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm", 2);
+        Printf(b_cfy_grp_cpp->b1,"    ) {\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"    try {\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        initializeAddin();\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        // Convert input types into Library types\n\n");
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", 2, 0, false);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.node, "rp_tm_xxx_rp_get", 2);
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtdm", 2);
+        Printf(b_cfy_grp_cpp->b1,"        xxx->%s(\n", p.name);
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cpp_args", 3, ',', true, true);
+        Printf(b_cfy_grp_cpp->b1,"        );\n", p.name);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtsm", 2);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtex", 2, false);
+        Printf(b_cfy_grp_cpp->b1,"    } catch (...) {\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b1,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtex", 2, false);
+        Printf(b_cfy_grp_cpp->b1,"    }\n");
+        Printf(b_cfy_grp_cpp->b1,"}\n");
+        Printf(b_cfy_grp_cpp->b1,"} // extern \"C\"\n");
 
         count_.members++;
         count_.total2++;
     }
 
     void clear() {
+        Append(b_cfy_grp_cpp->b0, pragmas_.add_inc);
         b_cfy_grp_cpp->clear(count_);
     }
 };
