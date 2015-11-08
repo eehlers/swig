@@ -511,7 +511,7 @@
 // Declare the value as a summy bool.  Later we will suppress it altogether.
 %typemap(rp_tm_cfy_mngo) void "BOOL";
 %typemap(rp_tm_cfy_mngo) bool "BOOL";
-%typemap(rp_tm_cfy_mngo) long "INT32";
+%typemap(rp_tm_cfy_mngo) long "INT64";
 %typemap(rp_tm_cfy_mngo) double "REAL64";
 %typemap(rp_tm_cfy_mngo) reposit::property_t const & "BOOL";
 %typemap(rp_tm_cfy_mngo) SWIGTYPE "CSTR";
