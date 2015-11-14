@@ -369,7 +369,7 @@ struct Count {
     int members;
     int total2;
     Count() : created(0), updated(0), unchanged(0), total(0),
-        functions(0), constructors(0), members(0) {}
+        functions(0), constructors(0), members(0), total2(0) {}
     void add(const Count &c) {
         created += c.created;
         updated += c.updated;
