@@ -101,8 +101,10 @@ void printList(Node *n, File *f) {
 }
 
 String *getTypeMap(Node *n, const char *m, bool fatal = true) {
-    if (String *tm = Swig_typemap_lookup(m, n, "", 0)) 
+    if (String *tm = Swig_typemap_lookup(m, n, "", 0)) {
+        Replaceall(tm, "$rp_value", Getattr(n, "rp_value"));
         return tm;
+    }
     if (fatal) {
         SwigType *t  = Getattr(n, "type");
         Append(errorList, NewStringf("*** ERROR : typemap '%s' does not match type '%s'.\n", m, SwigType_str(t, 0)));
@@ -145,6 +147,7 @@ void emitParmList(
     File *buf,
     int mode=0,         // 0=name, 1=type, 2=both
     const char *map="rp_tm_default",
+    const char *map2="rp_tm_default",
     int indent=1,
     char delim=',',
     bool fatal=true,
@@ -165,7 +168,12 @@ void emitParmList(
             continue;
 
         String *name = Getattr(p,"name");
-        String *type  = getType(p, map, fatal);
+        String *value = Getattr(p,"value");
+        String *type = 0;
+        if (value)
+            type  = getType(p, map2, fatal);
+        else
+            type  = getType(p, map, fatal);
 
         if (!type)
             continue;
@@ -199,7 +207,13 @@ String *excelParamCodes(Node *n, ParmList *parms) {
     String *tm = getTypeMap(n, "rp_tm_xll_cdrt");
     Append(s, tm);
     for (Parm *p = parms; p; p = nextSibling(p)) {
-        String *tm = getTypeMap(p, "rp_tm_xll_code");
+
+        String *value = Getattr(p, "value");
+        String *tm = 0;
+        if (value)
+            tm  = getTypeMap(p, "rp_tm_xll_code2");
+        else
+            tm  = getTypeMap(p, "rp_tm_xll_code");
         Append(s, tm);
     }
     Append(s, "#");
@@ -588,11 +602,11 @@ struct GroupLibraryObjects : public GroupBase {
             Printf(b_lib_grp_hpp->b0,"    public:\n");
             Printf(b_lib_grp_hpp->b0,"        %s(\n", p.name);
             Printf(b_lib_grp_hpp->b0,"            const boost::shared_ptr<reposit::ValueObject>& properties,\n");
-            emitParmList(p.parms, b_lib_grp_hpp->b0, 2, "rp_tm_default", 3, ',', true, false, true);
+            emitParmList(p.parms, b_lib_grp_hpp->b0, 2, "rp_tm_default", "rp_tm_default", 3, ',', true, false, true);
             Printf(b_lib_grp_hpp->b0,"            bool permanent)\n");
             Printf(b_lib_grp_hpp->b0,"        : %s(properties, permanent) {\n", s0);
             Printf(b_lib_grp_hpp->b0,"            libraryObject_ = boost::shared_ptr<%s>(new %s(\n", s1, p.pname);
-            emitParmList(p.parms, b_lib_grp_hpp->b0, 0, "rp_tm_default", 4);
+            emitParmList(p.parms, b_lib_grp_hpp->b0, 0, "rp_tm_default", "rp_tm_default", 4);
             Printf(b_lib_grp_hpp->b0,"            ));\n");
             Printf(b_lib_grp_hpp->b0,"        }\n");
             Printf(b_lib_grp_hpp->b0,"    };\n");
@@ -670,7 +684,7 @@ struct GroupValueObjects : public GroupBase {
         Printf(b_vob_grp_hpp->b0,"            %s() {}\n", p.funcRename);
         Printf(b_vob_grp_hpp->b0,"            %s(\n", p.funcRename);
         Printf(b_vob_grp_hpp->b0,"                const std::string& ObjectId,\n");
-        emitParmList(p.parms, b_vob_grp_hpp->b0, 2, "rp_tm_vob_parm", 4, ',', true, false, true);
+        emitParmList(p.parms, b_vob_grp_hpp->b0, 2, "rp_tm_vob_parm", "rp_tm_vob_parm", 4, ',', true, false, true);
         Printf(b_vob_grp_hpp->b0,"                bool Permanent);\n");
         Printf(b_vob_grp_hpp->b0,"\n");
         Printf(b_vob_grp_hpp->b0,"            const std::set<std::string>& getSystemPropertyNames() const;\n");
@@ -681,7 +695,7 @@ struct GroupValueObjects : public GroupBase {
         Printf(b_vob_grp_hpp->b0,"        protected:\n");
         Printf(b_vob_grp_hpp->b0,"            static const char* mPropertyNames[];\n");
         Printf(b_vob_grp_hpp->b0,"            static std::set<std::string> mSystemPropertyNames;\n");
-        emitParmList(p.parms, b_vob_grp_hpp->b0, 1, "rp_tm_vob_mbvr", 3, ';', true, false, true);
+        emitParmList(p.parms, b_vob_grp_hpp->b0, 1, "rp_tm_vob_mbvr", "rp_tm_vob_mbvr", 3, ';', true, false, true);
         Printf(b_vob_grp_hpp->b0,"            bool Permanent_;\n");
         if (String *processorName = Getattr(p.n, "feature:rp:processorName"))
             Printf(b_vob_grp_hpp->b0,"            virtual std::string processorName() { return \"%s\"; }\n", processorName);
@@ -691,7 +705,7 @@ struct GroupValueObjects : public GroupBase {
         Printf(b_vob_grp_hpp->b0,"            boost::serialization::void_cast_register<%s, reposit::ValueObject>(this, this);\n", p.funcRename);
         Printf(b_vob_grp_hpp->b0,"                ar  & boost::serialization::make_nvp(\"ObjectId\", objectId_)\n");
         Printf(b_vob_grp_hpp->b0,"                    & boost::serialization::make_nvp(\"ClassName\", className_)\n");
-        emitParmList(p.parms, b_vob_grp_hpp->b0, 1, "rp_tm_vob_srmv", 5, 0);
+        emitParmList(p.parms, b_vob_grp_hpp->b0, 1, "rp_tm_vob_srmv", "rp_tm_vob_srmv", 5, 0);
         Printf(b_vob_grp_hpp->b0,"                    & boost::serialization::make_nvp(\"Permanent\", Permanent_)\n");
         Printf(b_vob_grp_hpp->b0,"                    & boost::serialization::make_nvp(\"UserProperties\", userProperties);\n");
         Printf(b_vob_grp_hpp->b0,"            }\n");
@@ -699,7 +713,7 @@ struct GroupValueObjects : public GroupBase {
         Printf(b_vob_grp_hpp->b0,"\n");
 
         Printf(b_vob_grp_cpp->b0,"        const char* %s::mPropertyNames[] = {\n", p.funcRename);
-        emitParmList(p.parms, b_vob_grp_cpp->b0, 1, "rp_tm_vob_name", 3, ',', true, false, true);
+        emitParmList(p.parms, b_vob_grp_cpp->b0, 1, "rp_tm_vob_name", "rp_tm_vob_name", 3, ',', true, false, true);
         Printf(b_vob_grp_cpp->b0,"            \"Permanent\"\n");
         Printf(b_vob_grp_cpp->b0,"        };\n");
         Printf(b_vob_grp_cpp->b0,"\n");
@@ -747,10 +761,10 @@ struct GroupValueObjects : public GroupBase {
         Printf(b_vob_grp_cpp->b0,"\n");
         Printf(b_vob_grp_cpp->b0,"        %s::%s(\n", p.funcRename, p.funcRename);
         Printf(b_vob_grp_cpp->b0,"                const std::string& ObjectId,\n");
-        emitParmList(p.parms, b_vob_grp_cpp->b0, 2, "rp_tm_vob_parm", 4, ',', true, false, true);
+        emitParmList(p.parms, b_vob_grp_cpp->b0, 2, "rp_tm_vob_parm", "rp_tm_vob_parm", 4, ',', true, false, true);
         Printf(b_vob_grp_cpp->b0,"                bool Permanent) :\n");
         Printf(b_vob_grp_cpp->b0,"            reposit::ValueObject(ObjectId, \"%s\", Permanent),\n", p.funcRename);
-        emitParmList(p.parms, b_vob_grp_cpp->b0, 1, "rp_tm_vob_init", 3, ',', true, false, true);
+        emitParmList(p.parms, b_vob_grp_cpp->b0, 1, "rp_tm_vob_init", "rp_tm_vob_init", 3, ',', true, false, true);
         Printf(b_vob_grp_cpp->b0,"            Permanent_(Permanent) {\n");
         Printf(b_vob_grp_cpp->b0,"        }\n");
 
@@ -839,7 +853,7 @@ struct GroupSerializationCreate : public GroupBase {
         Printf(b_scr_grp_cpp->b0, "    const boost::shared_ptr<reposit::ValueObject> &valueObject) {\n");
         Printf(b_scr_grp_cpp->b0, "\n");
         Printf(b_scr_grp_cpp->b0, "    // conversions\n\n");
-        emitParmList(p.parms, b_scr_grp_cpp->b0, 1, "rp_tm_scr_cnvt", 1, 0);
+        emitParmList(p.parms, b_scr_grp_cpp->b0, 1, "rp_tm_scr_cnvt", "rp_tm_scr_cnvt", 1, 0);
         Printf(b_scr_grp_cpp->b0, "\n");
         Printf(b_scr_grp_cpp->b0, "    bool Permanent =\n");
         Printf(b_scr_grp_cpp->b0, "        reposit::convert2<bool>(valueObject->getProperty(\"Permanent\"));\n");
@@ -849,7 +863,7 @@ struct GroupSerializationCreate : public GroupBase {
         Printf(b_scr_grp_cpp->b0, "    boost::shared_ptr<reposit::Object> object(\n");
         Printf(b_scr_grp_cpp->b0, "        new %s::%s(\n", module, p.name);
         Printf(b_scr_grp_cpp->b0, "            valueObject,\n");
-        emitParmList(p.parms, b_scr_grp_cpp->b0, 0, "rp_tm_default", 3, ',', true, false, true);
+        emitParmList(p.parms, b_scr_grp_cpp->b0, 0, "rp_tm_default", "rp_tm_default", 3, ',', true, false, true);
         Printf(b_scr_grp_cpp->b0, "            Permanent));\n");
         Printf(b_scr_grp_cpp->b0, "    return object;\n");
         Printf(b_scr_grp_cpp->b0, "}\n");
@@ -997,19 +1011,19 @@ struct GroupCpp : public GroupBase {
 
         emitTypeMap(b_cpp_grp_hpp->b0, p.n, "rp_tm_cpp_rttp", 1);
         Printf(b_cpp_grp_hpp->b0,"    %s(\n", p.funcName);
-        emitParmList(p.parms, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", 2);
+        emitParmList(p.parms, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", "rp_tm_cpp_parm2", 2);
         Printf(b_cpp_grp_hpp->b0,"    );\n");
 
         Printf(b_cpp_grp_cpp->b1,"//****FUNC*****\n");
         emitTypeMap(b_cpp_grp_cpp->b1, p.n, "rp_tm_cpp_rttp");
         Printf(b_cpp_grp_cpp->b1,"%s::%s(\n", addinCppNameSpace, p.funcName);
-        emitParmList(p.parms, b_cpp_grp_cpp->b1, 2, "rp_tm_cpp_parm");
+        emitParmList(p.parms, b_cpp_grp_cpp->b1, 2, "rp_tm_cpp_parm", "rp_tm_cpp_parm2");
         Printf(b_cpp_grp_cpp->b1,") {\n");
-        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_cnvt", 1, 0, false);
+        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_cnvt", "rp_tm_cpp_cnvt2", 1, 0, false);
         Printf(b_cpp_grp_cpp->b1,"\n");
         emitTypeMap(b_cpp_grp_cpp->b1, p.n, "rp_tm_cpp_rtdc", 2);
         Printf(b_cpp_grp_cpp->b1,"    %s::%s(\n", nmspace, p.symname);
-        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_args", 2, ',', true, true);
+        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_args", "rp_tm_cpp_args2", 2, ',', true, true);
         Printf(b_cpp_grp_cpp->b1,"    );\n");
         emitTypeMap(b_cpp_grp_cpp->b1, p.n, "rp_tm_cpp_rtst", 2);
         Printf(b_cpp_grp_cpp->b1,"}\n");
@@ -1023,26 +1037,26 @@ struct GroupCpp : public GroupBase {
         if (generateCtor) {
             Printf(b_cpp_grp_hpp->b0,"\n");
             Printf(b_cpp_grp_hpp->b0,"    std::string %s(\n", p.funcName);
-            emitParmList(p.parms2, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", 2);
+            emitParmList(p.parms2, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", "rp_tm_cpp_parm", 2);
             Printf(b_cpp_grp_hpp->b0,"    );\n\n");
 
             Printf(b_cpp_grp_cpp->b1,"//****CTOR*****\n");
             Printf(b_cpp_grp_cpp->b1,"std::string %s::%s(\n", addinCppNameSpace, p.funcName);
-            emitParmList(p.parms2, b_cpp_grp_cpp->b1, 2, "rp_tm_cpp_parm", 2);
+            emitParmList(p.parms2, b_cpp_grp_cpp->b1, 2, "rp_tm_cpp_parm", "rp_tm_cpp_parm", 2);
             Printf(b_cpp_grp_cpp->b1,"    ) {\n");
             Printf(b_cpp_grp_cpp->b1,"\n");
             Printf(b_cpp_grp_cpp->b1,"    // Convert input types into Library types\n\n");
-            emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_cnvt", 1, 0, false);
+            emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_cnvt", "rp_tm_cpp_cnvt", 1, 0, false);
             Printf(b_cpp_grp_cpp->b1,"\n");
             Printf(b_cpp_grp_cpp->b1,"    boost::shared_ptr<reposit::ValueObject> valueObject(\n");
             Printf(b_cpp_grp_cpp->b1,"        new %s::ValueObjects::%s(\n", module, p.funcName);
             Printf(b_cpp_grp_cpp->b1,"            objectID,\n");
-            emitParmList(p.parms, b_cpp_grp_cpp->b1, 0, "rp_tm_default", 3, ',', true, false, true);
+            emitParmList(p.parms, b_cpp_grp_cpp->b1, 0, "rp_tm_default", "rp_tm_default", 3, ',', true, false, true);
             Printf(b_cpp_grp_cpp->b1,"            false));\n");
             Printf(b_cpp_grp_cpp->b1,"    boost::shared_ptr<reposit::Object> object(\n");
             Printf(b_cpp_grp_cpp->b1,"        new %s::%s(\n", module, p.name);
             Printf(b_cpp_grp_cpp->b1,"            valueObject,\n");
-            emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_args", 3, ',', true, true, true);
+            emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_args", "rp_tm_cpp_args", 3, ',', true, true, true);
             Printf(b_cpp_grp_cpp->b1,"            false));\n");
             Printf(b_cpp_grp_cpp->b1,"    std::string returnValue =\n");
             Printf(b_cpp_grp_cpp->b1,"        reposit::Repository::instance().storeObject(\n");
@@ -1060,20 +1074,20 @@ struct GroupCpp : public GroupBase {
     void functionWrapperImplMemb(ParmsMemb &p) {
         emitTypeMap(b_cpp_grp_hpp->b0, p.n, "rp_tm_cpp_rtmb", 1);
         Printf(b_cpp_grp_hpp->b0,"    %s(\n", p.funcName);
-        emitParmList(p.parms2, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", 2);
+        emitParmList(p.parms2, b_cpp_grp_hpp->b0, 2, "rp_tm_cpp_parm", "rp_tm_cpp_parm", 2);
         Printf(b_cpp_grp_hpp->b0,"    );\n\n");
 
         Printf(b_cpp_grp_cpp->b1,"//****MEMB*****\n");
         emitTypeMap(b_cpp_grp_cpp->b1, p.n, "rp_tm_cpp_rtmb");
         Printf(b_cpp_grp_cpp->b1,"%s::%s(\n", addinCppNameSpace, p.funcName);
-        emitParmList(p.parms2, b_cpp_grp_cpp->b1, 2, "rp_tm_cpp_parm", 2);
+        emitParmList(p.parms2, b_cpp_grp_cpp->b1, 2, "rp_tm_cpp_parm", "rp_tm_cpp_parm", 2);
         Printf(b_cpp_grp_cpp->b1,"    ) {\n\n");
-        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_cnvt", 1, 0, false);
+        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_cnvt", "rp_tm_cpp_cnvt", 1, 0, false);
         Printf(b_cpp_grp_cpp->b1,"\n");
         emitTypeMap(b_cpp_grp_cpp->b1, p.node, "rp_tm_xxx_rp_get");
         emitTypeMap(b_cpp_grp_cpp->b1, p.n, "rp_tm_cpp_rtdc", 2);
         Printf(b_cpp_grp_cpp->b1,"    xxx->%s(\n", p.name);
-        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_args", 3, ',', true, true);
+        emitParmList(p.parms, b_cpp_grp_cpp->b1, 1, "rp_tm_cpp_args", "rp_tm_cpp_args", 3, ',', true, true);
         Printf(b_cpp_grp_cpp->b1,"        );\n", p.name);
         emitTypeMap(b_cpp_grp_cpp->b1, p.n, "rp_tm_cpp_rtst", 2);
         Printf(b_cpp_grp_cpp->b1,"}\n");
@@ -1141,15 +1155,15 @@ struct GroupCSharp : public GroupBase {
         Printf(b_csh_grp_cpp->b1, "extern \"C\" __declspec(dllexport)\n");
         emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rttp");
         Printf(b_csh_grp_cpp->b1, "__stdcall %s(\n", p.funcName);
-        emitParmList(p.parms, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", 2);
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", "rp_tm_csh_parm", 2);
         Printf(b_csh_grp_cpp->b1, ") {\n");
         Printf(b_csh_grp_cpp->b1, "    try {\n");
         Printf(b_csh_grp_cpp->b1,"        std::cout << \"BEGIN - FUNCTION '%s'\" << std::endl;\n", p.funcName);
         Printf(b_csh_grp_cpp->b1, "\n");
-        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", 2, 0, false);
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", "rp_tm_csh_cnvt", 2, 0, false);
         emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtdc", 2);
         Printf(b_csh_grp_cpp->b1, "        %s(\n", p.name);
-        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", 3, ',', true, true);
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", "rp_tm_csh_args", 3, ',', true, true);
         Printf(b_csh_grp_cpp->b1, "        );\n");
         Printf(b_csh_grp_cpp->b1,"        std::cout << \"END   - FUNCTION '%s'\" << std::endl;\n", p.funcName);
         emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtst", 2);
@@ -1169,22 +1183,22 @@ struct GroupCSharp : public GroupBase {
     void functionWrapperImplCtor(ParmsCtor &p) {
         if (generateCtor) {
             Printf(b_csh_grp_cpp->b1, "extern \"C\" __declspec(dllexport) char * __stdcall %s(\n", p.funcRename);
-            emitParmList(p.parms2, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", 1);
+            emitParmList(p.parms2, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", "rp_tm_csh_parm", 1);
             Printf(b_csh_grp_cpp->b1, ") {\n");
             Printf(b_csh_grp_cpp->b1, "    try {\n");
             Printf(b_csh_grp_cpp->b1,"        std::cout << \"BEGIN - FUNCTION '%s'\" << std::endl;\n", p.funcRename);
             Printf(b_csh_grp_cpp->b1, "\n");
-            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", 2, 0, false);
+            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", "rp_tm_csh_cnvt", 2, 0, false);
             Printf(b_csh_grp_cpp->b1,"\n");
             Printf(b_csh_grp_cpp->b1,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
             Printf(b_csh_grp_cpp->b1,"            new %s::ValueObjects::%s(\n", module, p.funcRename);
             Printf(b_csh_grp_cpp->b1,"                objectID,\n");
-            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_argfv", 4, ',', true, true, true);
+            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_argfv", "rp_tm_csh_argfv", 4, ',', true, true, true);
             Printf(b_csh_grp_cpp->b1,"                false));\n");
             Printf(b_csh_grp_cpp->b1,"        boost::shared_ptr<reposit::Object> object(\n");
             Printf(b_csh_grp_cpp->b1,"            new %s::%s(\n", module, p.name);
             Printf(b_csh_grp_cpp->b1,"                valueObject,\n");
-            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", 4, ',', true, true, true);
+            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", "rp_tm_csh_args", 4, ',', true, true, true);
             Printf(b_csh_grp_cpp->b1,"                false));\n");
             Printf(b_csh_grp_cpp->b1,"        std::string returnValue =\n");
             Printf(b_csh_grp_cpp->b1,"            reposit::Repository::instance().storeObject(\n");
@@ -1220,7 +1234,7 @@ struct GroupCSharp : public GroupBase {
         Printf(b_csh_grp_cpp->b1, "            boost::bind(\n");
         Printf(b_csh_grp_cpp->b1, "                &%s::%s,\n", p.pname, p.name);
         Printf(b_csh_grp_cpp->b1, "                xxx,\n");
-        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_loop", 4, ',', true, true);
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_loop", "rp_tm_csh_loop", 4, ',', true, true);
         Printf(b_csh_grp_cpp->b1, "            );\n");
         Printf(b_csh_grp_cpp->b1, "\n");
         Printf(b_csh_grp_cpp->b1, "        std::vector<%s> returnValue = loop\n", loopFunctionType);
@@ -1234,12 +1248,12 @@ struct GroupCSharp : public GroupBase {
         Printf(b_csh_grp_cpp->b1, "extern \"C\" __declspec(dllexport)\n");
         emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rttp");
         Printf(b_csh_grp_cpp->b1, "__stdcall %s(\n", p.funcName);
-        emitParmList(p.parms2, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", 2);
+        emitParmList(p.parms2, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", "rp_tm_csh_parm", 2);
         Printf(b_csh_grp_cpp->b1,"    ) {\n");
         Printf(b_csh_grp_cpp->b1, "    try {\n");
         Printf(b_csh_grp_cpp->b1,"        std::cout << \"BEGIN - FUNCTION '%s'\" << std::endl;\n", p.funcName);
         Printf(b_csh_grp_cpp->b1, "\n");
-        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", 1, 0, false);
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", "rp_tm_csh_cnvt", 1, 0, false);
         Printf(b_csh_grp_cpp->b1,"\n");
         emitTypeMap(b_csh_grp_cpp->b1, p.node, "rp_tm_xxx_rp_get");
         if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
@@ -1247,7 +1261,7 @@ struct GroupCSharp : public GroupBase {
         } else {
             emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtdc", 2);
             Printf(b_csh_grp_cpp->b1,"        xxx->%s(\n", p.name);
-            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", 3, ',', true, true);
+            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", "rp_tm_csh_args", 3, ',', true, true);
             Printf(b_csh_grp_cpp->b1,"        );\n", p.name);
             Printf(b_csh_grp_cpp->b1,"        std::cout << \"END   - FUNCTION '%s'\" << std::endl;\n", p.funcName);
         }
@@ -1323,7 +1337,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "        %s::%sBind bindObject =\n", module, p.funcName);
         Printf(b_xlf_grp_cpp->b1, "            boost::bind(\n");
         Printf(b_xlf_grp_cpp->b1, "                %s,\n", p.name);
-        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_loop", 4, ',', true, true);
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_loop", "rp_tm_xll_loop", 4, ',', true, true);
         Printf(b_xlf_grp_cpp->b1, "            );\n");
         Printf(b_xlf_grp_cpp->b1, "        reposit::loop\n");
         Printf(b_xlf_grp_cpp->b1, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
@@ -1341,7 +1355,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "DLLEXPORT\n");
         emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtft");
         Printf(b_xlf_grp_cpp->b1, "%s(\n", p.funcName);
-        emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm", 1);
+        emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm", "rp_tm_xll_parm", 1);
         Printf(b_xlf_grp_cpp->b1, ") {\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
         Printf(b_xlf_grp_cpp->b1, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
@@ -1353,7 +1367,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "\n");
         Printf(b_xlf_grp_cpp->b1, "        reposit::validateRange(Trigger, \"Trigger\");\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
-        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", 2, 0, false);
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", "rp_tm_xll_cnvt", 2, 0, false);
         Printf(b_xlf_grp_cpp->b1, "\n");
         if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
             emitLoopFunc(p, loopParameter);
@@ -1361,7 +1375,7 @@ struct GroupExcelFunctions : public GroupBase {
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtdc", 2);
             //Printf(b_xlf_grp_cpp->b1, "        %s::%s(\n", nmspace, p.symname);
             Printf(b_xlf_grp_cpp->b1, "        %s(\n", p.name);
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", 3, ',', true, true);
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", "rp_tm_xll_argf", 3, ',', true, true);
             Printf(b_xlf_grp_cpp->b1, "        );\n\n");
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtst", 2);
         }
@@ -1385,7 +1399,7 @@ struct GroupExcelFunctions : public GroupBase {
             Printf(b_xlf_grp_cpp->b1, "\n");
             Printf(b_xlf_grp_cpp->b1,"//****CTOR*****\n");
             Printf(b_xlf_grp_cpp->b1, "DLLEXPORT char *%s(\n", p.funcRename);
-            emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm");
+            emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm", "rp_tm_xll_parm");
             Printf(b_xlf_grp_cpp->b1, ") {\n");
             Printf(b_xlf_grp_cpp->b1, "\n");
             Printf(b_xlf_grp_cpp->b1, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
@@ -1395,18 +1409,18 @@ struct GroupExcelFunctions : public GroupBase {
             Printf(b_xlf_grp_cpp->b1, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
             Printf(b_xlf_grp_cpp->b1, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcRename);
             Printf(b_xlf_grp_cpp->b1, "\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", 2, 0, false);
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", "rp_tm_xll_cnvt", 2, 0, false);
             Printf(b_xlf_grp_cpp->b1, "\n");
             Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
             Printf(b_xlf_grp_cpp->b1, "            new %s::ValueObjects::%s(\n", module, p.funcRename);
             Printf(b_xlf_grp_cpp->b1, "                objectID,\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argfv", 4, ',', true, true, true);
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argfv", "rp_tm_xll_argfv", 4, ',', true, true, true);
             Printf(b_xlf_grp_cpp->b1, "                false));\n");
             Printf(b_xlf_grp_cpp->b1, "\n");
             Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::Object> object(\n");
             Printf(b_xlf_grp_cpp->b1, "            new %s::%s(\n", module, p.name);
             Printf(b_xlf_grp_cpp->b1, "                valueObject,\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", 4, ',', true, true, true);
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", "rp_tm_xll_argf", 4, ',', true, true, true);
             Printf(b_xlf_grp_cpp->b1, "                false));\n");
             Printf(b_xlf_grp_cpp->b1, "\n");
             Printf(b_xlf_grp_cpp->b1, "        std::string returnValue =\n");
@@ -1442,7 +1456,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "            boost::bind(\n");
         Printf(b_xlf_grp_cpp->b1, "                &%s::%s,\n", p.pname, p.name);
         Printf(b_xlf_grp_cpp->b1, "                xxx,\n");
-        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_loop", 4, ',', true, true);
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_loop", "rp_tm_xll_loop2", 4, ',', true, true);
         Printf(b_xlf_grp_cpp->b1, "            );\n");
         Printf(b_xlf_grp_cpp->b1, "        reposit::loop\n");
         Printf(b_xlf_grp_cpp->b1, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
@@ -1460,7 +1474,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "DLLEXPORT\n");
         emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtft");
         Printf(b_xlf_grp_cpp->b1, "%s(\n", p.funcName);
-        emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm");
+        emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm", "rp_tm_xll_parm2");
         Printf(b_xlf_grp_cpp->b1, ") {\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
         Printf(b_xlf_grp_cpp->b1, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
@@ -1470,7 +1484,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
         Printf(b_xlf_grp_cpp->b1, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcName);
         Printf(b_xlf_grp_cpp->b1, "\n");
-        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", 2, 0, false);
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", "rp_tm_xll_cnvt2", 2, 0, false);
         Printf(b_xlf_grp_cpp->b1, "\n");
         emitTypeMap(b_xlf_grp_cpp->b1, p.node, "rp_tm_xxx_rp_get", 2);
         Printf(b_xlf_grp_cpp->b1, "\n");
@@ -1479,7 +1493,7 @@ struct GroupExcelFunctions : public GroupBase {
         } else {
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtdc", 2);
             Printf(b_xlf_grp_cpp->b1, "        xxx->%s(\n", p.name);
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", 3, ',', true, true);
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", "rp_tm_xll_argf", 3, ',', true, true);
             Printf(b_xlf_grp_cpp->b1, "        );\n\n");
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtst", 2);
         }
@@ -1651,7 +1665,7 @@ struct GroupCountify : public GroupBase {
         Printf(b_cfy_grp_cpp->b1,"COUNTIFY_API\n");
         emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtfn");
         Printf(b_cfy_grp_cpp->b1,"%s(\n", p.funcName);
-        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm");
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm", "rp_tm_cfy_parm");
         Printf(b_cfy_grp_cpp->b1,") {\n");
         Printf(b_cfy_grp_cpp->b1,"\n");
         Printf(b_cfy_grp_cpp->b1,"    try {\n");
@@ -1661,11 +1675,11 @@ struct GroupCountify : public GroupBase {
         Printf(b_cfy_grp_cpp->b1,"        initializeAddin();\n");
         Printf(b_cfy_grp_cpp->b1,"\n");
         Printf(b_cfy_grp_cpp->b1,"        // Convert input types into Library types\n\n");
-        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", 2, 0, false);
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", "rp_tm_cfy_cnvt", 2, 0, false);
         Printf(b_cfy_grp_cpp->b1,"\n");
         emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtdf", 2, false);
         Printf(b_cfy_grp_cpp->b1,"        %s::%s(\n", module, p.symname);
-        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_args", 2, ',', true, true);
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_args", "rp_tm_cfy_args", 2, ',', true, true);
         Printf(b_cfy_grp_cpp->b1,"        );\n");
         Printf(b_cfy_grp_cpp->b1,"\n");
         Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
@@ -1692,7 +1706,7 @@ struct GroupCountify : public GroupBase {
         Printf(b_cfy_grp_cpp->b1,"extern \"C\" {\n");
         Printf(b_cfy_grp_cpp->b1,"COUNTIFY_API\n");
         Printf(b_cfy_grp_cpp->b1,"const char *%s(\n", p.funcName);
-        emitParmList(p.parms2, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm", 2);
+        emitParmList(p.parms2, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm", "rp_tm_cfy_parm", 2);
         Printf(b_cfy_grp_cpp->b1,"    ) {\n");
         Printf(b_cfy_grp_cpp->b1,"\n");
         Printf(b_cfy_grp_cpp->b1,"    try {\n");
@@ -1702,17 +1716,17 @@ struct GroupCountify : public GroupBase {
         Printf(b_cfy_grp_cpp->b1,"        initializeAddin();\n");
         Printf(b_cfy_grp_cpp->b1,"\n");
         Printf(b_cfy_grp_cpp->b1,"        // Convert input types into Library types\n\n");
-        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", 2, 0, false);
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", "rp_tm_cfy_cnvt", 2, 0, false);
         Printf(b_cfy_grp_cpp->b1,"\n");
         Printf(b_cfy_grp_cpp->b1,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
         Printf(b_cfy_grp_cpp->b1,"            new %s::ValueObjects::%s(\n", module, p.funcName);
         Printf(b_cfy_grp_cpp->b1,"                objectID,\n");
-        emitParmList(p.parms, b_cfy_grp_cpp->b1, 0, "rp_tm_default", 4, ',', true, false, true);
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 0, "rp_tm_default", "rp_tm_default", 4, ',', true, false, true);
         Printf(b_cfy_grp_cpp->b1,"                false));\n");
         Printf(b_cfy_grp_cpp->b1,"        boost::shared_ptr<reposit::Object> object(\n");
         Printf(b_cfy_grp_cpp->b1,"            new %s::%s(\n", module, p.name);
         Printf(b_cfy_grp_cpp->b1,"                valueObject,\n");
-        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_args", 4, ',', true, true, true);
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_args", "rp_tm_cfy_args", 4, ',', true, true, true);
         Printf(b_cfy_grp_cpp->b1,"                false));\n");
         Printf(b_cfy_grp_cpp->b1,"        static std::string returnValue;\n");
         Printf(b_cfy_grp_cpp->b1,"        returnValue =\n");
@@ -1747,7 +1761,7 @@ struct GroupCountify : public GroupBase {
         Printf(b_cfy_grp_cpp->b1,"COUNTIFY_API\n");
         emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtmb");
         Printf(b_cfy_grp_cpp->b1,"%s(\n", p.funcName);
-        emitParmList(p.parms2, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm", 2);
+        emitParmList(p.parms2, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm", "rp_tm_cfy_parm", 2);
         Printf(b_cfy_grp_cpp->b1,"    ) {\n");
         Printf(b_cfy_grp_cpp->b1,"\n");
         Printf(b_cfy_grp_cpp->b1,"    try {\n");
@@ -1757,12 +1771,12 @@ struct GroupCountify : public GroupBase {
         Printf(b_cfy_grp_cpp->b1,"        initializeAddin();\n");
         Printf(b_cfy_grp_cpp->b1,"\n");
         Printf(b_cfy_grp_cpp->b1,"        // Convert input types into Library types\n\n");
-        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", 2, 0, false);
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", "rp_tm_cfy_cnvt", 2, 0, false);
         Printf(b_cfy_grp_cpp->b1,"\n");
         emitTypeMap(b_cfy_grp_cpp->b1, p.node, "rp_tm_xxx_rp_get", 2);
         emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtdm", 2);
         Printf(b_cfy_grp_cpp->b1,"        xxx->%s(\n", p.name);
-        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cpp_args", 3, ',', true, true);
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cpp_args", "rp_tm_cpp_args", 3, ',', true, true);
         Printf(b_cfy_grp_cpp->b1,"        );\n", p.name);
         Printf(b_cfy_grp_cpp->b1,"\n");
         Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
@@ -2125,7 +2139,7 @@ struct AddinCSharp : public AddinImpl<GroupCSharp> {
             Printf(b_csh_exp_all_cs->b0, "        public static extern\n");
             emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rscp", 2);
             Printf(b_csh_exp_all_cs->b0, "        %s(\n", p.funcName);
-            emitParmList(p.parms, b_csh_exp_all_cs->b0, 2, "rp_tm_csh_clcp", 3);
+            emitParmList(p.parms, b_csh_exp_all_cs->b0, 2, "rp_tm_csh_clcp", "rp_tm_csh_clcp", 3);
             Printf(b_csh_exp_all_cs->b0, "        );\n");
         }
     }
@@ -2138,7 +2152,7 @@ struct AddinCSharp : public AddinImpl<GroupCSharp> {
             Printf(b_csh_exp_all_cs->b0, "        [DllImport(QUANTLIB_ADDIN_DLL, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
             Printf(b_csh_exp_all_cs->b0, "        [return: MarshalAs(UnmanagedType.LPStr)]\n");
             Printf(b_csh_exp_all_cs->b0, "        public static extern string %s(\n", p.funcRename);
-            emitParmList(p.parms2, b_csh_exp_all_cs->b0, 2, "rp_tm_csh_clcp", 3);
+            emitParmList(p.parms2, b_csh_exp_all_cs->b0, 2, "rp_tm_csh_clcp", "rp_tm_csh_clcp", 3);
             Printf(b_csh_exp_all_cs->b0, "        );\n");
         }
     }
@@ -2153,7 +2167,7 @@ struct AddinCSharp : public AddinImpl<GroupCSharp> {
             Printf(b_csh_exp_all_cs->b0, "        public static extern\n");
             emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rscp", 2);
             Printf(b_csh_exp_all_cs->b0, "        %s(\n", p.funcName);
-            emitParmList(p.parms2, b_csh_exp_all_cs->b0, 2, "rp_tm_csh_clcp", 3);
+            emitParmList(p.parms2, b_csh_exp_all_cs->b0, 2, "rp_tm_csh_clcp", "rp_tm_csh_clcp", 3);
             Printf(b_csh_exp_all_cs->b0, "        );\n");
         }
     }
@@ -2902,6 +2916,9 @@ void processParm(Parm *p) {
 
     SwigType *t = Getattr(p, "type");
     REPOSIT_SWIG_REQUIRE(t, "parameter '" << Char(name) << "' has no type");
+
+    String *value = Getattr(p,"value");
+    Setattr(p, "rp_value", value);
 
     String *nameUpper = copyUpper2(name);
     Setattr(p, "rp_name_upper", nameUpper);

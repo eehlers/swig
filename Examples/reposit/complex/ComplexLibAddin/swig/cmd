@@ -1,5 +1,5 @@
 
 SWIG="../../../../../preinst-swig"
 SWIG_DEBUG="-debug-top 4 -debug-tmsearch"
-$SWIG $SWIG_DEBUG -c++ -reposit -gencpp -prefix cl complex.i
+$SWIG $SWIG_DEBUG -c++ -reposit -genc++ -prefix cl complex.i
 

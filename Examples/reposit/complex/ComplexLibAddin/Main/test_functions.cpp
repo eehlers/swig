@@ -12,6 +12,8 @@ void testFunctions() {
     std::cout << std::endl;
 
     std::cout << ComplexLibAddinCpp::clFunc1() << std::endl;
+    ComplexLibAddinCpp::clFunc2(123L);
+    ComplexLibAddinCpp::clFunc2(reposit::property_t());
 
 //    ComplexLibAddinCpp::clEchoVoid();
 //    std::cout << ComplexLibAddinCpp::clEchoBool(true) << std::endl;

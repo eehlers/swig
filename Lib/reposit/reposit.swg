@@ -158,6 +158,7 @@
 %typemap(rp_tm_cpp_parm) rp_tp_cnv "const reposit::property_t&";
 %typemap(rp_tm_cpp_parm) rp_tp_crc "const reposit::property_t&";
 %typemap(rp_tm_cpp_parm) SWIGTYPE "$1_type";
+%typemap(rp_tm_cpp_parm2) SWIGTYPE "const reposit::property_t&";
 
 // rp_tm_cpp_rtmb - return type of a member function (M)
 %typemap(rp_tm_cpp_rtmb) void "bool";
@@ -178,6 +179,12 @@
         $1_type>()($1_name);
 %}
 
+%typemap(rp_tm_cpp_cnvt2) SWIGTYPE %{
+    $1_type $1_name_cnv =
+        reposit::convert2<$1_type>(
+            $1_name, "$1_name", $rp_value);
+%}
+
 // rp_tm_cpp_rtdc - declare variable to capture return value of Library function (F/M)
 %typemap(rp_tm_cpp_rtdc) void "";
 %typemap(rp_tm_cpp_rtdc) double "double returnValue =";
@@ -192,6 +199,7 @@
 %typemap(rp_tm_cpp_args) rp_tp_cnv "$1_name_cnv";
 %typemap(rp_tm_cpp_args) rp_tp_crc "$1_name_crc";
 %typemap(rp_tm_cpp_args) SWIGTYPE "$1_name";
+%typemap(rp_tm_cpp_args2) SWIGTYPE "$1_name_cnv";
 
 //*****************************************************************************
 // rp_tm_csh_* - typemaps for the C# Addin
@@ -323,6 +331,8 @@
 %typemap(rp_tm_xll_parm) std::vector "OPER *";
 %typemap(rp_tm_xll_parm) std::vector const & "OPER *";
 
+%typemap(rp_tm_xll_parm2) SWIGTYPE "OPER*";
+
 // rp_tm_xll_cnvt - convert from Excel datatypes to the datatypes of the underlying Library
 %typemap(rp_tm_xll_cnvt) rp_tp_cnv %{
         $1_type $1_name_cnv = reposit::convert2<$1_type, reposit::ConvertOper>(
@@ -353,6 +363,11 @@
 %typemap(rp_tm_xll_cnvt) std::vector<std::string> %{
         std::vector< std::string > $1_name_vec =
             reposit::operToVector< std::string >(*$1_name, "$1_name");
+%}
+
+%typemap(rp_tm_xll_cnvt2) bool %{
+        bool $1_name_cnv = reposit::convert2<bool>(
+            reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
 
 // rp_tm_xll_argfv - arguments to the Value Object constructor (C)
@@ -443,10 +458,14 @@
 %typemap(rp_tm_xll_code) std::vector const & "P";
 %typemap(rp_tm_xll_code) SWIGTYPE * "C";
 
+%typemap(rp_tm_xll_code2) SWIGTYPE "P";
+
 // rp_tm_xll_loop - arguments to boost::bind object for a looping function (F/M)
 %typemap(rp_tm_xll_loop) bool "*$1_name";
 %typemap(rp_tm_xll_loop) std::vector "_1";
 %typemap(rp_tm_xll_loop) SWIGTYPE "$1_name";
+
+%typemap(rp_tm_xll_loop2) SWIGTYPE "$1_name_cnv";
 
 //*****************************************************************************
 // rp_tm_cfy_* - typemaps for the =countify Addin
@@ -572,6 +591,12 @@
         T $1_name_enm =
             reposit::Create<T>()($1_name);
 %}
+%typemap(rp_tm_xll_cnvt2) T %{
+        std::string $1_name_str = reposit::convert2<std::string>(
+            reposit::ConvertOper(*$1_name), "T", "$rp_value");
+        T $1_name_cnv =
+            reposit::Create<T>()($1_name_str);
+%}
 %typemap(rp_tm_xll_argf) T "$1_name_enm";
 %typemap(rp_tm_xll_cdrt) T "C";
 %typemap(rp_tm_xll_code) T "C";
@@ -616,6 +641,12 @@
 %typemap(rp_tm_xll_cnvt) T & %{
         T $1_name_enm =
             reposit::Create<T>()($1_name);
+%}
+%typemap(rp_tm_xll_cnvt2) T & %{
+        std::string $1_name_str = reposit::convert2<std::string>(
+            reposit::ConvertOper(*$1_name), "T", "$rp_value");
+        T $1_name_cnv =
+            reposit::Create<T>()($1_name_str);
 %}
 %typemap(rp_tm_xll_argf) T & "$1_name_enm";
 %typemap(rp_tm_xll_cdrt) T & "C";
