@@ -1424,7 +1424,8 @@ struct GroupExcelFunctions : public GroupBase {
             Printf(b_xlf_grp_cpp->b1, "                false));\n");
             Printf(b_xlf_grp_cpp->b1, "\n");
             Printf(b_xlf_grp_cpp->b1, "        std::string returnValue =\n");
-            Printf(b_xlf_grp_cpp->b1, "            reposit::RepositoryXL::instance().storeObject(objectID, object, true);\n");
+            Printf(b_xlf_grp_cpp->b1, "            reposit::RepositoryXL::instance().storeObject(\n");
+            Printf(b_xlf_grp_cpp->b1, "                objectID, object, *Overwrite, valueObject);\n");
             Printf(b_xlf_grp_cpp->b1, "\n");
             Printf(b_xlf_grp_cpp->b1, "        static char ret[XL_MAX_STR_LEN];\n");
             Printf(b_xlf_grp_cpp->b1, "        reposit::stringToChar(returnValue, ret);\n");
