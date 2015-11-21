@@ -606,6 +606,8 @@
             reposit::Create<T>()($1_name);
 %}
 %typemap(rp_tm_cfy_args) T "$1_name_enum";
+%typemap(rp_tm_xll_argfv) T "$1_name";
+%typemap(rp_tm_xll_argfv2) T "$1_name_str";
 
 // T &
 %typemap(rp_tm_xxx_rp_get) T & %{
@@ -657,6 +659,8 @@
             reposit::Create<T>()($1_name);
 %}
 %typemap(rp_tm_cfy_args) T & "$1_name_enum";
+%typemap(rp_tm_xll_argfv) T & "$1_name";
+%typemap(rp_tm_xll_argfv2) T & "$1_name_str";
 %enddef
 
 // enumerated class
@@ -701,6 +705,12 @@
         T $1_name_enm =
             reposit::Create<T>()($1_name);
 %}
+%typemap(rp_tm_xll_cnvt2) T %{
+        std::string $1_name_str = reposit::convert2<std::string>(
+            reposit::ConvertOper(*$1_name), "T", "$rp_value");
+        T $1_name_enm =
+            reposit::Create<T>()($1_name_str);
+%}
 %typemap(rp_tm_xll_argf) T "$1_name_enm";
 %typemap(rp_tm_xll_cdrt) T "C";
 %typemap(rp_tm_xll_code) T "C";
@@ -711,6 +721,8 @@
         reposit::Create<T >()($1_name);
 %}
 %typemap(rp_tm_cfy_args) T "$1_name_enm";
+%typemap(rp_tm_xll_argfv) T "$1_name";
+%typemap(rp_tm_xll_argfv2) T "$1_name_str";
 
 // T &
 %typemap(rp_tm_xxx_rp_get) T & %{
@@ -761,6 +773,12 @@
         T $1_name_enm =
             reposit::Create<T>()($1_name);
 %}
+%typemap(rp_tm_xll_cnvt2) T & %{
+        std::string $1_name_str = reposit::convert2<std::string>(
+            reposit::ConvertOper(*$1_name), "T", "$rp_value");
+        T $1_name_enm =
+            reposit::Create<T>()($1_name_str);
+%}
 %typemap(rp_tm_xll_argf) T & "$1_name_enm";
 %typemap(rp_tm_xll_cdrt) T & "C";
 %typemap(rp_tm_xll_code) T & "C";
@@ -771,6 +789,8 @@
         reposit::Create<T >()($1_name);
 %}
 %typemap(rp_tm_cfy_args) T & "$1_name_enm";
+%typemap(rp_tm_xll_argfv) T & "$1_name";
+%typemap(rp_tm_xll_argfv2) T & "$1_name_str";
 
 %enddef
 

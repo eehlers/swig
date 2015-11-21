@@ -1399,7 +1399,7 @@ struct GroupExcelFunctions : public GroupBase {
             Printf(b_xlf_grp_cpp->b1, "\n");
             Printf(b_xlf_grp_cpp->b1,"//****CTOR*****\n");
             Printf(b_xlf_grp_cpp->b1, "DLLEXPORT char *%s(\n", p.funcRename);
-            emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm", "rp_tm_xll_parm");
+            emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm", "rp_tm_xll_parm2");
             Printf(b_xlf_grp_cpp->b1, ") {\n");
             Printf(b_xlf_grp_cpp->b1, "\n");
             Printf(b_xlf_grp_cpp->b1, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
@@ -1409,12 +1409,12 @@ struct GroupExcelFunctions : public GroupBase {
             Printf(b_xlf_grp_cpp->b1, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
             Printf(b_xlf_grp_cpp->b1, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcRename);
             Printf(b_xlf_grp_cpp->b1, "\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", "rp_tm_xll_cnvt", 2, 0, false);
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", "rp_tm_xll_cnvt2", 2, 0, false);
             Printf(b_xlf_grp_cpp->b1, "\n");
             Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
             Printf(b_xlf_grp_cpp->b1, "            new %s::ValueObjects::%s(\n", module, p.funcRename);
             Printf(b_xlf_grp_cpp->b1, "                objectID,\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argfv", "rp_tm_xll_argfv", 4, ',', true, true, true);
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argfv", "rp_tm_xll_argfv2", 4, ',', true, true, true);
             Printf(b_xlf_grp_cpp->b1, "                false));\n");
             Printf(b_xlf_grp_cpp->b1, "\n");
             Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::Object> object(\n");
