@@ -9,6 +9,7 @@
 #define %processor(cls, proc) %feature("rp:processorName", "proc") cls
 #define %generate(lang, id) %feature("rp:generate:lang") id
 #define %generateall(lang) %feature("rp:generate:lang")
+#define %alias(id, id2) %feature("rp:alias", "id2") id
 
 //*****************************************************************************
 // rp_tm_xxx_* - typemaps shared by multiple addins

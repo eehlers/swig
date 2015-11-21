@@ -242,8 +242,7 @@ std::string hexLen(String *c) {
     return s.str();
 }
 
-void excelRegister(File *b, Node *n, ParmList *parms) {
-    String *funcName   = Getattr(n, "rp:funcRename");
+void excelRegister(File *b, Node *n, String *funcName, ParmList *parms) {
     Printf(b, "        // BEGIN function excelRegister\n");
     Printf(b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
     Printf(b, "            // function code name\n");
@@ -272,8 +271,7 @@ void excelRegister(File *b, Node *n, ParmList *parms) {
     Printf(b, "        // END   function excelRegister\n\n");
 }
 
-void excelUnregister(File *b, Node *n, ParmList *parms) {
-    String *funcName   = Getattr(n, "rp:funcRename");
+void excelUnregister(File *b, Node *n, String *funcName, ParmList *parms) {
     Printf(b, "        // BEGIN function excelUnregister\n");
     Printf(b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
     Printf(b, "            // function code name\n");
@@ -525,6 +523,7 @@ struct ParmsMemb {
     Node *n;
     String *nameUpper;
     String *funcName;
+    String *alias;
     ParmList *parms;
     ParmList *parms2;
     String *pname;
@@ -1468,13 +1467,13 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "        // END   function emitLoopFunc\n");
     }
 
-    void functionWrapperImplMemb(ParmsMemb &p) {
+    void functionWrapperImplMembImpl(ParmsMemb &p, String *funcName) {
 
         Printf(b_xlf_grp_cpp->b1, "\n");
         Printf(b_xlf_grp_cpp->b1,"//****MEMB*****\n");
         Printf(b_xlf_grp_cpp->b1, "DLLEXPORT\n");
         emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtft");
-        Printf(b_xlf_grp_cpp->b1, "%s(\n", p.funcName);
+        Printf(b_xlf_grp_cpp->b1, "%s(\n", funcName);
         emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm", "rp_tm_xll_parm2");
         Printf(b_xlf_grp_cpp->b1, ") {\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
@@ -1483,7 +1482,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "    try {\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
         Printf(b_xlf_grp_cpp->b1, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
-        Printf(b_xlf_grp_cpp->b1, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcName);
+        Printf(b_xlf_grp_cpp->b1, "            (new reposit::FunctionCall(\"%s\"));\n", funcName);
         Printf(b_xlf_grp_cpp->b1, "\n");
         emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", "rp_tm_xll_cnvt2", 2, 0, false);
         Printf(b_xlf_grp_cpp->b1, "\n");
@@ -1509,6 +1508,12 @@ struct GroupExcelFunctions : public GroupBase {
 
         count_.members++;
         count_.total2++;
+    }
+
+    void functionWrapperImplMemb(ParmsMemb &p) {
+        functionWrapperImplMembImpl(p, p.funcName);
+        if (p.alias)
+            functionWrapperImplMembImpl(p, p.alias);
     }
 
     void clear() {
@@ -1550,8 +1555,8 @@ struct GroupExcelRegister : public GroupBase {
 
     void functionWrapperImplFunc(ParmsFunc &p) {
 
-        excelRegister(b_xlr_grp_cpp->b0, p.n, p.parms2);
-        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.parms2);
+        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcName, p.parms2);
+        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcName, p.parms2);
 
         count_.functions++;
         count_.total2++;
@@ -1559,16 +1564,20 @@ struct GroupExcelRegister : public GroupBase {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        excelRegister(b_xlr_grp_cpp->b0, p.n, p.parms2);
-        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.parms2);
+        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcRename, p.parms2);
+        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcRename, p.parms2);
 
         count_.constructors++;
         count_.total2++;
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
-        excelRegister(b_xlr_grp_cpp->b0, p.n, p.parms2);
-        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.parms2);
+        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcName, p.parms2);
+        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcName, p.parms2);
+        if (p.alias) {
+            excelRegister(b_xlr_grp_cpp->b0, p.n, p.alias, p.parms2);
+            excelUnregister(b_xlr_grp_cpp->b1, p.n, p.alias, p.parms2);
+        }
 
         count_.members++;
         count_.total2++;
@@ -2864,8 +2873,8 @@ int functionWrapperImplFunc(Node *n) {
     p.funcName = NewStringf("%s%s", prefix, p.symnameUpper);
     validateFunctionName(p.funcName);
 
-    Setattr(n, "rp:funcName", p.funcName);
-    Setattr(n, "rp:funcRename", p.funcName);
+    //Setattr(n, "rp:funcName", p.funcName);
+    //Setattr(n, "rp:funcRename", p.funcName);
     printf("p.name=%s\n", Char(p.name));
     printf("p.symname=%s\n", Char(p.symname));
     printf("p.symnameUpper=%s\n", Char(p.symnameUpper));
@@ -2949,8 +2958,8 @@ int functionWrapperImplCtor(Node *n) {
     p.funcName = NewStringf("%s%s", prefix, temp);
     String *tempx = copyUpper(p.rename);
     p.funcRename = NewStringf("%s%s", prefix, tempx);
-    Setattr(n, "rp:funcName", p.funcName);
-    Setattr(n, "rp:funcRename", p.funcRename);
+    //Setattr(n, "rp:funcName", p.funcName);
+    //Setattr(n, "rp:funcRename", p.funcRename);
     validateFunctionName(p.funcRename);
     printf("funcName=%s\n", Char(p.funcName));
     Printf(b_init, "@@@ CTOR Name=%s\n", Char(p.funcName));
@@ -3006,8 +3015,13 @@ int functionWrapperImplMemb(Node *n) {
     p.nameUpper = NewStringf("%s%s", temp0, temp1);
     p.funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
     validateFunctionName(p.funcName);
-    Setattr(p.n, "rp:funcName", p.funcName);
-    Setattr(n, "rp:funcRename", p.funcName);
+    //Setattr(p.n, "rp:funcName", p.funcName);
+    //Setattr(n, "rp:funcRename", p.funcName);
+    if (String *alias = Getattr(p.n, "feature:rp:alias"))
+        p.alias = NewStringf("%s%s", prefix, alias);
+    else
+        p.alias = 0;
+
     printf("cls=%s\n", Char(cls));
     printf("p.name=%s\n", Char(p.name));
     printf("temp0=%s\n", Char(temp0));
