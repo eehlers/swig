@@ -1374,7 +1374,7 @@ struct GroupExcelFunctions : public GroupBase {
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtdc", 2);
             //Printf(b_xlf_grp_cpp->b1, "        %s::%s(\n", nmspace, p.symname);
             Printf(b_xlf_grp_cpp->b1, "        %s(\n", p.name);
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", "rp_tm_xll_argf", 3, ',', true, true);
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", "rp_tm_xll_argf2", 3, ',', true, true);
             Printf(b_xlf_grp_cpp->b1, "        );\n\n");
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtst", 2);
         }
@@ -1419,7 +1419,7 @@ struct GroupExcelFunctions : public GroupBase {
             Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::Object> object(\n");
             Printf(b_xlf_grp_cpp->b1, "            new %s::%s(\n", module, p.name);
             Printf(b_xlf_grp_cpp->b1, "                valueObject,\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", "rp_tm_xll_argf", 4, ',', true, true, true);
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", "rp_tm_xll_argf2", 4, ',', true, true, true);
             Printf(b_xlf_grp_cpp->b1, "                false));\n");
             Printf(b_xlf_grp_cpp->b1, "\n");
             Printf(b_xlf_grp_cpp->b1, "        std::string returnValue =\n");
@@ -1493,7 +1493,7 @@ struct GroupExcelFunctions : public GroupBase {
         } else {
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtdc", 2);
             Printf(b_xlf_grp_cpp->b1, "        xxx->%s(\n", p.name);
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", "rp_tm_xll_argf", 3, ',', true, true);
+            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", "rp_tm_xll_argf2", 3, ',', true, true);
             Printf(b_xlf_grp_cpp->b1, "        );\n\n");
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtst", 2);
         }

@@ -370,6 +370,10 @@
         bool $1_name_cnv = reposit::convert2<bool>(
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
+%typemap(rp_tm_xll_cnvt2) double %{
+        double $1_name_cnv = reposit::convert2<$1_type>(
+            reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
+%}
 
 // rp_tm_xll_argfv - arguments to the Value Object constructor (C)
 %typemap(rp_tm_xll_argfv) bool "*$1_name";
@@ -378,6 +382,8 @@
 %typemap(rp_tm_xll_argfv) double "*$1_name";
 %typemap(rp_tm_xll_argfv) std::vector const & "$1_name_vec";
 %typemap(rp_tm_xll_argfv) SWIGTYPE "$1_name";
+
+%typemap(rp_tm_xll_argfv2) double "$1_name_cnv";
 
 // rp_tm_xll_argf - arguments to the underlying Library function (F/C/M)
 %typemap(rp_tm_xll_argf) bool "*$1_name";
@@ -394,6 +400,8 @@
 %typemap(rp_tm_xll_argf) std::vector<double> "$1_name_vec";
 %typemap(rp_tm_xll_argf) std::vector<double> const & "$1_name_vec";
 %typemap(rp_tm_xll_argf) SWIGTYPE "$1_name";
+
+%typemap(rp_tm_xll_argf2) double "$1_name_cnv";
 
 // rp_tm_xll_rtdc - declare variable to capture return value of Library function (F/M)
 %typemap(rp_tm_xll_rtdc) void "";
@@ -599,6 +607,7 @@
             reposit::Create<T>()($1_name_str);
 %}
 %typemap(rp_tm_xll_argf) T "$1_name_enm";
+%typemap(rp_tm_xll_argf2) T "$1_name_enm";
 %typemap(rp_tm_xll_cdrt) T "C";
 %typemap(rp_tm_xll_code) T "C";
 %typemap(rp_tm_cfy_parm) T "const char * $1_name";
@@ -652,6 +661,7 @@
             reposit::Create<T>()($1_name_str);
 %}
 %typemap(rp_tm_xll_argf) T & "$1_name_enm";
+%typemap(rp_tm_xll_argf2) T & "$1_name_enm";
 %typemap(rp_tm_xll_cdrt) T & "C";
 %typemap(rp_tm_xll_code) T & "C";
 %typemap(rp_tm_cfy_parm) T & "const char * $1_name";
@@ -713,6 +723,7 @@
             reposit::Create<T>()($1_name_str);
 %}
 %typemap(rp_tm_xll_argf) T "$1_name_enm";
+%typemap(rp_tm_xll_argf2) T "$1_name_enm";
 %typemap(rp_tm_xll_cdrt) T "C";
 %typemap(rp_tm_xll_code) T "C";
 
@@ -781,6 +792,7 @@
             reposit::Create<T>()($1_name_str);
 %}
 %typemap(rp_tm_xll_argf) T & "$1_name_enm";
+%typemap(rp_tm_xll_argf2) T & "$1_name_enm";
 %typemap(rp_tm_xll_cdrt) T & "C";
 %typemap(rp_tm_xll_code) T & "C";
 
