@@ -512,6 +512,7 @@ struct ParmsCtor {
     String *rename;
     String *funcName;
     String *funcRename;
+    String *alias;
     ParmList *parms;
     ParmList *parms2;
     String *pname;
@@ -1392,54 +1393,60 @@ struct GroupExcelFunctions : public GroupBase {
         count_.total2++;
     }
 
+    void functionWrapperImplCtorImpl(ParmsCtor &p, String *funcName) {
+
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1,"//****CTOR*****\n");
+        Printf(b_xlf_grp_cpp->b1, "DLLEXPORT char *%s(\n", funcName);
+        emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm", "rp_tm_xll_parm2");
+        Printf(b_xlf_grp_cpp->b1, ") {\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    try {\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
+        Printf(b_xlf_grp_cpp->b1, "            (new reposit::FunctionCall(\"%s\"));\n", funcName);
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", "rp_tm_xll_cnvt2", 2, 0, false);
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+        Printf(b_xlf_grp_cpp->b1, "            new %s::ValueObjects::%s(\n", module, funcName);
+        Printf(b_xlf_grp_cpp->b1, "                objectID,\n");
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argfv", "rp_tm_xll_argfv2", 4, ',', true, true, true);
+        Printf(b_xlf_grp_cpp->b1, "                false));\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::Object> object(\n");
+        Printf(b_xlf_grp_cpp->b1, "            new %s::%s(\n", module, p.name);
+        Printf(b_xlf_grp_cpp->b1, "                valueObject,\n");
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", "rp_tm_xll_argf2", 4, ',', true, true, true);
+        Printf(b_xlf_grp_cpp->b1, "                false));\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        std::string returnValue =\n");
+        Printf(b_xlf_grp_cpp->b1, "            reposit::RepositoryXL::instance().storeObject(\n");
+        Printf(b_xlf_grp_cpp->b1, "                objectID, object, *Overwrite, valueObject);\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        static char ret[XL_MAX_STR_LEN];\n");
+        Printf(b_xlf_grp_cpp->b1, "        reposit::stringToChar(returnValue, ret);\n");
+        Printf(b_xlf_grp_cpp->b1, "        return ret;\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    } catch (const std::exception &e) {\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "        reposit::RepositoryXL::instance().logError(e.what(), functionCall);\n");
+        Printf(b_xlf_grp_cpp->b1, "        return 0;\n");
+        Printf(b_xlf_grp_cpp->b1, "\n");
+        Printf(b_xlf_grp_cpp->b1, "    }\n");
+        Printf(b_xlf_grp_cpp->b1, "}\n");
+
+        count_.constructors++;
+        count_.total2++;
+    }
+
     void functionWrapperImplCtor(ParmsCtor &p) {
-
         if (generateCtor) {
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1,"//****CTOR*****\n");
-            Printf(b_xlf_grp_cpp->b1, "DLLEXPORT char *%s(\n", p.funcRename);
-            emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm", "rp_tm_xll_parm2");
-            Printf(b_xlf_grp_cpp->b1, ") {\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "    try {\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "        functionCall = boost::shared_ptr<reposit::FunctionCall>\n");
-            Printf(b_xlf_grp_cpp->b1, "            (new reposit::FunctionCall(\"%s\"));\n", p.funcRename);
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", "rp_tm_xll_cnvt2", 2, 0, false);
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
-            Printf(b_xlf_grp_cpp->b1, "            new %s::ValueObjects::%s(\n", module, p.funcRename);
-            Printf(b_xlf_grp_cpp->b1, "                objectID,\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argfv", "rp_tm_xll_argfv2", 4, ',', true, true, true);
-            Printf(b_xlf_grp_cpp->b1, "                false));\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::Object> object(\n");
-            Printf(b_xlf_grp_cpp->b1, "            new %s::%s(\n", module, p.name);
-            Printf(b_xlf_grp_cpp->b1, "                valueObject,\n");
-            emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", "rp_tm_xll_argf2", 4, ',', true, true, true);
-            Printf(b_xlf_grp_cpp->b1, "                false));\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "        std::string returnValue =\n");
-            Printf(b_xlf_grp_cpp->b1, "            reposit::RepositoryXL::instance().storeObject(\n");
-            Printf(b_xlf_grp_cpp->b1, "                objectID, object, *Overwrite, valueObject);\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "        static char ret[XL_MAX_STR_LEN];\n");
-            Printf(b_xlf_grp_cpp->b1, "        reposit::stringToChar(returnValue, ret);\n");
-            Printf(b_xlf_grp_cpp->b1, "        return ret;\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "    } catch (const std::exception &e) {\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "        reposit::RepositoryXL::instance().logError(e.what(), functionCall);\n");
-            Printf(b_xlf_grp_cpp->b1, "        return 0;\n");
-            Printf(b_xlf_grp_cpp->b1, "\n");
-            Printf(b_xlf_grp_cpp->b1, "    }\n");
-            Printf(b_xlf_grp_cpp->b1, "}\n");
-
-            count_.constructors++;
-            count_.total2++;
+            functionWrapperImplCtorImpl(p, p.funcRename);
+            if (p.alias)
+                functionWrapperImplCtorImpl(p, p.alias);
             groupContainsConstructor = true;
         }
         groupContainsClass = true;
@@ -1566,6 +1573,10 @@ struct GroupExcelRegister : public GroupBase {
 
         excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcRename, p.parms2);
         excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcRename, p.parms2);
+        if (p.alias) {
+            excelRegister(b_xlr_grp_cpp->b0, p.n, p.alias, p.parms2);
+            excelUnregister(b_xlr_grp_cpp->b1, p.n, p.alias, p.parms2);
+        }
 
         count_.constructors++;
         count_.total2++;
@@ -2873,8 +2884,6 @@ int functionWrapperImplFunc(Node *n) {
     p.funcName = NewStringf("%s%s", prefix, p.symnameUpper);
     validateFunctionName(p.funcName);
 
-    //Setattr(n, "rp:funcName", p.funcName);
-    //Setattr(n, "rp:funcRename", p.funcName);
     printf("p.name=%s\n", Char(p.name));
     printf("p.symname=%s\n", Char(p.symname));
     printf("p.symnameUpper=%s\n", Char(p.symnameUpper));
@@ -2958,9 +2967,11 @@ int functionWrapperImplCtor(Node *n) {
     p.funcName = NewStringf("%s%s", prefix, temp);
     String *tempx = copyUpper(p.rename);
     p.funcRename = NewStringf("%s%s", prefix, tempx);
-    //Setattr(n, "rp:funcName", p.funcName);
-    //Setattr(n, "rp:funcRename", p.funcRename);
     validateFunctionName(p.funcRename);
+    if (String *alias = Getattr(p.n, "feature:rp:alias"))
+        p.alias = NewStringf("%s%s", prefix, alias);
+    else
+        p.alias = 0;
     printf("funcName=%s\n", Char(p.funcName));
     Printf(b_init, "@@@ CTOR Name=%s\n", Char(p.funcName));
 
@@ -3015,8 +3026,6 @@ int functionWrapperImplMemb(Node *n) {
     p.nameUpper = NewStringf("%s%s", temp0, temp1);
     p.funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
     validateFunctionName(p.funcName);
-    //Setattr(p.n, "rp:funcName", p.funcName);
-    //Setattr(n, "rp:funcRename", p.funcName);
     if (String *alias = Getattr(p.n, "feature:rp:alias"))
         p.alias = NewStringf("%s%s", prefix, alias);
     else
