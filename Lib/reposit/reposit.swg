@@ -401,6 +401,7 @@
 %typemap(rp_tm_xll_argf) std::vector<double> const & "$1_name_vec";
 %typemap(rp_tm_xll_argf) SWIGTYPE "$1_name";
 
+%typemap(rp_tm_xll_argf2) long "$1_name_cnv";
 %typemap(rp_tm_xll_argf2) double "$1_name_cnv";
 
 // rp_tm_xll_rtdc - declare variable to capture return value of Library function (F/M)
