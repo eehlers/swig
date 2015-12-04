@@ -1355,7 +1355,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "DLLEXPORT\n");
         emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtft");
         Printf(b_xlf_grp_cpp->b1, "%s(\n", p.funcName);
-        emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm", "rp_tm_xll_parm", 1);
+        emitParmList(p.parms2, b_xlf_grp_cpp->b1, 2, "rp_tm_xll_parm", "rp_tm_xll_parm2", 1);
         Printf(b_xlf_grp_cpp->b1, ") {\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
         Printf(b_xlf_grp_cpp->b1, "    boost::shared_ptr<reposit::FunctionCall> functionCall;\n");
@@ -1367,7 +1367,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "\n");
         Printf(b_xlf_grp_cpp->b1, "        reposit::validateRange(Trigger, \"Trigger\");\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
-        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", "rp_tm_xll_cnvt", 2, 0, false);
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", "rp_tm_xll_cnvt2", 2, 0, false);
         Printf(b_xlf_grp_cpp->b1, "\n");
         if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
             emitLoopFunc(p, loopParameter);

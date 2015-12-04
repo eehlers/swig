@@ -370,6 +370,12 @@
         bool $1_name_cnv = reposit::convert2<bool>(
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
+
+%typemap(rp_tm_xll_cnvt2) long %{
+        long $1_name_cnv = reposit::convert2<$1_type>(
+            reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
+%}
+
 %typemap(rp_tm_xll_cnvt2) double %{
         double $1_name_cnv = reposit::convert2<$1_type>(
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
