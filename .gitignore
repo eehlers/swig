@@ -133,6 +133,8 @@ tags
 *.ncb
 *.suo
 *.user
+*.filters
+*.sdf
 build
 
 !Source/Swig/swigconfig_win.h
