@@ -1,0 +1,185 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>swig</ProjectName>
+    <ProjectGuid>{1BCA73BB-0CAD-4653-89E0-99C04C989CEC}</ProjectGuid>
+    <RootNamespace>swig</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\build\vc100\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\build\vc100\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\build\vc100\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\build\vc100\$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>./Source/CParse;./Source/DOH;./Source/Include;./Source/Modules;./Source/Preprocessor;./Source/Swig;..\pcre-8.35\build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;PCRE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>pcred.lib;pcrecppd.lib;pcreposixd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\pcre-8.35\build\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>./Source/CParse;./Source/DOH;./Source/Include;./Source/Modules;./Source/Preprocessor;./Source/Swig;..\pcre-8.35\build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;PCRE_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>pcre.lib;pcrecpp.lib;pcreposix.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\pcre-8.35\build\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\CParse\cparse.h" />
+    <ClInclude Include="Source\DOH\doh.h" />
+    <ClInclude Include="Source\DOH\dohint.h" />
+    <ClInclude Include="Source\Include\swigwarn.h" />
+    <ClInclude Include="Source\Modules\swigmod.h" />
+    <ClInclude Include="Source\Preprocessor\preprocessor.h" />
+    <ClInclude Include="Source\Swig\swig.h" />
+    <ClInclude Include="Source\Swig\swigconfig_win.h" />
+    <ClInclude Include="Source\Swig\swigfile.h" />
+    <ClInclude Include="Source\Swig\swigopt.h" />
+    <ClInclude Include="Source\Swig\swigparm.h" />
+    <ClInclude Include="Source\Swig\swigscan.h" />
+    <ClInclude Include="Source\Swig\swigtree.h" />
+    <ClInclude Include="Source\Swig\swigwrap.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\CParse\cscanner_win.c" />
+    <ClCompile Include="Source\CParse\parser_win.c" />
+    <ClCompile Include="Source\CParse\templ.c" />
+    <ClCompile Include="Source\CParse\util.c" />
+    <ClCompile Include="Source\DOH\base.c" />
+    <ClCompile Include="Source\DOH\file.c" />
+    <ClCompile Include="Source\DOH\fio.c" />
+    <ClCompile Include="Source\DOH\hash.c" />
+    <ClCompile Include="Source\DOH\list.c" />
+    <ClCompile Include="Source\DOH\memory.c" />
+    <ClCompile Include="Source\DOH\string.c" />
+    <ClCompile Include="Source\DOH\void.c" />
+    <ClCompile Include="Source\Modules\allegrocl.cxx" />
+    <ClCompile Include="Source\Modules\allocate.cxx" />
+    <ClCompile Include="Source\Modules\browser.cxx" />
+    <ClCompile Include="Source\Modules\cffi.cxx" />
+    <ClCompile Include="Source\Modules\chicken.cxx" />
+    <ClCompile Include="Source\Modules\clisp.cxx" />
+    <ClCompile Include="Source\Modules\contract.cxx" />
+    <ClCompile Include="Source\Modules\csharp.cxx" />
+    <ClCompile Include="Source\Modules\d.cxx" />
+    <ClCompile Include="Source\Modules\directors.cxx" />
+    <ClCompile Include="Source\Modules\emit.cxx" />
+    <ClCompile Include="Source\Modules\go.cxx" />
+    <ClCompile Include="Source\Modules\guile.cxx" />
+    <ClCompile Include="Source\Modules\java.cxx" />
+    <ClCompile Include="Source\Modules\lang.cxx" />
+    <ClCompile Include="Source\Modules\lua.cxx" />
+    <ClCompile Include="Source\Modules\main.cxx" />
+    <ClCompile Include="Source\Modules\modula3.cxx" />
+    <ClCompile Include="Source\Modules\module.cxx" />
+    <ClCompile Include="Source\Modules\mzscheme.cxx" />
+    <ClCompile Include="Source\Modules\ocaml.cxx" />
+    <ClCompile Include="Source\Modules\octave.cxx" />
+    <ClCompile Include="Source\Modules\overload.cxx" />
+    <ClCompile Include="Source\Modules\perl5.cxx" />
+    <ClCompile Include="Source\Modules\php.cxx" />
+    <ClCompile Include="Source\Modules\pike.cxx" />
+    <ClCompile Include="Source\Modules\python.cxx" />
+    <ClCompile Include="Source\Modules\r.cxx" />
+    <ClCompile Include="Source\Modules\ruby.cxx" />
+    <ClCompile Include="Source\Modules\s-exp.cxx" />
+    <ClCompile Include="Source\Modules\swigmain.cxx" />
+    <ClCompile Include="Source\Modules\tcl8.cxx" />
+    <ClCompile Include="Source\Modules\typepass.cxx" />
+    <ClCompile Include="Source\Modules\uffi.cxx" />
+    <ClCompile Include="Source\Modules\utils.cxx" />
+    <ClCompile Include="Source\Modules\xml.cxx" />
+    <ClCompile Include="Source\Preprocessor\cpp.c" />
+    <ClCompile Include="Source\Preprocessor\expr.c" />
+    <ClCompile Include="Source\Swig\cwrap.c" />
+    <ClCompile Include="Source\Swig\deprecate.c" />
+    <ClCompile Include="Source\Swig\error.c" />
+    <ClCompile Include="Source\Swig\fragment.c" />
+    <ClCompile Include="Source\Swig\getopt.c" />
+    <ClCompile Include="Source\Swig\include.c" />
+    <ClCompile Include="Source\Swig\misc.c" />
+    <ClCompile Include="Source\Swig\naming.c" />
+    <ClCompile Include="Source\Swig\parms.c" />
+    <ClCompile Include="Source\Swig\scanner.c" />
+    <ClCompile Include="Source\Swig\stype.c" />
+    <ClCompile Include="Source\Swig\symbol.c" />
+    <ClCompile Include="Source\Swig\tree.c" />
+    <ClCompile Include="Source\Swig\typemap.c" />
+    <ClCompile Include="Source\Swig\typeobj.c" />
+    <ClCompile Include="Source\Swig\typesys.c" />
+    <ClCompile Include="Source\Swig\wrapfunc.c" />
+    <ClCompile Include="Source\Modules\reposit.cxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Lib\reposit\reposit.swg" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
