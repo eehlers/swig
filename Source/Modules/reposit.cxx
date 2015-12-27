@@ -1646,28 +1646,22 @@ void mongoFunc(File *f, String *funcName1, String *funcName2, Node *n, ParmList 
 struct GroupCountify : public GroupBase {
 
     Buffer *b_cfy_grp_cpp;
+    bool groupContainsClass;
+    bool groupContainsConstructor;
 
-    GroupCountify(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count) {
+    GroupCountify(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), groupContainsClass(false), groupContainsConstructor(false) {
 
         b_cfy_grp_cpp = new Buffer("b_cfy_grp_cpp", NewStringf("%s/cfy_%s.cpp", cfyDir, pragmas_.groupName_));
 
         Printf(b_cfy_grp_cpp->b0, "\n");
         Printf(b_cfy_grp_cpp->b0, "#include \"init.hpp\"\n");
         Printf(b_cfy_grp_cpp->b0, "#include <rp/repository.hpp>\n");
-        Printf(b_cfy_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
         Printf(b_cfy_grp_cpp->b0, "\n");
         Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains conversions\n");
         Printf(b_cfy_grp_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
         Printf(b_cfy_grp_cpp->b0, "#include <%s/conversions/coercetermstructure.hpp>\n", objInc);
         //Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains enumerations\n");
         //Printf(b_cfy_grp_cpp->b0, "#include <rp/enumerations/typefactory.hpp>\n");
-        Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains constructors\n");
-        Printf(b_cfy_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
-        if (pragmas_.automatic_) {
-            Printf(b_cfy_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
-        } else {
-            Printf(b_cfy_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
-        }
 
         // From this point on we stop writing to b0 and write to b1 instead.
         // After all processing finishes we will append some more #includes to b0 depending on what code this group requires.
@@ -1723,56 +1717,60 @@ struct GroupCountify : public GroupBase {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        Printf(b_cfy_grp_cpp->b1,"//****CTOR*****\n");
-        Printf(b_cfy_grp_cpp->b1,"extern \"C\" {\n");
-        Printf(b_cfy_grp_cpp->b1,"COUNTIFY_API\n");
-        Printf(b_cfy_grp_cpp->b1,"const char *%s(\n", p.funcName);
-        emitParmList(p.parms2, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm", "rp_tm_cfy_parm", 2);
-        Printf(b_cfy_grp_cpp->b1,"    ) {\n");
-        Printf(b_cfy_grp_cpp->b1,"\n");
-        Printf(b_cfy_grp_cpp->b1,"    try {\n");
-        Printf(b_cfy_grp_cpp->b1,"\n");
-        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
-        Printf(b_cfy_grp_cpp->b1,"\n");
-        Printf(b_cfy_grp_cpp->b1,"        initializeAddin();\n");
-        Printf(b_cfy_grp_cpp->b1,"\n");
-        Printf(b_cfy_grp_cpp->b1,"        // Convert input types into Library types\n\n");
-        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", "rp_tm_cfy_cnvt", 2, 0, false);
-        Printf(b_cfy_grp_cpp->b1,"\n");
-        Printf(b_cfy_grp_cpp->b1,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
-        Printf(b_cfy_grp_cpp->b1,"            new %s::ValueObjects::%s(\n", module, p.funcName);
-        Printf(b_cfy_grp_cpp->b1,"                objectID,\n");
-        emitParmList(p.parms, b_cfy_grp_cpp->b1, 0, "rp_tm_default", "rp_tm_default", 4, ',', true, false, true);
-        Printf(b_cfy_grp_cpp->b1,"                false));\n");
-        Printf(b_cfy_grp_cpp->b1,"        boost::shared_ptr<reposit::Object> object(\n");
-        Printf(b_cfy_grp_cpp->b1,"            new %s::%s(\n", module, p.name);
-        Printf(b_cfy_grp_cpp->b1,"                valueObject,\n");
-        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_args", "rp_tm_cfy_args", 4, ',', true, true, true);
-        Printf(b_cfy_grp_cpp->b1,"                false));\n");
-        Printf(b_cfy_grp_cpp->b1,"        static std::string returnValue;\n");
-        Printf(b_cfy_grp_cpp->b1,"        returnValue =\n");
-        Printf(b_cfy_grp_cpp->b1,"            reposit::Repository::instance().storeObject(\n");
-        Printf(b_cfy_grp_cpp->b1,"                objectID, object, true, valueObject);\n");
-        Printf(b_cfy_grp_cpp->b1,"\n");
-        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
-        Printf(b_cfy_grp_cpp->b1,"\n");
-        Printf(b_cfy_grp_cpp->b1,"        return returnValue.c_str();\n");
-        Printf(b_cfy_grp_cpp->b1,"\n");
-        Printf(b_cfy_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
-        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
-        Printf(b_cfy_grp_cpp->b1,"        static std::string errorMessage;\n");
-        Printf(b_cfy_grp_cpp->b1,"        errorMessage = e.what();\n");
-        Printf(b_cfy_grp_cpp->b1,"        return errorMessage.c_str();\n");
-        Printf(b_cfy_grp_cpp->b1,"    } catch (...) {\n");
-        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
-        Printf(b_cfy_grp_cpp->b1,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
-        Printf(b_cfy_grp_cpp->b1,"        return errorMessage.c_str();\n");
-        Printf(b_cfy_grp_cpp->b1,"    }\n");
-        Printf(b_cfy_grp_cpp->b1,"}\n\n");
-        Printf(b_cfy_grp_cpp->b1,"} // extern \"C\"\n");
+        if (generateCtor) {
+            Printf(b_cfy_grp_cpp->b1,"//****CTOR*****\n");
+            Printf(b_cfy_grp_cpp->b1,"extern \"C\" {\n");
+            Printf(b_cfy_grp_cpp->b1,"COUNTIFY_API\n");
+            Printf(b_cfy_grp_cpp->b1,"const char *%s(\n", p.funcName);
+            emitParmList(p.parms2, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm", "rp_tm_cfy_parm", 2);
+            Printf(b_cfy_grp_cpp->b1,"    ) {\n");
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"    try {\n");
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"        initializeAddin();\n");
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"        // Convert input types into Library types\n\n");
+            emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", "rp_tm_cfy_cnvt", 2, 0, false);
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+            Printf(b_cfy_grp_cpp->b1,"            new %s::ValueObjects::%s(\n", module, p.funcName);
+            Printf(b_cfy_grp_cpp->b1,"                objectID,\n");
+            emitParmList(p.parms, b_cfy_grp_cpp->b1, 0, "rp_tm_default", "rp_tm_default", 4, ',', true, false, true);
+            Printf(b_cfy_grp_cpp->b1,"                false));\n");
+            Printf(b_cfy_grp_cpp->b1,"        boost::shared_ptr<reposit::Object> object(\n");
+            Printf(b_cfy_grp_cpp->b1,"            new %s::%s(\n", module, p.name);
+            Printf(b_cfy_grp_cpp->b1,"                valueObject,\n");
+            emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_args", "rp_tm_cfy_args", 4, ',', true, true, true);
+            Printf(b_cfy_grp_cpp->b1,"                false));\n");
+            Printf(b_cfy_grp_cpp->b1,"        static std::string returnValue;\n");
+            Printf(b_cfy_grp_cpp->b1,"        returnValue =\n");
+            Printf(b_cfy_grp_cpp->b1,"            reposit::Repository::instance().storeObject(\n");
+            Printf(b_cfy_grp_cpp->b1,"                objectID, object, true, valueObject);\n");
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"        return returnValue.c_str();\n");
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
+            Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
+            Printf(b_cfy_grp_cpp->b1,"        static std::string errorMessage;\n");
+            Printf(b_cfy_grp_cpp->b1,"        errorMessage = e.what();\n");
+            Printf(b_cfy_grp_cpp->b1,"        return errorMessage.c_str();\n");
+            Printf(b_cfy_grp_cpp->b1,"    } catch (...) {\n");
+            Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
+            Printf(b_cfy_grp_cpp->b1,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
+            Printf(b_cfy_grp_cpp->b1,"        return errorMessage.c_str();\n");
+            Printf(b_cfy_grp_cpp->b1,"    }\n");
+            Printf(b_cfy_grp_cpp->b1,"}\n\n");
+            Printf(b_cfy_grp_cpp->b1,"} // extern \"C\"\n");
 
-        count_.constructors++;
-        count_.total2++;
+            count_.constructors++;
+            count_.total2++;
+            groupContainsConstructor = true;
+        }
+        groupContainsClass = true;
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
@@ -1820,6 +1818,16 @@ struct GroupCountify : public GroupBase {
     }
 
     void clear() {
+
+        if (groupContainsConstructor)
+            Printf(b_cfy_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        if (groupContainsClass) {
+            if (pragmas_.automatic_) {
+                Printf(b_cfy_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            } else {
+                Printf(b_cfy_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            }
+        }
         Append(b_cfy_grp_cpp->b0, pragmas_.add_inc);
         b_cfy_grp_cpp->clear(count_);
     }
