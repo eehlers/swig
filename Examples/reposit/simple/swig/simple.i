@@ -35,6 +35,7 @@ OBJECT_WRAPPER(SimpleLibAddin::Adder, SimpleLib::Adder)
 // on to be included in the C++ addin.  Everything is included in the Excel
 // addin by default.
 %generateall(c++);
+%generateall(countify);
 
 // This code indicates which functionality from the SimpleLib library should be
 // included in the addin.

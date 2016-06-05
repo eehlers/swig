@@ -1660,6 +1660,9 @@ struct GroupCountify : public GroupBase {
         Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains conversions\n");
         Printf(b_cfy_grp_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
         Printf(b_cfy_grp_cpp->b0, "#include <%s/conversions/coercetermstructure.hpp>\n", objInc);
+        Printf(b_cfy_grp_cpp->b0, "// FIXME only required if the file contains a looping function\n");
+        Printf(b_cfy_grp_cpp->b0, "#include \"loop.hpp\"\n");
+        Printf(b_cfy_grp_cpp->b0, "#include \"%s/loop.hpp\"\n", objInc);
         //Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains enumerations\n");
         //Printf(b_cfy_grp_cpp->b0, "#include <rp/enumerations/typefactory.hpp>\n");
 
@@ -1674,13 +1677,31 @@ struct GroupCountify : public GroupBase {
         Printf(b_cfy_grp_cpp->b1, "\n");
     }
 
+    void emitLoopFunc(ParmsFunc &p, String *loopParameter) {
+        String *loopParameterType = Getattr(p.n, "rp:loopParameterType");
+        String *loopFunctionType = Getattr(p.n, "rp:loopFunctionType");
+        Printf(b_cfy_grp_cpp->b1, "        // BEGIN function emitLoopFunc\n");
+        Printf(b_cfy_grp_cpp->b1, "\n");
+        Printf(b_cfy_grp_cpp->b1, "        %s::%sBind bindObject =\n", module, p.funcName);
+        Printf(b_cfy_grp_cpp->b1, "            boost::bind(\n");
+        Printf(b_cfy_grp_cpp->b1, "                %s,\n", p.name);
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_loop", "rp_tm_cfy_loop", 4, ',', true, true);
+        Printf(b_cfy_grp_cpp->b1, "            );\n");
+        Printf(b_cfy_grp_cpp->b1, "\n");
+        Printf(b_cfy_grp_cpp->b1, "        std::vector<%s> returnValue = loop\n", loopFunctionType);
+        Printf(b_cfy_grp_cpp->b1, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
+        Printf(b_cfy_grp_cpp->b1, "            (bindObject, %s);\n", loopParameter);
+        Printf(b_cfy_grp_cpp->b1, "\n");
+        Printf(b_cfy_grp_cpp->b1, "        // END   function emitLoopFunc\n");
+    }
+
     void functionWrapperImplFunc(ParmsFunc &p) {
         Printf(b_cfy_grp_cpp->b1,"//****FUNC*****\n");
         Printf(b_cfy_grp_cpp->b1,"extern \"C\" {\n");
         Printf(b_cfy_grp_cpp->b1,"COUNTIFY_API\n");
-        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtfn");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtft");
         Printf(b_cfy_grp_cpp->b1,"%s(\n", p.funcName);
-        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm", "rp_tm_cfy_parm");
+        emitParmList(p.parms2, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm", "rp_tm_cfy_parm");
         Printf(b_cfy_grp_cpp->b1,") {\n");
         Printf(b_cfy_grp_cpp->b1,"\n");
         Printf(b_cfy_grp_cpp->b1,"    try {\n");
@@ -1692,11 +1713,15 @@ struct GroupCountify : public GroupBase {
         Printf(b_cfy_grp_cpp->b1,"        // Convert input types into Library types\n\n");
         emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", "rp_tm_cfy_cnvt", 2, 0, false);
         Printf(b_cfy_grp_cpp->b1,"\n");
-        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtdf", 2, false);
-        Printf(b_cfy_grp_cpp->b1,"        %s::%s(\n", module, p.symname);
-        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_args", "rp_tm_cfy_args", 2, ',', true, true);
-        Printf(b_cfy_grp_cpp->b1,"        );\n");
-        Printf(b_cfy_grp_cpp->b1,"\n");
+        if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
+            emitLoopFunc(p, loopParameter);
+        } else {
+            emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtdf", 2, false);
+            Printf(b_cfy_grp_cpp->b1,"        %s(\n", p.name);
+            emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_args", "rp_tm_cfy_args", 2, ',', true, true);
+            Printf(b_cfy_grp_cpp->b1,"        );\n");
+            Printf(b_cfy_grp_cpp->b1,"\n");
+        }
         Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
         Printf(b_cfy_grp_cpp->b1,"\n");
         emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtsf", 2, false);
@@ -1773,12 +1798,31 @@ struct GroupCountify : public GroupBase {
         groupContainsClass = true;
     }
 
+    void emitLoopFunc(ParmsMemb &p, String *loopParameter) {
+        String *loopParameterType = Getattr(p.n, "rp:loopParameterType");
+        String *loopFunctionType = Getattr(p.n, "rp:loopFunctionType");
+        Printf(b_cfy_grp_cpp->b1, "        // BEGIN function emitLoopFunc\n");
+        Printf(b_cfy_grp_cpp->b1, "\n");
+        Printf(b_cfy_grp_cpp->b1, "        %s::%sBind bindObject =\n", module, p.funcName);
+        Printf(b_cfy_grp_cpp->b1, "            boost::bind(\n");
+        Printf(b_cfy_grp_cpp->b1, "                &%s::%s,\n", p.pname, p.name);
+        Printf(b_cfy_grp_cpp->b1, "                xxx,\n");
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_loop", "rp_tm_cfy_loop", 4, ',', true, true);
+        Printf(b_cfy_grp_cpp->b1, "            );\n");
+        Printf(b_cfy_grp_cpp->b1, "\n");
+        Printf(b_cfy_grp_cpp->b1, "        std::vector<%s> returnValue = loop\n", loopFunctionType);
+        Printf(b_cfy_grp_cpp->b1, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
+        Printf(b_cfy_grp_cpp->b1, "            (bindObject, %s);\n", loopParameter);
+        Printf(b_cfy_grp_cpp->b1, "\n");
+        Printf(b_cfy_grp_cpp->b1, "        // END   function emitLoopFunc\n");
+    }
+
     void functionWrapperImplMemb(ParmsMemb &p) {
 
         Printf(b_cfy_grp_cpp->b1,"//****MEMB*****\n");
         Printf(b_cfy_grp_cpp->b1,"extern \"C\" {\n");
         Printf(b_cfy_grp_cpp->b1,"COUNTIFY_API\n");
-        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtmb");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtft");
         Printf(b_cfy_grp_cpp->b1,"%s(\n", p.funcName);
         emitParmList(p.parms2, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm", "rp_tm_cfy_parm", 2);
         Printf(b_cfy_grp_cpp->b1,"    ) {\n");
@@ -1793,11 +1837,15 @@ struct GroupCountify : public GroupBase {
         emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", "rp_tm_cfy_cnvt", 2, 0, false);
         Printf(b_cfy_grp_cpp->b1,"\n");
         emitTypeMap(b_cfy_grp_cpp->b1, p.node, "rp_tm_xxx_rp_get", 2);
-        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtdm", 2);
-        Printf(b_cfy_grp_cpp->b1,"        xxx->%s(\n", p.name);
-        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cpp_args", "rp_tm_cpp_args", 3, ',', true, true);
-        Printf(b_cfy_grp_cpp->b1,"        );\n", p.name);
-        Printf(b_cfy_grp_cpp->b1,"\n");
+        if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
+            emitLoopFunc(p, loopParameter);
+        } else {
+            emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtdm", 2);
+            Printf(b_cfy_grp_cpp->b1,"        xxx->%s(\n", p.name);
+            emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_args", "rp_tm_cfy_args", 3, ',', true, true);
+            Printf(b_cfy_grp_cpp->b1,"        );\n", p.name);
+            Printf(b_cfy_grp_cpp->b1,"\n");
+        }
         Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
         Printf(b_cfy_grp_cpp->b1,"\n");
         emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtsm", 2);
@@ -2285,12 +2333,83 @@ struct AddinCountify : public AddinImpl<GroupCountify> {
 
     virtual void top() {
         b_cfy_add_mng_txt = new Buffer("b_cfy_add_mng_txt", NewStringf("%s/cfy_mongo.txt", cfyDir));
+        Printf(b_cfy_add_mng_txt->b0, "\n");
+        Printf(b_cfy_add_mng_txt->b0, "        {\n");
+        Printf(b_cfy_add_mng_txt->b0, "            \"name\": \"Trigger\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "            \"codeName\": \"qlTrigger\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "            \"description\": \"\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "            \"returnValue\": {\n");
+        Printf(b_cfy_add_mng_txt->b0, "                \"dataType\": \"INT64\"\n");
+        Printf(b_cfy_add_mng_txt->b0, "            },\n");
+        Printf(b_cfy_add_mng_txt->b0, "            \"parameters\": [\n");
+        Printf(b_cfy_add_mng_txt->b0, "                {\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"name\": \"dummy0\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"dataType\": \"CSTR\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"description\": \"\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"optional\": false\n");
+        Printf(b_cfy_add_mng_txt->b0, "                },\n");
+        Printf(b_cfy_add_mng_txt->b0, "                {\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"name\": \"dummy1\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"dataType\": \"CSTR\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"description\": \"\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"optional\": false\n");
+        Printf(b_cfy_add_mng_txt->b0, "                },\n");
+        Printf(b_cfy_add_mng_txt->b0, "                {\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"name\": \"dummy2\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"dataType\": \"CSTR\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"description\": \"\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"optional\": false\n");
+        Printf(b_cfy_add_mng_txt->b0, "                },\n");
+        Printf(b_cfy_add_mng_txt->b0, "                {\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"name\": \"dummy3\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"dataType\": \"CSTR\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"description\": \"\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"optional\": false\n");
+        Printf(b_cfy_add_mng_txt->b0, "                },\n");
+        Printf(b_cfy_add_mng_txt->b0, "                {\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"name\": \"dummy4\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"dataType\": \"CSTR\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"description\": \"\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"optional\": false\n");
+        Printf(b_cfy_add_mng_txt->b0, "                },\n");
+        Printf(b_cfy_add_mng_txt->b0, "                {\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"name\": \"dummy5\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"dataType\": \"CSTR\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"description\": \"\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"optional\": false\n");
+        Printf(b_cfy_add_mng_txt->b0, "                },\n");
+        Printf(b_cfy_add_mng_txt->b0, "                {\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"name\": \"dummy6\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"dataType\": \"CSTR\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"description\": \"\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"optional\": false\n");
+        Printf(b_cfy_add_mng_txt->b0, "                },\n");
+        Printf(b_cfy_add_mng_txt->b0, "                {\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"name\": \"dummy7\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"dataType\": \"CSTR\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"description\": \"\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"optional\": false\n");
+        Printf(b_cfy_add_mng_txt->b0, "                },\n");
+        Printf(b_cfy_add_mng_txt->b0, "                {\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"name\": \"dummy8\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"dataType\": \"CSTR\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"description\": \"\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"optional\": false\n");
+        Printf(b_cfy_add_mng_txt->b0, "                },\n");
+        Printf(b_cfy_add_mng_txt->b0, "                {\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"name\": \"dummy9\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"dataType\": \"CSTR\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"description\": \"\",\n");
+        Printf(b_cfy_add_mng_txt->b0, "                    \"optional\": false\n");
+        Printf(b_cfy_add_mng_txt->b0, "                }\n");
+        Printf(b_cfy_add_mng_txt->b0, "            ]\n");
+        Printf(b_cfy_add_mng_txt->b0, "        },\n");
     }
 
     virtual void functionWrapperImplFunc(ParmsFunc &p) {
         if (checkAttribute(p.n, "feature:rp:generate:countify", "1")) {
             AddinImpl::functionWrapperImplFunc(p);
-            mongoFunc(b_cfy_add_mng_txt->b0, p.symnameUpper, p.funcName, p.n, p.parms);
+            mongoFunc(b_cfy_add_mng_txt->b0, p.symnameUpper, p.funcName, p.n, p.parms2);
         }
     }
 

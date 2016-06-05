@@ -487,19 +487,22 @@
 // rp_tm_cfy_* - typemaps for the =countify Addin
 //*****************************************************************************
 
+// rp_tm_cfy_loop - arguments to boost::bind object for a looping function (F/M)
+%typemap(rp_tm_cfy_loop) bool "$1_name";
+%typemap(rp_tm_cfy_loop) std::vector "_1";
+%typemap(rp_tm_cfy_loop) SWIGTYPE "$1_name_cnv";
+%typemap(rp_tm_cfy_loop2) SWIGTYPE "$1_name_cnv";
+
 // GROUP
 
 // CPP
 
-// rp_tm_cfy_rtfn - Function return type (F)
-%typemap(rp_tm_cfy_rtfn) void "bool";
-%typemap(rp_tm_cfy_rtfn) std::string "const char *";
-%typemap(rp_tm_cfy_rtfn) SWIGTYPE "$1_type";
-
-// rp_tm_cfy_rtmb - return value of a member function (M)
-%typemap(rp_tm_cfy_rtmb) void "bool";
-%typemap(rp_tm_cfy_rtmb) double "double";
-%typemap(rp_tm_cfy_rtmb) SWIGTYPE "$1_type";
+// rp_tm_cfy_rtft - Function return type (F/M)
+%typemap(rp_tm_cfy_rtft) void "bool";
+%typemap(rp_tm_cfy_rtft) std::string "const char *";
+%typemap(rp_tm_cfy_rtft) double "double";
+%typemap(rp_tm_cfy_rtft) std::vector "FLYLIB_OPAQUE";
+%typemap(rp_tm_cfy_rtft) SWIGTYPE "$1_type";
 
 // rp_tm_cfy_parm - function parameters (F/C/M)
 %typemap(rp_tm_cfy_parm) double "double $1_name";
@@ -507,21 +510,26 @@
 // This is a temporary hack for trigger parameters, which are not supported by =countify.
 // Declare the value as a dummy bool.  Later we will suppress it altogether.
 %typemap(rp_tm_cfy_parm)  reposit::property_t const & "bool $1_name";
+%typemap(rp_tm_cfy_parm) std::vector "FLYLIB_OPAQUE $1_name";
 %typemap(rp_tm_cfy_parm) SWIGTYPE "$1_type $1_name";
 
 // rp_tm_cfy_cnvt - convert input values from =countify datatypes into datatypes of the underlying Library (F/C/M)
 
 // rp_tm_cfy_rtdf - declare variable to capture return value of Library function (F)
+%typemap(rp_tm_cfy_rtdf) long %{
+        long returnValue =
+%}
 %typemap(rp_tm_cfy_rtdf) std::string %{
         static std::string ret;
         ret =
 %}
-%typemap(rp_tm_cfy_rtdf) long %{
-        long returnValue =
+%typemap(rp_tm_cfy_rtdf) std::vector<std::string> %{
+        std::vector<std::string> returnValue =
 %}
 
 // rp_tm_cfy_rtdm - declare variable to capture return value of Library member function (M)
 %typemap(rp_tm_cfy_rtdm) void "";
+%typemap(rp_tm_cfy_rtdm) long "long returnValue =";
 %typemap(rp_tm_cfy_rtdm) double "double returnValue =";
 
 // rp_tm_cfy_args - arguments to pass to underlying Library function
@@ -533,8 +541,9 @@
 %typemap(rp_tm_cfy_rtsf) std::string "return ret.c_str();";
 
 // rp_tm_cfy_rtsm - return statement of a Library member function (M)
-%typemap(rp_tm_cfy_rtsm) double "return returnValue;";
 %typemap(rp_tm_cfy_rtsm) void "return true;";
+%typemap(rp_tm_cfy_rtsm) long "return returnValue;";
+%typemap(rp_tm_cfy_rtsm) double "return returnValue;";
 
 // rp_tm_cfy_rtex - return statement in the event of an exception
 %typemap(rp_tm_cfy_rtex) SWIGTYPE "return 0;";
@@ -549,6 +558,8 @@
 %typemap(rp_tm_cfy_mngo) long "INT64";
 %typemap(rp_tm_cfy_mngo) double "REAL64";
 %typemap(rp_tm_cfy_mngo) reposit::property_t const & "BOOL";
+%typemap(rp_tm_cfy_mngo) std::vector "CSTR[][]";
+%typemap(rp_tm_cfy_mngo) std::vector const & "CSTR[][]";
 %typemap(rp_tm_cfy_mngo) SWIGTYPE "CSTR";
 
 //*****************************************************************************
@@ -579,6 +590,7 @@
 %}
 %typemap(rp_tm_xll_loop) T "$1_name_enm";
 %typemap(rp_tm_csh_loop) T "$1_name_enm";
+%typemap(rp_tm_cfy_loop) T "$1_name_enm";
 %typemap(rp_tm_vob_parm) T "const std::string &";
 %typemap(rp_tm_vob_mbvr) T "std::string $1_name_";
 %typemap(rp_tm_vob_cnvt) T "reposit::convert2<std::string>(value)";
@@ -619,10 +631,10 @@
 %typemap(rp_tm_xll_code) T "C";
 %typemap(rp_tm_cfy_parm) T "const char * $1_name";
 %typemap(rp_tm_cfy_cnvt) T %{
-        T $1_name_enum =
+        T $1_name_enm =
             reposit::Create<T>()($1_name);
 %}
-%typemap(rp_tm_cfy_args) T "$1_name_enum";
+%typemap(rp_tm_cfy_args) T "$1_name_enm";
 %typemap(rp_tm_xll_argfv) T "$1_name";
 %typemap(rp_tm_xll_argfv2) T "$1_name_str";
 
@@ -633,6 +645,7 @@
 %}
 %typemap(rp_tm_xll_loop) T & "$1_name_enm";
 %typemap(rp_tm_csh_loop) T & "$1_name_enm";
+%typemap(rp_tm_cfy_loop) T & "$1_name_enm";
 %typemap(rp_tm_vob_parm) T & "const std::string &";
 %typemap(rp_tm_vob_mbvr) T & "std::string $1_name_";
 %typemap(rp_tm_vob_cnvt) T & "reposit::convert2<std::string>(value)";
@@ -673,10 +686,10 @@
 %typemap(rp_tm_xll_code) T & "C";
 %typemap(rp_tm_cfy_parm) T & "const char * $1_name";
 %typemap(rp_tm_cfy_cnvt) T & %{
-        T $1_name_enum =
+        T $1_name_enm =
             reposit::Create<T>()($1_name);
 %}
-%typemap(rp_tm_cfy_args) T & "$1_name_enum";
+%typemap(rp_tm_cfy_args) T & "$1_name_enm";
 %typemap(rp_tm_xll_argfv) T & "$1_name";
 %typemap(rp_tm_xll_argfv2) T & "$1_name_str";
 %enddef
