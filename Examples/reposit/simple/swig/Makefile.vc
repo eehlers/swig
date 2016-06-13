@@ -5,7 +5,6 @@ SWIG_INC=$(SWIG_ROOT_DIR)\Lib
 REPOSIT_INC=$(SWIG_ROOT_DIR)\Lib\reposit
 BUILD_DIR=build\vc
 BUILDFLAG=$(BUILD_DIR)\buildflag
-MAKEFILE=Makefile.vc
 SWIG_FILE=simple.i
 
 ALL : $(BUILDFLAG)

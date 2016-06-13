@@ -3,7 +3,7 @@
 SWIG = ../../../../../preinst-swig
 #SWIG_DEBUG = -debug-top 4 -debug-tmsearch
 
-all:
+all: SWIG
 
 .PHONY: SWIG
 SWIG: complex.i

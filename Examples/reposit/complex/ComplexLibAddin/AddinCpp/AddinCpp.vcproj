@@ -186,6 +186,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\add_docstrings.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\add_docstrings.hpp"
+			>
+		</File>
+		<File
 			RelativePath=".\add_enumerated_classes.cpp"
 			>
 		</File>

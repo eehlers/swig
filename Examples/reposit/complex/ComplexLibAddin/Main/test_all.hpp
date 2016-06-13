@@ -13,6 +13,7 @@
 #define TEST_OVERRIDES
 #define TEST_MULTIPLE_INHERITANCE
 #define TEST_DIAMOND_INHERITANCE
+#define TEST_DOCSTRINGS
 
 void testFunctions();
 void testObjects();
@@ -25,6 +26,7 @@ void testEnumeratedClasses();
 void testOverrides();
 void testMultipleInheritance();
 void testDiamondInheritance();
+void testDocstrings();
 
 #endif
 

@@ -22,10 +22,18 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MainComplexLibAddin", "Comp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "swigrun", "ComplexLibAddin\swig\swigrun_vc9.vcproj", "{88BE5568-6E55-41C5-A251-670FAFB44336}"
 	ProjectSection(ProjectDependencies) = postProject
+		{C8A6BB98-75CA-4EB9-A750-8BA3B3AA5969} = {C8A6BB98-75CA-4EB9-A750-8BA3B3AA5969}
 		{1BCA73BB-0CAD-4653-89E0-99C04C989CEC} = {1BCA73BB-0CAD-4653-89E0-99C04C989CEC}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "swig", "..\..\..\swig_vc9.vcproj", "{1BCA73BB-0CAD-4653-89E0-99C04C989CEC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "docstrings", "ComplexLibAddin\docstrings\docstrings.vcproj", "{C8A6BB98-75CA-4EB9-A750-8BA3B3AA5969}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "docs", "ComplexLibAddin\Docs\docs.vcproj", "{3A1AC508-8F57-4318-AC89-EE55513FE506}"
+	ProjectSection(ProjectDependencies) = postProject
+		{88BE5568-6E55-41C5-A251-670FAFB44336} = {88BE5568-6E55-41C5-A251-670FAFB44336}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -76,6 +84,18 @@ Global
 		{1BCA73BB-0CAD-4653-89E0-99C04C989CEC}.Debug|Win32.Build.0 = Debug|Win32
 		{1BCA73BB-0CAD-4653-89E0-99C04C989CEC}.Release|Win32.ActiveCfg = Release|Win32
 		{1BCA73BB-0CAD-4653-89E0-99C04C989CEC}.Release|Win32.Build.0 = Release|Win32
+		{C8A6BB98-75CA-4EB9-A750-8BA3B3AA5969}.All|Win32.ActiveCfg = All|Win32
+		{C8A6BB98-75CA-4EB9-A750-8BA3B3AA5969}.All|Win32.Build.0 = All|Win32
+		{C8A6BB98-75CA-4EB9-A750-8BA3B3AA5969}.Debug|Win32.ActiveCfg = All|Win32
+		{C8A6BB98-75CA-4EB9-A750-8BA3B3AA5969}.Debug|Win32.Build.0 = All|Win32
+		{C8A6BB98-75CA-4EB9-A750-8BA3B3AA5969}.Release|Win32.ActiveCfg = All|Win32
+		{C8A6BB98-75CA-4EB9-A750-8BA3B3AA5969}.Release|Win32.Build.0 = All|Win32
+		{3A1AC508-8F57-4318-AC89-EE55513FE506}.All|Win32.ActiveCfg = All|Win32
+		{3A1AC508-8F57-4318-AC89-EE55513FE506}.All|Win32.Build.0 = All|Win32
+		{3A1AC508-8F57-4318-AC89-EE55513FE506}.Debug|Win32.ActiveCfg = All|Win32
+		{3A1AC508-8F57-4318-AC89-EE55513FE506}.Debug|Win32.Build.0 = All|Win32
+		{3A1AC508-8F57-4318-AC89-EE55513FE506}.Release|Win32.ActiveCfg = All|Win32
+		{3A1AC508-8F57-4318-AC89-EE55513FE506}.Release|Win32.Build.0 = All|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

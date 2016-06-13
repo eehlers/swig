@@ -14,3 +14,7 @@ clean :
 SWIG:
 	$(MAKE) -C ComplexLibAddin SWIG
 
+.PHONY: Docs
+Docs:
+	$(MAKE) -C ComplexLibAddin Docs
+

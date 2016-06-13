@@ -19,6 +19,8 @@ OBJECT_WRAPPER(ComplexLibAddin::FooBar, ComplexLib::FooBar)
 OBJECT_WRAPPER(ComplexLibAddin::Foo2, ComplexLib::Foo2)
 OBJECT_WRAPPER(ComplexLibAddin::Bar2, ComplexLib::Bar2)
 OBJECT_WRAPPER(ComplexLibAddin::FooBar2, ComplexLib::FooBar2)
+OBJECT_WRAPPER(ComplexLibAddin::Doc1, ComplexLib::Doc1)
+OBJECT_WRAPPER(ComplexLibAddin::Doc2, ComplexLib::Doc2)
 
 %typemap(rp_tm_cpp_cnvt) boost::shared_ptr<ComplexLib::Foo> const & %{
     RP_GET_REFERENCE($1_name_get, $1_name, ComplexLibAddin::FooBar, ComplexLib::FooBar);

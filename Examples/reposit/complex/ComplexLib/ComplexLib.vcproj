@@ -177,6 +177,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cl\docstrings.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\cl\docstrings.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\cl\echo.cpp"
 				>
 			</File>

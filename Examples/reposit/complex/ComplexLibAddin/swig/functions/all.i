@@ -10,6 +10,7 @@
 %include overrides.i
 %include multiple_inheritance.i
 %include diamond_inheritance.i
+%include docstrings.i
 ////%include echo.i
 ////%include noparm.i
 

@@ -5,6 +5,7 @@
 
 #define %override %pragma(reposit) override_obj="true"
 #define %group(x)  %pragma(reposit) group="x"
+#define %groupCaption(x)  %pragma(reposit) groupCaption="x"
 #define %loop(func, parm) %feature("rp:loopParameter", "parm") func
 #define %processor(cls, proc) %feature("rp:processorName", "proc") cls
 #define %generate(lang, id) %feature("rp:generate:lang") id
@@ -552,6 +553,35 @@
 %typemap(rp_tm_cfy_mngo) SWIGTYPE "CSTR";
 
 //*****************************************************************************
+// rp_tm_dox_* - typemaps for the Doxygen Addin
+//*****************************************************************************
+
+%typemap(rp_tm_dox_rtdc) void "void returnValue";
+%typemap(rp_tm_dox_rtdc) bool "bool returnValue";
+%typemap(rp_tm_dox_rtdc) long "long returnValue";
+%typemap(rp_tm_dox_rtdc) double "double returnValue";
+%typemap(rp_tm_dox_rtdc) rp_tp_string "string returnValue";
+%typemap(rp_tm_dox_rtdc) std::vector<bool> "vector<bool> returnValue";
+%typemap(rp_tm_dox_rtdc) std::vector<std::string> "vector<string> returnValue";
+
+%typemap(rp_tm_dox_rtd2) SWIGTYPE "XXX returnValue";
+
+%typemap(rp_tm_dox_mbvr) bool "bool $1_name";
+%typemap(rp_tm_dox_mbvr) long "long $1_name";
+%typemap(rp_tm_dox_mbvr) double "double $1_name";
+%typemap(rp_tm_dox_mbvr) double const & "double $1_name";
+%typemap(rp_tm_dox_mbvr) rp_tp_string "string $1_name";
+%typemap(rp_tm_dox_mbvr) rp_tp_cnv "string $1_name";
+%typemap(rp_tm_dox_mbvr) rp_tp_crc "string $1_name";
+%typemap(rp_tm_dox_mbvr) rp_tp_any "any $1_name";
+%typemap(rp_tm_dox_mbvr) std::vector<std::string> "vector<string> $1_name";
+%typemap(rp_tm_dox_mbvr) std::vector<bool> const & "vector<bool> $1_name";
+//%typemap(rp_tm_dox_mbvr) std::vector<long> const & "vector<long> $1_name";
+%typemap(rp_tm_dox_mbvr) std::vector<double> const & "vector<double> $1_name";
+
+%typemap(rp_tm_dox_mbv2) SWIGTYPE "\\param $1_name $rp_docstr";
+
+//*****************************************************************************
 // %apply statements - map native types to reposit types
 //*****************************************************************************
 
@@ -626,6 +656,10 @@
 %typemap(rp_tm_xll_argfv) T "$1_name";
 %typemap(rp_tm_xll_argfv2) T "$1_name_str";
 
+%typemap(rp_tm_dox_rtdc) T "string returnValue";
+%typemap(rp_tm_dox_mbvr) T "string $1_name";
+%typemap(rp_tm_dox_rtd2) SWIGTYPE "ZZZ returnValue";
+
 // T &
 %typemap(rp_tm_xxx_rp_get) T & %{
         T xxx =
@@ -679,6 +713,11 @@
 %typemap(rp_tm_cfy_args) T & "$1_name_enum";
 %typemap(rp_tm_xll_argfv) T & "$1_name";
 %typemap(rp_tm_xll_argfv2) T & "$1_name_str";
+
+%typemap(rp_tm_dox_rtdc) T & "string returnValue";
+%typemap(rp_tm_dox_mbvr) T & "string $1_name";
+%typemap(rp_tm_dox_rtd2) SWIGTYPE "ZZZ returnValue";
+
 %enddef
 
 // enumerated class
@@ -742,6 +781,10 @@
 %typemap(rp_tm_cfy_args) T "$1_name_enm";
 %typemap(rp_tm_xll_argfv) T "$1_name";
 %typemap(rp_tm_xll_argfv2) T "$1_name_str";
+
+%typemap(rp_tm_dox_rtdc) T "string returnValue";
+%typemap(rp_tm_dox_mbvr) T "string $1_name";
+%typemap(rp_tm_dox_rtd2) SWIGTYPE "ID of Enumeration of class T";
 
 // T &
 %typemap(rp_tm_xxx_rp_get) T & %{
@@ -812,6 +855,10 @@
 %typemap(rp_tm_xll_argfv) T & "$1_name";
 %typemap(rp_tm_xll_argfv2) T & "$1_name_str";
 
+%typemap(rp_tm_dox_rtdc) T & "string returnValue";
+%typemap(rp_tm_dox_mbvr) T & "string $1_name";
+%typemap(rp_tm_dox_rtd2) SWIGTYPE "ID of Enumeration of class T";
+
 %enddef
 
 // repository objects
@@ -859,4 +906,12 @@
         RP_GET_REFERENCE($1_name_get, $1_name, T_ADDIN, T_LIB);
 %}
 %typemap(rp_tm_cfy_args) boost::shared_ptr<T_LIB> const & "$1_name_get";
+
+%typemap(rp_tm_dox_rtdc) boost::shared_ptr<T_LIB> const & "string returnValue";
+%typemap(rp_tm_dox_mbvr) boost::shared_ptr<T_LIB> const &  "string $1_name";
+
+%typemap(rp_tm_dox_mbvr) std::vector<boost::shared_ptr<T_LIB> > const & "string $1_name";
+%typemap(rp_tm_dox_mbvr) std::vector<boost::shared_ptr<T_ADDIN> > const & "string $1_name";
+
 %enddef
+

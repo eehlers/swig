@@ -201,6 +201,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\clxl\functions\function_docstrings.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\clxl\functions\function_enumerated_classes.cpp"
 				>
 			</File>
@@ -250,6 +254,10 @@
 			</File>
 			<File
 				RelativePath=".\clxl\register\register_diamond_inheritance.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\clxl\register\register_docstrings.cpp"
 				>
 			</File>
 			<File

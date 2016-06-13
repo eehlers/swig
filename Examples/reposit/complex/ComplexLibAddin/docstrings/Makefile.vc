@@ -1,0 +1,35 @@
+
+BUILD_DIR=build\vc
+BUILDFLAG1=$(BUILD_DIR)\buildflag1
+BUILDFLAG2=$(BUILD_DIR)\buildflag2
+DOXYGEN=doxygen.exe
+
+DEPENDENCIES = \
+    ..\..\ComplexLib\cl\*.hpp
+
+ALL : $(BUILDFLAG1) $(BUILDFLAG2)
+
+$(BUILD_DIR) :
+    if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
+
+$(BUILDFLAG1) : $(BUILD_DIR) $(DEPENDENCIES)
+	$(DOXYGEN) Doxyfile
+    echo flagged > $@
+
+# If Python is installed on your machine so that .py files are associated with
+# the Python executable, then the call below to Python should work OK, even if
+# the PYTHON variable is null.
+#
+# Otherwise, you might need to set the PYTHON variable equal to the location of
+# the Python executable on your machine, e.g:
+#PYTHON=C:\Python27\python.exe
+
+$(BUILDFLAG2) : $(BUILDFLAG1)
+    $(PYTHON) docstrings.py
+    echo flagged > $@
+
+CLEAN :
+    -@ if EXIST $(BUILD_DIR)\* del /f /q $(BUILD_DIR)\*
+    -@ if EXIST xml rmdir /s /q xml
+    -@ if EXIST docstrings.txt del /f /q docstrings.txt
+

@@ -14,5 +14,10 @@ clean :
 
 .PHONY: SWIG
 SWIG:
-	$(MAKE) -C swig SWIG
+	$(MAKE) -C docstrings
+	$(MAKE) -C swig
+
+.PHONY: Docs
+Docs:
+	$(MAKE) -C Docs
 

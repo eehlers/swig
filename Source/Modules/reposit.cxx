@@ -6,6 +6,8 @@
 #include "swigmod.h"
 #include <string>
 #include <vector>
+#include <set>
+#include <fstream>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -29,11 +31,15 @@ bool legacy = false;
 
 // Default names for directories for source code and headers.
 // FIXME store these defaults in reposit.swg and retrieve them here.
-String *objDir = NewString("AddinObjects");
-String *addDir = NewString("AddinCpp");
-String *cshDir = NewString("AddinCSharp");
-String *cfyDir = NewString("AddinCfy");
-String *xllDir = NewString("AddinXl");
+String *objDir = NewString("../AddinObjects");
+String *addDir = NewString("../AddinCpp");
+String *cshDir = NewString("../AddinCSharp");
+String *cfyDir = NewString("../AddinCfy");
+String *xllDir = NewString("../AddinXl");
+// Path to the documentation directory.  Default is null i.e. no documentation generated.
+String *doxDir = 0;
+// The path to the docstrings.txt file.  Default is null i.e. no docstrings generated.
+String *docStr = 0;
 String *objInc = NewString("AddinObjects");
 String *addInc = NewString("AddinCpp");
 String *xllInc = NewString("AddinXl");
@@ -70,10 +76,9 @@ if (!(condition)) { \
 // UTILITY FUNCTIONS
 //*****************************************************************************
 
-Node *getNode(Node *n, const char *c) {
-    Node *ret = 0;
-    REPOSIT_SWIG_REQUIRE((ret = Getattr(n, c)),
-        "Can't find node '" << c << "'");
+Node *getNode(Node *n, const char *c, bool allowNull = false) {
+    Node *ret = Getattr(n, c);
+    REPOSIT_SWIG_REQUIRE(allowNull || ret, "Can't find node '" << c << "'");
     return ret;
 }
 
@@ -103,6 +108,7 @@ void printList(Node *n, File *f) {
 String *getTypeMap(Node *n, const char *m, bool fatal = true) {
     if (String *tm = Swig_typemap_lookup(m, n, "", 0)) {
         Replaceall(tm, "$rp_value", Getattr(n, "rp_value"));
+        Replaceall(tm, "$rp_docstr", Getattr(n, "rp_docstr"));
         return tm;
     }
     if (fatal) {
@@ -129,17 +135,21 @@ void printIndent(File *buf, int indent) {
         Printf(buf, "    ");
 }
 
-void emitTypeMap(File *buf, Node *n, const char *m, int indent=0, bool fatal = true) {
+void emitTypeMap(File *buf, Node *n, const char *m, int indent=0, bool fatal = true, bool comment = true) {
     SwigType *t  = Getattr(n, "type");
-    printIndent(buf, indent);
-    Printf(buf, "// BEGIN typemap %s %s\n", m, t);
+    if (comment) {
+        printIndent(buf, indent);
+        Printf(buf, "// BEGIN typemap %s %s\n", m, t);
+    }
     printIndent(buf, indent);
     String *s = getType(n, m, fatal);
     if (Len(s)) {
         Printf(buf, "%s\n", s);
         printIndent(buf, indent);
     }
-    Printf(buf, "// END   typemap %s\n", m);
+    if (comment) {
+        Printf(buf, "// END   typemap %s\n", m);
+    }
 }
 
 void emitParmList(
@@ -152,14 +162,17 @@ void emitParmList(
     char delim=',',
     bool fatal=true,
     bool skipHidden=false,
-    bool append=false) {
+    bool append=false,
+    bool comment=true) {
 
     REPOSIT_SWIG_REQUIRE(map, "Function emitParmList called with null type map.");
 
     bool first = true;
 
-    printIndent(buf, indent);
-    Printf(buf, "// BEGIN typemap %s\n", map);
+    if (comment) {
+        printIndent(buf, indent);
+        Printf(buf, "// BEGIN typemap %s\n", map);
+    }
     printIndent(buf, indent);
 
     for (Parm *p = parms; p; p = nextSibling(p)) {
@@ -199,7 +212,9 @@ void emitParmList(
         Printf(buf, "\n");
         printIndent(buf, indent);
     }
-    Printf(buf, "// END   typemap %s\n", map);
+    if (comment) {
+        Printf(buf, "// END   typemap %s\n", map);
+    }
 }
 
 String *excelParamCodes(Node *n, ParmList *parms) {
@@ -354,6 +369,48 @@ File *initFile(String *outfile) {
 }
 
 //*****************************************************************************
+// DOCSTRINGS
+//*****************************************************************************
+
+std::map<std::string, std::string> m;
+
+void initializeDocStrings() {
+    if (!docStr) {
+        printf("the path to the docstrings.txt file is not specified. "
+            "No docstrings will be generated.\n");
+        return;
+    }
+    std::ifstream f(Char(docStr));
+    if (!f) {
+        printf("Error opening docstrings file %s. "
+            "No docstrings will be generated.\n", Char(docStr));
+        return;
+    }
+    std::string s;
+    getline(f, s);
+    while (f) {
+        size_t i = s.find("=");
+        if (std::string::npos == i)
+            REPOSIT_SWIG_FAIL("docstrings file - invalid format");
+        std::string k = s.substr(0, i);
+        std::string v = s.substr(i+1, s.length()-i-1);
+        printf("k=%s v=%s\n", k.c_str(), v.c_str());
+        m[k]=v;
+        getline(f, s);
+    }
+}
+
+std::string getDocString(const std::string &scope, const std::string &func, const std::string &parm) {
+    std::string k = scope + "|" + func + "|" + parm;
+    printf("k=%s\n", k.c_str());
+    std::map<std::string, std::string>::const_iterator i = m.find(k);
+    if (m.end()==i)
+        return std::string();
+    else
+        return m[k];
+}
+
+//*****************************************************************************
 // COUNT
 //*****************************************************************************
 
@@ -385,20 +442,23 @@ struct Count {
 //*****************************************************************************
 
 struct Pragmas {
-    const String *groupName_;
+    String *groupName_;
+    String *displayName_;
     String *lib_inc;
     String *add_inc;
     bool automatic_;
     Pragmas() : groupName_(0), lib_inc(0), add_inc(0), automatic_(true) {}
     Pragmas & operator= (const Pragmas & other) {
         groupName_ = other.groupName_;
+        displayName_ = other.displayName_;
         lib_inc = other.lib_inc;
         add_inc = other.add_inc;
         automatic_ = other.automatic_;
         return *this;
     }
-    void setGroupName(const String *groupName) {
+    void setGroupName(String *groupName) {
         groupName_ = groupName;
+        displayName_ = groupName;
         lib_inc = NewString("");
         add_inc = NewString("");
         Swig_register_filebyname(NewStringf("%s_library_hpp", groupName), lib_inc);
@@ -503,7 +563,8 @@ struct ParmsFunc {
     String *name;
     String *symname;
     String *symnameUpper;
-    String* funcName;
+    String *funcName;
+    std::string docStr;
 };
 
 struct ParmsCtor {
@@ -518,6 +579,7 @@ struct ParmsCtor {
     String *pname;
     String *base;
     bool multipleBaseClasses;
+    std::string docStr;
 };
 
 struct ParmsMemb {
@@ -531,6 +593,7 @@ struct ParmsMemb {
     String *addinClass;
     String *name;
     Node *node;
+    std::string docStr;
 };
 
 //*****************************************************************************
@@ -961,6 +1024,147 @@ struct GroupSerializationRegister : public GroupBase {
 
         b_srg_grp_hpp->clear(count_, generateOutput);
         b_srg_grp_cpp->clear(count_, generateOutput);
+    }
+};
+
+struct GroupDoxygen : public GroupBase {
+
+    Buffer *b_dox_grp_dox;
+    std::vector<std::string> v;
+
+    GroupDoxygen(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count) {
+
+        b_dox_grp_dox = new Buffer("b_dox_grp_dox", NewStringf("%s/functions_01_%s.dox", doxDir, pragmas_.groupName_));
+
+        Printf(b_dox_grp_dox->b0, "\n");
+        Printf(b_dox_grp_dox->b0, "/*! \\page func_%s Functions - %s\n", pragmas_.groupName_, pragmas_.displayName_);
+        Printf(b_dox_grp_dox->b0, "\\section overview_%s Overview\n", pragmas_.groupName_);
+        Printf(b_dox_grp_dox->b0, "Documentation for function group %s.\n", pragmas_.groupName_);
+        Printf(b_dox_grp_dox->b0, "\\section functions_%s Function List\n", pragmas_.groupName_);
+        Printf(b_dox_grp_dox->b0, "\n");
+        // Start writing to b1 instead of b0.  Later we will append more text to b0.
+    }
+
+    void functionWrapperImplFunc(ParmsFunc &p) {
+
+        Printf(b_dox_grp_dox->b1,"\\subsection %s\n", p.funcName);
+        Printf(b_dox_grp_dox->b1,"\\code\n");
+        Printf(b_dox_grp_dox->b1, "\n");
+        emitTypeMap(b_dox_grp_dox->b1, p.n, "rp_tm_dox_rtdc", 0, true, false);
+        Printf(b_dox_grp_dox->b1, "\n");
+        Printf(b_dox_grp_dox->b1, "%s(\n", p.funcName);
+        emitParmList(p.parms2, b_dox_grp_dox->b1, 1, "rp_tm_dox_mbvr", "rp_tm_dox_mbvr", 1, ',', true, true, false, false);
+        Printf(b_dox_grp_dox->b1, ")\n");
+        Printf(b_dox_grp_dox->b1,"\\endcode\n");
+        Printf(b_dox_grp_dox->b1,"\\par Type:\n");
+        Printf(b_dox_grp_dox->b1,"Function\n");
+        Printf(b_dox_grp_dox->b1,"\\par Description:\n");
+        Printf(b_dox_grp_dox->b1, "%s\n", Char(p.docStr.c_str()));
+        Printf(b_dox_grp_dox->b1,"\\par Supported Platforms:\n");
+        Printf(b_dox_grp_dox->b1, "Excel");
+        if (checkAttribute(p.n, "feature:rp:generate:c++", "1"))
+            Printf(b_dox_grp_dox->b1, ", C++");
+        if (checkAttribute(p.n, "feature:rp:generate:c#", "1"))
+            Printf(b_dox_grp_dox->b1, ", C#");
+        Printf(b_dox_grp_dox->b1, "\n");
+        emitParmList(p.parms2, b_dox_grp_dox->b1, 1, "rp_tm_dox_mbv2", "rp_tm_dox_mbv2", 0, 0, true, false, false, false);
+        Printf(b_dox_grp_dox->b1, "\n");
+        Printf(b_dox_grp_dox->b1, "\n");
+
+        v.push_back(Char(p.funcName));
+
+        count_.functions++;
+        count_.total2++;
+    }
+
+    void functionWrapperImplCtor(ParmsCtor &p) {
+
+        if (generateCtor) {
+
+            Printf(b_dox_grp_dox->b1,"\\subsection %s\n", p.funcRename);
+            Printf(b_dox_grp_dox->b1,"\\code\n");
+            Printf(b_dox_grp_dox->b1, "\n");
+            Printf(b_dox_grp_dox->b1, "string returnValue\n");
+            Printf(b_dox_grp_dox->b1, "\n");
+            Printf(b_dox_grp_dox->b1, "%s(\n", p.funcRename);
+            emitParmList(p.parms2, b_dox_grp_dox->b1, 1, "rp_tm_dox_mbvr", "rp_tm_dox_mbvr", 1, ',', true, true, false, false);
+            Printf(b_dox_grp_dox->b1, ")\n");
+            Printf(b_dox_grp_dox->b1,"\\endcode\n");
+            Printf(b_dox_grp_dox->b1,"\\par Type:\n");
+            Printf(b_dox_grp_dox->b1,"Constructor\n");
+            Printf(b_dox_grp_dox->b1,"\\par Description:\n");
+            Printf(b_dox_grp_dox->b1, "%s\n", Char(p.docStr.c_str()));
+            Printf(b_dox_grp_dox->b1,"\\par Supported Platforms:\n");
+            Printf(b_dox_grp_dox->b1, "Excel");
+            if (checkAttribute(p.n, "feature:rp:generate:c++", "1"))
+                Printf(b_dox_grp_dox->b1, ", C++");
+            if (checkAttribute(p.n, "feature:rp:generate:c#", "1"))
+                Printf(b_dox_grp_dox->b1, ", C#");
+            Printf(b_dox_grp_dox->b1, "\n");
+            emitParmList(p.parms2, b_dox_grp_dox->b1, 1, "rp_tm_dox_mbv2", "rp_tm_dox_mbv2", 0, 0, true, false, false, false);
+            Printf(b_dox_grp_dox->b1, "\n");
+            Printf(b_dox_grp_dox->b1, "\n");
+
+            v.push_back(Char(p.funcRename));
+
+            count_.constructors++;
+            count_.total2++;
+        }
+    }
+
+    void functionWrapperImplMemb(ParmsMemb &p) {
+        Printf(b_dox_grp_dox->b1,"\\subsection %s\n", p.funcName);
+        Printf(b_dox_grp_dox->b1,"\\code\n");
+        Printf(b_dox_grp_dox->b1, "\n");
+        emitTypeMap(b_dox_grp_dox->b1, p.n, "rp_tm_dox_rtdc", 0, true, false);
+        Printf(b_dox_grp_dox->b1, "\n");
+        Printf(b_dox_grp_dox->b1, "%s(\n", p.funcName);
+        emitParmList(p.parms2, b_dox_grp_dox->b1, 1, "rp_tm_dox_mbvr", "rp_tm_dox_mbvr", 1, ',', true, true, false, false);
+        Printf(b_dox_grp_dox->b1, ")\n");
+        Printf(b_dox_grp_dox->b1,"\\endcode\n");
+        Printf(b_dox_grp_dox->b1,"\\par Type:\n");
+        Printf(b_dox_grp_dox->b1,"Member\n");
+        Printf(b_dox_grp_dox->b1,"\\par Description:\n");
+        Printf(b_dox_grp_dox->b1, "%s\n", Char(p.docStr.c_str()));
+        if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
+            Printf(b_dox_grp_dox->b1,"\\par Looping Function:\n");
+            Printf(b_dox_grp_dox->b1, "This function loops on parameter \\b %s.\n", loopParameter);
+        }
+        Printf(b_dox_grp_dox->b1,"\\par Supported Platforms:\n");
+        Printf(b_dox_grp_dox->b1, "Excel");
+        if (checkAttribute(p.n, "feature:rp:generate:c++", "1"))
+            Printf(b_dox_grp_dox->b1, ", C++");
+        if (checkAttribute(p.n, "feature:rp:generate:c#", "1"))
+            Printf(b_dox_grp_dox->b1, ", C#");
+        Printf(b_dox_grp_dox->b1, "\n");
+        emitParmList(p.parms2, b_dox_grp_dox->b1, 1, "rp_tm_dox_mbv2", "rp_tm_dox_mbv2", 0, 0, true, false, false, false);
+        Printf(b_dox_grp_dox->b1, "\n");
+        Printf(b_dox_grp_dox->b1, "\n");
+
+        v.push_back(Char(p.funcName));
+
+        count_.members++;
+        count_.total2++;
+    }
+
+    void clear() {
+
+        // Append to b0 the alphabetical list of links
+        std::sort(v.begin(), v.end());
+
+        typedef std::vector<std::string>::const_iterator iter;
+        for (iter i=v.begin(); i!=v.end(); ++i) {
+            Printf(b_dox_grp_dox->b0, "\\ref %s ()\\n\n", i->c_str());
+        }
+
+        Printf(b_dox_grp_dox->b0, "\n");
+        Printf(b_dox_grp_dox->b0, "\\section documentation_%s Function Documentation\n", pragmas_.groupName_);
+
+        Printf(b_dox_grp_dox->b1, "\n");
+        Printf(b_dox_grp_dox->b1, "*/\n");
+        Printf(b_dox_grp_dox->b1, "\n");
+
+        b_dox_grp_dox->clear(count_);
     }
 };
 
@@ -2067,6 +2271,69 @@ struct AddinSerializationRegister : public AddinImpl<GroupSerializationRegister>
     }
 };
 
+struct AddinDoxygen : public AddinImpl<GroupDoxygen> {
+
+    Buffer *b_dox_add_all;
+    std::vector<std::string> v;
+
+    AddinDoxygen() : AddinImpl("Doxygen") {}
+
+    virtual void top() {
+
+        b_dox_add_all = new Buffer("b_dox_add_all", NewStringf("%s/functions_00_all.dox", doxDir));
+
+        Printf(b_dox_add_all->b0, "\n");
+        Printf(b_dox_add_all->b0, "/*! \\page func_all Functions - All\n");
+        Printf(b_dox_add_all->b0, "\n");
+        // Start writing to b1 instead of b0.  Later we will append more text to b0.
+        Printf(b_dox_add_all->b1, "\\section functions Function List\n");
+        Printf(b_dox_add_all->b1, "\n");
+    }
+
+    virtual void functionWrapperImplFunc(ParmsFunc &p) {
+        AddinImpl::functionWrapperImplFunc(p);
+        v.push_back(Char(p.funcName));
+    }
+
+    virtual void functionWrapperImplCtor(ParmsCtor &p) {
+        if (generateCtor) {
+            AddinImpl::functionWrapperImplCtor(p);
+            v.push_back(Char(p.funcRename));
+        }
+    }
+
+    virtual void functionWrapperImplMemb(ParmsMemb &p) {
+        AddinImpl::functionWrapperImplMemb(p);
+        v.push_back(Char(p.funcName));
+    }
+
+    virtual void clear() {
+
+        AddinImpl::clear();
+
+        std::sort(v.begin(), v.end());
+
+        std::vector<std::string>::const_iterator i0;
+        for (i0=v.begin(); i0!=v.end(); ++i0) {
+            Printf(b_dox_add_all->b1, "\\ref %s ()\\n\n", i0->c_str());
+        }
+
+        Printf(b_dox_add_all->b1, "*/\n");
+        Printf(b_dox_add_all->b1, "\n");
+
+        // Append the function count to b0
+        Printf(b_dox_add_all->b0, "Below is an alphabetical list of links to documentation for all functions (%d) in %%%s.\n", v.size(), module);
+        Printf(b_dox_add_all->b0, "\n");
+
+        b_dox_add_all->clear(count);
+
+        // statistics
+
+        printf("%s - Addin Files", name_.c_str());
+        printf("%s\n", std::string(66-name_.length(), '=').c_str());
+    }
+};
+
 struct AddinCpp : public AddinImpl<GroupCpp> {
 
     Buffer *b_cpp_add_all_hpp;
@@ -2482,22 +2749,26 @@ virtual int top(Node *n) {
     // Extract some config info.
     Node *n2 = getNode(n, "module");
     if (Node *n3 = Getattr(n2, "options")) {
-        if (String *n4 = getNode(n3, "rp_obj_dir"))
-            objDir = n4;
+        if (String *s = getNode(n3, "rp_obj_dir"))
+            objDir = s;
         if (String *s = getNode(n3, "rp_add_dir"))
             addDir = s;
         if (String *s = getNode(n3, "rp_csh_dir"))
             cshDir = s;
-        if (String *n6 = getNode(n3, "rp_xll_dir"))
-            xllDir = n6;
-        if (String *n6a = getNode(n3, "rp_cfy_dir"))
-            cfyDir = n6a;
-        if (String *n7 = getNode(n3, "rp_obj_inc"))
-            objInc = n7;
-        if (String *n8 = getNode(n3, "rp_add_inc"))
-            addInc = n8;
-        if (String *n9 = getNode(n3, "rp_xll_inc"))
-            xllInc = n9;
+        if (String *s = getNode(n3, "rp_xll_dir"))
+            xllDir = s;
+        if (String *s = getNode(n3, "rp_cfy_dir"))
+            cfyDir = s;
+        if (String *s = getNode(n3, "rp_obj_inc"))
+            objInc = s;
+        if (String *s = getNode(n3, "rp_add_inc"))
+            addInc = s;
+        if (String *s = getNode(n3, "rp_xll_inc"))
+            xllInc = s;
+        if (String *s = getNode(n3, "rp_doc_str", true))
+            docStr = s;
+        if (String *s = getNode(n3, "rp_dox_dir", true))
+            doxDir = s;
     }
 
     printf("module=%s\n", Char(module));
@@ -2510,6 +2781,14 @@ virtual int top(Node *n) {
     printf("rp_obj_inc=%s\n", Char(objInc));
     printf("rp_add_inc=%s\n", Char(addInc));
     printf("rp_xll_inc=%s\n", Char(xllInc));
+    printf("rp_doc_str=%s\n", Char(docStr));
+    printf("rp_dox_dir=%s\n", Char(doxDir));
+
+    if (doxDir)
+        addinList_.appendAddin(new AddinDoxygen);
+
+    if (docStr)
+        initializeDocStrings();
 
    /* Initialize I/O */
     b_begin = NewString("");
@@ -2745,6 +3024,8 @@ int pragmaDirective(Node *n) {
 
             if (0 == Strcmp(name, "group")) {
                 pragmas_.setGroupName(NewString(value));
+            } else if (0 == Strcmp(name, "groupCaption")) {
+                pragmas_.displayName_ = NewString(value);
             } else if (0 == Strcmp(name, "override_obj")) {
                 // For the user writing the config file, it is easier to assume automatic (default)
                 // unless overridden with '%feature("rp:override_obj");' :
@@ -2791,7 +3072,7 @@ int functionHandlerImpl(Node *n) {
     return Language::functionHandler(n);
 }
 
-Parm *createParm(const char *name, const char *type, bool constRef, bool hidden) {
+Parm *createParm(const char *name, const char *type, bool constRef, bool hidden, const char *docStr) {
     Parm *ret = NewHash();
     Setattr(ret, "name", name);
     String *nt  = NewString(type);
@@ -2802,18 +3083,20 @@ Parm *createParm(const char *name, const char *type, bool constRef, bool hidden)
     Setattr(ret, "type", nt);
     if (hidden)
         Setattr(ret, "hidden", "1");
+    if (docStr)
+        Setattr(ret, "rp_docstr", Char(docStr));
     processParm(ret);
     return ret;
 }
 
-ParmList *prependParm(ParmList *parms, const char *name, const char *type, bool constRef = true, bool hidden = false) {
-    Parm *ret = createParm(name, type, constRef, hidden);
+ParmList *prependParm(ParmList *parms, const char *name, const char *type, bool constRef = true, bool hidden = false, const char *docStr = 0) {
+    Parm *ret = createParm(name, type, constRef, hidden, docStr);
     Setattr(ret, "nextSibling", parms);
     return ret;
 }
 
-ParmList *appendParm(ParmList *parms, const char *name, const char *type, bool constRef = true, bool hidden = false) {
-    Parm *p = createParm(name, type, constRef, hidden);
+ParmList *appendParm(ParmList *parms, const char *name, const char *type, bool constRef = true, bool hidden = false, const char *docStr = 0) {
+    Parm *p = createParm(name, type, constRef, hidden, docStr);
     if (parms && ParmList_len(parms)) {
         Parm *lastParm;
         for (Parm *p2 = parms; p2; p2 = nextSibling(p2))
@@ -2892,6 +3175,18 @@ int functionWrapperImplFunc(Node *n) {
     p.funcName = NewStringf("%s%s", prefix, p.symnameUpper);
     validateFunctionName(p.funcName);
 
+    String *scope = 0;
+    String *funcName = 0;
+    if (staticMember) {
+        Node *x=Getattr(n, "parentNode");
+        scope = Getattr(x, "name");
+        funcName = Getattr(n, "staticmemberfunctionHandler:name");
+    } else {
+        scope = nmspace;
+        funcName = p.symname;
+    }
+    p.docStr = getDocString(Char(scope), Char(funcName), "");
+
     printf("p.name=%s\n", Char(p.name));
     printf("p.symname=%s\n", Char(p.symname));
     printf("p.symnameUpper=%s\n", Char(p.symnameUpper));
@@ -2902,14 +3197,19 @@ int functionWrapperImplFunc(Node *n) {
     Printf(b_init, "&&& prefix=%s\n", prefix);
     Printf(b_init, "&&& p.funcName=%s\n", p.funcName);
 
+    for (Parm *x = p.parms; x; x = nextSibling(x)) {
+        std::string docStr = getDocString(Char(scope), Char(funcName), Char(Getattr(x, "name")));
+        Setattr(x, "rp_docstr", Char(docStr.c_str()));
+    }
+
     // Create from parms another list parms2 with argument Trigger.
     if (legacy) {
         // In legacy mode, append the argument to the list.
         p.parms2 = CopyParmList(p.parms);
-        p.parms2 = appendParm(p.parms2, "Trigger", "reposit::property_t");
+        p.parms2 = appendParm(p.parms2, "Trigger", "reposit::property_t", true, false, "Dependency tracking trigger");
     } else {
         // For new projects, Trigger is the first argument.
-        p.parms2 = prependParm(p.parms, "Trigger", "reposit::property_t");
+        p.parms2 = prependParm(p.parms, "Trigger", "reposit::property_t", true, false, "Dependency tracking trigger");
     }
 
     addinList_.functionWrapperImplFunc(p);
@@ -2983,20 +3283,33 @@ int functionWrapperImplCtor(Node *n) {
     printf("funcName=%s\n", Char(p.funcName));
     Printf(b_init, "@@@ CTOR Name=%s\n", Char(p.funcName));
 
+    String *className = Getattr(Getattr(p.n, "parentNode"), "name");
+    p.docStr = getDocString(Char(className), Char(p.name), "");
+    if (p.docStr.empty()) {
+        std::stringstream s;
+        s << "Construct an object of class " << Char(p.name) << " and return its id";
+        p.docStr = s.str();
+    }
+
+    for (Parm *x = p.parms; x; x = nextSibling(x)) {
+        std::string docStr = getDocString(Char(className), Char(p.name), Char(Getattr(x, "name")));
+        Setattr(x, "rp_docstr", Char(docStr.c_str()));
+    }
+
     // Create from parms another list parms2 containing additional parameters.
     if (legacy) {
         // In legacy mode the signature is: (ObjectId, ..., Permanent, Trigger, Overwrite)
         p.parms2 = CopyParmList(p.parms);
-        p.parms2 = appendParm(p.parms2, "Permanent", "bool", false);
-        p.parms2 = appendParm(p.parms2, "Trigger", "reposit::property_t");
-        p.parms2 = appendParm(p.parms2, "Overwrite", "bool", false);
-        p.parms2 = prependParm(p.parms2, "objectID", "std::string");
+        p.parms2 = appendParm(p.parms2, "Permanent", "bool", false, false, "Permanent flag");
+        p.parms2 = appendParm(p.parms2, "Trigger", "reposit::property_t", true, false, "Dependency tracking trigger");
+        p.parms2 = appendParm(p.parms2, "Overwrite", "bool", false, false, "Overwrite flag");
+        p.parms2 = prependParm(p.parms2, "objectID", "std::string", true, false, "Object ID");
     } else {
         // For new projects the signature is: (Trigger, ObjectId, Overwrite, Permanent, ...)
-        Parm *temp1 = prependParm(p.parms, "Permanent", "bool", false);
-        Parm *temp2 = prependParm(temp1, "Overwrite", "bool", false);
-        Parm *temp3 = prependParm(temp2, "objectID", "std::string");
-        p.parms2 = prependParm(temp3, "Trigger", "reposit::property_t");
+        Parm *temp1 = prependParm(p.parms, "Permanent", "bool", false, false, "Permanent flag");
+        Parm *temp2 = prependParm(temp1, "Overwrite", "bool", false, false, "Overwrite flag");
+        Parm *temp3 = prependParm(temp2, "objectID", "std::string", true, false, "Object ID");
+        p.parms2 = prependParm(temp3, "Trigger", "reposit::property_t", true, false, "Dependency tracking trigger");
     }
 
     Printf(b_wrappers, "//***DEF\n");
@@ -3047,17 +3360,28 @@ int functionWrapperImplMemb(Node *n) {
     printf("p.funcName=%s\n", Char(p.funcName));
     Printf(b_init, "@@@ MEMB Name=%s\n", Char(p.funcName));
 
+    String *className = Getattr(Getattr(p.n, "parentNode"), "name");
+    p.docStr = getDocString(Char(className), Char(p.name), "");
+
+    for (Parm *x = p.parms; x; x = nextSibling(x)) {
+        std::string docStr = getDocString(Char(className), Char(p.name), Char(Getattr(x, "name")));
+        Setattr(x, "rp_docstr", Char(docStr.c_str()));
+    }
+
+    String *s = getTypeMap(p.n, "rp_tm_dox_rtd2");
+
     // Create from parms another list parms2 containing additional parameters.
     if (legacy) {
         // In legacy mode the signature is: (ObjectId, ..., Trigger)
         p.parms2 = CopyParmList(Getattr(p.parms, "nextSibling"));
-        p.parms2 = appendParm(p.parms2, "Trigger", "reposit::property_t");
-        p.parms2 = prependParm(p.parms2, "objectID", "std::string");
+        p.parms2 = appendParm(p.parms2, "Trigger", "reposit::property_t", true, false, "Dependency tracking trigger");
+        //p.parms2 = prependParm(p.parms2, "objectID", "std::string", true, false, "Object ID");
+        p.parms2 = prependParm(p.parms2, "objectID", "std::string", true, false, Char(s));
     } else {
         // For new projects the signature is: (Trigger, ObjectId, ...)
         ParmList *parmsTemp = Getattr(p.parms, "nextSibling");
-        Parm *parmsTemp2 = prependParm(parmsTemp, "objectID", "std::string");
-        p.parms2 = prependParm(parmsTemp2, "Trigger", "reposit::property_t");
+        Parm *parmsTemp2 = prependParm(parmsTemp, "objectID", "std::string", true, false, "Object ID");
+        p.parms2 = prependParm(parmsTemp2, "Trigger", "reposit::property_t", true, false, "Dependency tracking trigger");
     }
 
     // We are invoking the member function of a class.

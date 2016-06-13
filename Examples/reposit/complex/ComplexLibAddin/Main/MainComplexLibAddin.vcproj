@@ -192,6 +192,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\test_docstrings.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\test_enumerated_classes.cpp"
 			>
 		</File>

@@ -8,7 +8,9 @@
     rp_obj_inc="clo",
     rp_add_inc="AddinCpp",
     rp_xll_inc="clxl",
-    rp_cfy_inc="AddinCfy"
+    rp_cfy_inc="AddinCfy",
+    rp_doc_str="../docstrings/docstrings.txt",
+    rp_dox_dir="../Docs/pages_auto"
 ) ComplexLibAddin
 
 %feature("rp:generate:c++");
@@ -16,3 +18,4 @@
 %include typedefs/all.i
 %include typemaps/all.i
 %include functions/all.i
+

@@ -22,6 +22,7 @@ int main() {
         testOverrides();
         testMultipleInheritance();
         testDiamondInheritance();
+        testDocstrings();
 
         ComplexLibAddinCpp::closeAddin();
 

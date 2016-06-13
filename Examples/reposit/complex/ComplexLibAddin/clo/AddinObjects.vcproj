@@ -157,6 +157,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\valueobjects\vo_docstrings.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\valueobjects\vo_docstrings.hpp"
+				>
+			</File>
+			<File
 				RelativePath=".\valueobjects\vo_inheritance.cpp"
 				>
 			</File>
@@ -284,6 +292,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\serialization\create\create_docstrings.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\create\create_docstrings.hpp"
+					>
+				</File>
+				<File
 					RelativePath=".\serialization\create\create_inheritance.cpp"
 					>
 				</File>
@@ -329,6 +345,14 @@
 				</File>
 				<File
 					RelativePath=".\serialization\register\serialization_diamond_inheritance.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_docstrings.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serialization\register\serialization_docstrings.hpp"
 					>
 				</File>
 				<File
@@ -391,6 +415,10 @@
 		</File>
 		<File
 			RelativePath=".\obj_all.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\obj_docstrings.hpp"
 			>
 		</File>
 		<File
