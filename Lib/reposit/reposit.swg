@@ -658,7 +658,6 @@
 
 %typemap(rp_tm_dox_rtdc) T "string returnValue";
 %typemap(rp_tm_dox_mbvr) T "string $1_name";
-%typemap(rp_tm_dox_rtd2) SWIGTYPE "ZZZ returnValue";
 
 // T &
 %typemap(rp_tm_xxx_rp_get) T & %{
