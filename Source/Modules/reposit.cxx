@@ -217,10 +217,14 @@ void emitParmList(
     }
 }
 
-String *excelParamCodes(Node *n, ParmList *parms) {
-    String *s = NewString("");
-    String *tm = getTypeMap(n, "rp_tm_xll_cdrt");
-    Append(s, tm);
+std::string hexLen(String *c) {
+    std::stringstream s;
+    s << std::hex << std::setw(2) << std::setfill('0') << Len(c);
+    return s.str();
+}
+
+void excelParamCodes(File *b, Node *n, ParmList *parms) {
+    String *s = getTypeMap(n, "rp_tm_xll_cdrt");
     for (Parm *p = parms; p; p = nextSibling(p)) {
 
         String *value = Getattr(p, "value");
@@ -232,10 +236,10 @@ String *excelParamCodes(Node *n, ParmList *parms) {
         Append(s, tm);
     }
     Append(s, "#");
-    return s;
+    Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(s).c_str(), s);
 }
 
-String *excelParamList(ParmList *parms) {
+void excelParamList(File *b, ParmList *parms) {
     String *s = NewString("");
     bool first = true;
     for (Parm *p = parms; p; p = nextSibling(p)) {
@@ -245,72 +249,91 @@ String *excelParamList(ParmList *parms) {
         } else {
             Append(s, ",");
         }
-        String *name = Getattr(p,"name");
+        String *name = Getattr(p, "name");
         Append(s, name);
     }
-    return s;
+    Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(s).c_str(), s);
 }
 
-std::string hexLen(String *c) {
-    std::stringstream s;
-    s << std::hex << std::setw(2) << std::setfill('0') << Len(c);
-    return s.str();
+void excelParamListDocStrings(File *b, ParmList *parms) {
+    bool first = true;
+    for (Parm *p = parms; p; p = nextSibling(p)) {
+        if (Getattr(p, "hidden")) continue;
+        if (first) {
+            first = false;
+        } else {
+            Printf(b, ",\n");
+        }
+        String *s = Getattr(p, "rp_docstr");
+        // There is a bug in the Excel API which causes docstrings to get corrupted.
+        // The workaround is to pad the last one with two spaces.
+        if (!nextSibling(p))
+            Append(s, "  ");
+        Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\")", hexLen(s).c_str(), s);
+    }
+    Printf(b, "\n");
 }
 
-void excelRegister(File *b, Node *n, String *funcName, ParmList *parms) {
+// For some reason Len(parms) does not seem to return the value that I would expect.
+int paramListSize(ParmList *parms) {
+    int ret = 0;
+    for (Parm *p = parms; p; p = nextSibling(p)) {
+        if (Getattr(p, "hidden")) continue;
+        ret++;
+    }
+    return ret;
+}
+
+void excelRegister(File *b, Node *n, String *funcName, String *funcDoc, ParmList *parms) {
     Printf(b, "        // BEGIN function excelRegister\n");
-    Printf(b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
+    Printf(b, "        Excel(xlfRegister, 0, %d, &xDll,\n", 10 + paramListSize(parms));
     Printf(b, "            // function code name\n");
     Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
     Printf(b, "            // parameter codes\n");
-    String *xlParamCodes = excelParamCodes(n, parms);
-    Printf(b, "            TempStrNoSize(\n");
-    Printf(b, "            // BEGIN func excelParamCodes (using typemap rp_tm_xll_code)\n");
-    Printf(b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamCodes).c_str(), xlParamCodes);
-    Printf(b, "            // END   func excelParamCodes (using typemap rp_tm_xll_code)\n");
-    Printf(b, "            ),\n");
+    excelParamCodes(b, n, parms);
     Printf(b, "            // function display name\n");
     Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
-    Printf(b, "            // comma-delimited list of parameters\n");
-    String *xlParamList = excelParamList(parms);
-    Printf(b, "            TempStrNoSize(\n");
-    Printf(b, "            // BEGIN func excelParamList\n");
-    Printf(b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamList).c_str(), xlParamList);
-    Printf(b, "            // END   func excelParamList\n");
-    Printf(b, "            ),\n");
+    Printf(b, "            // comma-delimited list of parameter names\n");
+    excelParamList(b, parms);
     Printf(b, "            // function type (0 = hidden function, 1 = worksheet function, 2 = command macro)\n");
     Printf(b, "            TempStrNoSize(\"\\x01\"\"1\"),\n");
     Printf(b, "            // function category\n");
-    Printf(b, "            TempStrNoSize(\"\\x07\"\"Example\")\n");
+    Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(module).c_str(), module);
+    Printf(b, "            // shortcut text (command macros only)\n");
+    Printf(b, "            TempStrNoSize(\"\\x00\"\"\"),\n");
+    Printf(b, "            // path to help file\n");
+    Printf(b, "            TempStrNoSize(\"\\x00\"\"\"),\n");
+    Printf(b, "            // function description\n");
+    Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcDoc).c_str(), funcDoc);
+    Printf(b, "            // parameter descriptions\n");
+    excelParamListDocStrings(b, parms);
     Printf(b, "        );\n");
     Printf(b, "        // END   function excelRegister\n\n");
 }
 
-void excelUnregister(File *b, Node *n, String *funcName, ParmList *parms) {
+void excelUnregister(File *b, Node *n, String *funcName, String *funcDoc, ParmList *parms) {
     Printf(b, "        // BEGIN function excelUnregister\n");
-    Printf(b, "        Excel(xlfRegister, 0, 7, &xDll,\n");
+    Printf(b, "        Excel(xlfRegister, 0, %d, &xDll,\n", 10 + paramListSize(parms));
     Printf(b, "            // function code name\n");
     Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
     Printf(b, "            // parameter codes\n");
-    String *xlParamCodes = excelParamCodes(n, parms);
-    Printf(b, "            TempStrNoSize(\n");
-    Printf(b, "            // BEGIN func excelParamCodes (using typemap rp_tm_xll_code)\n");
-    Printf(b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamCodes).c_str(), xlParamCodes);
-    Printf(b, "            // END   func excelParamCodes (using typemap rp_tm_xll_code)\n");
-    Printf(b, "            ),\n");
+    excelParamCodes(b, n, parms);
     Printf(b, "            // function display name\n");
     Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
-    Printf(b, "            // comma-delimited list of parameters\n");
-    String *xlParamList = excelParamList(parms);
-    Printf(b, "            TempStrNoSize(\n");
-    Printf(b, "            // BEGIN func excelParamList\n");
-    Printf(b, "            \"\\x%s\"\"%s\"\n", hexLen(xlParamList).c_str(), xlParamList);
-    Printf(b, "            // END   func excelParamList\n");
-    Printf(b, "            ),\n");
+    Printf(b, "            // comma-delimited list of parameter names\n");
+    excelParamList(b, parms);
     Printf(b, "            // function type (0 = hidden function, 1 = worksheet function, 2 = command macro)\n");
     Printf(b, "            TempStrNoSize(\"\\x01\"\"0\"),\n");
     Printf(b, "            // function category\n");
-    Printf(b, "            TempStrNoSize(\"\\x07\"\"Example\")\n");
+    Printf(b, "            TempStrNoSize(\"\\x07\"\"Example\"),\n");
+    Printf(b, "            // shortcut text (command macros only)\n");
+    Printf(b, "            TempStrNoSize(\"\\x00\"\"\"),\n");
+    Printf(b, "            // path to help file\n");
+    Printf(b, "            TempStrNoSize(\"\\x00\"\"\"),\n");
+    Printf(b, "            // function description\n");
+    Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcDoc).c_str(), funcDoc);
+    Printf(b, "            // parameter descriptions\n");
+    excelParamListDocStrings(b, parms);
     Printf(b, "        );\n");
     Printf(b, "\n");
     Printf(b, "        Excel4(xlfRegisterId, &xlRegID, 2, &xDll,\n");
@@ -1766,8 +1789,8 @@ struct GroupExcelRegister : public GroupBase {
 
     void functionWrapperImplFunc(ParmsFunc &p) {
 
-        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcName, p.parms2);
-        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcName, p.parms2);
+        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcName, Char(p.docStr.c_str()), p.parms2);
+        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcName, Char(p.docStr.c_str()), p.parms2);
 
         count_.functions++;
         count_.total2++;
@@ -1775,11 +1798,11 @@ struct GroupExcelRegister : public GroupBase {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcRename, p.parms2);
-        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcRename, p.parms2);
+        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcRename, Char(p.docStr.c_str()), p.parms2);
+        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcRename, Char(p.docStr.c_str()), p.parms2);
         if (p.alias) {
-            excelRegister(b_xlr_grp_cpp->b0, p.n, p.alias, p.parms2);
-            excelUnregister(b_xlr_grp_cpp->b1, p.n, p.alias, p.parms2);
+            excelRegister(b_xlr_grp_cpp->b0, p.n, p.alias, Char(p.docStr.c_str()), p.parms2);
+            excelUnregister(b_xlr_grp_cpp->b1, p.n, p.alias, Char(p.docStr.c_str()), p.parms2);
         }
 
         count_.constructors++;
@@ -1787,11 +1810,11 @@ struct GroupExcelRegister : public GroupBase {
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
-        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcName, p.parms2);
-        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcName, p.parms2);
+        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcName, Char(p.docStr.c_str()), p.parms2);
+        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcName, Char(p.docStr.c_str()), p.parms2);
         if (p.alias) {
-            excelRegister(b_xlr_grp_cpp->b0, p.n, p.alias, p.parms2);
-            excelUnregister(b_xlr_grp_cpp->b1, p.n, p.alias, p.parms2);
+            excelRegister(b_xlr_grp_cpp->b0, p.n, p.alias, Char(p.docStr.c_str()), p.parms2);
+            excelUnregister(b_xlr_grp_cpp->b1, p.n, p.alias, Char(p.docStr.c_str()), p.parms2);
         }
 
         count_.members++;

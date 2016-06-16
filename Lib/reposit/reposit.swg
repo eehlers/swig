@@ -564,8 +564,6 @@
 %typemap(rp_tm_dox_rtdc) std::vector<bool> "vector<bool> returnValue";
 %typemap(rp_tm_dox_rtdc) std::vector<std::string> "vector<string> returnValue";
 
-%typemap(rp_tm_dox_rtd2) SWIGTYPE "XXX returnValue";
-
 %typemap(rp_tm_dox_mbvr) bool "bool $1_name";
 %typemap(rp_tm_dox_mbvr) long "long $1_name";
 %typemap(rp_tm_dox_mbvr) double "double $1_name";

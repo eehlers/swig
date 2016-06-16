@@ -59,6 +59,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\functions\docstrings.i"
+				>
+			</File>
+			<File
 				RelativePath=".\functions\echo.i"
 				>
 			</File>
