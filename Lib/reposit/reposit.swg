@@ -6,11 +6,13 @@
 #define %override %pragma(reposit) override_obj="true"
 #define %group(x)  %pragma(reposit) group="x"
 #define %groupCaption(x)  %pragma(reposit) groupCaption="x"
+#define %groupFunctionWizard(x)  %pragma(reposit) groupFunctionWizard="x"
 #define %loop(func, parm) %feature("rp:loopParameter", "parm") func
 #define %processor(cls, proc) %feature("rp:processorName", "proc") cls
 #define %generate(lang, id) %feature("rp:generate:lang") id
 #define %generateall(lang) %feature("rp:generate:lang")
 #define %alias(id, id2) %feature("rp:alias", "id2") id
+#define %rename2(id, id2) %feature("rp:rename2", "id2") id
 
 //*****************************************************************************
 // rp_tm_xxx_* - typemaps shared by multiple addins
@@ -317,6 +319,7 @@
 %typemap(rp_tm_xll_rtft) double "double*";
 %typemap(rp_tm_xll_rtft) rp_tp_string "char*";
 %typemap(rp_tm_xll_rtft) std::vector "OPER*";
+%typemap(rp_tm_xll_rtft) std::vector & "OPER*";
 
 // rp_tm_xll_parm - function parameters (F/C/M)
 %typemap(rp_tm_xll_parm) bool "bool*";
@@ -372,6 +375,11 @@
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
 
+%typemap(rp_tm_xll_cnvt2) int %{
+        long $1_name_cnv = reposit::convert2<$1_type>(
+            reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
+%}
+
 %typemap(rp_tm_xll_cnvt2) long %{
         long $1_name_cnv = reposit::convert2<$1_type>(
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
@@ -382,6 +390,11 @@
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
 
+%typemap(rp_tm_xll_cnvt2) std::vector<double> const & %{
+        std::vector<double> $1_name_vec =
+            reposit::operToVector<double>(*$1_name, "$1_name");
+%}
+
 // rp_tm_xll_argfv - arguments to the Value Object constructor (C)
 %typemap(rp_tm_xll_argfv) bool "*$1_name";
 %typemap(rp_tm_xll_argfv) int "*$1_name";
@@ -390,7 +403,10 @@
 %typemap(rp_tm_xll_argfv) std::vector const & "$1_name_vec";
 %typemap(rp_tm_xll_argfv) SWIGTYPE "$1_name";
 
+%typemap(rp_tm_xll_argfv2) bool "$1_name_cnv";
+%typemap(rp_tm_xll_argfv2) int "$1_name_cnv";
 %typemap(rp_tm_xll_argfv2) double "$1_name_cnv";
+%typemap(rp_tm_xll_argfv2) std::vector const & "$1_name_vec";
 
 // rp_tm_xll_argf - arguments to the underlying Library function (F/C/M)
 %typemap(rp_tm_xll_argf) bool "*$1_name";
@@ -408,8 +424,11 @@
 %typemap(rp_tm_xll_argf) std::vector<double> const & "$1_name_vec";
 %typemap(rp_tm_xll_argf) SWIGTYPE "$1_name";
 
+%typemap(rp_tm_xll_argf2) bool "$1_name_cnv";
+%typemap(rp_tm_xll_argf2) int "$1_name_cnv";
 %typemap(rp_tm_xll_argf2) long "$1_name_cnv";
 %typemap(rp_tm_xll_argf2) double "$1_name_cnv";
+%typemap(rp_tm_xll_argf2) std::vector<double> const & "$1_name_vec";
 
 // rp_tm_xll_rtdc - declare variable to capture return value of Library function (F/M)
 %typemap(rp_tm_xll_rtdc) void "";
@@ -433,7 +452,25 @@
         return ret;
 %}
 
-%typemap(rp_tm_xll_rtst) std::vector< std::string > %{
+%typemap(rp_tm_xll_rtst) std::string & %{
+        static char ret[XL_MAX_STR_LEN];
+        reposit::stringToChar(returnValue, ret);
+        return ret;
+%}
+
+%typemap(rp_tm_xll_rtst) std::vector<double> %{
+        static OPER xRet;
+        reposit::vectorToOper(returnValue, xRet);
+        return &xRet;
+%}
+
+%typemap(rp_tm_xll_rtst) std::vector<double> & %{
+        static OPER xRet;
+        reposit::vectorToOper(returnValue, xRet);
+        return &xRet;
+%}
+
+%typemap(rp_tm_xll_rtst) std::vector<std::string> %{
         static OPER xRet;
         reposit::vectorToOper(returnValue, xRet);
         return &xRet;
@@ -638,7 +675,7 @@
 %typemap(rp_tm_xll_cnvt2) T %{
         std::string $1_name_str = reposit::convert2<std::string>(
             reposit::ConvertOper(*$1_name), "T", "$rp_value");
-        T $1_name_cnv =
+        T $1_name_enm =
             reposit::Create<T>()($1_name_str);
 %}
 %typemap(rp_tm_xll_argf) T "$1_name_enm";
@@ -695,7 +732,7 @@
 %typemap(rp_tm_xll_cnvt2) T & %{
         std::string $1_name_str = reposit::convert2<std::string>(
             reposit::ConvertOper(*$1_name), "T", "$rp_value");
-        T $1_name_cnv =
+        T $1_name_enm =
             reposit::Create<T>()($1_name_str);
 %}
 %typemap(rp_tm_xll_argf) T & "$1_name_enm";

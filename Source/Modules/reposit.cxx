@@ -48,7 +48,7 @@ String *xllInc = NewString("AddinXl");
 // ERROR HANDLING
 //*****************************************************************************
 
-List *errorList = NewList();
+List *errorList = NewHash();
 
 // This macro is shared by the two below it and should not be called directly.
 #define REPOSIT_SWIG_ERROR(message) \
@@ -113,7 +113,7 @@ String *getTypeMap(Node *n, const char *m, bool fatal = true) {
     }
     if (fatal) {
         SwigType *t  = Getattr(n, "type");
-        Append(errorList, NewStringf("*** ERROR : typemap '%s' does not match type '%s'.\n", m, SwigType_str(t, 0)));
+        Setattr(errorList, NewStringf("*** ERROR : typemap '%s' does not match type '%s'.\n", m, SwigType_str(t, 0)), NewString("x"));
         // Return an error string, this will be inserted into the source code.
         return NewStringf("#error NEED THIS TYPEMAP: >>> %%typemap(%s) %s \"XXX\"; <<<", m, SwigType_str(t, 0));
     }
@@ -284,7 +284,7 @@ int paramListSize(ParmList *parms) {
     return ret;
 }
 
-void excelRegister(File *b, Node *n, String *funcName, String *funcDoc, ParmList *parms) {
+void excelRegister(File *b, Node *n, String *funcName, String *funcDoc, ParmList *parms, String *groupFunctionWizard) {
     Printf(b, "        // BEGIN function excelRegister\n");
     Printf(b, "        Excel(xlfRegister, 0, %d, &xDll,\n", 10 + paramListSize(parms));
     Printf(b, "            // function code name\n");
@@ -298,7 +298,7 @@ void excelRegister(File *b, Node *n, String *funcName, String *funcDoc, ParmList
     Printf(b, "            // function type (0 = hidden function, 1 = worksheet function, 2 = command macro)\n");
     Printf(b, "            TempStrNoSize(\"\\x01\"\"1\"),\n");
     Printf(b, "            // function category\n");
-    Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(module).c_str(), module);
+    Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(groupFunctionWizard).c_str(), groupFunctionWizard);
     Printf(b, "            // shortcut text (command macros only)\n");
     Printf(b, "            TempStrNoSize(\"\\x00\"\"\"),\n");
     Printf(b, "            // path to help file\n");
@@ -311,7 +311,7 @@ void excelRegister(File *b, Node *n, String *funcName, String *funcDoc, ParmList
     Printf(b, "        // END   function excelRegister\n\n");
 }
 
-void excelUnregister(File *b, Node *n, String *funcName, String *funcDoc, ParmList *parms) {
+void excelUnregister(File *b, Node *n, String *funcName, String *funcDoc, ParmList *parms, String *groupFunctionWizard) {
     Printf(b, "        // BEGIN function excelUnregister\n");
     Printf(b, "        Excel(xlfRegister, 0, %d, &xDll,\n", 10 + paramListSize(parms));
     Printf(b, "            // function code name\n");
@@ -325,7 +325,7 @@ void excelUnregister(File *b, Node *n, String *funcName, String *funcDoc, ParmLi
     Printf(b, "            // function type (0 = hidden function, 1 = worksheet function, 2 = command macro)\n");
     Printf(b, "            TempStrNoSize(\"\\x01\"\"0\"),\n");
     Printf(b, "            // function category\n");
-    Printf(b, "            TempStrNoSize(\"\\x07\"\"Example\"),\n");
+    Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(groupFunctionWizard).c_str(), groupFunctionWizard);
     Printf(b, "            // shortcut text (command macros only)\n");
     Printf(b, "            TempStrNoSize(\"\\x00\"\"\"),\n");
     Printf(b, "            // path to help file\n");
@@ -467,6 +467,7 @@ struct Count {
 struct Pragmas {
     String *groupName_;
     String *displayName_;
+    String *groupFunctionWizard_;
     String *lib_inc;
     String *add_inc;
     bool automatic_;
@@ -474,6 +475,7 @@ struct Pragmas {
     Pragmas & operator= (const Pragmas & other) {
         groupName_ = other.groupName_;
         displayName_ = other.displayName_;
+        groupFunctionWizard_ = other.groupFunctionWizard_;
         lib_inc = other.lib_inc;
         add_inc = other.add_inc;
         automatic_ = other.automatic_;
@@ -482,6 +484,7 @@ struct Pragmas {
     void setGroupName(String *groupName) {
         groupName_ = groupName;
         displayName_ = groupName;
+        groupFunctionWizard_ = module;
         lib_inc = NewString("");
         add_inc = NewString("");
         Swig_register_filebyname(NewStringf("%s_library_hpp", groupName), lib_inc);
@@ -585,7 +588,6 @@ struct ParmsFunc {
     Parm *parms2;
     String *name;
     String *symname;
-    String *symnameUpper;
     String *funcName;
     std::string docStr;
 };
@@ -593,7 +595,7 @@ struct ParmsFunc {
 struct ParmsCtor {
     Node *n;
     String *name;
-    String *rename;
+    //String *rename;
     String *funcName;
     String *funcRename;
     String *alias;
@@ -607,7 +609,7 @@ struct ParmsCtor {
 
 struct ParmsMemb {
     Node *n;
-    String *nameUpper;
+    //String *nameUpper;
     String *funcName;
     String *alias;
     ParmList *parms;
@@ -1789,8 +1791,8 @@ struct GroupExcelRegister : public GroupBase {
 
     void functionWrapperImplFunc(ParmsFunc &p) {
 
-        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcName, Char(p.docStr.c_str()), p.parms2);
-        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcName, Char(p.docStr.c_str()), p.parms2);
+        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcName, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
+        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcName, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
 
         count_.functions++;
         count_.total2++;
@@ -1798,11 +1800,11 @@ struct GroupExcelRegister : public GroupBase {
 
     void functionWrapperImplCtor(ParmsCtor &p) {
 
-        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcRename, Char(p.docStr.c_str()), p.parms2);
-        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcRename, Char(p.docStr.c_str()), p.parms2);
+        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcRename, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
+        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcRename, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
         if (p.alias) {
-            excelRegister(b_xlr_grp_cpp->b0, p.n, p.alias, Char(p.docStr.c_str()), p.parms2);
-            excelUnregister(b_xlr_grp_cpp->b1, p.n, p.alias, Char(p.docStr.c_str()), p.parms2);
+            excelRegister(b_xlr_grp_cpp->b0, p.n, p.alias, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
+            excelUnregister(b_xlr_grp_cpp->b1, p.n, p.alias, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
         }
 
         count_.constructors++;
@@ -1810,11 +1812,11 @@ struct GroupExcelRegister : public GroupBase {
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
-        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcName, Char(p.docStr.c_str()), p.parms2);
-        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcName, Char(p.docStr.c_str()), p.parms2);
+        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcName, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
+        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcName, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
         if (p.alias) {
-            excelRegister(b_xlr_grp_cpp->b0, p.n, p.alias, Char(p.docStr.c_str()), p.parms2);
-            excelUnregister(b_xlr_grp_cpp->b1, p.n, p.alias, Char(p.docStr.c_str()), p.parms2);
+            excelRegister(b_xlr_grp_cpp->b0, p.n, p.alias, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
+            excelUnregister(b_xlr_grp_cpp->b1, p.n, p.alias, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
         }
 
         count_.members++;
@@ -2580,7 +2582,7 @@ struct AddinCountify : public AddinImpl<GroupCountify> {
     virtual void functionWrapperImplFunc(ParmsFunc &p) {
         if (checkAttribute(p.n, "feature:rp:generate:countify", "1")) {
             AddinImpl::functionWrapperImplFunc(p);
-            mongoFunc(b_cfy_add_mng_txt->b0, p.symnameUpper, p.funcName, p.n, p.parms);
+            //mongoFunc(b_cfy_add_mng_txt->b0, p.symnameUpper, p.funcName, p.n, p.parms);
         }
     }
 
@@ -2594,7 +2596,7 @@ struct AddinCountify : public AddinImpl<GroupCountify> {
     virtual void functionWrapperImplMemb(ParmsMemb &p) {
         if (checkAttribute(p.n, "feature:rp:generate:countify", "1")) {
             AddinImpl::functionWrapperImplMemb(p);
-            mongoFunc(b_cfy_add_mng_txt->b0, p.nameUpper, p.funcName, p.n, p.parms2);
+            //mongoFunc(b_cfy_add_mng_txt->b0, p.nameUpper, p.funcName, p.n, p.parms2);
         }
     }
 
@@ -2885,10 +2887,12 @@ virtual int top(Node *n) {
     //Close(f_test);
     Delete(f_test);
 
-    for (int i=0; i<Len(errorList); ++i) {
-        String *errorMessage = Getitem(errorList, i);
+    List *x = Keys(errorList);
+    for (int i=0; i<Len(x); ++i) {
+        String *errorMessage = Getitem(x, i);
         printf("%s", Char(errorMessage));
     }
+    Delete(x);
     Delete(errorList);//FIXME also delete each item individually
 
    return SWIG_OK;
@@ -3049,6 +3053,8 @@ int pragmaDirective(Node *n) {
                 pragmas_.setGroupName(NewString(value));
             } else if (0 == Strcmp(name, "groupCaption")) {
                 pragmas_.displayName_ = NewString(value);
+            } else if (0 == Strcmp(name, "groupFunctionWizard")) {
+                pragmas_.groupFunctionWizard_ = NewString(value);
             } else if (0 == Strcmp(name, "override_obj")) {
                 // For the user writing the config file, it is easier to assume automatic (default)
                 // unless overridden with '%feature("rp:override_obj");' :
@@ -3193,9 +3199,12 @@ int functionWrapperImplFunc(Node *n) {
     bool staticMember = 1 == checkAttribute(p.n, "globalfunctionHandler:view", "staticmemberfunctionHandler");
     if (staticMember)
         Replaceall(p.symname, "_", "");
-    p.symnameUpper = copyUpper(p.symname);
 
-    p.funcName = NewStringf("%s%s", prefix, p.symnameUpper);
+    String *tempx1 = Getattr(p.n, "feature:rp:rename2");
+    if (!tempx1)
+        tempx1 = p.symname;
+    String *tempx2 = copyUpper(tempx1);
+    p.funcName = NewStringf("%s%s", prefix, tempx2);
     validateFunctionName(p.funcName);
 
     String *scope = 0;
@@ -3212,7 +3221,6 @@ int functionWrapperImplFunc(Node *n) {
 
     printf("p.name=%s\n", Char(p.name));
     printf("p.symname=%s\n", Char(p.symname));
-    printf("p.symnameUpper=%s\n", Char(p.symnameUpper));
     printf("p.funcName=%s\n", Char(p.funcName));
     printf("staticMember=%d\n", staticMember);
     Printf(b_init, "@@@ FUNC Name=%s\n", p.funcName);
@@ -3280,7 +3288,6 @@ int functionWrapperImplCtor(Node *n) {
 
     p.n = n;
     p.name = Getattr(n, "name");
-    p.rename = Getattr(n, "constructorDeclaration:sym:name");
     p.parms = Getattr(n, "parms");
     Node *n1 = Getattr(n, "parentNode");
     p.pname = Getattr(n1, "name");
@@ -3296,8 +3303,11 @@ int functionWrapperImplCtor(Node *n) {
 
     String *temp = copyUpper(p.name);
     p.funcName = NewStringf("%s%s", prefix, temp);
-    String *tempx = copyUpper(p.rename);
-    p.funcRename = NewStringf("%s%s", prefix, tempx);
+    String *tempx1 = Getattr(p.n, "feature:rp:rename2");
+    if (!tempx1)
+        tempx1 = Getattr(n, "constructorDeclaration:sym:name");
+    String *tempx2 = copyUpper(tempx1);
+    p.funcRename = NewStringf("%s%s", prefix, tempx2);
     validateFunctionName(p.funcRename);
     if (String *alias = Getattr(p.n, "feature:rp:alias"))
         p.alias = NewStringf("%s%s", prefix, alias);
@@ -3365,11 +3375,16 @@ int functionWrapperImplMemb(Node *n) {
     p.parms  = Getattr(n,"parms");
     p.addinClass = NewStringf("%s::%s", module, cls);
 
-    String *temp0 = copyUpper(cls);
-    String *temp1 = copyUpper(p.name);
-    p.nameUpper = NewStringf("%s%s", temp0, temp1);
-    p.funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
+    if (String *tempx1 = Getattr(p.n, "feature:rp:rename2")) {
+        String *tempx2 = copyUpper(tempx1);
+        p.funcName = NewStringf("%s%s", prefix, tempx2);
+    } else {
+        String *temp0 = copyUpper(cls);
+        String *temp1 = copyUpper(p.name);
+        p.funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
+    }
     validateFunctionName(p.funcName);
+
     if (String *alias = Getattr(p.n, "feature:rp:alias"))
         p.alias = NewStringf("%s%s", prefix, alias);
     else
@@ -3377,9 +3392,6 @@ int functionWrapperImplMemb(Node *n) {
 
     printf("cls=%s\n", Char(cls));
     printf("p.name=%s\n", Char(p.name));
-    printf("temp0=%s\n", Char(temp0));
-    printf("temp1=%s\n", Char(temp1));
-    printf("p.nameUpper=%s\n", Char(p.nameUpper));
     printf("p.funcName=%s\n", Char(p.funcName));
     Printf(b_init, "@@@ MEMB Name=%s\n", Char(p.funcName));
 
