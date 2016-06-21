@@ -476,6 +476,12 @@
         return &xRet;
 %}
 
+%typemap(rp_tm_xll_rtst) std::vector<std::vector<reposit::property_t> > %{
+        static OPER xRet;
+        reposit::matrixToOper(returnValue, xRet);
+        return &xRet;
+%}
+
 // rp_tm_xll_cdrt - code to register the return type with Excel
 %typemap(rp_tm_xll_cdrt) void "L";
 %typemap(rp_tm_xll_cdrt) bool "L";
@@ -600,6 +606,7 @@
 %typemap(rp_tm_dox_rtdc) rp_tp_string "string returnValue";
 %typemap(rp_tm_dox_rtdc) std::vector<bool> "vector<bool> returnValue";
 %typemap(rp_tm_dox_rtdc) std::vector<std::string> "vector<string> returnValue";
+%typemap(rp_tm_dox_rtdc) std::vector< std::vector< reposit::property_t > > "vector<vector<any> > returnValue";
 
 %typemap(rp_tm_dox_mbvr) bool "bool $1_name";
 %typemap(rp_tm_dox_mbvr) long "long $1_name";
