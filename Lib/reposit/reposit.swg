@@ -51,6 +51,7 @@
 // XPP
 
 // rp_tm_vob_parm - Value Object constructor parameters (C)
+%typemap(rp_tm_vob_parm) bool "bool";
 %typemap(rp_tm_vob_parm) int "long";
 %typemap(rp_tm_vob_parm) long "long";
 %typemap(rp_tm_vob_parm) double "double";
@@ -64,6 +65,7 @@
 // HPP
 
 // rp_tm_vob_mbvr - Value Object class member variables (C)
+%typemap(rp_tm_vob_mbvr) bool "bool $1_name_";
 %typemap(rp_tm_vob_mbvr) int "long $1_name_";
 %typemap(rp_tm_vob_mbvr) long "long $1_name_";
 %typemap(rp_tm_vob_mbvr) double "double $1_name_";
@@ -935,6 +937,9 @@
 
 %typemap(rp_tm_csh_args) boost::shared_ptr<T_LIB> const & "$1_name_obj";
 %typemap(rp_tm_xll_parm) boost::shared_ptr<T_LIB> const & "char*";
+%typemap(rp_tm_xll_cnvt) boost::shared_ptr<T_ADDIN> const & %{
+        RP_GET_OBJECT($1_name_obj, $1_name, T_ADDIN);
+%}
 %typemap(rp_tm_xll_cnvt) boost::shared_ptr<T_LIB> const & %{
         RP_GET_REFERENCE($1_name_obj, $1_name,
             T_ADDIN ,  T_LIB );
