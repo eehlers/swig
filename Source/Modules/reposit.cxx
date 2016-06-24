@@ -595,7 +595,6 @@ struct ParmsFunc {
 struct ParmsCtor {
     Node *n;
     String *name;
-    //String *rename;
     String *funcName;
     String *funcRename;
     String *alias;
@@ -611,6 +610,7 @@ struct ParmsMemb {
     Node *n;
     //String *nameUpper;
     String *funcName;
+    String *funcRename;
     String *alias;
     ParmList *parms;
     ParmList *parms2;
@@ -1747,7 +1747,7 @@ struct GroupExcelFunctions : public GroupBase {
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
-        functionWrapperImplMembImpl(p, p.funcName);
+        functionWrapperImplMembImpl(p, p.funcRename);
         if (p.alias)
             functionWrapperImplMembImpl(p, p.alias);
     }
@@ -1812,8 +1812,8 @@ struct GroupExcelRegister : public GroupBase {
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
-        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcName, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
-        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcName, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
+        excelRegister(b_xlr_grp_cpp->b0, p.n, p.funcRename, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
+        excelUnregister(b_xlr_grp_cpp->b1, p.n, p.funcRename, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
         if (p.alias) {
             excelRegister(b_xlr_grp_cpp->b0, p.n, p.alias, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
             excelUnregister(b_xlr_grp_cpp->b1, p.n, p.alias, Char(p.docStr.c_str()), p.parms2, pragmas_.groupFunctionWizard_);
@@ -2329,7 +2329,7 @@ struct AddinDoxygen : public AddinImpl<GroupDoxygen> {
 
     virtual void functionWrapperImplMemb(ParmsMemb &p) {
         AddinImpl::functionWrapperImplMemb(p);
-        v.push_back(Char(p.funcName));
+        v.push_back(Char(p.funcRename));
     }
 
     virtual void clear() {
@@ -2482,12 +2482,12 @@ struct AddinCSharp : public AddinImpl<GroupCSharp> {
         if (checkAttribute(p.n, "feature:rp:generate:c#", "1")) {
             AddinImpl::functionWrapperImplMemb(p);
             Printf(b_csh_exp_all_cs->b0, "\n");
-            Printf(b_csh_exp_all_cs->b0, "        // %s\n", p.funcName);
+            Printf(b_csh_exp_all_cs->b0, "        // %s\n", p.funcRename);
             Printf(b_csh_exp_all_cs->b0, "        [DllImport(QUANTLIB_ADDIN_DLL, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
             emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rtcp", 2);
             Printf(b_csh_exp_all_cs->b0, "        public static extern\n");
             emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rscp", 2);
-            Printf(b_csh_exp_all_cs->b0, "        %s(\n", p.funcName);
+            Printf(b_csh_exp_all_cs->b0, "        %s(\n", p.funcRename);
             emitParmList(p.parms2, b_csh_exp_all_cs->b0, 2, "rp_tm_csh_clcp", "rp_tm_csh_clcp", 3);
             Printf(b_csh_exp_all_cs->b0, "        );\n");
         }
@@ -3375,15 +3375,20 @@ int functionWrapperImplMemb(Node *n) {
     p.parms  = Getattr(n,"parms");
     p.addinClass = NewStringf("%s::%s", module, cls);
 
-    if (String *tempx1 = Getattr(p.n, "feature:rp:rename2")) {
+    String *temp0 = copyUpper(cls);
+    String *temp1 = copyUpper(p.name);
+    p.funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
+
+    String *tempx1 = Getattr(p.n, "feature:rp:rename2");
+    if (tempx1) {
         String *tempx2 = copyUpper(tempx1);
-        p.funcName = NewStringf("%s%s", prefix, tempx2);
+        p.funcRename = NewStringf("%s%s", prefix, tempx2);
     } else {
-        String *temp0 = copyUpper(cls);
-        String *temp1 = copyUpper(p.name);
-        p.funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
+        tempx1 = Getattr(n, "memberfunctionHandler:sym:name");
+        String *tempx2 = copyUpper(tempx1);
+        p.funcRename = NewStringf("%s%s%s", prefix, temp0, tempx2);
     }
-    validateFunctionName(p.funcName);
+    validateFunctionName(p.funcRename);
 
     if (String *alias = Getattr(p.n, "feature:rp:alias"))
         p.alias = NewStringf("%s%s", prefix, alias);
