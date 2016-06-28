@@ -638,15 +638,18 @@ struct GroupBase {
 struct GroupLibraryObjects : public GroupBase {
 
     Buffer *b_lib_grp_hpp;
+    Buffer *b_lib_loop_hpp;
     bool generateHppFile;
+    bool generateLoopFile;
 
-    GroupLibraryObjects(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), generateHppFile(false) {
+    GroupLibraryObjects(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), generateHppFile(false), generateLoopFile(false) {
 
         if (pragmas_.automatic_) {
             b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/obj_%s.hpp", objDir, pragmas_.groupName_));
         } else {
             b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/objmanual_%s.hpp.template", objDir, pragmas_.groupName_));
         }
+        b_lib_loop_hpp = new Buffer("b_lib_loop_hpp", NewStringf("%s/loop/loop_%s.hpp", objDir, pragmas_.groupName_));
 
         Printf(b_lib_grp_hpp->b0, "\n");
         Printf(b_lib_grp_hpp->b0, "#ifndef obj_%s_hpp\n", pragmas_.groupName_);
@@ -664,6 +667,58 @@ struct GroupLibraryObjects : public GroupBase {
         Printf(b_lib_grp_hpp->b0, "\n");
         Printf(b_lib_grp_hpp->b0,"namespace %s {\n", module);
         Printf(b_lib_grp_hpp->b0, "\n");
+
+
+        Printf(b_lib_loop_hpp->b0, "\n");
+        Printf(b_lib_loop_hpp->b0, "#ifndef loop_%s_hpp\n", pragmas_.groupName_);
+        Printf(b_lib_loop_hpp->b0, "#define loop_%s_hpp\n", pragmas_.groupName_);
+        Printf(b_lib_loop_hpp->b0, "\n");
+        Printf(b_lib_loop_hpp->b0, "#include <boost/bind.hpp>\n");
+        Printf(b_lib_loop_hpp->b0, "\n");
+        Printf(b_lib_loop_hpp->b0, "namespace %s {\n", module);
+    }
+
+    void functionWrapperImplFunc(ParmsFunc &p) {
+
+        if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
+            Printf(b_lib_loop_hpp->b0, "    // %s\n", p.funcName);
+            Printf(b_lib_loop_hpp->b0, "\n");
+            Printf(b_lib_loop_hpp->b0, "        typedef     boost::_bi::bind_t<\n");
+            Printf(b_lib_loop_hpp->b0, "                    %s,\n", Getattr(p.n, "type_orig"));
+            Printf(b_lib_loop_hpp->b0, "                    %s (__cdecl*)(\n", Getattr(p.n, "type_orig"));
+            bool first = true;
+            for (Parm *x=p.parms; x; x=nextSibling(x)) {
+                if (first) {
+                    first = false;
+                } else {
+                    Printf(b_lib_loop_hpp->b0, ",\n");
+                }
+                if (String *s = Getattr(x, "type_orig")) {
+                    Printf(b_lib_loop_hpp->b0, "                        %s", SwigType_str(s, 0));
+                } else {
+                    Printf(b_lib_loop_hpp->b0, "                        %s", SwigType_str(Getattr(x, "type"), 0));
+                }
+            }
+            Printf(b_lib_loop_hpp->b0, "),\n");
+            Printf(b_lib_loop_hpp->b0, "                    boost::_bi::list%d<\n", paramListSize(p.parms));
+            first = true;
+            for (Parm *x=p.parms; x; x=nextSibling(x)) {
+                if (first) {
+                    first = false;
+                } else {
+                    Printf(b_lib_loop_hpp->b0, ",\n");
+                }
+                if (String *s = Getattr(x, "type_orig")) {
+                    Printf(b_lib_loop_hpp->b0, "                        boost::arg<1>");
+                } else {
+                    Printf(b_lib_loop_hpp->b0, "                        boost::_bi::value<%s>", SwigType_str(SwigType_base(Getattr(x, "type")), 0));
+                }
+            }
+            Printf(b_lib_loop_hpp->b0, " > >\n");
+            Printf(b_lib_loop_hpp->b0, "                    %sBind;\n", p.funcName);
+            Printf(b_lib_loop_hpp->b0, "\n");
+            generateLoopFile=true;
+        }
     }
 
     void functionWrapperImplCtor(ParmsCtor &p) {
@@ -716,14 +771,93 @@ struct GroupLibraryObjects : public GroupBase {
         generateHppFile = true;
     }
 
+    void functionWrapperImplMemb(ParmsMemb &p) {
+
+        if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
+            Printf(b_lib_loop_hpp->b0, "\n");
+            Printf(b_lib_loop_hpp->b0, "    // %s\n", p.funcName);
+            Printf(b_lib_loop_hpp->b0, "\n");
+            Printf(b_lib_loop_hpp->b0, "    typedef     boost::_bi::bind_t<\n");
+            Printf(b_lib_loop_hpp->b0, "                %s,\n", Getattr(p.n, "type_orig"));
+            Printf(b_lib_loop_hpp->b0, "                boost::_mfi::cmf%d<\n", paramListSize(p.parms));
+            Printf(b_lib_loop_hpp->b0, "                    %s,\n", Getattr(p.n, "type_orig"));
+            Printf(b_lib_loop_hpp->b0, "                    %s,\n", p.pname);
+            bool first = true;
+            for (Parm *x=p.parms; x; x=nextSibling(x)) {
+                if (Getattr(x, "hidden"))
+                    continue;
+                if (first) {
+                    first = false;
+                } else {
+                    Printf(b_lib_loop_hpp->b0, ",\n");
+                }
+                if (String *s = Getattr(x, "type_orig")) {
+                    Printf(b_lib_loop_hpp->b0, "                    %s", SwigType_str(s, 0));
+                } else {
+                    Printf(b_lib_loop_hpp->b0, "                    %s", SwigType_str(Getattr(x, "type"), 0));
+                }
+            }
+            Printf(b_lib_loop_hpp->b0, ">,\n");
+
+            Printf(b_lib_loop_hpp->b0, "                boost::_bi::list%d<\n", paramListSize(p.parms)+1);
+            Printf(b_lib_loop_hpp->b0, "                    boost::_bi::value<%s >,\n", getTypeMap(p.node, "rp_tm_lib_loop"));
+            first = true;
+            for (Parm *x=p.parms; x; x=nextSibling(x)) {
+                if (Getattr(x, "hidden"))
+                    continue;
+                if (first) {
+                    first = false;
+                } else {
+                    Printf(b_lib_loop_hpp->b0, ",\n");
+                }
+                if (String *s = Getattr(x, "type_orig")) {
+                    Printf(b_lib_loop_hpp->b0, "                    boost::arg<1>");
+                } else {
+                    Printf(b_lib_loop_hpp->b0, "                    boost::_bi::value<%s>", SwigType_str(SwigType_base(Getattr(x, "type")), 0));
+                }
+            }
+            Printf(b_lib_loop_hpp->b0, " > >\n");
+            Printf(b_lib_loop_hpp->b0, "                    %sBind;\n", p.funcName);
+            Printf(b_lib_loop_hpp->b0, "\n");
+            Printf(b_lib_loop_hpp->b0, "    typedef     %s\n", Getattr(p.n, "type_orig"));
+            Printf(b_lib_loop_hpp->b0, "                (%s::* %sSignature)(\n", p.pname, p.funcName);
+            first = true;
+            for (Parm *x=p.parms; x; x=nextSibling(x)) {
+                if (Getattr(x, "hidden"))
+                    continue;
+                if (first) {
+                    first = false;
+                } else {
+                    Printf(b_lib_loop_hpp->b0, ",\n");
+                }
+                if (String *s = Getattr(x, "type_orig")) {
+                    Printf(b_lib_loop_hpp->b0, "                    %s", SwigType_str(s, 0));
+                } else {
+                    Printf(b_lib_loop_hpp->b0, "                    %s", SwigType_str(Getattr(x, "type"), 0));
+                }
+            }
+            if (SwigType_isconst(Getattr(p.n, "decl")))
+                Printf(b_lib_loop_hpp->b0, ") const;\n");
+            else
+                Printf(b_lib_loop_hpp->b0, ");\n");
+            Printf(b_lib_loop_hpp->b0, "\n");
+            generateLoopFile=true;
+        }
+    }
+
     void clear() {
 
         Printf(b_lib_grp_hpp->b0, "} // namespace %s\n", module);
         Printf(b_lib_grp_hpp->b0, "\n");
         Printf(b_lib_grp_hpp->b0, "#endif\n");
-        Printf(b_lib_grp_hpp->b0, "\n");
+
+        Printf(b_lib_loop_hpp->b0, "}\n");
+        Printf(b_lib_loop_hpp->b0, "\n");
+        Printf(b_lib_loop_hpp->b0, "#endif\n");
+        Printf(b_lib_loop_hpp->b0, "\n");
 
         b_lib_grp_hpp->clear(count_, generateHppFile);
+        b_lib_loop_hpp->clear(count_, generateLoopFile);
     }
 };
 
@@ -860,9 +994,6 @@ struct GroupValueObjects : public GroupBase {
         count_.total2++;
 
         generateOutput = true;
-    }
-
-    void functionWrapperImplMemb(ParmsMemb & /*p*/) {
     }
 
     void clear() {
@@ -1356,8 +1487,10 @@ struct GroupCSharp : public GroupBase {
     Buffer *b_csh_grp_cpp;
     bool groupContainsClass;
     bool groupContainsConstructor;
+    bool groupContainsLoopFunction;
 
-    GroupCSharp(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), groupContainsClass(false), groupContainsConstructor(false) {
+    GroupCSharp(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count),
+        groupContainsClass(false), groupContainsConstructor(false), groupContainsLoopFunction(false) {
 
         b_csh_grp_cpp = new Buffer("b_csh_grp_cpp", NewStringf("%s/csh_%s.cpp", cshDir, pragmas_.groupName_));
 
@@ -1371,9 +1504,6 @@ struct GroupCSharp : public GroupBase {
         Printf(b_csh_grp_cpp->b0, "//FIXME include only factories for types used in the current file\n");
         Printf(b_csh_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         Printf(b_csh_grp_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
-        Printf(b_csh_grp_cpp->b0, "// FIXME only required if the file contains a looping function\n");
-        Printf(b_csh_grp_cpp->b0, "#include \"%s/loop.hpp\"\n", objInc);
-        Printf(b_csh_grp_cpp->b0, "#include \"loop.hpp\"\n"/*, rp_csh_inc*/);
         Printf(b_csh_grp_cpp->b0, "#include <windows.h>\n");
         // From this point on we stop writing to b0 and write to b1 instead.
         // After all processing finishes we will append some more #includes to b0 depending on what code this group requires.
@@ -1487,6 +1617,7 @@ struct GroupCSharp : public GroupBase {
         emitTypeMap(b_csh_grp_cpp->b1, p.node, "rp_tm_xxx_rp_get");
         if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
             emitLoopFunc(p, loopParameter);
+            groupContainsLoopFunction = true;
         } else {
             emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtdc", 2);
             Printf(b_csh_grp_cpp->b1,"        xxx->%s(\n", p.name);
@@ -1510,6 +1641,10 @@ struct GroupCSharp : public GroupBase {
 
     void clear() {
 
+        if (groupContainsLoopFunction) {
+            Printf(b_csh_grp_cpp->b0, "#include \"%s/loop/loop_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            Printf(b_csh_grp_cpp->b0, "#include \"loop.hpp\"\n"/*, rp_csh_inc*/);
+        }
         if (groupContainsConstructor)
             Printf(b_csh_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
         if (groupContainsClass) {
@@ -1530,8 +1665,10 @@ struct GroupExcelFunctions : public GroupBase {
     Buffer *b_xlf_grp_cpp;
     bool groupContainsClass;
     bool groupContainsConstructor;
+    bool groupContainsLoopFunction;
 
-    GroupExcelFunctions(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), groupContainsClass(false), groupContainsConstructor(false) {
+    GroupExcelFunctions(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count),
+        groupContainsClass(false), groupContainsConstructor(false), groupContainsLoopFunction(false) {
 
         b_xlf_grp_cpp = new Buffer("b_xlf_grp_cpp", NewStringf("%s/functions/function_%s.cpp", xllDir, pragmas_.groupName_));
 
@@ -1541,8 +1678,6 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b0, "#include <rpxl/functions/export.hpp>\n");
         Printf(b_xlf_grp_cpp->b0, "#include <rpxl/utilities/xlutilities.hpp>\n");
         Printf(b_xlf_grp_cpp->b0, "#include <rpxl/objectwrapperxl.hpp>\n");
-        Printf(b_xlf_grp_cpp->b0, "// FIXME only required if the file contains a looping function\n");
-        Printf(b_xlf_grp_cpp->b0, "#include <rpxl/loop.hpp>\n");
         Printf(b_xlf_grp_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
         Printf(b_xlf_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         // From this point on we stop writing to b0 and write to b1 instead.
@@ -1551,8 +1686,6 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "//#include \"%s/conversions/convert2.hpp\"\n", objInc);
         Printf(b_xlf_grp_cpp->b1, "#include \"%s/conversions/conversions.hpp\"\n", objInc);
         Printf(b_xlf_grp_cpp->b1, "#include \"%s/conversions/all.hpp\"\n", xllInc);
-        Printf(b_xlf_grp_cpp->b1, "// FIXME only required if the file contains a looping function\n");
-        Printf(b_xlf_grp_cpp->b1, "#include \"%s/loop.hpp\"\n", objInc);
         Printf(b_xlf_grp_cpp->b1, "\n");
     }
 
@@ -1600,6 +1733,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "\n");
         if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
             emitLoopFunc(p, loopParameter);
+            groupContainsLoopFunction = true;
         } else {
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtdc", 2);
             //Printf(b_xlf_grp_cpp->b1, "        %s::%s(\n", nmspace, p.symname);
@@ -1726,6 +1860,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "\n");
         if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
             emitLoopFunc(p, loopParameter);
+            groupContainsLoopFunction = true;
         } else {
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtdc", 2);
             Printf(b_xlf_grp_cpp->b1, "        xxx->%s(\n", p.name);
@@ -1754,6 +1889,10 @@ struct GroupExcelFunctions : public GroupBase {
 
     void clear() {
 
+        if (groupContainsLoopFunction) {
+            Printf(b_xlf_grp_cpp->b0, "#include <rpxl/loop.hpp>\n");
+            Printf(b_xlf_grp_cpp->b0, "#include \"%s/loop/loop_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        }
         if (groupContainsConstructor)
             Printf(b_xlf_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
         if (groupContainsClass) {
@@ -3453,6 +3592,7 @@ void processLoopParameter(Node *n, String *functionName, ParmList *parms, String
         String *name = Getattr(p, "name");
         if (0==Strcmp(loopParameter, name)) {
             SwigType *t = Getattr(p, "type");
+            Setattr(p, "type_orig", t);
             SwigType *t2 = SwigType_base(t);
             Parm *p2 = NewHash();
             Setattr(p2, "type", t2);
@@ -3468,6 +3608,7 @@ void processLoopParameter(Node *n, String *functionName, ParmList *parms, String
             SwigType *t5 = NewString("std::vector");
             SwigType_add_template(t5, p3);
             Setattr(n, "type", t5);
+            Setattr(n, "type_orig", t4);
 
             return;
         }

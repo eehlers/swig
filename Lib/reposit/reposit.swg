@@ -1,3 +1,4 @@
+%typemap(rp_tm_foo) SWIGTYPE "$1_type";
 
 //*****************************************************************************
 // defines
@@ -41,6 +42,8 @@
 // rp_tm_lib_rtst - Return statement (F)
 %typemap(rp_tm_lib_rtst) void "";
 %typemap(rp_tm_lib_rtst) SWIGTYPE "return ";
+
+%typemap(rp_tm_lib_loop) SWIGTYPE "$1_type";
 
 //*****************************************************************************
 // rp_tm_vob_* - typemaps for Value Objects
@@ -958,6 +961,8 @@
 
 %typemap(rp_tm_dox_mbvr) std::vector<boost::shared_ptr<T_LIB> > const & "string $1_name";
 %typemap(rp_tm_dox_mbvr) std::vector<boost::shared_ptr<T_ADDIN> > const & "string $1_name";
+
+%typemap(rp_tm_lib_loop) T_LIB "boost::shared_ptr<T_LIB>";
 
 %enddef
 
