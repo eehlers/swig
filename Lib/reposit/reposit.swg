@@ -604,15 +604,21 @@
 // rp_tm_dox_* - typemaps for the Doxygen Addin
 //*****************************************************************************
 
+// rp_tm_dox_rtdc - Return type
 %typemap(rp_tm_dox_rtdc) void "void returnValue";
 %typemap(rp_tm_dox_rtdc) bool "bool returnValue";
 %typemap(rp_tm_dox_rtdc) long "long returnValue";
 %typemap(rp_tm_dox_rtdc) double "double returnValue";
 %typemap(rp_tm_dox_rtdc) rp_tp_string "string returnValue";
+// The return type of a looping function is automatically converted to a vector.
+// If the function is declared with a return type of void then it ends up with a return type of vector<void>.
+// This is a summy typemap to handle that case (turn it back into a void).
+%typemap(rp_tm_dox_rtdc) std::vector<void> "void returnValue";
 %typemap(rp_tm_dox_rtdc) std::vector<bool> "vector<bool> returnValue";
 %typemap(rp_tm_dox_rtdc) std::vector<std::string> "vector<string> returnValue";
 %typemap(rp_tm_dox_rtdc) std::vector< std::vector< reposit::property_t > > "vector<vector<any> > returnValue";
 
+// rp_tm_dox_mbvr - Member variable
 %typemap(rp_tm_dox_mbvr) bool "bool $1_name";
 %typemap(rp_tm_dox_mbvr) long "long $1_name";
 %typemap(rp_tm_dox_mbvr) double "double $1_name";
@@ -958,11 +964,13 @@
 
 %typemap(rp_tm_dox_rtdc) boost::shared_ptr<T_LIB> const & "string returnValue";
 %typemap(rp_tm_dox_mbvr) boost::shared_ptr<T_LIB> const &  "string $1_name";
+%typemap(rp_tm_dox_mbvr) boost::shared_ptr<T_ADDIN> const &  "string $1_name";
 
-%typemap(rp_tm_dox_mbvr) std::vector<boost::shared_ptr<T_LIB> > const & "string $1_name";
-%typemap(rp_tm_dox_mbvr) std::vector<boost::shared_ptr<T_ADDIN> > const & "string $1_name";
+%typemap(rp_tm_dox_mbvr) std::vector<boost::shared_ptr<T_LIB> > const & "vector<string> $1_name";
+%typemap(rp_tm_dox_mbvr) std::vector<boost::shared_ptr<T_ADDIN> > const & "vector<string> $1_name";
 
 %typemap(rp_tm_lib_loop) T_LIB "boost::shared_ptr<T_LIB>";
+%typemap(rp_tm_lib_loop) T_ADDIN "boost::shared_ptr<T_ADDIN>";
 
 %enddef
 

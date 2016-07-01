@@ -1272,12 +1272,12 @@ struct GroupDoxygen : public GroupBase {
     }
 
     void functionWrapperImplMemb(ParmsMemb &p) {
-        Printf(b_dox_grp_dox->b1,"\\subsection %s\n", p.funcName);
+        Printf(b_dox_grp_dox->b1,"\\subsection %s\n", p.funcRename);
         Printf(b_dox_grp_dox->b1,"\\code\n");
         Printf(b_dox_grp_dox->b1, "\n");
         emitTypeMap(b_dox_grp_dox->b1, p.n, "rp_tm_dox_rtdc", 0, true, false);
         Printf(b_dox_grp_dox->b1, "\n");
-        Printf(b_dox_grp_dox->b1, "%s(\n", p.funcName);
+        Printf(b_dox_grp_dox->b1, "%s(\n", p.funcRename);
         emitParmList(p.parms2, b_dox_grp_dox->b1, 1, "rp_tm_dox_mbvr", "rp_tm_dox_mbvr", 1, ',', true, true, false, false);
         Printf(b_dox_grp_dox->b1, ")\n");
         Printf(b_dox_grp_dox->b1,"\\endcode\n");
@@ -1300,7 +1300,7 @@ struct GroupDoxygen : public GroupBase {
         Printf(b_dox_grp_dox->b1, "\n");
         Printf(b_dox_grp_dox->b1, "\n");
 
-        v.push_back(Char(p.funcName));
+        v.push_back(Char(p.funcRename));
 
         count_.members++;
         count_.total2++;
@@ -1892,10 +1892,6 @@ struct GroupExcelFunctions : public GroupBase {
 
     void clear() {
 
-        if (groupContainsLoopFunction) {
-            Printf(b_xlf_grp_cpp->b0, "#include <rpxl/loop.hpp>\n");
-            Printf(b_xlf_grp_cpp->b0, "#include \"%s/loop/loop_%s.hpp\"\n", objInc, pragmas_.groupName_);
-        }
         if (groupContainsConstructor)
             Printf(b_xlf_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
         if (groupContainsClass) {
@@ -1904,6 +1900,10 @@ struct GroupExcelFunctions : public GroupBase {
             } else {
                 Printf(b_xlf_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
             }
+        }
+        if (groupContainsLoopFunction) {
+            Printf(b_xlf_grp_cpp->b0, "#include <rpxl/loop.hpp>\n");
+            Printf(b_xlf_grp_cpp->b0, "#include \"%s/loop/loop_%s.hpp\"\n", objInc, pragmas_.groupName_);
         }
         Append(b_xlf_grp_cpp->b0, pragmas_.add_inc);
 
