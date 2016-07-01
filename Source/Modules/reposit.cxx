@@ -779,7 +779,10 @@ struct GroupLibraryObjects : public GroupBase {
             Printf(b_lib_loop_hpp->b0, "\n");
             Printf(b_lib_loop_hpp->b0, "    typedef     boost::_bi::bind_t<\n");
             Printf(b_lib_loop_hpp->b0, "                %s,\n", Getattr(p.n, "type_orig"));
-            Printf(b_lib_loop_hpp->b0, "                boost::_mfi::cmf%d<\n", paramListSize(p.parms));
+            if (SwigType_isconst(Getattr(p.n, "decl")))
+                Printf(b_lib_loop_hpp->b0, "                boost::_mfi::cmf%d<\n", paramListSize(p.parms));
+            else
+                Printf(b_lib_loop_hpp->b0, "                boost::_mfi::mf%d<\n", paramListSize(p.parms));
             Printf(b_lib_loop_hpp->b0, "                    %s,\n", Getattr(p.n, "type_orig"));
             Printf(b_lib_loop_hpp->b0, "                    %s,\n", p.pname);
             bool first = true;
