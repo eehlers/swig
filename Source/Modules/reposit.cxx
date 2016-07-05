@@ -1442,7 +1442,7 @@ struct GroupCpp : public GroupBase {
             Printf(b_cpp_grp_cpp->b1,"            false));\n");
             Printf(b_cpp_grp_cpp->b1,"    std::string returnValue =\n");
             Printf(b_cpp_grp_cpp->b1,"        reposit::Repository::instance().storeObject(\n");
-            Printf(b_cpp_grp_cpp->b1,"            objectID, object, false, valueObject);\n");
+            Printf(b_cpp_grp_cpp->b1,"            objectID, object, Overwrite, valueObject);\n");
             Printf(b_cpp_grp_cpp->b1,"    return returnValue;\n");
             Printf(b_cpp_grp_cpp->b1,"}\n\n");
 
