@@ -121,13 +121,10 @@ String *getTypeMap(Node *n, const char *m, bool fatal = true) {
 }
 
 String *getType(Parm *p, const char *m, bool fatal) {
-    SwigType *t = Getattr(p, "type");
     if (0==strcmp(m, "rp_tm_default"))
-        return t;
-    else {
-        String *s = getTypeMap(p, m, fatal);
-        return s;
-    }
+        return Getattr(p, "type");
+    else
+        return getTypeMap(p, m, fatal);
 }
 
 void printIndent(File *buf, int indent) {
@@ -356,6 +353,18 @@ String *copyUpper2(String *s) {
     char *c = Char(ret);
     for (unsigned int i=0; i<strlen(c); i++)
         c[i] = toupper(c[i]);
+    return ret;
+}
+
+// convert Class_memberFunction to ClassMemberFunction
+String *copyUpper3(String *s) {
+    String *ret = Copy(s);
+    char *c = Char(ret);
+    for (unsigned int i=0; i<strlen(c); i++) {
+        if ('_'==c[i] && i+1<strlen(c))
+            c[i+1] = toupper(c[i+1]);
+    }
+    Replaceall(ret, "_", "");
     return ret;
 }
 
@@ -680,12 +689,17 @@ struct GroupLibraryObjects : public GroupBase {
 
     void functionWrapperImplFunc(ParmsFunc &p) {
 
-        if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
+        if (String *loopParameterName = Getattr(p.n, "feature:rp:loopParameter")) {
+            Node *x1 = Getattr(p.n, "rp:loopFunctionNode");
+            String *loopFunctionType = getTypeMap(x1, "rp_tm_xll_lpfn");
+            Parm *x2 = Getattr(p.n, "rp:loopParameterNode");
+            String *loopParameterType = getTypeMap(x2, "rp_tm_xll_lppm");
+
             Printf(b_lib_loop_hpp->b0, "    // %s\n", p.funcName);
             Printf(b_lib_loop_hpp->b0, "\n");
             Printf(b_lib_loop_hpp->b0, "        typedef     boost::_bi::bind_t<\n");
-            Printf(b_lib_loop_hpp->b0, "                    %s,\n", Getattr(p.n, "type_orig"));
-            Printf(b_lib_loop_hpp->b0, "                    %s (__cdecl*)(\n", Getattr(p.n, "type_orig"));
+            Printf(b_lib_loop_hpp->b0, "                    %s,\n", loopFunctionType);
+            Printf(b_lib_loop_hpp->b0, "                    %s (__cdecl*)(\n", loopFunctionType);
             bool first = true;
             for (Parm *x=p.parms; x; x=nextSibling(x)) {
                 if (first) {
@@ -693,8 +707,9 @@ struct GroupLibraryObjects : public GroupBase {
                 } else {
                     Printf(b_lib_loop_hpp->b0, ",\n");
                 }
-                if (String *s = Getattr(x, "type_orig")) {
-                    Printf(b_lib_loop_hpp->b0, "                        %s", SwigType_str(s, 0));
+
+                if (0==Strcmp(loopParameterName, Getattr(x, "name"))) {
+                    Printf(b_lib_loop_hpp->b0, "                        %s", SwigType_str(Getattr(x2, "type"), 0));
                 } else {
                     Printf(b_lib_loop_hpp->b0, "                        %s", SwigType_str(Getattr(x, "type"), 0));
                 }
@@ -708,7 +723,7 @@ struct GroupLibraryObjects : public GroupBase {
                 } else {
                     Printf(b_lib_loop_hpp->b0, ",\n");
                 }
-                if (String *s = Getattr(x, "type_orig")) {
+                if (0==Strcmp(loopParameterName, Getattr(x, "name"))) {
                     Printf(b_lib_loop_hpp->b0, "                        boost::arg<1>");
                 } else {
                     Printf(b_lib_loop_hpp->b0, "                        boost::_bi::value<%s>", SwigType_str(SwigType_base(Getattr(x, "type")), 0));
@@ -773,17 +788,21 @@ struct GroupLibraryObjects : public GroupBase {
 
     void functionWrapperImplMemb(ParmsMemb &p) {
 
-        if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
+        if (String *loopParameterName = Getattr(p.n, "feature:rp:loopParameter")) {
+            Node *x1 = Getattr(p.n, "rp:loopFunctionNode");
+            String *loopFunctionType = getTypeMap(x1, "rp_tm_xll_lpfn");
+            Parm *x2 = Getattr(p.n, "rp:loopParameterNode");
+            String *loopParameterType = getTypeMap(x2, "rp_tm_xll_lppm");
             Printf(b_lib_loop_hpp->b0, "\n");
             Printf(b_lib_loop_hpp->b0, "    // %s\n", p.funcName);
             Printf(b_lib_loop_hpp->b0, "\n");
             Printf(b_lib_loop_hpp->b0, "    typedef     boost::_bi::bind_t<\n");
-            Printf(b_lib_loop_hpp->b0, "                %s,\n", Getattr(p.n, "type_orig"));
+            Printf(b_lib_loop_hpp->b0, "                %s,\n", loopFunctionType);
             if (SwigType_isconst(Getattr(p.n, "decl")))
                 Printf(b_lib_loop_hpp->b0, "                boost::_mfi::cmf%d<\n", paramListSize(p.parms));
             else
                 Printf(b_lib_loop_hpp->b0, "                boost::_mfi::mf%d<\n", paramListSize(p.parms));
-            Printf(b_lib_loop_hpp->b0, "                    %s,\n", Getattr(p.n, "type_orig"));
+            Printf(b_lib_loop_hpp->b0, "                    %s,\n", loopFunctionType);
             Printf(b_lib_loop_hpp->b0, "                    %s,\n", p.pname);
             bool first = true;
             for (Parm *x=p.parms; x; x=nextSibling(x)) {
@@ -794,8 +813,8 @@ struct GroupLibraryObjects : public GroupBase {
                 } else {
                     Printf(b_lib_loop_hpp->b0, ",\n");
                 }
-                if (String *s = Getattr(x, "type_orig")) {
-                    Printf(b_lib_loop_hpp->b0, "                    %s", SwigType_str(s, 0));
+                if (0==Strcmp(loopParameterName, Getattr(x, "name"))) {
+                    Printf(b_lib_loop_hpp->b0, "                    %s", SwigType_str(Getattr(x2, "type"), 0));
                 } else {
                     Printf(b_lib_loop_hpp->b0, "                    %s", SwigType_str(Getattr(x, "type"), 0));
                 }
@@ -813,7 +832,7 @@ struct GroupLibraryObjects : public GroupBase {
                 } else {
                     Printf(b_lib_loop_hpp->b0, ",\n");
                 }
-                if (String *s = Getattr(x, "type_orig")) {
+                if (0==Strcmp(loopParameterName, Getattr(x, "name"))) {
                     Printf(b_lib_loop_hpp->b0, "                    boost::arg<1>");
                 } else {
                     Printf(b_lib_loop_hpp->b0, "                    boost::_bi::value<%s>", SwigType_str(SwigType_base(Getattr(x, "type")), 0));
@@ -822,7 +841,7 @@ struct GroupLibraryObjects : public GroupBase {
             Printf(b_lib_loop_hpp->b0, " > >\n");
             Printf(b_lib_loop_hpp->b0, "                    %sBind;\n", p.funcName);
             Printf(b_lib_loop_hpp->b0, "\n");
-            Printf(b_lib_loop_hpp->b0, "    typedef     %s\n", Getattr(p.n, "type_orig"));
+            Printf(b_lib_loop_hpp->b0, "    typedef     %s\n", loopFunctionType);
             Printf(b_lib_loop_hpp->b0, "                (%s::* %sSignature)(\n", p.pname, p.funcName);
             first = true;
             for (Parm *x=p.parms; x; x=nextSibling(x)) {
@@ -833,8 +852,8 @@ struct GroupLibraryObjects : public GroupBase {
                 } else {
                     Printf(b_lib_loop_hpp->b0, ",\n");
                 }
-                if (String *s = Getattr(x, "type_orig")) {
-                    Printf(b_lib_loop_hpp->b0, "                    %s", SwigType_str(s, 0));
+                if (0==Strcmp(loopParameterName, Getattr(x, "name"))) {
+                    Printf(b_lib_loop_hpp->b0, "                    %s", loopParameterType);
                 } else {
                     Printf(b_lib_loop_hpp->b0, "                    %s", SwigType_str(Getattr(x, "type"), 0));
                 }
@@ -1285,9 +1304,9 @@ struct GroupDoxygen : public GroupBase {
         Printf(b_dox_grp_dox->b1,"Member\n");
         Printf(b_dox_grp_dox->b1,"\\par Description:\n");
         Printf(b_dox_grp_dox->b1, "%s\n", Char(p.docStr.c_str()));
-        if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
+        if (String *loopParameterName = Getattr(p.n, "feature:rp:loopParameter")) {
             Printf(b_dox_grp_dox->b1,"\\par Looping Function:\n");
-            Printf(b_dox_grp_dox->b1, "This function loops on parameter \\b %s.\n", loopParameter);
+            Printf(b_dox_grp_dox->b1, "This function loops on parameter \\b %s.\n", loopParameterName);
         }
         Printf(b_dox_grp_dox->b1,"\\par Supported Platforms:\n");
         Printf(b_dox_grp_dox->b1, "Excel");
@@ -1587,9 +1606,11 @@ struct GroupCSharp : public GroupBase {
         groupContainsClass = true;
     }
 
-    void emitLoopFunc(ParmsMemb &p, String *loopParameter) {
-        String *loopParameterType = Getattr(p.n, "rp:loopParameterType");
-        String *loopFunctionType = Getattr(p.n, "rp:loopFunctionType");
+    void emitLoopFunc(ParmsMemb &p, String *loopParameterName) {
+        Node *x1 = Getattr(p.n, "rp:loopFunctionNode");
+        String *loopFunctionType = getTypeMap(x1, "rp_tm_xll_lpfn");
+        Parm *x2 = Getattr(p.n, "rp:loopParameterNode");
+        String *loopParameterType = getTypeMap(x2, "rp_tm_xll_lppm");
         Printf(b_csh_grp_cpp->b1, "        // BEGIN function emitLoopFunc\n");
         Printf(b_csh_grp_cpp->b1, "\n");
         Printf(b_csh_grp_cpp->b1, "        %s::%sBind bindObject =\n", module, p.funcName);
@@ -1601,7 +1622,7 @@ struct GroupCSharp : public GroupBase {
         Printf(b_csh_grp_cpp->b1, "\n");
         Printf(b_csh_grp_cpp->b1, "        std::vector<%s> returnValue = loop\n", loopFunctionType);
         Printf(b_csh_grp_cpp->b1, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
-        Printf(b_csh_grp_cpp->b1, "            (bindObject, %s_vec2);\n", loopParameter);
+        Printf(b_csh_grp_cpp->b1, "            (bindObject, %s_vec2);\n", loopParameterName);
         Printf(b_csh_grp_cpp->b1, "\n");
         Printf(b_csh_grp_cpp->b1, "        // END   function emitLoopFunc\n");
     }
@@ -1618,8 +1639,8 @@ struct GroupCSharp : public GroupBase {
         emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", "rp_tm_csh_cnvt", 1, 0, false);
         Printf(b_csh_grp_cpp->b1,"\n");
         emitTypeMap(b_csh_grp_cpp->b1, p.node, "rp_tm_xxx_rp_get");
-        if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
-            emitLoopFunc(p, loopParameter);
+        if (String *loopParameterName = Getattr(p.n, "feature:rp:loopParameter")) {
+            emitLoopFunc(p, loopParameterName);
             groupContainsLoopFunction = true;
         } else {
             emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtdc", 2);
@@ -1692,9 +1713,11 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "\n");
     }
 
-    void emitLoopFunc(ParmsFunc &p, String *loopParameter) {
-        String *loopParameterType = Getattr(p.n, "rp:loopParameterType");
-        String *loopFunctionType = Getattr(p.n, "rp:loopFunctionType");
+    void emitLoopFunc(ParmsFunc &p, String *loopParameterName) {
+        Node *x1 = Getattr(p.n, "rp:loopFunctionNode");
+        String *loopFunctionType = getTypeMap(x1, "rp_tm_xll_lpfn");
+        Parm *x2 = Getattr(p.n, "rp:loopParameterNode");
+        String *loopParameterType = getTypeMap(x2, "rp_tm_xll_lppm");
         Printf(b_xlf_grp_cpp->b1, "        // BEGIN function emitLoopFunc\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
         Printf(b_xlf_grp_cpp->b1, "        static XLOPER returnValue;\n");
@@ -1702,11 +1725,11 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "        %s::%sBind bindObject =\n", module, p.funcName);
         Printf(b_xlf_grp_cpp->b1, "            boost::bind(\n");
         Printf(b_xlf_grp_cpp->b1, "                %s,\n", p.name);
-        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_loop", "rp_tm_xll_loop", 4, ',', true, true);
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_loop", "rp_tm_xll_loop2", 4, ',', true, true);
         Printf(b_xlf_grp_cpp->b1, "            );\n");
         Printf(b_xlf_grp_cpp->b1, "        reposit::loop\n");
         Printf(b_xlf_grp_cpp->b1, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
-        Printf(b_xlf_grp_cpp->b1, "            (functionCall, bindObject, %s, returnValue);\n", loopParameter);
+        Printf(b_xlf_grp_cpp->b1, "            (functionCall, bindObject, %s, returnValue);\n", loopParameterName);
         Printf(b_xlf_grp_cpp->b1, "\n");
         Printf(b_xlf_grp_cpp->b1, "        return &returnValue;\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
@@ -1734,8 +1757,8 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "\n");
         emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", "rp_tm_xll_cnvt2", 2, 0, false);
         Printf(b_xlf_grp_cpp->b1, "\n");
-        if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
-            emitLoopFunc(p, loopParameter);
+        if (String *loopParameterName = Getattr(p.n, "feature:rp:loopParameter")) {
+            emitLoopFunc(p, loopParameterName);
             groupContainsLoopFunction = true;
         } else {
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtdc", 2);
@@ -1818,9 +1841,11 @@ struct GroupExcelFunctions : public GroupBase {
         groupContainsClass = true;
     }
 
-    void emitLoopFunc(ParmsMemb &p, String *loopParameter) {
-        String *loopParameterType = Getattr(p.n, "rp:loopParameterType");
-        String *loopFunctionType = Getattr(p.n, "rp:loopFunctionType");
+    void emitLoopFunc(ParmsMemb &p, String *loopParameterName) {
+        Node *x1 = Getattr(p.n, "rp:loopFunctionNode");
+        String *loopFunctionType = getTypeMap(x1, "rp_tm_xll_lpfn");
+        Parm *x2 = Getattr(p.n, "rp:loopParameterNode");
+        String *loopParameterType = getTypeMap(x2, "rp_tm_xll_lppm");
         Printf(b_xlf_grp_cpp->b1, "        // BEGIN function emitLoopFunc\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
         Printf(b_xlf_grp_cpp->b1, "        static XLOPER returnValue;\n");
@@ -1833,7 +1858,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "            );\n");
         Printf(b_xlf_grp_cpp->b1, "        reposit::loop\n");
         Printf(b_xlf_grp_cpp->b1, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
-        Printf(b_xlf_grp_cpp->b1, "            (functionCall, bindObject, %s, returnValue);\n", loopParameter);
+        Printf(b_xlf_grp_cpp->b1, "            (functionCall, bindObject, %s, returnValue);\n", loopParameterName);
         Printf(b_xlf_grp_cpp->b1, "\n");
         Printf(b_xlf_grp_cpp->b1, "        return &returnValue;\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
@@ -1861,8 +1886,8 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "\n");
         emitTypeMap(b_xlf_grp_cpp->b1, p.node, "rp_tm_xxx_rp_get", 2);
         Printf(b_xlf_grp_cpp->b1, "\n");
-        if (String *loopParameter = Getattr(p.n, "feature:rp:loopParameter")) {
-            emitLoopFunc(p, loopParameter);
+        if (String *loopParameterName = Getattr(p.n, "feature:rp:loopParameter")) {
+            emitLoopFunc(p, loopParameterName);
             groupContainsLoopFunction = true;
         } else {
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtdc", 2);
@@ -3335,12 +3360,13 @@ int functionWrapperImplFunc(Node *n) {
     ParmsFunc p;
 
     p.n = n;
-    p.name   = Getattr(n,"name");
-    p.parms  = Getattr(n,"parms");
-    p.symname   = Getattr(n,"sym:name");
+    p.name = Getattr(n,"name");
+    p.parms = Getattr(n,"parms");
     bool staticMember = 1 == checkAttribute(p.n, "globalfunctionHandler:view", "staticmemberfunctionHandler");
     if (staticMember)
-        Replaceall(p.symname, "_", "");
+        p.symname = copyUpper3(Getattr(n, "sym:name"));
+    else
+        p.symname = Getattr(n, "sym:name");
 
     String *tempx1 = Getattr(p.n, "feature:rp:rename2");
     if (!tempx1)
@@ -3590,35 +3616,39 @@ int functionWrapperImplMemb(Node *n) {
     return SWIG_OK;
 }
 
-void processLoopParameter(Node *n, String *functionName, ParmList *parms, String *loopParameter) {
+// The user has indicated in the SWIG interface file that the current function should
+// exhibit looping behavior (see the documentation for more details).
+// Take a backup of the nodes for the function and for the loop parameter.
+// Modify the two original nodes and change T to vector<T>.
+// For most purposes the modified nodes are required (vector<T>).
+// The backups of the original nodes may also be retrieved if necessary (T).
+void processLoopParameter(Node *n, String *functionName, ParmList *parms, String *loopParameterName) {
     for (Parm *p=parms; p; p=nextSibling(p)) {
         String *name = Getattr(p, "name");
-        if (0==Strcmp(loopParameter, name)) {
+        if (0==Strcmp(loopParameterName, name)) {
+            Setattr(n, "rp:loopParameterNode", CopyParm(p));
             SwigType *t = Getattr(p, "type");
-            Setattr(p, "type_orig", t);
             SwigType *t2 = SwigType_base(t);
             Parm *p2 = NewHash();
             Setattr(p2, "type", t2);
             SwigType *t3 = NewString("std::vector");
             SwigType_add_template(t3, p2);
             Setattr(p, "type", t3);
-            Setattr(n, "rp:loopParameterType", SwigType_str(t2, 0));
 
+            Setattr(n, "rp:loopFunctionNode", Copy(n));
             SwigType *t4 = Getattr(n, "type");
-            Setattr(n, "rp:loopFunctionType", SwigType_str(t4, 0));
             Parm *p3 = NewHash();
             Setattr(p3, "type", t4);
             SwigType *t5 = NewString("std::vector");
             SwigType_add_template(t5, p3);
             Setattr(n, "type", t5);
-            Setattr(n, "type_orig", t4);
 
             return;
         }
     }
     REPOSIT_SWIG_FAIL(
         "Error processing function '" << Char(functionName) <<
-        "' - you specified loop parameter '" << Char(loopParameter) << "' " <<
+        "' - you specified loop parameter '" << Char(loopParameterName) << "' " <<
         "but the function has no parameter with that name.");
 }
 
@@ -3628,9 +3658,8 @@ void functionWrapperImplAll(Node *n) {
 
     ParmList *parms  = Getattr(n, "parms");
 
-    String *loopParameter = Getattr(n, "feature:rp:loopParameter");
-    if (loopParameter)
-        processLoopParameter(n, nodeName, parms, loopParameter);
+    if (String *loopParameterName = Getattr(n, "feature:rp:loopParameter"))
+        processLoopParameter(n, nodeName, parms, loopParameterName);
 
     // Process the parameter list.
     for (Parm *p = parms; p; p = nextSibling(p))

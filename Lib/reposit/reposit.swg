@@ -1,4 +1,3 @@
-%typemap(rp_tm_foo) SWIGTYPE "$1_type";
 
 //*****************************************************************************
 // defines
@@ -338,8 +337,8 @@
 %typemap(rp_tm_xll_parm) rp_tp_cnv "OPER*";
 %typemap(rp_tm_xll_parm) rp_tp_crc "OPER*";
 %typemap(rp_tm_xll_parm) rp_tp_any "OPER*";
-%typemap(rp_tm_xll_parm) std::vector "OPER *";
-%typemap(rp_tm_xll_parm) std::vector const & "OPER *";
+%typemap(rp_tm_xll_parm) std::vector "OPER*";
+%typemap(rp_tm_xll_parm) std::vector const & "OPER*";
 
 %typemap(rp_tm_xll_parm2) SWIGTYPE "OPER*";
 
@@ -353,6 +352,11 @@
         $1_type $1_name_crc = reposit::CoerceImpl<
             reposit::ConvertOper, $1_type>()
             (reposit::ConvertOper(*$1_name));
+%}
+
+%typemap(rp_tm_xll_cnvt) std::vector<bool> %{
+        std::vector<bool> $1_name_vec =
+            reposit::operToVector<bool>(*$1_name, "$1_name");
 %}
 
 %typemap(rp_tm_xll_cnvt) std::vector<bool> const & %{
@@ -395,6 +399,16 @@
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
 
+%typemap(rp_tm_xll_cnvt2) std::vector<bool> %{
+        std::vector<bool> $1_name_vec =
+            reposit::operToVector<bool>(*$1_name, "$1_name");
+%}
+
+%typemap(rp_tm_xll_cnvt2) std::vector<bool> const & %{
+        std::vector<bool> $1_name_vec =
+            reposit::operToVector<bool>(*$1_name, "$1_name");
+%}
+
 %typemap(rp_tm_xll_cnvt2) std::vector<double> const & %{
         std::vector<double> $1_name_vec =
             reposit::operToVector<double>(*$1_name, "$1_name");
@@ -433,6 +447,7 @@
 %typemap(rp_tm_xll_argf2) int "$1_name_cnv";
 %typemap(rp_tm_xll_argf2) long "$1_name_cnv";
 %typemap(rp_tm_xll_argf2) double "$1_name_cnv";
+%typemap(rp_tm_xll_argf2) std::vector<bool> const & "$1_name_vec";
 %typemap(rp_tm_xll_argf2) std::vector<double> const & "$1_name_vec";
 
 // rp_tm_xll_rtdc - declare variable to capture return value of Library function (F/M)
@@ -531,6 +546,12 @@
 %typemap(rp_tm_xll_loop) SWIGTYPE "$1_name";
 
 %typemap(rp_tm_xll_loop2) SWIGTYPE "$1_name_cnv";
+
+// Datatype of the loop function for call to boost::bind
+%typemap(rp_tm_xll_lpfn) SWIGTYPE "$1_type";
+
+// Datatype of the loop parameter for call to boost::bind
+%typemap(rp_tm_xll_lppm) SWIGTYPE "$1_basetype";
 
 //*****************************************************************************
 // rp_tm_cfy_* - typemaps for the =countify Addin
