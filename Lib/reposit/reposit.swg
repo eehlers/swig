@@ -713,7 +713,7 @@
 %}
 %typemap(rp_tm_xll_cnvt2) T %{
         std::string $1_name_str = reposit::convert2<std::string>(
-            reposit::ConvertOper(*$1_name), "T", "$rp_value");
+            reposit::ConvertOper(*$1_name), "$1_name", "$rp_value");
         T $1_name_enm =
             reposit::Create<T>()($1_name_str);
 %}
@@ -770,7 +770,7 @@
 %}
 %typemap(rp_tm_xll_cnvt2) T & %{
         std::string $1_name_str = reposit::convert2<std::string>(
-            reposit::ConvertOper(*$1_name), "T", "$rp_value");
+            reposit::ConvertOper(*$1_name), "$1_name", "$rp_value");
         T $1_name_enm =
             reposit::Create<T>()($1_name_str);
 %}
@@ -837,7 +837,7 @@
 %}
 %typemap(rp_tm_xll_cnvt2) T %{
         std::string $1_name_str = reposit::convert2<std::string>(
-            reposit::ConvertOper(*$1_name), "T", "$rp_value");
+            reposit::ConvertOper(*$1_name), "$1_name", "$rp_value");
         T $1_name_enm =
             reposit::Create<T>()($1_name_str);
 %}
@@ -910,7 +910,7 @@
 %}
 %typemap(rp_tm_xll_cnvt2) T & %{
         std::string $1_name_str = reposit::convert2<std::string>(
-            reposit::ConvertOper(*$1_name), "T", "$rp_value");
+            reposit::ConvertOper(*$1_name), "$1_name", "$rp_value");
         T $1_name_enm =
             reposit::Create<T>()($1_name_str);
 %}
