@@ -552,6 +552,7 @@
 
 // Datatype of the loop parameter for call to boost::bind
 %typemap(rp_tm_xll_lppm) SWIGTYPE "$1_basetype";
+%typemap(rp_tm_xll_lppm2) SWIGTYPE "$1_type";
 
 //*****************************************************************************
 // rp_tm_cfy_* - typemaps for the =countify Addin
@@ -682,6 +683,7 @@
             reposit::Create<T>()(objectID);
 %}
 %typemap(rp_tm_xll_loop) T "$1_name_enm";
+%typemap(rp_tm_xll_loop2) T "$1_name_enm";
 %typemap(rp_tm_csh_loop) T "$1_name_enm";
 %typemap(rp_tm_vob_parm) T "const std::string &";
 %typemap(rp_tm_vob_mbvr) T "std::string $1_name_";
@@ -721,6 +723,7 @@
 %typemap(rp_tm_xll_argf2) T "$1_name_enm";
 %typemap(rp_tm_xll_cdrt) T "C";
 %typemap(rp_tm_xll_code) T "C";
+
 %typemap(rp_tm_cfy_parm) T "const char * $1_name";
 %typemap(rp_tm_cfy_cnvt) T %{
         T $1_name_enum =
@@ -729,6 +732,14 @@
 %typemap(rp_tm_cfy_args) T "$1_name_enum";
 %typemap(rp_tm_xll_argfv) T "$1_name";
 %typemap(rp_tm_xll_argfv2) T "$1_name_str";
+
+%typemap(rp_tm_xll_rtst) T %{
+        std::ostringstream os;
+        os << returnValue;
+        static char ret[XL_MAX_STR_LEN];
+        reposit::stringToChar(os.str(), ret);
+        return ret;
+%}
 
 %typemap(rp_tm_dox_rtdc) T "string returnValue";
 %typemap(rp_tm_dox_mbvr) T "string $1_name";
@@ -739,6 +750,7 @@
             reposit::Create<T>()(objectID);
 %}
 %typemap(rp_tm_xll_loop) T & "$1_name_enm";
+%typemap(rp_tm_xll_loop2) T & "$1_name_enm";
 %typemap(rp_tm_csh_loop) T & "$1_name_enm";
 %typemap(rp_tm_vob_parm) T & "const std::string &";
 %typemap(rp_tm_vob_mbvr) T & "std::string $1_name_";
@@ -787,6 +799,14 @@
 %typemap(rp_tm_xll_argfv) T & "$1_name";
 %typemap(rp_tm_xll_argfv2) T & "$1_name_str";
 
+%typemap(rp_tm_xll_rtst) T & %{
+        std::ostringstream os;
+        os << returnValue;
+        static char ret[XL_MAX_STR_LEN];
+        reposit::stringToChar(os.str(), ret);
+        return ret;
+%}
+
 %typemap(rp_tm_dox_rtdc) T & "string returnValue";
 %typemap(rp_tm_dox_mbvr) T & "string $1_name";
 %typemap(rp_tm_dox_rtd2) SWIGTYPE "ZZZ returnValue";
@@ -800,6 +820,8 @@
         T xxx =
             reposit::Create<T>()(objectID);
 %}
+%typemap(rp_tm_xll_loop) T "$1_name_enm";
+%typemap(rp_tm_xll_loop2) T "$1_name_enm";
 %typemap(rp_tm_vob_parm) T "const std::string &";
 %typemap(rp_tm_vob_mbvr) T "std::string $1_name_";
 %typemap(rp_tm_vob_cnvt) T "reposit::convert2<std::string>(value)";
@@ -855,6 +877,14 @@
 %typemap(rp_tm_xll_argfv) T "$1_name";
 %typemap(rp_tm_xll_argfv2) T "$1_name_str";
 
+%typemap(rp_tm_xll_rtst) T %{
+        std::ostringstream os;
+        os << returnValue;
+        static char ret[XL_MAX_STR_LEN];
+        reposit::stringToChar(os.str(), ret);
+        return ret;
+%}
+
 %typemap(rp_tm_dox_rtdc) T "string returnValue";
 %typemap(rp_tm_dox_mbvr) T "string $1_name";
 %typemap(rp_tm_dox_rtd2) SWIGTYPE "ID of Enumeration of class T";
@@ -864,6 +894,8 @@
         T xxx =
             reposit::Create<T>()(objectID);
 %}
+%typemap(rp_tm_xll_loop) T & "$1_name_enm";
+%typemap(rp_tm_xll_loop2) T & "$1_name_enm";
 %typemap(rp_tm_vob_parm) T & "const std::string &";
 %typemap(rp_tm_vob_mbvr) T & "std::string $1_name_";
 %typemap(rp_tm_vob_cnvt) T & "reposit::convert2<std::string>(value)";
@@ -918,6 +950,14 @@
 %typemap(rp_tm_xll_argf2) T & "$1_name_enm";
 %typemap(rp_tm_xll_cdrt) T & "C";
 %typemap(rp_tm_xll_code) T & "C";
+
+%typemap(rp_tm_xll_rtst) T & %{
+        std::ostringstream os;
+        os << returnValue;
+        static char ret[XL_MAX_STR_LEN];
+        reposit::stringToChar(os.str(), ret);
+        return ret;
+%}
 
 %typemap(rp_tm_cfy_parm) T & "const char * $1_name";
 %typemap(rp_tm_cfy_cnvt) T & %{

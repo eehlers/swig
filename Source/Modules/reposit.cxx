@@ -793,6 +793,7 @@ struct GroupLibraryObjects : public GroupBase {
             String *loopFunctionType = getTypeMap(x1, "rp_tm_xll_lpfn");
             Parm *x2 = Getattr(p.n, "rp:loopParameterNode");
             String *loopParameterType = getTypeMap(x2, "rp_tm_xll_lppm");
+            String *loopParameterType2 = getTypeMap(x2, "rp_tm_xll_lppm2");
             Printf(b_lib_loop_hpp->b0, "\n");
             Printf(b_lib_loop_hpp->b0, "    // %s\n", p.funcName);
             Printf(b_lib_loop_hpp->b0, "\n");
@@ -853,7 +854,7 @@ struct GroupLibraryObjects : public GroupBase {
                     Printf(b_lib_loop_hpp->b0, ",\n");
                 }
                 if (0==Strcmp(loopParameterName, Getattr(x, "name"))) {
-                    Printf(b_lib_loop_hpp->b0, "                    %s", loopParameterType);
+                    Printf(b_lib_loop_hpp->b0, "                    %s", loopParameterType2);
                 } else {
                     Printf(b_lib_loop_hpp->b0, "                    %s", SwigType_str(Getattr(x, "type"), 0));
                 }
@@ -1851,7 +1852,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "        static XLOPER returnValue;\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
         Printf(b_xlf_grp_cpp->b1, "        %s::%sBind bindObject =\n", module, p.funcName);
-        Printf(b_xlf_grp_cpp->b1, "            boost::bind(\n");
+        Printf(b_xlf_grp_cpp->b1, "            boost::bind((%s::%sSignature)\n", module, p.funcName);
         Printf(b_xlf_grp_cpp->b1, "                &%s::%s,\n", p.pname, p.name);
         Printf(b_xlf_grp_cpp->b1, "                xxx,\n");
         emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_loop", "rp_tm_xll_loop2", 4, ',', true, true);
