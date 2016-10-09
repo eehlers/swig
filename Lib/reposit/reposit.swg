@@ -394,8 +394,19 @@
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
 
+// FIXME use a more general way to treat size_t as long
+%typemap(rp_tm_xll_cnvt2) std::size_t const %{
+        long $1_name_cnv = reposit::convert2<long>(
+            reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
+%}
+
 %typemap(rp_tm_xll_cnvt2) double %{
         double $1_name_cnv = reposit::convert2<$1_type>(
+            reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
+%}
+
+%typemap(rp_tm_xll_cnvt2) std::string & %{
+        std::string $1_name_cnv = reposit::convert2<std::string>(
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
 
@@ -422,10 +433,8 @@
 %typemap(rp_tm_xll_argfv) std::vector const & "$1_name_vec";
 %typemap(rp_tm_xll_argfv) SWIGTYPE "$1_name";
 
-%typemap(rp_tm_xll_argfv2) bool "$1_name_cnv";
-%typemap(rp_tm_xll_argfv2) int "$1_name_cnv";
-%typemap(rp_tm_xll_argfv2) double "$1_name_cnv";
 %typemap(rp_tm_xll_argfv2) std::vector const & "$1_name_vec";
+%typemap(rp_tm_xll_argfv2) SWIGTYPE "$1_name_cnv";
 
 // rp_tm_xll_argf - arguments to the underlying Library function (F/C/M)
 %typemap(rp_tm_xll_argf) bool "*$1_name";
@@ -443,12 +452,9 @@
 %typemap(rp_tm_xll_argf) std::vector<double> const & "$1_name_vec";
 %typemap(rp_tm_xll_argf) SWIGTYPE "$1_name";
 
-%typemap(rp_tm_xll_argf2) bool "$1_name_cnv";
-%typemap(rp_tm_xll_argf2) int "$1_name_cnv";
-%typemap(rp_tm_xll_argf2) long "$1_name_cnv";
-%typemap(rp_tm_xll_argf2) double "$1_name_cnv";
 %typemap(rp_tm_xll_argf2) std::vector<bool> const & "$1_name_vec";
 %typemap(rp_tm_xll_argf2) std::vector<double> const & "$1_name_vec";
+%typemap(rp_tm_xll_argf2) SWIGTYPE "$1_name_cnv";
 
 // rp_tm_xll_rtdc - declare variable to capture return value of Library function (F/M)
 %typemap(rp_tm_xll_rtdc) void "";
@@ -485,6 +491,12 @@
 %}
 
 %typemap(rp_tm_xll_rtst) std::vector<double> & %{
+        static OPER xRet;
+        reposit::vectorToOper(returnValue, xRet);
+        return &xRet;
+%}
+
+%typemap(rp_tm_xll_rtst) std::vector<long> & %{
         static OPER xRet;
         reposit::vectorToOper(returnValue, xRet);
         return &xRet;
