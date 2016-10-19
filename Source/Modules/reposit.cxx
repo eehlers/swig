@@ -654,9 +654,9 @@ struct GroupLibraryObjects : public GroupBase {
     GroupLibraryObjects(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), generateHppFile(false), generateLoopFile(false) {
 
         if (pragmas_.automatic_) {
-            b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/obj_%s.hpp", objDir, pragmas_.groupName_));
+            b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/objects/obj_%s.hpp", objDir, pragmas_.groupName_));
         } else {
-            b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/objmanual_%s.hpp.template", objDir, pragmas_.groupName_));
+            b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/objects/objmanual_%s.hpp.template", objDir, pragmas_.groupName_));
         }
         b_lib_loop_hpp = new Buffer("b_lib_loop_hpp", NewStringf("%s/loop/loop_%s.hpp", objDir, pragmas_.groupName_));
 
@@ -1065,12 +1065,12 @@ struct GroupSerializationCreate : public GroupBase {
         Printf(b_scr_grp_cpp->b0, "#include <%s/serialization/create/create_%s.hpp>\n", objInc, pragmas_.groupName_);
         Printf(b_scr_grp_cpp->b0, "//#include <%s/qladdindefines.hpp>\n", objInc);
         //Printf(b_scr_grp_cpp->b0, "#include <%s/conversions/convert2.hpp>\n", objInc);
-        Printf(b_scr_grp_cpp->b0, "//#include <%s/handle.hpp>\n", objInc);
+        //Printf(b_scr_grp_cpp->b0, "//#include <%s/objects/handle.hpp>\n", objInc);
         Printf(b_scr_grp_cpp->b0, "\n");
         if (pragmas_.automatic_) {
-            Printf(b_scr_grp_cpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, pragmas_.groupName_);
+            Printf(b_scr_grp_cpp->b0, "#include <%s/objects/obj_%s.hpp>\n", objInc, pragmas_.groupName_);
         } else {
-            Printf(b_scr_grp_cpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, pragmas_.groupName_);
+            Printf(b_scr_grp_cpp->b0, "#include <%s/objects/objmanual_%s.hpp>\n", objInc, pragmas_.groupName_);
         }
         Append(b_scr_grp_cpp->b0, pragmas_.add_inc);
         Printf(b_scr_grp_cpp->b0, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, pragmas_.groupName_);
@@ -1485,9 +1485,9 @@ struct GroupCpp : public GroupBase {
             Printf(b_cpp_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
         if (groupContainsClass) {
             if (pragmas_.automatic_) {
-                Printf(b_cpp_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
+                Printf(b_cpp_grp_cpp->b0, "#include \"%s/objects/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
             } else {
-                Printf(b_cpp_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
+                Printf(b_cpp_grp_cpp->b0, "#include \"%s/objects/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
             }
         }
         Append(b_cpp_grp_cpp->b0, pragmas_.add_inc);
@@ -1518,9 +1518,9 @@ struct GroupCSharp : public GroupBase {
         b_csh_grp_cpp = new Buffer("b_csh_grp_cpp", NewStringf("%s/csh_%s.cpp", cshDir, pragmas_.groupName_));
 
         if (pragmas_.automatic_) {
-            Printf(b_csh_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            Printf(b_csh_grp_cpp->b0, "#include \"%s/objects/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
         } else {
-            Printf(b_csh_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            Printf(b_csh_grp_cpp->b0, "#include \"%s/objects/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
         }
 
         Printf(b_csh_grp_cpp->b0, "#include <rp/repository.hpp>\n");
@@ -1674,9 +1674,9 @@ struct GroupCSharp : public GroupBase {
             Printf(b_csh_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
         if (groupContainsClass) {
             if (pragmas_.automatic_) {
-                Printf(b_csh_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
+                Printf(b_csh_grp_cpp->b0, "#include \"%s/objects/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
             } else {
-                Printf(b_csh_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
+                Printf(b_csh_grp_cpp->b0, "#include \"%s/objects/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
             }
         }
         Append(b_csh_grp_cpp->b0, pragmas_.add_inc);
@@ -1922,9 +1922,9 @@ struct GroupExcelFunctions : public GroupBase {
             Printf(b_xlf_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
         if (groupContainsClass) {
             if (pragmas_.automatic_) {
-                Printf(b_xlf_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
+                Printf(b_xlf_grp_cpp->b0, "#include \"%s/objects/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
             } else {
-                Printf(b_xlf_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
+                Printf(b_xlf_grp_cpp->b0, "#include \"%s/objects/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
             }
         }
         if (groupContainsLoopFunction) {
@@ -2220,9 +2220,9 @@ struct GroupCountify : public GroupBase {
             Printf(b_cfy_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
         if (groupContainsClass) {
             if (pragmas_.automatic_) {
-                Printf(b_cfy_grp_cpp->b0, "#include \"%s/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
+                Printf(b_cfy_grp_cpp->b0, "#include \"%s/objects/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
             } else {
-                Printf(b_cfy_grp_cpp->b0, "#include \"%s/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
+                Printf(b_cfy_grp_cpp->b0, "#include \"%s/objects/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
             }
         }
         Append(b_cfy_grp_cpp->b0, pragmas_.add_inc);
@@ -2300,7 +2300,7 @@ struct AddinLibraryObjects : public AddinImpl<GroupLibraryObjects> {
 
     virtual void top() {
 
-        b_lib_add_hpp = new Buffer("b_lib_add_hpp", NewStringf("%s/obj_all.hpp", objDir));
+        b_lib_add_hpp = new Buffer("b_lib_add_hpp", NewStringf("%s/objects/obj_all.hpp", objDir));
 
         Printf(b_lib_add_hpp->b0, "\n");
         Printf(b_lib_add_hpp->b0, "#ifndef obj_all_hpp\n");
@@ -2315,9 +2315,9 @@ struct AddinLibraryObjects : public AddinImpl<GroupLibraryObjects> {
         for (GroupMapIter i=groupMap_.begin(); i!=groupMap_.end(); ++i) {
             GroupLibraryObjects *group = i->second;
             if (group->pragmas_.automatic_) {
-                Printf(b_lib_add_hpp->b0, "#include <%s/obj_%s.hpp>\n", objInc, group->pragmas_.groupName_);
+                Printf(b_lib_add_hpp->b0, "#include <%s/objects/obj_%s.hpp>\n", objInc, group->pragmas_.groupName_);
             } else {
-                Printf(b_lib_add_hpp->b0, "#include <%s/objmanual_%s.hpp>\n", objInc, group->pragmas_.groupName_);
+                Printf(b_lib_add_hpp->b0, "#include <%s/objects/objmanual_%s.hpp>\n", objInc, group->pragmas_.groupName_);
             }
         }
 
