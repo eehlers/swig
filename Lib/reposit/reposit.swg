@@ -454,8 +454,6 @@
 %typemap(rp_tm_xll_argf) double const & "*$1_name";
 %typemap(rp_tm_xll_argf) rp_tp_cnv "$1_name_cnv";
 %typemap(rp_tm_xll_argf) rp_tp_crc "$1_name_crc";
-// FIXME i think all the tyepmaps below could be replaced with this one?
-//%typemap(rp_tm_xll_argfv) std::vector const & "$1_name_vec";
 %typemap(rp_tm_xll_argf) std::vector<bool> "$1_name_vec";
 %typemap(rp_tm_xll_argf) std::vector<bool> const & "$1_name_vec";
 %typemap(rp_tm_xll_argf) std::vector<long> "$1_name_vec";
