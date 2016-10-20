@@ -667,7 +667,7 @@ struct GroupLibraryObjects : public GroupBase {
         Printf(b_lib_grp_hpp->b0, "#include <string>\n");
         Printf(b_lib_grp_hpp->b0, "#include <rp/libraryobject.hpp>\n");
         Printf(b_lib_grp_hpp->b0, "#include <rp/valueobject.hpp>\n");
-        Printf(b_lib_grp_hpp->b0, "#include <boost/shared_ptr.hpp>");
+        Printf(b_lib_grp_hpp->b0, "#include <boost/shared_ptr.hpp>\n");
 
         Append(b_lib_grp_hpp->b0, pragmas_.lib_inc);
 
