@@ -62,8 +62,10 @@
 %typemap(rp_tm_vob_parm) rp_tp_any "const reposit::property_t&";
 %typemap(rp_tm_vob_parm) std::vector<unsigned int> const & "const std::vector<long>&";
 %typemap(rp_tm_vob_parm) std::vector<int> const & "const std::vector<long>&";
+// FIXME delete the 2 lines below?
 %typemap(rp_tm_vob_parm) std::vector<long> const & "const std::vector<long>&";
 %typemap(rp_tm_vob_parm) std::vector<double> const & "const std::vector<double>&";
+//%typemap(rp_tm_vob_parm) std::vector<std::string> const & "const std::vector<std::string>&";
 %typemap(rp_tm_vob_parm) std::vector< std::vector<double> > const & "const std::vector< std::vector<double> >&";
 %typemap(rp_tm_vob_parm) SWIGTYPE "$1_type";
 
@@ -82,6 +84,7 @@
 %typemap(rp_tm_vob_mbvr) std::vector<int> const & "std::vector<long> $1_name_";
 %typemap(rp_tm_vob_mbvr) std::vector<long> const & "std::vector<long> $1_name_";
 %typemap(rp_tm_vob_mbvr) std::vector<double> const & "std::vector<double> $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector<std::string> const & "std::vector<std::string> $1_name_";
 %typemap(rp_tm_vob_mbvr) std::vector< std::vector<double> > const & "std::vector< std::vector<double> > $1_name_";
 %typemap(rp_tm_vob_mbvr) SWIGTYPE "$1_type $1_name_";
 
@@ -108,6 +111,7 @@
 %typemap(rp_tm_vob_cnvt) std::vector<int> const & "reposit::vector::convert2<long>(value, nameUpper)";
 %typemap(rp_tm_vob_cnvt) std::vector<long> const & "reposit::vector::convert2<long>(value, nameUpper)";
 %typemap(rp_tm_vob_cnvt) std::vector<double> const & "reposit::vector::convert2<double>(value, nameUpper)";
+%typemap(rp_tm_vob_cnvt) std::vector<std::string> const & "reposit::vector::convert2<std::string>(value, nameUpper)";
 %typemap(rp_tm_vob_cnvt) std::vector<std::vector<double> > const & "reposit::matrix::convert2<double>(value, nameUpper)";
 %typemap(rp_tm_vob_cnvt) SWIGTYPE "reposit::convert2<$1_type>(value)";
 
@@ -154,6 +158,11 @@
 %typemap(rp_tm_scr_cnvt) const std::vector<bool>& %{
    std::vector<bool> $1_name =
         reposit::vector::convert2<bool>(valueObject->getProperty("$1_name"), "$1_name");
+%}
+
+%typemap(rp_tm_scr_cnvt) const std::vector<std::string>& %{
+   std::vector<std::string> $1_name =
+        reposit::vector::convert2<std::string>(valueObject->getProperty("$1_name"), "$1_name");
 %}
 
 %typemap(rp_tm_scr_cnvt) const std::vector<std::vector<double> >& %{
@@ -394,6 +403,11 @@
             reposit::operToVector<double>(*$1_name, "$1_name");
 %}
 
+%typemap(rp_tm_xll_cnvt) std::vector<std::string> const & %{
+        std::vector<std::string> $1_name_vec =
+            reposit::operToVector<std::string>(*$1_name, "$1_name");
+%}
+
 %typemap(rp_tm_xll_cnvt) std::vector<std::vector<double> > const & %{
         std::vector<std::vector<double> > $1_name_vec =
             reposit::fpToMatrix<double>(*$1_name);
@@ -482,6 +496,7 @@
 %typemap(rp_tm_xll_argf) std::vector<long> const & "$1_name_vec";
 %typemap(rp_tm_xll_argf) std::vector<double> "$1_name_vec";
 %typemap(rp_tm_xll_argf) std::vector<double> const & "$1_name_vec";
+%typemap(rp_tm_xll_argf) std::vector<std::string> const & "$1_name_vec";
 %typemap(rp_tm_xll_argf) std::vector<std::vector<double> > const & "$1_name_vec";
 %typemap(rp_tm_xll_argf) SWIGTYPE "$1_name";
 
