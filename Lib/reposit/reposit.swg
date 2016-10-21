@@ -54,11 +54,13 @@
 
 // rp_tm_vob_parm - Value Object constructor parameters (C)
 %typemap(rp_tm_vob_parm) bool "bool";
+%typemap(rp_tm_vob_parm) unsigned int "long";
 %typemap(rp_tm_vob_parm) int "long";
 %typemap(rp_tm_vob_parm) long "long";
 %typemap(rp_tm_vob_parm) double "double";
 %typemap(rp_tm_vob_parm) rp_tp_string "const std::string &";
 %typemap(rp_tm_vob_parm) rp_tp_any "const reposit::property_t&";
+%typemap(rp_tm_vob_parm) std::vector<unsigned int> const & "const std::vector<long>&";
 %typemap(rp_tm_vob_parm) std::vector<int> const & "const std::vector<long>&";
 %typemap(rp_tm_vob_parm) std::vector<long> const & "const std::vector<long>&";
 %typemap(rp_tm_vob_parm) std::vector<double> const & "const std::vector<double>&";
@@ -69,12 +71,14 @@
 
 // rp_tm_vob_mbvr - Value Object class member variables (C)
 %typemap(rp_tm_vob_mbvr) bool "bool $1_name_";
+%typemap(rp_tm_vob_mbvr) unsigned int "long $1_name_";
 %typemap(rp_tm_vob_mbvr) int "long $1_name_";
 %typemap(rp_tm_vob_mbvr) long "long $1_name_";
 %typemap(rp_tm_vob_mbvr) double "double $1_name_";
 %typemap(rp_tm_vob_mbvr) rp_tp_string "std::string $1_name_";
 %typemap(rp_tm_vob_mbvr) rp_tp_any "reposit::property_t $1_name_";
 %typemap(rp_tm_vob_mbvr) std::vector<bool> const & "std::vector<bool> $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector<unsigned int> const & "std::vector<long> $1_name_";
 %typemap(rp_tm_vob_mbvr) std::vector<int> const & "std::vector<long> $1_name_";
 %typemap(rp_tm_vob_mbvr) std::vector<long> const & "std::vector<long> $1_name_";
 %typemap(rp_tm_vob_mbvr) std::vector<double> const & "std::vector<double> $1_name_";
@@ -93,12 +97,14 @@
 %typemap(rp_tm_vob_init) SWIGTYPE "$1_name_($1_name)";
 
 // rp_tm_vob_cnvt - in ValueObject::setSystemProperty, convert value from property_t to native type (C)
+%typemap(rp_tm_vob_cnvt) unsigned int "reposit::convert2<long>(value)";
 %typemap(rp_tm_vob_cnvt) int "reposit::convert2<long>(value)";
 %typemap(rp_tm_vob_cnvt) long "reposit::convert2<long>(value)";
 %typemap(rp_tm_vob_cnvt) double "reposit::convert2<double>(value)";
 %typemap(rp_tm_vob_cnvt) rp_tp_string "reposit::convert2<std::string>(value)";
 %typemap(rp_tm_vob_cnvt) rp_tp_any "value";
 %typemap(rp_tm_vob_cnvt) std::vector<bool> const & "reposit::vector::convert2<bool>(value, nameUpper)";
+%typemap(rp_tm_vob_cnvt) std::vector<unsigned int> const & "reposit::vector::convert2<long>(value, nameUpper)";
 %typemap(rp_tm_vob_cnvt) std::vector<int> const & "reposit::vector::convert2<long>(value, nameUpper)";
 %typemap(rp_tm_vob_cnvt) std::vector<long> const & "reposit::vector::convert2<long>(value, nameUpper)";
 %typemap(rp_tm_vob_cnvt) std::vector<double> const & "reposit::vector::convert2<double>(value, nameUpper)";
@@ -114,6 +120,13 @@
 // CPP
 
 // rp_tm_scr_cnvt - convert types from the Value Object to the corresponding Library Object (C)
+
+%typemap(rp_tm_scr_cnvt) unsigned int %{
+    long $1_name =
+        reposit::convert2<long>(
+            valueObject->getProperty("$1_name"));
+%}
+
 %typemap(rp_tm_scr_cnvt) int %{
     long $1_name =
         reposit::convert2<long>(
@@ -326,6 +339,7 @@
 // rp_tm_xll_rtft - function return type (F/M)
 %typemap(rp_tm_xll_rtft) void "bool*";
 %typemap(rp_tm_xll_rtft) bool "bool*";
+%typemap(rp_tm_xll_rtft) unsigned int "long*";
 %typemap(rp_tm_xll_rtft) int "long*";
 %typemap(rp_tm_xll_rtft) long "long*";
 %typemap(rp_tm_xll_rtft) double "double*";
@@ -335,6 +349,7 @@
 
 // rp_tm_xll_parm - function parameters (F/C/M)
 %typemap(rp_tm_xll_parm) bool "bool*";
+%typemap(rp_tm_xll_parm) unsigned int "long*";
 %typemap(rp_tm_xll_parm) int "long*";
 %typemap(rp_tm_xll_parm) long "long*";
 %typemap(rp_tm_xll_parm) double "double*";
@@ -394,6 +409,11 @@
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
 
+%typemap(rp_tm_xll_cnvt2) unsigned int %{
+        long $1_name_cnv = reposit::convert2<$1_type>(
+            reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
+%}
+
 %typemap(rp_tm_xll_cnvt2) int %{
         long $1_name_cnv = reposit::convert2<$1_type>(
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
@@ -437,6 +457,7 @@
 
 // rp_tm_xll_argfv - arguments to the Value Object constructor (C)
 %typemap(rp_tm_xll_argfv) bool "*$1_name";
+%typemap(rp_tm_xll_argfv) unsigned int "*$1_name";
 %typemap(rp_tm_xll_argfv) int "*$1_name";
 %typemap(rp_tm_xll_argfv) long "*$1_name";
 %typemap(rp_tm_xll_argfv) double "*$1_name";
@@ -448,6 +469,7 @@
 
 // rp_tm_xll_argf - arguments to the underlying Library function (F/C/M)
 %typemap(rp_tm_xll_argf) bool "*$1_name";
+%typemap(rp_tm_xll_argf) unsigned int "*$1_name";
 %typemap(rp_tm_xll_argf) int "*$1_name";
 %typemap(rp_tm_xll_argf) long "*$1_name";
 %typemap(rp_tm_xll_argf) double "*$1_name";
@@ -528,6 +550,7 @@
 // rp_tm_xll_cdrt - code to register the return type with Excel
 %typemap(rp_tm_xll_cdrt) void "L";
 %typemap(rp_tm_xll_cdrt) bool "L";
+%typemap(rp_tm_xll_cdrt) unsigned int "N";
 %typemap(rp_tm_xll_cdrt) int "N";
 %typemap(rp_tm_xll_cdrt) long "N";
 %typemap(rp_tm_xll_cdrt) double "E";
@@ -546,6 +569,7 @@
 // rp_tm_xll_code - code to register the parameter with Excel
 %typemap(rp_tm_xll_code) void "L";
 %typemap(rp_tm_xll_code) bool "L";
+%typemap(rp_tm_xll_code) unsigned int "N";
 %typemap(rp_tm_xll_code) int "N";
 %typemap(rp_tm_xll_code) long "N";
 %typemap(rp_tm_xll_code) double "E";
