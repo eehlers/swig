@@ -33,6 +33,8 @@ bool legacy = false;
 // FIXME store these defaults in reposit.swg and retrieve them here.
 String *objDir = NewString("../AddinObjects");
 String *addDir = NewString("../AddinCpp");
+String *cshDir = NewString("../AddinCSharp");
+String *cfyDir = NewString("../AddinCfy");
 String *xllDir = NewString("../AddinXl");
 // Path to the documentation directory.  Default is null i.e. no documentation generated.
 String *doxDir = 0;
@@ -109,12 +111,12 @@ String *getTypeMap(Node *n, const char *m, bool fatal = true) {
         Replaceall(tm, "$rp_docstr", Getattr(n, "rp_docstr"));
         return tm;
     }
-    //if (fatal) {
+    if (fatal) {
         SwigType *t  = Getattr(n, "type");
         Setattr(errorList, NewStringf("*** ERROR : typemap '%s' does not match type '%s'.\n", m, SwigType_str(t, 0)), NewString("x"));
         // Return an error string, this will be inserted into the source code.
         return NewStringf("#error NEED THIS TYPEMAP: >>> %%typemap(%s) %s \"XXX\"; <<<", m, SwigType_str(t, 0));
-    //}
+    }
     return 0;
 }
 
@@ -1503,6 +1505,186 @@ struct GroupCpp : public GroupBase {
     }
 };
 
+struct GroupCSharp : public GroupBase {
+
+    Buffer *b_csh_grp_cpp;
+    bool groupContainsClass;
+    bool groupContainsConstructor;
+    bool groupContainsLoopFunction;
+
+    GroupCSharp(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count),
+        groupContainsClass(false), groupContainsConstructor(false), groupContainsLoopFunction(false) {
+
+        b_csh_grp_cpp = new Buffer("b_csh_grp_cpp", NewStringf("%s/csh_%s.cpp", cshDir, pragmas_.groupName_));
+
+        if (pragmas_.automatic_) {
+            Printf(b_csh_grp_cpp->b0, "#include \"%s/objects/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        } else {
+            Printf(b_csh_grp_cpp->b0, "#include \"%s/objects/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        }
+
+        Printf(b_csh_grp_cpp->b0, "#include <rp/repository.hpp>\n");
+        Printf(b_csh_grp_cpp->b0, "//FIXME include only factories for types used in the current file\n");
+        Printf(b_csh_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
+        Printf(b_csh_grp_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
+        Printf(b_csh_grp_cpp->b0, "#include <windows.h>\n");
+        // From this point on we stop writing to b0 and write to b1 instead.
+        // After all processing finishes we will append some more #includes to b0 depending on what code this group requires.
+    }
+
+    void functionWrapperImplFunc(ParmsFunc &p) {
+
+        Printf(b_csh_grp_cpp->b1, "extern \"C\" __declspec(dllexport)\n");
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rttp");
+        Printf(b_csh_grp_cpp->b1, "__stdcall %s(\n", p.funcName);
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", "rp_tm_csh_parm", 2);
+        Printf(b_csh_grp_cpp->b1, ") {\n");
+        Printf(b_csh_grp_cpp->b1, "    try {\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"BEGIN - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+        Printf(b_csh_grp_cpp->b1, "\n");
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", "rp_tm_csh_cnvt", 2, 0, false);
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtdc", 2);
+        Printf(b_csh_grp_cpp->b1, "        %s(\n", p.name);
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", "rp_tm_csh_args", 3, ',', true, true);
+        Printf(b_csh_grp_cpp->b1, "        );\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"END   - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtst", 2);
+        Printf(b_csh_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - \" << e.what() << std::endl;\n", p.funcName);
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtex", 2, false);
+        Printf(b_csh_grp_cpp->b1,"    } catch (...) {\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - UNKNOWN EXCEPTION\" << std::endl;\n", p.funcName);
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtex", 2, false);
+        Printf(b_csh_grp_cpp->b1,"    }\n");
+        Printf(b_csh_grp_cpp->b1, "}\n");
+
+        count_.functions++;
+        count_.total2++;
+    }
+
+    void functionWrapperImplCtor(ParmsCtor &p) {
+        if (generateCtor) {
+            Printf(b_csh_grp_cpp->b1, "extern \"C\" __declspec(dllexport) char * __stdcall %s(\n", p.funcRename);
+            emitParmList(p.parms2, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", "rp_tm_csh_parm", 1);
+            Printf(b_csh_grp_cpp->b1, ") {\n");
+            Printf(b_csh_grp_cpp->b1, "    try {\n");
+            Printf(b_csh_grp_cpp->b1,"        std::cout << \"BEGIN - FUNCTION '%s'\" << std::endl;\n", p.funcRename);
+            Printf(b_csh_grp_cpp->b1, "\n");
+            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", "rp_tm_csh_cnvt", 2, 0, false);
+            Printf(b_csh_grp_cpp->b1,"\n");
+            Printf(b_csh_grp_cpp->b1,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+            Printf(b_csh_grp_cpp->b1,"            new %s::ValueObjects::%s(\n", module, p.funcRename);
+            Printf(b_csh_grp_cpp->b1,"                objectID,\n");
+            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_argfv", "rp_tm_csh_argfv", 4, ',', true, true, true);
+            Printf(b_csh_grp_cpp->b1,"                false));\n");
+            Printf(b_csh_grp_cpp->b1,"        boost::shared_ptr<reposit::Object> object(\n");
+            Printf(b_csh_grp_cpp->b1,"            new %s::%s(\n", module, p.name);
+            Printf(b_csh_grp_cpp->b1,"                valueObject,\n");
+            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", "rp_tm_csh_args", 4, ',', true, true, true);
+            Printf(b_csh_grp_cpp->b1,"                false));\n");
+            Printf(b_csh_grp_cpp->b1,"        std::string returnValue =\n");
+            Printf(b_csh_grp_cpp->b1,"            reposit::Repository::instance().storeObject(\n");
+            Printf(b_csh_grp_cpp->b1,"                objectID, object, false, valueObject);\n");
+            Printf(b_csh_grp_cpp->b1,"\n");
+            Printf(b_csh_grp_cpp->b1,"        ULONG size = returnValue.length() + sizeof(char);\n");
+            Printf(b_csh_grp_cpp->b1,"        char *ret = (char*)::CoTaskMemAlloc(size);\n");
+            Printf(b_csh_grp_cpp->b1,"        strcpy(ret, returnValue.c_str());\n");
+            Printf(b_csh_grp_cpp->b1,"        std::cout << \"END   - FUNCTION '%s'\" << std::endl;\n", p.funcRename);
+            Printf(b_csh_grp_cpp->b1,"        return ret;\n");
+            Printf(b_csh_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
+            Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - \" << e.what() << std::endl;\n", p.funcRename);
+            Printf(b_csh_grp_cpp->b1,"        return 0;\n");
+            Printf(b_csh_grp_cpp->b1,"    } catch (...) {\n");
+            Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - UNKNOWN EXCEPTION\" << std::endl;\n", p.funcRename);
+            Printf(b_csh_grp_cpp->b1,"        return 0;\n");
+            Printf(b_csh_grp_cpp->b1,"    }\n");
+            Printf(b_csh_grp_cpp->b1,"}\n\n");
+
+            count_.constructors++;
+            count_.total2++;
+            groupContainsConstructor = true;
+        }
+        groupContainsClass = true;
+    }
+
+    void emitLoopFunc(ParmsMemb &p, String *loopParameterName) {
+        Node *x1 = Getattr(p.n, "rp:loopFunctionNode");
+        String *loopFunctionType = getTypeMap(x1, "rp_tm_xll_lpfn");
+        Parm *x2 = Getattr(p.n, "rp:loopParameterNode");
+        String *loopParameterType = getTypeMap(x2, "rp_tm_xll_lppm");
+        Printf(b_csh_grp_cpp->b1, "        // BEGIN function emitLoopFunc\n");
+        Printf(b_csh_grp_cpp->b1, "\n");
+        Printf(b_csh_grp_cpp->b1, "        %s::%sBind bindObject =\n", module, p.funcName);
+        Printf(b_csh_grp_cpp->b1, "            boost::bind(\n");
+        Printf(b_csh_grp_cpp->b1, "                &%s::%s,\n", p.pname, p.name);
+        Printf(b_csh_grp_cpp->b1, "                xxx,\n");
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_loop", "rp_tm_csh_loop", 4, ',', true, true);
+        Printf(b_csh_grp_cpp->b1, "            );\n");
+        Printf(b_csh_grp_cpp->b1, "\n");
+        Printf(b_csh_grp_cpp->b1, "        std::vector<%s> returnValue = loop\n", loopFunctionType);
+        Printf(b_csh_grp_cpp->b1, "            <%s::%sBind, %s, %s>\n", module, p.funcName, loopParameterType, loopFunctionType);
+        Printf(b_csh_grp_cpp->b1, "            (bindObject, %s_vec2);\n", loopParameterName);
+        Printf(b_csh_grp_cpp->b1, "\n");
+        Printf(b_csh_grp_cpp->b1, "        // END   function emitLoopFunc\n");
+    }
+
+    void functionWrapperImplMemb(ParmsMemb &p) {
+        Printf(b_csh_grp_cpp->b1, "extern \"C\" __declspec(dllexport)\n");
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rttp");
+        Printf(b_csh_grp_cpp->b1, "__stdcall %s(\n", p.funcName);
+        emitParmList(p.parms2, b_csh_grp_cpp->b1, 2, "rp_tm_csh_parm", "rp_tm_csh_parm", 2);
+        Printf(b_csh_grp_cpp->b1,"    ) {\n");
+        Printf(b_csh_grp_cpp->b1, "    try {\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"BEGIN - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+        Printf(b_csh_grp_cpp->b1, "\n");
+        emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_cnvt", "rp_tm_csh_cnvt", 1, 0, false);
+        Printf(b_csh_grp_cpp->b1,"\n");
+        emitTypeMap(b_csh_grp_cpp->b1, p.node, "rp_tm_xxx_rp_get");
+        if (String *loopParameterName = Getattr(p.n, "feature:rp:loopParameter")) {
+            emitLoopFunc(p, loopParameterName);
+            groupContainsLoopFunction = true;
+        } else {
+            emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtdc", 2);
+            Printf(b_csh_grp_cpp->b1,"        xxx->%s(\n", p.name);
+            emitParmList(p.parms, b_csh_grp_cpp->b1, 1, "rp_tm_csh_args", "rp_tm_csh_args", 3, ',', true, true);
+            Printf(b_csh_grp_cpp->b1,"        );\n", p.name);
+            Printf(b_csh_grp_cpp->b1,"        std::cout << \"END   - FUNCTION '%s'\" << std::endl;\n", p.funcName);
+        }
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtst", 2);
+        Printf(b_csh_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - \" << e.what() << std::endl;\n", p.funcName);
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtex", 2, false);
+        Printf(b_csh_grp_cpp->b1,"    } catch (...) {\n");
+        Printf(b_csh_grp_cpp->b1,"        std::cout << \"ERROR - FUNCTION '%s' - UNKNOWN EXCEPTION\" << std::endl;\n", p.funcName);
+        emitTypeMap(b_csh_grp_cpp->b1, p.n, "rp_tm_csh_rtex", 2, false);
+        Printf(b_csh_grp_cpp->b1,"    }\n");
+        Printf(b_csh_grp_cpp->b1,"}\n");
+
+        count_.members++;
+        count_.total2++;
+    }
+
+    void clear() {
+
+        if (groupContainsLoopFunction) {
+            Printf(b_csh_grp_cpp->b0, "#include \"%s/loop/loop_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            Printf(b_csh_grp_cpp->b0, "#include \"loop.hpp\"\n"/*, rp_csh_inc*/);
+        }
+        if (groupContainsConstructor)
+            Printf(b_csh_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        if (groupContainsClass) {
+            if (pragmas_.automatic_) {
+                Printf(b_csh_grp_cpp->b0, "#include \"%s/objects/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            } else {
+                Printf(b_csh_grp_cpp->b0, "#include \"%s/objects/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            }
+        }
+        Append(b_csh_grp_cpp->b0, pragmas_.add_inc);
+        Printf(b_csh_grp_cpp->b0, "\n");
+        b_csh_grp_cpp->clear(count_);
+    }
+};
+
 struct GroupExcelFunctions : public GroupBase {
 
     Buffer *b_xlf_grp_cpp;
@@ -1815,6 +1997,236 @@ struct GroupExcelRegister : public GroupBase {
         Printf(b_xlr_grp_cpp->b1, "}\n");
 
         b_xlr_grp_cpp->clear(count_);
+    }
+};
+
+void mongoParms(File *f, ParmList *parms) {
+    if (parms) {
+    Printf(f, ",\n");
+    Printf(f, "            \"parameters\": [\n");
+    bool first = true;
+    for (Parm *p = parms; p; p = nextSibling(p)) {
+    String *name = Getattr(p,"name");
+    if (first) {
+        first = false;
+    } else {
+        Printf(f, ",\n");
+    }
+    Printf(f, "                {\n");
+    Printf(f, "                    \"name\": \"%s\",\n", name);
+    String *s = getTypeMap(p, "rp_tm_cfy_mngo");
+    Printf(f, "                    \"dataType\": \"%s\",\n", s);
+    Printf(f, "                    \"description\": \"\",\n");
+    Printf(f, "                    \"optional\": false\n");
+    Printf(f, "                }");
+    }
+    Printf(f, "\n");
+    Printf(f, "            ]\n");
+    } else {
+    Printf(f, "\n");
+    }
+}
+
+void mongoFunc(File *f, String *funcName1, String *funcName2, Node *n, ParmList *parms) {
+    Printf(f, "        {\n");
+    Printf(f, "            \"name\": \"%s\",\n", funcName1);
+    Printf(f, "            \"codeName\": \"%s\",\n", funcName2);
+    Printf(f, "            \"description\": \"\",\n");
+    Printf(f, "            \"returnValue\": {\n");
+    String *s = getTypeMap(n, "rp_tm_cfy_mngo");
+    Printf(f, "                \"dataType\": \"%s\"\n", s);
+    Printf(f, "            }");
+    mongoParms(f, parms);
+    Printf(f, "        },\n");
+}
+
+struct GroupCountify : public GroupBase {
+
+    Buffer *b_cfy_grp_cpp;
+    bool groupContainsClass;
+    bool groupContainsConstructor;
+
+    GroupCountify(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), groupContainsClass(false), groupContainsConstructor(false) {
+
+        b_cfy_grp_cpp = new Buffer("b_cfy_grp_cpp", NewStringf("%s/cfy_%s.cpp", cfyDir, pragmas_.groupName_));
+
+        Printf(b_cfy_grp_cpp->b0, "\n");
+        Printf(b_cfy_grp_cpp->b0, "#include \"init.hpp\"\n");
+        Printf(b_cfy_grp_cpp->b0, "#include <rp/repository.hpp>\n");
+        Printf(b_cfy_grp_cpp->b0, "\n");
+        Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains conversions\n");
+        Printf(b_cfy_grp_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
+        Printf(b_cfy_grp_cpp->b0, "#include <%s/conversions/coercetermstructure.hpp>\n", objInc);
+        //Printf(b_cfy_grp_cpp->b0, "//FIXME this #include is only required if the file contains enumerations\n");
+        //Printf(b_cfy_grp_cpp->b0, "#include <rp/enumerations/typefactory.hpp>\n");
+
+        // From this point on we stop writing to b0 and write to b1 instead.
+        // After all processing finishes we will append some more #includes to b0 depending on what code this group requires.
+
+        Printf(b_cfy_grp_cpp->b1, "//FIXME include only factories for types used in the current file\n");
+        Printf(b_cfy_grp_cpp->b1, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
+        Printf(b_cfy_grp_cpp->b1, "#include <boost/shared_ptr.hpp>\n");
+        Printf(b_cfy_grp_cpp->b1, "#include <rp/repository.hpp>\n");
+        //Printf(b_cfy_grp_cpp->b1, "#include <AddinCpp/add_all.hpp>\n");
+        Printf(b_cfy_grp_cpp->b1, "\n");
+    }
+
+    void functionWrapperImplFunc(ParmsFunc &p) {
+        Printf(b_cfy_grp_cpp->b1,"//****FUNC*****\n");
+        Printf(b_cfy_grp_cpp->b1,"extern \"C\" {\n");
+        Printf(b_cfy_grp_cpp->b1,"COUNTIFY_API\n");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtfn");
+        Printf(b_cfy_grp_cpp->b1,"%s(\n", p.funcName);
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm", "rp_tm_cfy_parm");
+        Printf(b_cfy_grp_cpp->b1,") {\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"    try {\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        initializeAddin();\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        // Convert input types into Library types\n\n");
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", "rp_tm_cfy_cnvt", 2, 0, false);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtdf", 2, false);
+        Printf(b_cfy_grp_cpp->b1,"        %s::%s(\n", module, p.symname);
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_args", "rp_tm_cfy_args", 2, ',', true, true);
+        Printf(b_cfy_grp_cpp->b1,"        );\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtsf", 2, false);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtex", 2, false);
+        Printf(b_cfy_grp_cpp->b1,"    } catch (...) {\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtex", 2, false);
+        Printf(b_cfy_grp_cpp->b1,"    }\n");
+        Printf(b_cfy_grp_cpp->b1,"}\n");
+        Printf(b_cfy_grp_cpp->b1,"} // extern \"C\"\n");
+
+        count_.functions++;
+        count_.total2++;
+    }
+
+    void functionWrapperImplCtor(ParmsCtor &p) {
+
+        if (generateCtor) {
+            Printf(b_cfy_grp_cpp->b1,"//****CTOR*****\n");
+            Printf(b_cfy_grp_cpp->b1,"extern \"C\" {\n");
+            Printf(b_cfy_grp_cpp->b1,"COUNTIFY_API\n");
+            Printf(b_cfy_grp_cpp->b1,"const char *%s(\n", p.funcName);
+            emitParmList(p.parms2, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm", "rp_tm_cfy_parm", 2);
+            Printf(b_cfy_grp_cpp->b1,"    ) {\n");
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"    try {\n");
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"        initializeAddin();\n");
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"        // Convert input types into Library types\n\n");
+            emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", "rp_tm_cfy_cnvt", 2, 0, false);
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
+            Printf(b_cfy_grp_cpp->b1,"            new %s::ValueObjects::%s(\n", module, p.funcName);
+            Printf(b_cfy_grp_cpp->b1,"                objectID,\n");
+            emitParmList(p.parms, b_cfy_grp_cpp->b1, 0, "rp_tm_default", "rp_tm_default", 4, ',', true, false, true);
+            Printf(b_cfy_grp_cpp->b1,"                false));\n");
+            Printf(b_cfy_grp_cpp->b1,"        boost::shared_ptr<reposit::Object> object(\n");
+            Printf(b_cfy_grp_cpp->b1,"            new %s::%s(\n", module, p.name);
+            Printf(b_cfy_grp_cpp->b1,"                valueObject,\n");
+            emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_args", "rp_tm_cfy_args", 4, ',', true, true, true);
+            Printf(b_cfy_grp_cpp->b1,"                false));\n");
+            Printf(b_cfy_grp_cpp->b1,"        static std::string returnValue;\n");
+            Printf(b_cfy_grp_cpp->b1,"        returnValue =\n");
+            Printf(b_cfy_grp_cpp->b1,"            reposit::Repository::instance().storeObject(\n");
+            Printf(b_cfy_grp_cpp->b1,"                objectID, object, true, valueObject);\n");
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"        return returnValue.c_str();\n");
+            Printf(b_cfy_grp_cpp->b1,"\n");
+            Printf(b_cfy_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
+            Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
+            Printf(b_cfy_grp_cpp->b1,"        static std::string errorMessage;\n");
+            Printf(b_cfy_grp_cpp->b1,"        errorMessage = e.what();\n");
+            Printf(b_cfy_grp_cpp->b1,"        return errorMessage.c_str();\n");
+            Printf(b_cfy_grp_cpp->b1,"    } catch (...) {\n");
+            Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
+            Printf(b_cfy_grp_cpp->b1,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
+            Printf(b_cfy_grp_cpp->b1,"        return errorMessage.c_str();\n");
+            Printf(b_cfy_grp_cpp->b1,"    }\n");
+            Printf(b_cfy_grp_cpp->b1,"}\n\n");
+            Printf(b_cfy_grp_cpp->b1,"} // extern \"C\"\n");
+
+            count_.constructors++;
+            count_.total2++;
+            groupContainsConstructor = true;
+        }
+        groupContainsClass = true;
+    }
+
+    void functionWrapperImplMemb(ParmsMemb &p) {
+
+        Printf(b_cfy_grp_cpp->b1,"//****MEMB*****\n");
+        Printf(b_cfy_grp_cpp->b1,"extern \"C\" {\n");
+        Printf(b_cfy_grp_cpp->b1,"COUNTIFY_API\n");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtmb");
+        Printf(b_cfy_grp_cpp->b1,"%s(\n", p.funcName);
+        emitParmList(p.parms2, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_parm", "rp_tm_cfy_parm", 2);
+        Printf(b_cfy_grp_cpp->b1,"    ) {\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"    try {\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"Begin function\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        initializeAddin();\n");
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        // Convert input types into Library types\n\n");
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cfy_cnvt", "rp_tm_cfy_cnvt", 2, 0, false);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.node, "rp_tm_xxx_rp_get", 2);
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtdm", 2);
+        Printf(b_cfy_grp_cpp->b1,"        xxx->%s(\n", p.name);
+        emitParmList(p.parms, b_cfy_grp_cpp->b1, 1, "rp_tm_cpp_args", "rp_tm_cpp_args", 3, ',', true, true);
+        Printf(b_cfy_grp_cpp->b1,"        );\n", p.name);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"End function\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtsm", 2);
+        Printf(b_cfy_grp_cpp->b1,"\n");
+        Printf(b_cfy_grp_cpp->b1,"    } catch (const std::exception &e) {\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - \" << e.what());\n", p.funcName);
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtex", 2, false);
+        Printf(b_cfy_grp_cpp->b1,"    } catch (...) {\n");
+        Printf(b_cfy_grp_cpp->b1,"        CFY_LOG_MESSAGE(\"%s\", \"ERROR - UNKNOWN EXCEPTION\");\n", p.funcName);
+        Printf(b_cfy_grp_cpp->b1,"        static std::string errorMessage = \"UNKNOWN EXCEPTION\";\n");
+        emitTypeMap(b_cfy_grp_cpp->b1, p.n, "rp_tm_cfy_rtex", 2, false);
+        Printf(b_cfy_grp_cpp->b1,"    }\n");
+        Printf(b_cfy_grp_cpp->b1,"}\n");
+        Printf(b_cfy_grp_cpp->b1,"} // extern \"C\"\n");
+
+        count_.members++;
+        count_.total2++;
+    }
+
+    void clear() {
+
+        if (groupContainsConstructor)
+            Printf(b_cfy_grp_cpp->b0, "#include \"%s/valueobjects/vo_%s.hpp\"\n", objInc, pragmas_.groupName_);
+        if (groupContainsClass) {
+            if (pragmas_.automatic_) {
+                Printf(b_cfy_grp_cpp->b0, "#include \"%s/objects/obj_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            } else {
+                Printf(b_cfy_grp_cpp->b0, "#include \"%s/objects/objmanual_%s.hpp\"\n", objInc, pragmas_.groupName_);
+            }
+        }
+        Append(b_cfy_grp_cpp->b0, pragmas_.add_inc);
+        b_cfy_grp_cpp->clear(count_);
     }
 };
 
@@ -2168,6 +2580,101 @@ struct AddinCpp : public AddinImpl<GroupCpp> {
     }
 };
 
+struct AddinCSharp : public AddinImpl<GroupCSharp> {
+
+    Buffer *b_csh_exp_all_cs;
+
+    AddinCSharp() : AddinImpl("C# Addin") {}
+
+    virtual void top() {
+        b_csh_exp_all_cs = new Buffer("b_csh_exp_all_cs", NewStringf("%s/Export.cs", cshDir));
+
+        Printf(b_csh_exp_all_cs->b0, "\n");
+        Printf(b_csh_exp_all_cs->b0, "using System;\n");
+        Printf(b_csh_exp_all_cs->b0, "using System.Collections.Generic;\n");
+        Printf(b_csh_exp_all_cs->b0, "using System.Linq;\n");
+        Printf(b_csh_exp_all_cs->b0, "using System.Text;\n");
+        Printf(b_csh_exp_all_cs->b0, "using System.Runtime.InteropServices;\n");
+        Printf(b_csh_exp_all_cs->b0, "\n");
+        Printf(b_csh_exp_all_cs->b0, "namespace QuantLibAddin\n");
+        Printf(b_csh_exp_all_cs->b0, "{\n");
+        Printf(b_csh_exp_all_cs->b0, "    class Export\n");
+        Printf(b_csh_exp_all_cs->b0, "    {\n");
+        Printf(b_csh_exp_all_cs->b0, "#if x64\n");
+        Printf(b_csh_exp_all_cs->b0, "        const string QUANTLIB_ADDIN_DLL = \"..\\\\..\\\\..\\\\..\\\\..\\\\bin\\\\AddinCSharp-vc90-x64-mt-s-1_7_0.dll\";\n");
+        Printf(b_csh_exp_all_cs->b0, "#else\n");
+        Printf(b_csh_exp_all_cs->b0, "        const string QUANTLIB_ADDIN_DLL = \"..\\\\..\\\\..\\\\..\\\\..\\\\bin\\\\AddinCSharp-vc90-mt-s-1_7_0.dll\";\n");
+        Printf(b_csh_exp_all_cs->b0, "#endif\n");
+        Printf(b_csh_exp_all_cs->b0, "        // qlInitializeAddin\n");
+        Printf(b_csh_exp_all_cs->b0, "        [DllImport(QUANTLIB_ADDIN_DLL, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+        Printf(b_csh_exp_all_cs->b0, "        public static extern void qlInitializeAddin();\n");
+        Printf(b_csh_exp_all_cs->b0, "\n");
+        Printf(b_csh_exp_all_cs->b0, "        // qlReleaseMemoryInt\n");
+        Printf(b_csh_exp_all_cs->b0, "        [DllImport(QUANTLIB_ADDIN_DLL, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+        Printf(b_csh_exp_all_cs->b0, "        public static extern void qlReleaseMemoryInt(IntPtr p);\n");
+        Printf(b_csh_exp_all_cs->b0, "\n");
+        Printf(b_csh_exp_all_cs->b0, "        // qlReleaseMemoryDbl\n");
+        Printf(b_csh_exp_all_cs->b0, "        [DllImport(QUANTLIB_ADDIN_DLL, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+        Printf(b_csh_exp_all_cs->b0, "        public static extern void qlReleaseMemoryDbl(IntPtr p);\n");
+    }
+
+    virtual void functionWrapperImplFunc(ParmsFunc &p) {
+        if (checkAttribute(p.n, "feature:rp:generate:c#", "1")) {
+            AddinImpl::functionWrapperImplFunc(p);
+            Printf(b_csh_exp_all_cs->b0, "\n");
+            Printf(b_csh_exp_all_cs->b0, "        // %s\n", p.funcName);
+            Printf(b_csh_exp_all_cs->b0, "        [DllImport(QUANTLIB_ADDIN_DLL, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+            emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rtcp", 2);
+            Printf(b_csh_exp_all_cs->b0, "        public static extern\n");
+            emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rscp", 2);
+            Printf(b_csh_exp_all_cs->b0, "        %s(\n", p.funcName);
+            emitParmList(p.parms, b_csh_exp_all_cs->b0, 2, "rp_tm_csh_clcp", "rp_tm_csh_clcp", 3);
+            Printf(b_csh_exp_all_cs->b0, "        );\n");
+        }
+    }
+
+    virtual void functionWrapperImplCtor(ParmsCtor &p) {
+        if (checkAttribute(p.n, "feature:rp:generate:c#", "1")) {
+            AddinImpl::functionWrapperImplCtor(p);
+            Printf(b_csh_exp_all_cs->b0, "\n");
+            Printf(b_csh_exp_all_cs->b0, "        // %s\n", p.funcRename);
+            Printf(b_csh_exp_all_cs->b0, "        [DllImport(QUANTLIB_ADDIN_DLL, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+            Printf(b_csh_exp_all_cs->b0, "        [return: MarshalAs(UnmanagedType.LPStr)]\n");
+            Printf(b_csh_exp_all_cs->b0, "        public static extern string %s(\n", p.funcRename);
+            emitParmList(p.parms2, b_csh_exp_all_cs->b0, 2, "rp_tm_csh_clcp", "rp_tm_csh_clcp", 3);
+            Printf(b_csh_exp_all_cs->b0, "        );\n");
+        }
+    }
+
+    virtual void functionWrapperImplMemb(ParmsMemb &p) {
+        if (checkAttribute(p.n, "feature:rp:generate:c#", "1")) {
+            AddinImpl::functionWrapperImplMemb(p);
+            Printf(b_csh_exp_all_cs->b0, "\n");
+            Printf(b_csh_exp_all_cs->b0, "        // %s\n", p.funcRename);
+            Printf(b_csh_exp_all_cs->b0, "        [DllImport(QUANTLIB_ADDIN_DLL, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]\n");
+            emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rtcp", 2);
+            Printf(b_csh_exp_all_cs->b0, "        public static extern\n");
+            emitTypeMap(b_csh_exp_all_cs->b0, p.n, "rp_tm_csh_rscp", 2);
+            Printf(b_csh_exp_all_cs->b0, "        %s(\n", p.funcRename);
+            emitParmList(p.parms2, b_csh_exp_all_cs->b0, 2, "rp_tm_csh_clcp", "rp_tm_csh_clcp", 3);
+            Printf(b_csh_exp_all_cs->b0, "        );\n");
+        }
+    }
+
+    virtual void clear() {
+
+        AddinImpl::clear();
+
+        Printf(b_csh_exp_all_cs->b0, "    }\n");
+        Printf(b_csh_exp_all_cs->b0, "}\n");
+        Printf(b_csh_exp_all_cs->b0, "\n");
+
+        printf("%s - Addin Files", name_.c_str());
+        printf("%s\n", std::string(66-name_.length(), '=').c_str());
+        b_csh_exp_all_cs->clear(count);
+    }
+};
+
 struct AddinExcelFunctions : public AddinImpl<GroupExcelFunctions> {
 
     AddinExcelFunctions() : AddinImpl("Excel Addin - Functions") {}
@@ -2227,6 +2734,47 @@ struct AddinExcelRegister : public AddinImpl<GroupExcelRegister> {
         printf("%s - Addin Files", name_.c_str());
         printf("%s\n", std::string(66-name_.length(), '=').c_str());
         b_xlr_add_all_cpp->clear(count);
+    }
+};
+
+struct AddinCountify : public AddinImpl<GroupCountify> {
+
+    Buffer *b_cfy_add_mng_txt;
+
+    AddinCountify() : AddinImpl("Countify Addin") {}
+
+    virtual void top() {
+        b_cfy_add_mng_txt = new Buffer("b_cfy_add_mng_txt", NewStringf("%s/cfy_mongo.txt", cfyDir));
+    }
+
+    virtual void functionWrapperImplFunc(ParmsFunc &p) {
+        if (checkAttribute(p.n, "feature:rp:generate:countify", "1")) {
+            AddinImpl::functionWrapperImplFunc(p);
+            //mongoFunc(b_cfy_add_mng_txt->b0, p.symnameUpper, p.funcName, p.n, p.parms);
+        }
+    }
+
+    virtual void functionWrapperImplCtor(ParmsCtor &p) {
+        if (checkAttribute(p.n, "feature:rp:generate:countify", "1") && generateCtor) {
+            AddinImpl::functionWrapperImplCtor(p);
+            mongoFunc(b_cfy_add_mng_txt->b0, p.name, p.funcName, p.n, p.parms2);
+        }
+    }
+
+    virtual void functionWrapperImplMemb(ParmsMemb &p) {
+        if (checkAttribute(p.n, "feature:rp:generate:countify", "1")) {
+            AddinImpl::functionWrapperImplMemb(p);
+            //mongoFunc(b_cfy_add_mng_txt->b0, p.nameUpper, p.funcName, p.n, p.parms2);
+        }
+    }
+
+    virtual void clear() {
+
+        AddinImpl::clear();
+
+        printf("%s - Addin Files", name_.c_str());
+        printf("%s\n", std::string(66-name_.length(), '=').c_str());
+        b_cfy_add_mng_txt->clear(count);
     }
 };
 
@@ -2358,9 +2906,15 @@ public:
         if ( (strcmp(argv[i],"-genc++") == 0)) {
             addinList_.appendAddin(new AddinCpp);
             Swig_mark_arg(i);
+        } else if ( (strcmp(argv[i],"-genc#") == 0)) {
+            addinList_.appendAddin(new AddinCSharp);
+            Swig_mark_arg(i);
         } else if ( (strcmp(argv[i],"-genxll") == 0)) {
             addinList_.appendAddin(new AddinExcelFunctions);
             addinList_.appendAddin(new AddinExcelRegister);
+            Swig_mark_arg(i);
+        } else if ( (strcmp(argv[i],"-gencfy") == 0)) {
+            addinList_.appendAddin(new AddinCountify);
             Swig_mark_arg(i);
         } else if (strcmp(argv[i], "-prefix") == 0) {
             if (argv[i + 1]) {
@@ -2392,8 +2946,12 @@ virtual int top(Node *n) {
             objDir = s;
         if (String *s = getNode(n3, "rp_add_dir"))
             addDir = s;
+        if (String *s = getNode(n3, "rp_csh_dir"))
+            cshDir = s;
         if (String *s = getNode(n3, "rp_xll_dir"))
             xllDir = s;
+        if (String *s = getNode(n3, "rp_cfy_dir"))
+            cfyDir = s;
         if (String *s = getNode(n3, "rp_obj_inc"))
             objInc = s;
         if (String *s = getNode(n3, "rp_add_inc"))
@@ -2410,7 +2968,9 @@ virtual int top(Node *n) {
     printf("addinCppNameSpace=%s\n", Char(addinCppNameSpace));
     printf("rp_obj_dir=%s\n", Char(objDir));
     printf("rp_add_dir=%s\n", Char(addDir));
+    printf("rp_csh_dir=%s\n", Char(cshDir));
     printf("rp_xll_dir=%s\n", Char(xllDir));
+    printf("rp_cfy_dir=%s\n", Char(cfyDir));
     printf("rp_obj_inc=%s\n", Char(objInc));
     printf("rp_add_inc=%s\n", Char(addInc));
     printf("rp_xll_inc=%s\n", Char(xllInc));
