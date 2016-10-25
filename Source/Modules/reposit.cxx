@@ -109,12 +109,12 @@ String *getTypeMap(Node *n, const char *m, bool fatal = true) {
         Replaceall(tm, "$rp_docstr", Getattr(n, "rp_docstr"));
         return tm;
     }
-    //if (fatal) {
+    if (fatal) {
         SwigType *t  = Getattr(n, "type");
         Setattr(errorList, NewStringf("*** ERROR : typemap '%s' does not match type '%s'.\n", m, SwigType_str(t, 0)), NewString("x"));
         // Return an error string, this will be inserted into the source code.
         return NewStringf("#error NEED THIS TYPEMAP: >>> %%typemap(%s) %s \"XXX\"; <<<", m, SwigType_str(t, 0));
-    //}
+    }
     return 0;
 }
 
@@ -1372,7 +1372,7 @@ struct GroupCpp : public GroupBase {
         Printf(b_cpp_grp_cpp->b0, "#include <AddinCpp/add_%s.hpp>\n", pragmas_.groupName_);
         Printf(b_cpp_grp_cpp->b0, "//FIXME this #include is only required if the file contains conversions\n");
         Printf(b_cpp_grp_cpp->b0, "#include <%s/conversions/all.hpp>\n", objInc);
-        Printf(b_cpp_grp_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
+        //Printf(b_cpp_grp_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
         Printf(b_cpp_grp_cpp->b0, "#include <%s/conversions/coercetermstructure.hpp>\n", objInc);
         // FIXME this #include is only required if the file contains enumerations.
         //Printf(b_cpp_grp_cpp->b0, "#include <rp/enumerations/typefactory.hpp>\n");
@@ -1521,7 +1521,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b0, "#include <rpxl/functions/export.hpp>\n");
         Printf(b_xlf_grp_cpp->b0, "#include <rpxl/utilities/xlutilities.hpp>\n");
         Printf(b_xlf_grp_cpp->b0, "#include <rpxl/objectwrapperxl.hpp>\n");
-        Printf(b_xlf_grp_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
+        //Printf(b_xlf_grp_cpp->b0, "#include <%s/coercions/all.hpp>\n", objInc);
         Printf(b_xlf_grp_cpp->b0, "#include \"%s/enumerations/factories/all.hpp\"\n", objInc);
         // From this point on we stop writing to b0 and write to b1 instead.
         // After all processing finishes we will append some more #includes to b0 depending on what code this group requires.
@@ -2417,8 +2417,8 @@ virtual int top(Node *n) {
     printf("rp_doc_str=%s\n", Char(docStr));
     printf("rp_dox_dir=%s\n", Char(doxDir));
 
-    if (doxDir)
-        addinList_.appendAddin(new AddinDoxygen);
+    //if (doxDir)
+    //    addinList_.appendAddin(new AddinDoxygen);
 
     if (docStr)
         initializeDocStrings();
