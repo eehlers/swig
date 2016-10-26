@@ -997,7 +997,7 @@ struct GroupValueObjects : public GroupBase {
         Printf(b_vob_grp_cpp->b0,"                className_ = boost::get<std::string>(value);\n");
         voSetProp(b_vob_grp_cpp->b0, p.parms);
         Printf(b_vob_grp_cpp->b0,"            else if(strcmp(nameUpper.c_str(), \"PERMANENT\")==0)\n");
-        Printf(b_vob_grp_cpp->b0,"                Permanent_ = reposit::convert2<bool>(value);\n");
+        Printf(b_vob_grp_cpp->b0,"                Permanent_ = reposit::convert<bool>(value);\n");
         Printf(b_vob_grp_cpp->b0,"            else\n");
         Printf(b_vob_grp_cpp->b0,"                RP_FAIL(\"Error: attempt to set non-existent Property: '\" + name + \"'\");\n");
         Printf(b_vob_grp_cpp->b0,"        }\n");
@@ -1096,7 +1096,7 @@ struct GroupSerializationCreate : public GroupBase {
         emitParmList(p.parms, b_scr_grp_cpp->b0, 1, "rp_tm_scr_cnvt", "rp_tm_scr_cnvt", 1, 0);
         Printf(b_scr_grp_cpp->b0, "\n");
         Printf(b_scr_grp_cpp->b0, "    bool Permanent =\n");
-        Printf(b_scr_grp_cpp->b0, "        reposit::convert2<bool>(valueObject->getProperty(\"Permanent\"));\n");
+        Printf(b_scr_grp_cpp->b0, "        reposit::convert<bool>(valueObject->getProperty(\"Permanent\"));\n");
         Printf(b_scr_grp_cpp->b0, "\n");
         Printf(b_scr_grp_cpp->b0, "    // construct and return the object\n");
         Printf(b_scr_grp_cpp->b0, "\n");

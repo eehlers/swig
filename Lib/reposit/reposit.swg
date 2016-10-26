@@ -26,7 +26,7 @@
         RP_GET_OBJECT(xxx, objectID, $1_type);
 %}
 
-%typemap(rp_tm_xxx_rp_call) T "xxx->";
+%typemap(rp_tm_xxx_rp_call) SWIGTYPE "xxx->";
 
 //*****************************************************************************
 // rp_tm_lib_* - typemaps for Library Objects
@@ -55,19 +55,56 @@
 
 // rp_tm_vob_parm - Value Object constructor parameters (C)
 
+%typemap(rp_tm_vob_parm) rp_tp_long "long";
+%typemap(rp_tm_vob_parm) rp_tp_string "const std::string &";
+%typemap(rp_tm_vob_parm) rp_tp_any "const reposit::property_t&";
+%typemap(rp_tm_vob_parm) std::vector<unsigned int> & "const std::vector<long>&";
+%typemap(rp_tm_vob_parm) std::vector<int> & "const std::vector<long>&";
+%typemap(rp_tm_vob_parm) std::vector<double> & "const std::vector<double>&";
+%typemap(rp_tm_vob_parm) SWIGTYPE "$1_type";
+
 // HPP
 
 // rp_tm_vob_mbvr - Value Object class member variables (C)
 
+%typemap(rp_tm_vob_mbvr) rp_tp_long "long $1_name_";
+%typemap(rp_tm_vob_mbvr) rp_tp_string "std::string $1_name_";
+%typemap(rp_tm_vob_mbvr) rp_tp_any "reposit::property_t $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector<bool> const & "std::vector<bool> $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector<unsigned int> const & "std::vector<long> $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector<int> const & "std::vector<long> $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector<long> const & "std::vector<long> $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector<double> const & "std::vector<double> $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector<std::string> const & "std::vector<std::string> $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector< std::vector<double> > const & "std::vector< std::vector<double> > $1_name_";
+%typemap(rp_tm_vob_mbvr) SWIGTYPE "$1_type $1_name_";
+
 // rp_tm_vob_srmv - code to serialize a Value Object member variable (C)
+%typemap(rp_tm_vob_srmv) SWIGTYPE "& boost::serialization::make_nvp(\"$1_name\", $1_name_)";
 
 // CPP
 
 // rp_tm_vob_name - Insert the parameter name into the vo property names array (C)
+%typemap(rp_tm_vob_name) SWIGTYPE "\"$1_name\"";
 
 // rp_tm_vob_init - vo ctor initializer list (C)
+%typemap(rp_tm_vob_init) SWIGTYPE "$1_name_($1_name)";
 
 // rp_tm_vob_cnvt - in ValueObject::setSystemProperty, convert value from property_t to native type (C)
+
+// rp_tm_vob_cnvt - in ValueObject::setSystemProperty, convert value from property_t to native type (C)
+
+%typemap(rp_tm_vob_cnvt) rp_tp_long "reposit::convert<long>(value)";
+%typemap(rp_tm_vob_cnvt) rp_tp_string "reposit::convert<std::string>(value)";
+%typemap(rp_tm_vob_cnvt) rp_tp_any "value";
+%typemap(rp_tm_vob_cnvt) std::vector<bool> & "reposit::vector::convert<bool>(value, nameUpper)";
+%typemap(rp_tm_vob_cnvt) std::vector<unsigned int> & "reposit::vector::convert<long>(value, nameUpper)";
+%typemap(rp_tm_vob_cnvt) std::vector<int> & "reposit::vector::convert<long>(value, nameUpper)";
+%typemap(rp_tm_vob_cnvt) std::vector<long> & "reposit::vector::convert<long>(value, nameUpper)";
+%typemap(rp_tm_vob_cnvt) std::vector<double> & "reposit::vector::convert<double>(value, nameUpper)";
+%typemap(rp_tm_vob_cnvt) std::vector<std::string> & "reposit::vector::convert<std::string>(value, nameUpper)";
+%typemap(rp_tm_vob_cnvt) std::vector<std::vector<double> > & "reposit::matrix::convert<double>(value, nameUpper)";
+%typemap(rp_tm_vob_cnvt) SWIGTYPE "reposit::convert<$1_type>(value)";
 
 //*****************************************************************************
 // rp_tm_scr_* - typemaps for Serialization - Create
@@ -146,6 +183,11 @@
             reposit::operToVector<bool>(*$1_name, "$1_name");
 %}
 
+%typemap(rp_tm_xll_cnvt) std::vector<double> & %{
+        std::vector<double> $1_name_vec =
+            reposit::operToVector<double>(*$1_name, "$1_name");
+%}
+
 // rp_tm_xll_argfv - arguments to the Value Object constructor (C)
 
 %typemap(rp_tm_xll_argfv) bool "*$1_name";
@@ -180,14 +222,20 @@
 
 // rp_tm_xll_rtst - return statement (F/M)
 
+%typemap(rp_tm_xll_rtst) void %{
+        static bool ret = true;
+        return &ret;
+%}
+
 %typemap(rp_tm_xll_rtst) bool %{
         static bool ret;
         ret = returnValue;
         return &ret;
 %}
 
-%typemap(rp_tm_xll_rtst) void %{
-        static bool ret = true;
+%typemap(rp_tm_xll_rtst) rp_tp_long %{
+        static long ret;
+        ret = returnValue;
         return &ret;
 %}
 
