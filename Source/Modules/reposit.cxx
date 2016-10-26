@@ -1526,8 +1526,8 @@ struct GroupExcelFunctions : public GroupBase {
         // From this point on we stop writing to b0 and write to b1 instead.
         // After all processing finishes we will append some more #includes to b0 depending on what code this group requires.
 
-        Printf(b_xlf_grp_cpp->b1, "//#include \"%s/conversions/convert2.hpp\"\n", objInc);
-        Printf(b_xlf_grp_cpp->b1, "#include \"%s/conversions/conversions.hpp\"\n", objInc);
+        //Printf(b_xlf_grp_cpp->b1, "//#include \"%s/conversions/convert2.hpp\"\n", objInc);
+        //Printf(b_xlf_grp_cpp->b1, "#include \"%s/conversions/conversions.hpp\"\n", objInc);
         Printf(b_xlf_grp_cpp->b1, "#include \"%s/conversions/all.hpp\"\n", xllInc);
         Printf(b_xlf_grp_cpp->b1, "\n");
     }
