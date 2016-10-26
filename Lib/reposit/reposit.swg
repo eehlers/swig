@@ -21,6 +21,13 @@
 // Not a real typemap, implemented in code.  Always returns the type.
 // rp_tm_default
 
+// rp_tm_xxx_rp_get:  Retrieve an object from the repository.
+%typemap(rp_tm_xxx_rp_get) SWIGTYPE %{
+        RP_GET_OBJECT(xxx, objectID, $1_type);
+%}
+
+%typemap(rp_tm_xxx_rp_call) T "xxx->";
+
 //*****************************************************************************
 // rp_tm_lib_* - typemaps for Library Objects
 //*****************************************************************************
@@ -35,6 +42,8 @@
 // CPP
 
 // rp_tm_lib_rtst - Return statement (F)
+
+%typemap(rp_tm_lib_loop) SWIGTYPE "$1_type";
 
 //*****************************************************************************
 // rp_tm_vob_* - typemaps for Value Objects
@@ -228,6 +237,7 @@
 %typemap(rp_tm_xll_loop) std::vector "_1";
 %typemap(rp_tm_xll_loop) SWIGTYPE "$1_name";
 
+//%typemap(rp_tm_xll_loop2) bool "*$1_name";
 %typemap(rp_tm_xll_loop2) SWIGTYPE "$1_name_cnv";
 
 // rp_tm_xll_lpfn - datatype of the loop function for call to boost::bind
@@ -400,6 +410,7 @@
         T xxx =
             reposit::Create<T>()(objectID);
 %}
+%typemap(rp_tm_xxx_rp_call) T "xxx.";
 %typemap(rp_tm_xll_loop) T "$1_name_enm";
 %typemap(rp_tm_xll_loop2) T "$1_name_enm";
 %typemap(rp_tm_vob_parm) T "const std::string &";
