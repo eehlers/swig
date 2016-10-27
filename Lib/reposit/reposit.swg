@@ -92,8 +92,6 @@
 
 // rp_tm_vob_cnvt - in ValueObject::setSystemProperty, convert value from property_t to native type (C)
 
-// rp_tm_vob_cnvt - in ValueObject::setSystemProperty, convert value from property_t to native type (C)
-
 %typemap(rp_tm_vob_cnvt) rp_tp_long "reposit::convert<long>(value)";
 %typemap(rp_tm_vob_cnvt) rp_tp_string "reposit::convert<std::string>(value)";
 %typemap(rp_tm_vob_cnvt) rp_tp_any "value";
@@ -115,6 +113,45 @@
 // CPP
 
 // rp_tm_scr_cnvt - convert types from the Value Object to the corresponding Library Object (C)
+
+%typemap(rp_tm_scr_cnvt) rp_tp_long %{
+    long $1_name =
+        reposit::convert<long>(
+            valueObject->getProperty("$1_name"));
+%}
+
+%typemap(rp_tm_scr_cnvt) double %{
+    double $1_name =
+        reposit::convert<double>(
+            valueObject->getProperty("$1_name"));
+%}
+
+%typemap(rp_tm_scr_cnvt) rp_tp_string %{
+    std::string $1_name =
+        reposit::convert<std::string>(
+            valueObject->getProperty("$1_name"));
+%}
+
+%typemap(rp_tm_scr_cnvt) const std::vector<bool>& %{
+   std::vector<bool> $1_name =
+        reposit::vector::convert<bool>(valueObject->getProperty("$1_name"), "$1_name");
+%}
+
+%typemap(rp_tm_scr_cnvt) const std::vector<std::string>& %{
+   std::vector<std::string> $1_name =
+        reposit::vector::convert<std::string>(valueObject->getProperty("$1_name"), "$1_name");
+%}
+
+%typemap(rp_tm_scr_cnvt) const std::vector<std::vector<double> >& %{
+    std::vector<std::vector<double> > $1_name =
+        reposit::matrix::convert<double>(valueObject->getProperty("$1_name"), "$1_name");
+%}
+
+%typemap(rp_tm_scr_cnvt) SWIGTYPE %{
+    $1_type $1_name =
+        reposit::convert<$1_type>(
+            valueObject->getProperty("$1_name"));
+%}
 
 //*****************************************************************************
 // rp_tm_cpp_* - typemaps for the C++ Addin
@@ -198,8 +235,6 @@
 
 %typemap(rp_tm_xll_argfv2) std::vector const & "$1_name_vec";
 %typemap(rp_tm_xll_argfv2) SWIGTYPE "$1_name_cnv";
-
-// rp_tm_xll_argf - arguments to the underlying Library function (F/C/M)
 
 // rp_tm_xll_argf - arguments to the underlying Library function (F/C/M)
 
@@ -301,6 +336,7 @@
 //*****************************************************************************
 
 %apply rp_tp_long { int };
+%apply rp_tp_long { unsigned int };
 %apply rp_tp_long { std::size_t };
 %apply rp_tp_string { char * };
 %apply rp_tp_string { std::string };

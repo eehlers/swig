@@ -1710,9 +1710,8 @@ struct GroupExcelFunctions : public GroupBase {
             groupContainsLoopFunction = true;
         } else {
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtdc", 2);
-            //Printf(b_xlf_grp_cpp->b1, "        xxx->%s(\n", p.name);
             emitTypeMap(b_xlf_grp_cpp->b1, p.node, "rp_tm_xxx_rp_call", 2);
-            Printf(b_xlf_grp_cpp->b1, "%s(\n", p.name);
+            Printf(b_xlf_grp_cpp->b1, "        %s(\n", p.name);
             emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argf", "rp_tm_xll_argf2", 3, ',', true, true);
             Printf(b_xlf_grp_cpp->b1, "        );\n\n");
             emitTypeMap(b_xlf_grp_cpp->b1, p.n, "rp_tm_xll_rtst", 2);
