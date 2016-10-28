@@ -56,8 +56,11 @@
 // rp_tm_vob_parm - Value Object constructor parameters (C)
 
 %typemap(rp_tm_vob_parm) rp_tp_long "long";
+%typemap(rp_tm_vob_parm) double "double";
 %typemap(rp_tm_vob_parm) rp_tp_string "const std::string &";
 %typemap(rp_tm_vob_parm) rp_tp_any "const reposit::property_t&";
+%typemap(rp_tm_vob_parm) std::vector< std::vector<double> > const & "const std::vector< std::vector<double> >&";
+%typemap(rp_tm_vob_parm) std::vector< std::vector<double> > const & "const std::vector< std::vector<double> >&";
 %typemap(rp_tm_vob_parm) SWIGTYPE "$1_type";
 
 // HPP
@@ -65,6 +68,7 @@
 // rp_tm_vob_mbvr - Value Object class member variables (C)
 
 %typemap(rp_tm_vob_mbvr) rp_tp_long "long $1_name_";
+%typemap(rp_tm_vob_mbvr) double "double $1_name_";
 %typemap(rp_tm_vob_mbvr) rp_tp_string "std::string $1_name_";
 %typemap(rp_tm_vob_mbvr) rp_tp_any "reposit::property_t $1_name_";
 %typemap(rp_tm_vob_mbvr) std::vector< std::vector<double> > const & "std::vector< std::vector<double> > $1_name_";
@@ -84,6 +88,7 @@
 // rp_tm_vob_cnvt - in ValueObject::setSystemProperty, convert value from property_t to native type (C)
 
 %typemap(rp_tm_vob_cnvt) rp_tp_long "reposit::convert<long>(value)";
+%typemap(rp_tm_vob_cnvt) double "reposit::convert<double>(value)";
 %typemap(rp_tm_vob_cnvt) rp_tp_string "reposit::convert<std::string>(value)";
 %typemap(rp_tm_vob_cnvt) rp_tp_any "value";
 %typemap(rp_tm_vob_cnvt) std::vector<std::vector<double> > & "reposit::matrix::convert<double>(value, nameUpper)";
@@ -185,6 +190,11 @@
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
 
+%typemap(rp_tm_xll_cnvt2) double %{
+        double $1_name_cnv = reposit::convert<double>(
+            reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
+%}
+
 // rp_tm_xll_argfv - arguments to the Value Object constructor (C)
 
 %typemap(rp_tm_xll_argfv) bool "*$1_name";
@@ -221,7 +231,7 @@
         static bool ret = true;
         return &ret;
 %}
-
+// FIXME replace the 3 below with SWIGTYPE
 %typemap(rp_tm_xll_rtst) bool %{
         static bool ret;
         ret = returnValue;
@@ -230,6 +240,12 @@
 
 %typemap(rp_tm_xll_rtst) rp_tp_long %{
         static long ret;
+        ret = returnValue;
+        return &ret;
+%}
+
+%typemap(rp_tm_xll_rtst) double %{
+        static double ret;
         ret = returnValue;
         return &ret;
 %}
@@ -243,6 +259,12 @@
 %typemap(rp_tm_xll_rtst) std::vector<std::string> %{
         static OPER xRet;
         reposit::vectorToOper(returnValue, xRet);
+        return &xRet;
+%}
+
+%typemap(rp_tm_xll_rtst) std::vector<std::vector<double> > %{
+        static OPER xRet;
+        reposit::matrixToOper(returnValue, xRet);
         return &xRet;
 %}
 
@@ -301,6 +323,8 @@
 %define RP_VECTOR(T...)
 
 // rp_tm_vob_parm - Value Object constructor parameters (C)
+
+%typemap(rp_tm_vob_parm) std::vector<T> const & "const std::vector<T>&";
 
 %typemap(rp_tm_vob_parm) std::vector<T> & "const std::vector<T>&";
 
