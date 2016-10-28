@@ -669,8 +669,8 @@ struct GroupLibraryObjects : public GroupBase {
 
         Append(b_lib_grp_hpp->b0, pragmas_.lib_inc);
 
-        Printf(b_lib_grp_hpp->b0, "// FIXME get rid of this:\n");
-        Printf(b_lib_grp_hpp->b0, "using namespace %s;\n", nmspace);
+        //Printf(b_lib_grp_hpp->b0, "// FIXME get rid of this:\n");
+        //Printf(b_lib_grp_hpp->b0, "using namespace %s;\n", nmspace);
         Printf(b_lib_grp_hpp->b0, "\n");
         Printf(b_lib_grp_hpp->b0,"namespace %s {\n", module);
         Printf(b_lib_grp_hpp->b0, "\n");
