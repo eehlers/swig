@@ -284,7 +284,7 @@ void excelRegister(File *b, Node *n, String *funcName, String *funcDoc, ParmList
     Printf(b, "        Excel(xlfRegister, 0, %d, &xDll,\n", 10 + paramListSize(parms));
     Printf(b, "            // function code name\n");
     Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
-    Printf(b, "            // parameter codes\n");
+    Printf(b, "            // parameter codes (function excelParamCodes() using typemaps rp_tm_xll_cdrt, rp_tm_xll_code, rp_tm_xll_code2).\n");
     excelParamCodes(b, n, parms);
     Printf(b, "            // function display name\n");
     Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
@@ -311,7 +311,7 @@ void excelUnregister(File *b, Node *n, String *funcName, String *funcDoc, ParmLi
     Printf(b, "        Excel(xlfRegister, 0, %d, &xDll,\n", 10 + paramListSize(parms));
     Printf(b, "            // function code name\n");
     Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
-    Printf(b, "            // parameter codes\n");
+    Printf(b, "            // parameter codes (function excelParamCodes() using typemaps rp_tm_xll_cdrt, rp_tm_xll_code, rp_tm_xll_code2).\n");
     excelParamCodes(b, n, parms);
     Printf(b, "            // function display name\n");
     Printf(b, "            TempStrNoSize(\"\\x%s\"\"%s\"),\n", hexLen(funcName).c_str(), funcName);
@@ -955,6 +955,7 @@ struct GroupValueObjects : public GroupBase {
         Printf(b_vob_grp_hpp->b0,"        };\n");
         Printf(b_vob_grp_hpp->b0,"\n");
 
+        Printf(b_vob_grp_cpp->b0,"\n");
         Printf(b_vob_grp_cpp->b0,"        const char* %s::mPropertyNames[] = {\n", p.funcRename);
         emitParmList(p.parms, b_vob_grp_cpp->b0, 1, "rp_tm_vob_name", "rp_tm_vob_name", 3, ',', true, false, true);
         Printf(b_vob_grp_cpp->b0,"            \"Permanent\"\n");
@@ -1009,6 +1010,7 @@ struct GroupValueObjects : public GroupBase {
         Printf(b_vob_grp_cpp->b0,"            reposit::ValueObject(ObjectId, \"%s\", Permanent),\n", p.funcRename);
         emitParmList(p.parms, b_vob_grp_cpp->b0, 1, "rp_tm_vob_init", "rp_tm_vob_init", 3, ',', true, false, true);
         Printf(b_vob_grp_cpp->b0,"            Permanent_(Permanent) {\n");
+        Printf(b_vob_grp_cpp->b0,"                // FIXME need to call processPrecedentID() here.\n");
         Printf(b_vob_grp_cpp->b0,"        }\n");
 
         count_.constructors++;

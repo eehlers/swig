@@ -190,8 +190,18 @@
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
 
+%typemap(rp_tm_xll_cnvt2) rp_tp_long %{
+        long $1_name_cnv = reposit::convert<long>(
+            reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
+%}
+
 %typemap(rp_tm_xll_cnvt2) double %{
         double $1_name_cnv = reposit::convert<double>(
+            reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
+%}
+
+%typemap(rp_tm_xll_cnvt2) std::string & %{
+        std::string $1_name_cnv = reposit::convert<std::string>(
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
 
@@ -254,6 +264,12 @@
         static char ret[XL_MAX_STR_LEN];
         reposit::stringToChar(returnValue, ret);
         return ret;
+%}
+
+%typemap(rp_tm_xll_rtst) std::vector<double> & %{
+        static OPER xRet;
+        reposit::vectorToOper(returnValue, xRet);
+        return &xRet;
 %}
 
 %typemap(rp_tm_xll_rtst) std::vector<std::string> %{
