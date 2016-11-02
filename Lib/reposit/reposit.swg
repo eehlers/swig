@@ -55,6 +55,7 @@
 
 // rp_tm_vob_parm - Value Object constructor parameters (C)
 
+%typemap(rp_tm_vob_parm) bool "bool";
 %typemap(rp_tm_vob_parm) rp_tp_long "long";
 %typemap(rp_tm_vob_parm) double "double";
 %typemap(rp_tm_vob_parm) rp_tp_string "const std::string &";
@@ -67,6 +68,7 @@
 
 // rp_tm_vob_mbvr - Value Object class member variables (C)
 
+%typemap(rp_tm_vob_mbvr) bool "bool $1_name_";
 %typemap(rp_tm_vob_mbvr) rp_tp_long "long $1_name_";
 %typemap(rp_tm_vob_mbvr) double "double $1_name_";
 %typemap(rp_tm_vob_mbvr) rp_tp_string "std::string $1_name_";
@@ -373,6 +375,15 @@
 
 %enddef
 
+%define RP_VECTOR_LONG(T...)
+%typemap(rp_tm_xll_cnvt) std::vector<T> & %{
+        std::vector<long> $1_name_vec2 =
+            reposit::operToVector<long>(*$1_name, "$1_name");
+        std::vector<T> $1_name_vec =
+            QuantLibAddin::convertVector<long, T>($1_name_vec2);
+%}
+%enddef
+
 //*****************************************************************************
 // %apply statements - map native types to reposit types
 //*****************************************************************************
@@ -386,9 +397,11 @@
 %apply rp_tp_any { reposit::property_t & };
 
 RP_VECTOR(bool)
-RP_VECTOR(rp_tp_long)
+RP_VECTOR(long)
 RP_VECTOR(double)
 RP_VECTOR(rp_tp_string)
+
+RP_VECTOR_LONG(unsigned int)
 
 //*****************************************************************************
 // Macros - for certain kinds of types - repository objects, enumerated types
