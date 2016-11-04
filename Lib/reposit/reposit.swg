@@ -731,7 +731,7 @@ RP_VECTOR_LONG(unsigned int)
         reposit::convert<std::string>(valueObject->getProperty("$1_name"));
     valueObject->processPrecedentID($1_name_str);
     RP_GET_REFERENCE($1_name, $1_name_str,
-        T_ADDIN ,  T_LIB );
+        T_ADDIN,  T_LIB);
 %}
 %typemap(rp_tm_cpp_parm) boost::shared_ptr<T_LIB> const & "const std::string&";
 %typemap(rp_tm_cpp_args) boost::shared_ptr<T_LIB> const & "$1_name_get";
@@ -740,7 +740,7 @@ RP_VECTOR_LONG(unsigned int)
 %typemap(rp_tm_csh_clcp) boost::shared_ptr<T_LIB> const & "StringBuilder";
 %typemap(rp_tm_csh_cnvt) boost::shared_ptr<T_LIB> const & %{
         RP_GET_REFERENCE($1_name_obj, $1_name,
-            T_ADDIN ,  T_LIB );
+            T_ADDIN,  T_LIB);
 %}
 %typemap(rp_tm_csh_cnvt) std::vector<boost::shared_ptr<T_LIB> > const & %{
         std::vector<std::string> $1_name_vec($1_name, $1_name + $1_name_length);
@@ -755,7 +755,7 @@ RP_VECTOR_LONG(unsigned int)
 %}
 %typemap(rp_tm_xll_cnvt) boost::shared_ptr<T_LIB> const & %{
         RP_GET_REFERENCE($1_name_obj, $1_name,
-            T_ADDIN ,  T_LIB );
+            T_ADDIN,  T_LIB);
 %}
 %typemap(rp_tm_xll_argf) boost::shared_ptr<T_LIB> const & "$1_name_obj";
 %typemap(rp_tm_xll_cdrt) boost::shared_ptr<T_LIB> const & "C";
