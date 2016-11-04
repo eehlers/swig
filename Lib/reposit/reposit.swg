@@ -418,11 +418,11 @@ RP_VECTOR_LONG(unsigned int)
 //*****************************************************************************
 
 // enumerated types
-%define ENUMERATED_TYPE(T...)
-// T
+%define ENUMERATED_TYPE_IMPL(T...)
+
 %typemap(rp_tm_xxx_rp_get) T %{
-        T xxx =
-            reposit::Create<T>()(objectID);
+        $1_basetype xxx =
+            reposit::Create<$1_basetype>()(objectID);
 %}
 %typemap(rp_tm_xll_loop) T "$1_name_enm";
 %typemap(rp_tm_xll_loop2) T "$1_name_enm";
@@ -433,33 +433,33 @@ RP_VECTOR_LONG(unsigned int)
 %typemap(rp_tm_scr_cnvt) T %{
     std::string $1_name_str =
         reposit::convert<std::string>(valueObject->getProperty("$1_name"));
-    T $1_name =
-        reposit::Create<T>()($1_name_str);
+    $1_basetype $1_name =
+        reposit::Create<$1_basetype>()($1_name_str);
 %}
 %typemap(rp_tm_cpp_parm) T "const std::string&";
 %typemap(rp_tm_cpp_cnvt) T %{
-    T $1_name_enm =
-        reposit::Create<T>()($1_name);
+    $1_basetype $1_name_enm =
+        reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_cpp_args) T "$1_name_enm";
 %typemap(rp_tm_csh_parm) T "const char *";
 %typemap(rp_tm_csh_cnvt) T %{
-        T $1_name_enm =
-            reposit::Create<T>()($1_name);
+        $1_basetype $1_name_enm =
+            reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_csh_args) T "$1_name_enm";
 %typemap(rp_tm_csh_clcp) T "StringBuilder";
 %typemap(rp_tm_xll_rtft) T "char*";
 %typemap(rp_tm_xll_parm) T "char*";
 %typemap(rp_tm_xll_cnvt) T %{
-        T $1_name_enm =
-            reposit::Create<T>()($1_name);
+        $1_basetype $1_name_enm =
+            reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_xll_cnvt2) T %{
         std::string $1_name_str = reposit::convert<std::string>(
             reposit::ConvertOper(*$1_name), "$1_name", "$rp_value");
-        T $1_name_enm =
-            reposit::Create<T>()($1_name_str);
+        $1_basetype $1_name_enm =
+            reposit::Create<$1_basetype>()($1_name_str);
 %}
 %typemap(rp_tm_xll_argf) T "$1_name_enm";
 %typemap(rp_tm_xll_argf2) T "$1_name_enm";
@@ -468,8 +468,8 @@ RP_VECTOR_LONG(unsigned int)
 
 %typemap(rp_tm_cfy_parm) T "const char * $1_name";
 %typemap(rp_tm_cfy_cnvt) T %{
-        T $1_name_enum =
-            reposit::Create<T>()($1_name);
+        $1_basetype $1_name_enum =
+            reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_cfy_args) T "$1_name_enum";
 %typemap(rp_tm_xll_argv) T "$1_name";
@@ -486,81 +486,19 @@ RP_VECTOR_LONG(unsigned int)
 %typemap(rp_tm_dox_rtdc) T "string returnValue";
 %typemap(rp_tm_dox_mbvr) T "string $1_name";
 
-// T &
-%typemap(rp_tm_xxx_rp_get) T & %{
-        T xxx =
-            reposit::Create<T>()(objectID);
-%}
-%typemap(rp_tm_xll_loop) T & "$1_name_enm";
-%typemap(rp_tm_xll_loop2) T & "$1_name_enm";
-%typemap(rp_tm_csh_loop) T & "$1_name_enm";
-%typemap(rp_tm_vob_parm) T & "const std::string &";
-%typemap(rp_tm_vob_mbvr) T & "std::string $1_name_";
-%typemap(rp_tm_vob_cnvt) T & "reposit::convert<std::string>(value)";
-%typemap(rp_tm_scr_cnvt) T & %{
-    std::string $1_name_str =
-        reposit::convert<std::string>(valueObject->getProperty("$1_name"));
-    T $1_name =
-        reposit::Create<T>()($1_name_str);
-%}
-%typemap(rp_tm_cpp_parm) T & "const std::string&";
-%typemap(rp_tm_cpp_cnvt) T & %{
-    T $1_name_enm =
-        reposit::Create<T>()($1_name);
-%}
-%typemap(rp_tm_cpp_args) T & "$1_name_enm";
-%typemap(rp_tm_csh_parm) T & "const char *";
-%typemap(rp_tm_csh_cnvt) T & %{
-        T $1_name_enm =
-            reposit::Create<T>()($1_name);
-%}
-%typemap(rp_tm_csh_args) T & "$1_name_enm";
-%typemap(rp_tm_csh_clcp) T & "StringBuilder";
-%typemap(rp_tm_xll_rtft) T & "char*";
-%typemap(rp_tm_xll_parm) T & "char*";
-%typemap(rp_tm_xll_cnvt) T & %{
-        T $1_name_enm =
-            reposit::Create<T>()($1_name);
-%}
-%typemap(rp_tm_xll_cnvt2) T & %{
-        std::string $1_name_str = reposit::convert<std::string>(
-            reposit::ConvertOper(*$1_name), "$1_name", "$rp_value");
-        T $1_name_enm =
-            reposit::Create<T>()($1_name_str);
-%}
-%typemap(rp_tm_xll_argf) T & "$1_name_enm";
-%typemap(rp_tm_xll_argf2) T & "$1_name_enm";
-%typemap(rp_tm_xll_cdrt) T & "C";
-%typemap(rp_tm_xll_code) T & "C";
-%typemap(rp_tm_cfy_parm) T & "const char * $1_name";
-%typemap(rp_tm_cfy_cnvt) T & %{
-        T $1_name_enum =
-            reposit::Create<T>()($1_name);
-%}
-%typemap(rp_tm_cfy_args) T & "$1_name_enum";
-%typemap(rp_tm_xll_argv) T & "$1_name";
-%typemap(rp_tm_xll_argv2) T & "$1_name_str";
+%enddef
 
-%typemap(rp_tm_xll_rtst) T & %{
-        std::ostringstream os;
-        os << returnValue;
-        static char ret[XL_MAX_STR_LEN];
-        reposit::stringToChar(os.str(), ret);
-        return ret;
-%}
-
-%typemap(rp_tm_dox_rtdc) T & "string returnValue";
-%typemap(rp_tm_dox_mbvr) T & "string $1_name";
-%typemap(rp_tm_dox_rtd2) SWIGTYPE "ZZZ returnValue";
-
+%define ENUMERATED_TYPE(T...)
+ENUMERATED_TYPE_IMPL(T)
+ENUMERATED_TYPE_IMPL(T&)
 %enddef
 
 // enumerated class
-%define ENUMERATED_CLASS(T...)
-// T
+%define ENUMERATED_CLASS_IMPL(T,T_NAME...)
+
 %typemap(rp_tm_xxx_rp_get) T %{
-        T xxx =
-            reposit::Create<T>()(objectID);
+        $1_basetype xxx =
+            reposit::Create<$1_basetype>()(objectID);
 %}
 %typemap(rp_tm_xxx_rp_call) T "xxx.";
 %typemap(rp_tm_xll_loop) T "$1_name_enm";
@@ -571,24 +509,24 @@ RP_VECTOR_LONG(unsigned int)
 %typemap(rp_tm_scr_cnvt) T %{
     std::string $1_name_str =
         reposit::convert<std::string>(valueObject->getProperty("$1_name"));
-    T $1_name =
-        reposit::Create<T>()($1_name_str);
+    $1_basetype $1_name =
+        reposit::Create<$1_basetype>()($1_name_str);
 %}
 %typemap(rp_tm_cpp_parm) T "const std::string&";
 %typemap(rp_tm_cpp_cnvt) T %{
-    T $1_name_enm =
-        reposit::Create<T >()($1_name);
+    $1_basetype $1_name_enm =
+        reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_cpp_args) T "$1_name_enm";
 
 %typemap(rp_tm_csh_parm) T "const char *";
 %typemap(rp_tm_csh_cnvt) T %{
-            T $1_name_enm =
-                reposit::Create<T >()($1_name);
+            $1_basetype $1_name_enm =
+                reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_csh_cnvt) T %{
-        T $1_name_enm =
-            reposit::Create<T >()($1_name);
+        $1_basetype $1_name_enm =
+            reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_csh_args) T "$1_name_enm";
 %typemap(rp_tm_csh_clcp) T "StringBuilder";
@@ -597,14 +535,14 @@ RP_VECTOR_LONG(unsigned int)
 %typemap(rp_tm_xll_rtft) T "char*";
 %typemap(rp_tm_xll_parm) T "char*";
 %typemap(rp_tm_xll_cnvt) T %{
-        T $1_name_enm =
-            reposit::Create<T>()($1_name);
+        $1_basetype $1_name_enm =
+            reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_xll_cnvt2) T %{
         std::string $1_name_str = reposit::convert<std::string>(
             reposit::ConvertOper(*$1_name), "$1_name", "$rp_value");
-        T $1_name_enm =
-            reposit::Create<T>()($1_name_str);
+        $1_basetype $1_name_enm =
+            reposit::Create<$1_basetype>()($1_name_str);
 %}
 %typemap(rp_tm_xll_argf) T "$1_name_enm";
 %typemap(rp_tm_xll_argf2) T "$1_name_enm";
@@ -613,8 +551,8 @@ RP_VECTOR_LONG(unsigned int)
 
 %typemap(rp_tm_cfy_parm) T "const char * $1_name";
 %typemap(rp_tm_cfy_cnvt) T %{
-    T $1_name_enm =
-        reposit::Create<T >()($1_name);
+    $1_basetype $1_name_enm =
+        reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_cfy_args) T "$1_name_enm";
 %typemap(rp_tm_xll_argv) T "$1_name";
@@ -630,91 +568,13 @@ RP_VECTOR_LONG(unsigned int)
 
 %typemap(rp_tm_dox_rtdc) T "string returnValue";
 %typemap(rp_tm_dox_mbvr) T "string $1_name";
-%typemap(rp_tm_dox_rtd2) SWIGTYPE "ID of Enumeration of class T";
+%typemap(rp_tm_dox_rtd2) SWIGTYPE "ID of Enumeration of class T_NAME";
 
-// T &
-%typemap(rp_tm_xxx_rp_get) T & %{
-        T xxx =
-            reposit::Create<T>()(objectID);
-%}
-%typemap(rp_tm_xll_loop) T & "$1_name_enm";
-%typemap(rp_tm_xll_loop2) T & "$1_name_enm";
-%typemap(rp_tm_vob_parm) T & "const std::string &";
-%typemap(rp_tm_vob_mbvr) T & "std::string $1_name_";
-%typemap(rp_tm_vob_cnvt) T & "reposit::convert<std::string>(value)";
-%typemap(rp_tm_scr_cnvt) T & %{
-    std::string $1_name_str =
-        reposit::convert<std::string>(valueObject->getProperty("$1_name"));
-    T $1_name =
-        reposit::Create<T>()($1_name_str);
-%}
-%typemap(rp_tm_cpp_parm) T & "const std::string&";
-%typemap(rp_tm_cpp_cnvt) T & %{
-    T $1_name_enm =
-        reposit::Create<T >()($1_name);
-%}
-%typemap(rp_tm_cpp_args) T & "$1_name_enm";
+%enddef
 
-%typemap(rp_tm_csh_parm) T & "const char *";
-%typemap(rp_tm_csh_cnvt) T & %{
-            T $1_name_enm =
-                reposit::Create<T >()($1_name);
-%}
-%typemap(rp_tm_csh_cnvt) T & %{
-        T $1_name_enm =
-            reposit::Create<T >()($1_name);
-%}
-%typemap(rp_tm_csh_args) T & "$1_name_enm";
-%typemap(rp_tm_csh_clcp) T & "StringBuilder";
-%typemap(rp_tm_csh_rttp) T & "char *";
-%typemap(rp_tm_csh_rscp) T & "string";
-%typemap(rp_tm_csh_rtst) T & %{
-        std::ostringstream os;
-        os << returnValue;
-        ULONG size = os.str().length() + sizeof(char);
-        char *ret = (char*)::CoTaskMemAlloc(size);
-        strcpy(ret, os.str().c_str());
-        return ret;
-%}
-
-%typemap(rp_tm_xll_rtft) T & "char*";
-%typemap(rp_tm_xll_parm) T & "char*";
-%typemap(rp_tm_xll_cnvt) T & %{
-        T $1_name_enm =
-            reposit::Create<T>()($1_name);
-%}
-%typemap(rp_tm_xll_cnvt2) T & %{
-        std::string $1_name_str = reposit::convert<std::string>(
-            reposit::ConvertOper(*$1_name), "$1_name", "$rp_value");
-        T $1_name_enm =
-            reposit::Create<T>()($1_name_str);
-%}
-%typemap(rp_tm_xll_argf) T & "$1_name_enm";
-%typemap(rp_tm_xll_argf2) T & "$1_name_enm";
-%typemap(rp_tm_xll_cdrt) T & "C";
-%typemap(rp_tm_xll_code) T & "C";
-
-%typemap(rp_tm_xll_rtst) T & %{
-        std::ostringstream os;
-        os << returnValue;
-        static char ret[XL_MAX_STR_LEN];
-        reposit::stringToChar(os.str(), ret);
-        return ret;
-%}
-
-%typemap(rp_tm_cfy_parm) T & "const char * $1_name";
-%typemap(rp_tm_cfy_cnvt) T & %{
-    T $1_name_enm =
-        reposit::Create<T >()($1_name);
-%}
-%typemap(rp_tm_cfy_args) T & "$1_name_enm";
-%typemap(rp_tm_xll_argv) T & "$1_name";
-%typemap(rp_tm_xll_argv2) T & "$1_name_str";
-
-%typemap(rp_tm_dox_rtdc) T & "string returnValue";
-%typemap(rp_tm_dox_mbvr) T & "string $1_name";
-%typemap(rp_tm_dox_rtd2) SWIGTYPE "ID of Enumeration of class T";
-
+%define ENUMERATED_CLASS(T...)
+ENUMERATED_CLASS_IMPL(T, T)
+ENUMERATED_CLASS_IMPL(T&, T)
 %enddef
 
 // repository objects
