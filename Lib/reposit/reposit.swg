@@ -206,17 +206,17 @@
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
 
-// rp_tm_xll_argfv - arguments to the Value Object constructor (C)
+// rp_tm_xll_argv - arguments to the Value Object constructor (C)
 
-%typemap(rp_tm_xll_argfv) bool "*$1_name";
-%typemap(rp_tm_xll_argfv) rp_tp_long "*$1_name";
-%typemap(rp_tm_xll_argfv) double "*$1_name";
-%typemap(rp_tm_xll_argfv) std::vector "$1_name_vec";
-%typemap(rp_tm_xll_argfv) std::vector & "$1_name_vec";
-%typemap(rp_tm_xll_argfv) SWIGTYPE "$1_name";
+%typemap(rp_tm_xll_argv) bool "*$1_name";
+%typemap(rp_tm_xll_argv) rp_tp_long "*$1_name";
+%typemap(rp_tm_xll_argv) double "*$1_name";
+%typemap(rp_tm_xll_argv) std::vector "$1_name_vec";
+%typemap(rp_tm_xll_argv) std::vector & "$1_name_vec";
+%typemap(rp_tm_xll_argv) SWIGTYPE "$1_name";
 
-%typemap(rp_tm_xll_argfv2) std::vector const & "$1_name_vec";
-%typemap(rp_tm_xll_argfv2) SWIGTYPE "$1_name_cnv";
+%typemap(rp_tm_xll_argv2) std::vector const & "$1_name_vec";
+%typemap(rp_tm_xll_argv2) SWIGTYPE "$1_name_cnv";
 
 // rp_tm_xll_argf - arguments to the underlying Library function (F/C/M)
 
@@ -476,8 +476,8 @@ RP_VECTOR_LONG(unsigned int)
             reposit::Create<T>()($1_name);
 %}
 %typemap(rp_tm_cfy_args) T "$1_name_enum";
-%typemap(rp_tm_xll_argfv) T "$1_name";
-%typemap(rp_tm_xll_argfv2) T "$1_name_str";
+%typemap(rp_tm_xll_argv) T "$1_name";
+%typemap(rp_tm_xll_argv2) T "$1_name_str";
 
 %typemap(rp_tm_xll_rtst) T %{
         std::ostringstream os;
@@ -542,8 +542,8 @@ RP_VECTOR_LONG(unsigned int)
             reposit::Create<T>()($1_name);
 %}
 %typemap(rp_tm_cfy_args) T & "$1_name_enum";
-%typemap(rp_tm_xll_argfv) T & "$1_name";
-%typemap(rp_tm_xll_argfv2) T & "$1_name_str";
+%typemap(rp_tm_xll_argv) T & "$1_name";
+%typemap(rp_tm_xll_argv2) T & "$1_name_str";
 
 %typemap(rp_tm_xll_rtst) T & %{
         std::ostringstream os;
@@ -621,8 +621,8 @@ RP_VECTOR_LONG(unsigned int)
         reposit::Create<T >()($1_name);
 %}
 %typemap(rp_tm_cfy_args) T "$1_name_enm";
-%typemap(rp_tm_xll_argfv) T "$1_name";
-%typemap(rp_tm_xll_argfv2) T "$1_name_str";
+%typemap(rp_tm_xll_argv) T "$1_name";
+%typemap(rp_tm_xll_argv2) T "$1_name_str";
 
 %typemap(rp_tm_xll_rtst) T %{
         std::ostringstream os;
@@ -712,8 +712,8 @@ RP_VECTOR_LONG(unsigned int)
         reposit::Create<T >()($1_name);
 %}
 %typemap(rp_tm_cfy_args) T & "$1_name_enm";
-%typemap(rp_tm_xll_argfv) T & "$1_name";
-%typemap(rp_tm_xll_argfv2) T & "$1_name_str";
+%typemap(rp_tm_xll_argv) T & "$1_name";
+%typemap(rp_tm_xll_argv2) T & "$1_name_str";
 
 %typemap(rp_tm_dox_rtdc) T & "string returnValue";
 %typemap(rp_tm_dox_mbvr) T & "string $1_name";

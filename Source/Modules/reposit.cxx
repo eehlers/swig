@@ -1623,7 +1623,7 @@ struct GroupExcelFunctions : public GroupBase {
         Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::ValueObject> valueObject(\n");
         Printf(b_xlf_grp_cpp->b1, "            new %s::ValueObjects::%s(\n", module, funcName);
         Printf(b_xlf_grp_cpp->b1, "                objectID,\n");
-        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argfv", "rp_tm_xll_argfv2", 4, ',', true, true, true);
+        emitParmList(p.parms, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_argv", "rp_tm_xll_argv2", 4, ',', true, true, true);
         Printf(b_xlf_grp_cpp->b1, "                false));\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
         Printf(b_xlf_grp_cpp->b1, "        boost::shared_ptr<reposit::Object> object(\n");
