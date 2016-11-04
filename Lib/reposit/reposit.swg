@@ -373,11 +373,7 @@
         std::vector<T> $1_name_vec =
             reposit::operToVector<T>(*$1_name, "$1_name");
 %}
-
-%typemap(rp_tm_xll_cnvt) std::vector<T> & %{
-        std::vector<T> $1_name_vec =
-            reposit::operToVector<T>(*$1_name, "$1_name");
-%}
+%typemap(rp_tm_xll_cnvt) std::vector<T> & = std::vector<T>;
 
 %typemap(rp_tm_xll_cnvt2) std::vector<T> & %{
         std::vector<T> $1_name_vec =
