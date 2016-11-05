@@ -268,11 +268,12 @@
         return ret;
 %}
 
-%typemap(rp_tm_xll_rtst) std::vector<double> & %{
+%typemap(rp_tm_xll_rtst) std::vector<double> %{
         static OPER xRet;
         reposit::vectorToOper(returnValue, xRet);
         return &xRet;
 %}
+%typemap(rp_tm_xll_rtst) std::vector<double> & = std::vector<double>;
 
 %typemap(rp_tm_xll_rtst) std::vector<std::string> %{
         static OPER xRet;
@@ -568,7 +569,7 @@ ENUMERATED_TYPE_IMPL(T&)
 
 %typemap(rp_tm_dox_rtdc) T "string returnValue";
 %typemap(rp_tm_dox_mbvr) T "string $1_name";
-%typemap(rp_tm_dox_rtd2) SWIGTYPE "ID of Enumeration of class T_NAME";
+//%typemap(rp_tm_dox_rtd2) SWIGTYPE "ID of Enumeration of class T_NAME";
 
 %enddef
 

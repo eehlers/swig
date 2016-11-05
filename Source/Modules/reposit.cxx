@@ -3020,15 +3020,15 @@ int functionWrapperImplMemb(Node *n) {
         Setattr(x, "rp_docstr", Char(docStr.c_str()));
     }
 
-    String *s = getTypeMap(p.n, "rp_tm_dox_rtd2");
+    //String *s = getTypeMap(p.n, "rp_tm_dox_rtd2");
 
     // Create from parms another list parms2 containing additional parameters.
     if (legacy) {
         // In legacy mode the signature is: (ObjectId, ..., Trigger)
         p.parms2 = CopyParmList(Getattr(p.parms, "nextSibling"));
         p.parms2 = appendParm(p.parms2, "Trigger", "reposit::property_t", true, false, "Dependency tracking trigger");
-        //p.parms2 = prependParm(p.parms2, "objectID", "std::string", true, false, "Object ID");
-        p.parms2 = prependParm(p.parms2, "objectID", "std::string", true, false, Char(s));
+        p.parms2 = prependParm(p.parms2, "objectID", "std::string", true, false, "Object ID");
+        //p.parms2 = prependParm(p.parms2, "objectID", "std::string", true, false, Char(s));
     } else {
         // For new projects the signature is: (Trigger, ObjectId, ...)
         ParmList *parmsTemp = Getattr(p.parms, "nextSibling");
