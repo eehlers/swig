@@ -419,7 +419,7 @@ RP_VECTOR_LONG(unsigned int)
 //*****************************************************************************
 
 // enumerated types
-%define ENUMERATED_TYPE_IMPL(T...)
+%define ENUMERATED_TYPE_IMPL2(T...)
 
 %typemap(rp_tm_xxx_rp_get) T %{
         $1_basetype xxx =
@@ -489,13 +489,29 @@ RP_VECTOR_LONG(unsigned int)
 
 %enddef
 
-%define ENUMERATED_TYPE(T...)
-ENUMERATED_TYPE_IMPL(T)
-ENUMERATED_TYPE_IMPL(T&)
+%define ENUMERATED_TYPE_IMPL(T...)
+ENUMERATED_TYPE_IMPL2(T)
+ENUMERATED_TYPE_IMPL2(T&)
+%enddef
+
+%define ENUMERATED_TYPE(N,T...)
+namespace N {
+    enum T;
+}
+ENUMERATED_TYPE_IMPL(N::T)
+%enddef
+
+%define ENUMERATED_TYPE_STRUCT(N,S,T...)
+namespace N {
+    struct S {
+        enum T;
+    };
+}
+ENUMERATED_TYPE_IMPL(N::S::T)
 %enddef
 
 // enumerated class
-%define ENUMERATED_CLASS_IMPL(T,T_NAME...)
+%define ENUMERATED_CLASS_IMPL2(T,T_NAME...)
 
 %typemap(rp_tm_xxx_rp_get) T %{
         $1_basetype xxx =
@@ -573,9 +589,16 @@ ENUMERATED_TYPE_IMPL(T&)
 
 %enddef
 
-%define ENUMERATED_CLASS(T...)
-ENUMERATED_CLASS_IMPL(T, T)
-ENUMERATED_CLASS_IMPL(T&, T)
+%define ENUMERATED_CLASS_IMPL(T...)
+ENUMERATED_CLASS_IMPL2(T, T)
+ENUMERATED_CLASS_IMPL2(T&, T)
+%enddef
+
+%define ENUMERATED_CLASS(N,T...)
+namespace N {
+    class T;
+}
+ENUMERATED_CLASS_IMPL(N::T)
 %enddef
 
 // repository objects
