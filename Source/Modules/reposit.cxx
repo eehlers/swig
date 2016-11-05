@@ -1161,6 +1161,14 @@ struct GroupSerializationRegister : public GroupBase {
 
         Printf(b_srg_grp_cpp->b0, "\n");
         Printf(b_srg_grp_cpp->b0, "#include <rp/rpdefines.hpp>\n");
+        Printf(b_srg_grp_cpp->b0, "\n");
+        Printf(b_srg_grp_cpp->b0, "// Suppress a very long warning message which occurs at least in VC9 (2008) + boost::serialization 1.58\n");
+        Printf(b_srg_grp_cpp->b0, "// (and possibly for other/all combinations of VC + boost::serialization)?\n");
+        Printf(b_srg_grp_cpp->b0, "// warning C4018: '<' : signed/unsigned mismatch\n");
+        Printf(b_srg_grp_cpp->b0, "#if defined BOOST_MSVC\n");
+        Printf(b_srg_grp_cpp->b0, "#pragma warning(disable:4018)\n");
+        Printf(b_srg_grp_cpp->b0, "#endif\n");
+        Printf(b_srg_grp_cpp->b0, "\n");
         Printf(b_srg_grp_cpp->b0, "#include <%s/serialization/register/serialization_%s.hpp>\n", objInc, pragmas_.groupName_);
         Printf(b_srg_grp_cpp->b0, "#include <%s/valueobjects/vo_%s.hpp>\n", objInc, pragmas_.groupName_);
         Printf(b_srg_grp_cpp->b0, "#include <boost/serialization/shared_ptr.hpp>\n");
