@@ -471,6 +471,9 @@ struct Count {
 // PRAGMAS
 //*****************************************************************************
 
+String *rp_class;
+String *rp_header;
+
 struct Pragmas {
     String *groupName_;
     String *displayName_;
@@ -626,6 +629,9 @@ struct ParmsMemb {
     String *name;
     Node *node;
     std::string docStr;
+    String *base;
+    bool multipleBaseClasses;
+    String *cls;
 };
 
 //*****************************************************************************
@@ -640,20 +646,30 @@ struct GroupBase {
     virtual void functionWrapperImplFunc(ParmsFunc &) {}
     virtual void functionWrapperImplMemb(ParmsMemb &) {}
     virtual void functionWrapperImplCtor(ParmsCtor &) {}
+    virtual void classHandlerImplBefore() {}
+    virtual void classHandlerImplAfter() {}
+    virtual void includeDirectiveAfter() {}
 };
 
 struct GroupLibraryObjects : public GroupBase {
 
     Buffer *b_lib_grp_hpp;
+    Buffer *b_lib_grp_cpp;
     Buffer *b_lib_loop_hpp;
     bool generateHppFile;
+    bool generateCppFile;
     bool generateLoopFile;
+    bool needClassBegin;
+    bool needClassEnd;
 
-    GroupLibraryObjects(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), generateHppFile(false), generateLoopFile(false) {
+    GroupLibraryObjects(const Pragmas &pragmas, Count &count) : GroupBase(pragmas, count), generateHppFile(false), generateCppFile(false), generateLoopFile(false),
+        needClassBegin(false), needClassEnd(false) {
 
         if (pragmas_.automatic_) {
+            b_lib_grp_cpp = new Buffer("b_lib_grp_cpp", NewStringf("%s/objects/obj_%s.cpp", objDir, pragmas_.groupName_));
             b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/objects/obj_%s.hpp", objDir, pragmas_.groupName_));
         } else {
+            b_lib_grp_cpp = 0;
             b_lib_grp_hpp = new Buffer("b_lib_grp_hpp", NewStringf("%s/objects/objmanual_%s.hpp.template", objDir, pragmas_.groupName_));
         }
         b_lib_loop_hpp = new Buffer("b_lib_loop_hpp", NewStringf("%s/loop/loop_%s.hpp", objDir, pragmas_.groupName_));
@@ -673,6 +689,12 @@ struct GroupLibraryObjects : public GroupBase {
         Printf(b_lib_grp_hpp->b0,"namespace %s {\n", module);
         Printf(b_lib_grp_hpp->b0, "\n");
 
+        if (pragmas_.automatic_) {
+            Printf(b_lib_grp_cpp->b0, "\n");
+            Printf(b_lib_grp_cpp->b0, "#include <%s/objects/obj_%s.hpp>\n", objInc, pragmas_.groupName_);
+            Printf(b_lib_grp_cpp->b0, "\n");
+            Append(b_lib_grp_cpp->b0, pragmas_.add_inc);
+        }
 
         Printf(b_lib_loop_hpp->b0, "\n");
         Printf(b_lib_loop_hpp->b0, "#ifndef loop_%s_hpp\n", pragmas_.groupName_);
@@ -684,6 +706,29 @@ struct GroupLibraryObjects : public GroupBase {
     }
 
     void functionWrapperImplFunc(ParmsFunc &p) {
+
+        if (0==Strcmp(nmspace, module)) {
+            Printf(b_lib_grp_hpp->b0,"    //****FUNC*****\n");
+            if (String *loopParameterName = Getattr(p.n, "feature:rp:loopParameter")) {
+                // If this is a looping function then its return type and loop parameter have been changed from T to vector<T>.
+                // We want to emit the unchanged types for those two items (T).
+                // Emit the unchanged function (return) type:
+                Printf(b_lib_grp_hpp->b0,"    %s\n", SwigType_str(Getattr(Getattr(p.n, "rp:loopFunctionNode"), "type"), 0));
+                // Emit the function name:
+                Printf(b_lib_grp_hpp->b0,"    %s(\n", p.symname);
+                // Emit the unchanged parameter list:
+                emitParmList(Getattr(p.n, "rp:original_parms"), b_lib_grp_hpp->b0, 2, "rp_tm_default", "rp_tm_default", 2);
+            } else {
+                // This is not a looping function so its return type and parameter list have not been changed.
+                // Just emit the original values:
+                Printf(b_lib_grp_hpp->b0,"    %s\n", SwigType_str(Getattr(p.n, "type"), 0));
+                Printf(b_lib_grp_hpp->b0,"    %s(\n", p.symname);
+                emitParmList(p.parms, b_lib_grp_hpp->b0, 2, "rp_tm_default", "rp_tm_default", 2);
+            }
+            Printf(b_lib_grp_hpp->b0,"        );\n");
+            Printf(b_lib_grp_hpp->b0,"\n");
+            generateHppFile = true;
+        }
 
         if (String *loopParameterName = Getattr(p.n, "feature:rp:loopParameter")) {
             Node *x1 = Getattr(p.n, "rp:loopFunctionNode");
@@ -732,7 +777,39 @@ struct GroupLibraryObjects : public GroupBase {
         }
     }
 
+    void classHandlerImplBefore() {
+    printf("classHandler aa\n");
+        needClassBegin = true;
+        needClassEnd = false;
+    }
+
+    void classHandlerImplAfter() {
+        if (needClassEnd) {
+            Printf(b_lib_grp_hpp->b0, "%s", rp_class);
+            Printf(b_lib_grp_hpp->b0, "    };\n");
+        }
+        needClassBegin = false;
+        needClassEnd = false;
+    }
+
+    void includeDirectiveAfter() {
+        Printf(b_lib_grp_hpp->b0, "%s", rp_header);
+    }
+
+    void emitClassBegin(String *className, String *baseClassName) {
+        Printf(b_lib_grp_hpp->b0, "\n");
+        Printf(b_lib_grp_hpp->b0, "    class %s : \n", className);
+        Printf(b_lib_grp_hpp->b0, "        public %s {\n", baseClassName);
+        Printf(b_lib_grp_hpp->b0, "    public:\n");
+        needClassBegin = false;
+        needClassEnd = true;
+    }
+
     void functionWrapperImplCtor(ParmsCtor &p) {
+
+        // If the user has set the %noctor directive for the class (the parent node) then do nothing.
+        if (checkAttribute(Getattr(p.n, "parentNode"), "feature:rp:noctor", "1"))
+            return;
 
         if (generateCtor) {
 
@@ -750,22 +827,34 @@ struct GroupLibraryObjects : public GroupBase {
                 s0 = NewStringf("reposit::LibraryObject<%s>", p.pname);
                 s1 = p.pname;
             }
-            Printf(b_lib_grp_hpp->b0,"\n");
-            Printf(b_lib_grp_hpp->b0,"    class %s : \n", p.name);
-            Printf(b_lib_grp_hpp->b0,"        public %s {\n", s0);
-            Printf(b_lib_grp_hpp->b0,"    public:\n");
+            if (needClassBegin)
+                emitClassBegin(p.name, s0);
+
+            Printf(b_lib_grp_hpp->b0, "\n");
+            Printf(b_lib_grp_hpp->b0,"        //****CTOR*****\n");
             Printf(b_lib_grp_hpp->b0,"        %s(\n", p.name);
             Printf(b_lib_grp_hpp->b0,"            const boost::shared_ptr<reposit::ValueObject>& properties,\n");
             emitParmList(p.parms, b_lib_grp_hpp->b0, 2, "rp_tm_default", "rp_tm_default", 3, ',', true, false, true);
-            Printf(b_lib_grp_hpp->b0,"            bool permanent)\n");
-            Printf(b_lib_grp_hpp->b0,"        : %s(properties, permanent) {\n", s0);
-            Printf(b_lib_grp_hpp->b0,"            libraryObject_ = boost::shared_ptr<%s>(new %s(\n", s1, p.pname);
-            emitParmList(p.parms, b_lib_grp_hpp->b0, 0, "rp_tm_default", "rp_tm_default", 4);
-            Printf(b_lib_grp_hpp->b0,"            ));\n");
-            Printf(b_lib_grp_hpp->b0,"        }\n");
-            Printf(b_lib_grp_hpp->b0,"    };\n");
-            Printf(b_lib_grp_hpp->b0,"\n");
+            Printf(b_lib_grp_hpp->b0,"            bool permanent);\n");
 
+            if (pragmas_.automatic_) {
+                Printf(b_lib_grp_cpp->b0,"\n");
+                if (checkAttribute(p.n, "feature:rp:override", "1"))
+                    Printf(b_lib_grp_cpp->b0,"/* manual override\n");
+                Printf(b_lib_grp_cpp->b0,"%s::%s::%s(\n", module, p.name, p.name);
+                Printf(b_lib_grp_cpp->b0,"    const boost::shared_ptr<reposit::ValueObject>& properties,\n");
+                emitParmList(p.parms, b_lib_grp_cpp->b0, 2, "rp_tm_default", "rp_tm_default", 3, ',', true, false, true);
+                Printf(b_lib_grp_cpp->b0,"    bool permanent)\n");
+                Printf(b_lib_grp_cpp->b0,": %s(properties, permanent) {\n", s0);
+                Printf(b_lib_grp_cpp->b0,"    libraryObject_ = boost::shared_ptr<%s>(new %s(\n", s1, p.pname);
+                emitParmList(p.parms, b_lib_grp_cpp->b0, 0, "rp_tm_default", "rp_tm_default", 4);
+                Printf(b_lib_grp_cpp->b0,"    ));\n");
+                Printf(b_lib_grp_cpp->b0,"}\n");
+                if (checkAttribute(p.n, "feature:rp:override", "1"))
+                    Printf(b_lib_grp_cpp->b0,"manual override */\n");
+                Printf(b_lib_grp_cpp->b0,"\n");
+                generateCppFile = true;
+            }
         } else { //!generateCtor
 
             Printf(b_lib_grp_hpp->b0, "    // BEGIN typemap rp_tm_lib_cls\n");
@@ -782,7 +871,52 @@ struct GroupLibraryObjects : public GroupBase {
         generateHppFile = true;
     }
 
+    // Returns true if the given member function has the const qualifier
+    bool memberFunctionIsConst(ParmsMemb &p) {
+        // Take a copy of the type since we're going to modify it.
+        SwigType *t = Copy(Getattr(p.parms, "type"));
+        // All member functions are references (to self), pop that off.
+        SwigType_pop(t);
+        // Return true if the type of the member function is const.
+        return SwigType_isconst(t);
+    }
+
     void functionWrapperImplMemb(ParmsMemb &p) {
+
+        // If the user has set the %noexport directive for the class (the parent node) then do nothing.
+        if (checkAttribute(Getattr(p.n, "parentNode"), "feature:rp:noexport", "1"))
+            return;
+
+        if (0==Strcmp(nmspace, module)) {
+
+            String *s0 = NewString("");
+            if (p.base) {
+                // Autogeneration of object wrapper code is not supported for multiple inheritance.
+                REPOSIT_SWIG_REQUIRE(!pragmas_.automatic_ || !p.multipleBaseClasses,
+                    "Class '" << Char(p.name) << "' has multiple base classes.\n"
+                    "Autogeneration of object wrapper code is not supported for multiple inheritance.\n"
+                    "Use the %override directive to suppress autogeneration, and implement the code manually.");
+                s0 = p.base;
+                //s1 = NewStringf("%s::%s", nmspace, p.base);
+            } else {
+                s0 = NewStringf("reposit::LibraryObject<QuantLib::%s>", p.cls);
+                //s1 = p.pname;
+            }
+
+            if (needClassBegin)
+                emitClassBegin(p.cls, s0);
+
+            Printf(b_lib_grp_hpp->b0, "\n");
+            Printf(b_lib_grp_hpp->b0,"        //****MEMBER*****\n");
+            Printf(b_lib_grp_hpp->b0,"        %s\n", SwigType_str(Getattr(p.n, "type"), 0));
+            Printf(b_lib_grp_hpp->b0,"        %s(\n", p.name);
+            ParmList *parmsTemp = CopyParmList(Getattr(p.parms, "nextSibling"));
+            emitParmList(parmsTemp, b_lib_grp_hpp->b0, 2, "rp_tm_default", "rp_tm_default", 3);
+            Printf(b_lib_grp_hpp->b0,"        )");
+            if (memberFunctionIsConst(p))
+                Printf(b_lib_grp_hpp->b0, " const");
+            Printf(b_lib_grp_hpp->b0, ";\n");
+        }
 
         if (String *loopParameterName = Getattr(p.n, "feature:rp:loopParameter")) {
             Node *x1 = Getattr(p.n, "rp:loopFunctionNode");
@@ -876,6 +1010,8 @@ struct GroupLibraryObjects : public GroupBase {
         Printf(b_lib_loop_hpp->b0, "\n");
 
         b_lib_grp_hpp->clear(count_, generateHppFile);
+        if (pragmas_.automatic_)
+            b_lib_grp_cpp->clear(count_, generateCppFile);
         b_lib_loop_hpp->clear(count_, generateLoopFile);
     }
 };
@@ -1846,6 +1982,9 @@ struct Addin {
     virtual void functionWrapperImplFunc(ParmsFunc &p) = 0;
     virtual void functionWrapperImplCtor(ParmsCtor &p) = 0;
     virtual void functionWrapperImplMemb(ParmsMemb &p) = 0;
+    virtual void classHandlerImplBefore() = 0;
+    virtual void classHandlerImplAfter() = 0;
+    virtual void includeDirectiveAfter() = 0;
     virtual void clear() = 0;
 };
 
@@ -1886,6 +2025,23 @@ struct AddinImpl : public Addin {
         printf("%s\n", std::string(66-name_.length(), '=').c_str());
         for (GroupMapIter i=groupMap_.begin(); i!=groupMap_.end(); ++i)
             i->second->clear();
+    }
+
+    virtual void classHandlerImplBefore() {
+    printf("classHandler bb 00\n");
+        Group *group = getGroup();
+        group->classHandlerImplBefore();
+    printf("classHandler bb 99\n");
+    }
+
+    virtual void classHandlerImplAfter() {
+        Group *group = getGroup();
+        group->classHandlerImplAfter();
+    }
+
+    virtual void includeDirectiveAfter() {
+        Group *group = getGroup();
+        group->includeDirectiveAfter();
     }
 };
 
@@ -2276,6 +2432,29 @@ struct AddinList {
         }
     }
 
+    void classHandlerImplBefore() {
+    printf("classHandler cc 00\n");
+        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
+            Addin *addin = *i;
+            addin->classHandlerImplBefore();
+        }
+    printf("classHandler cc 99\n");
+    }
+
+    void classHandlerImplAfter() {
+        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
+            Addin *addin = *i;
+            addin->classHandlerImplAfter();
+        }
+    }
+
+    void includeDirectiveAfter() {
+        for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
+            Addin *addin = *i;
+            addin->includeDirectiveAfter();
+        }
+    }
+
     void functionWrapperImplMemb(ParmsMemb &p) {
         for (iter i=addinList_.begin(); i!=addinList_.end(); ++i) {
             Addin *addin = *i;
@@ -2559,6 +2738,7 @@ int namespaceDeclaration(Node *n) {
     printf("namespaceDeclaration\n");
     int ret=Language::namespaceDeclaration(n);
     Printf(b_init, "END   namespaceDeclaration - node name='%s'.\n", Char(nmspace));
+    nmspace = 0;
     return ret;
 }
 
@@ -2635,9 +2815,16 @@ int classHandler(Node *n) {
     String *nodename = Getattr(n, "name");
     Printf(b_init, "BEGIN classHandler - node name='%s'.\n", Char(nodename));
     printNode(n, b_init);
-    Printf(b_init, "call parent\n");
-    printf("classHandler\n");
+    printf("classHandler 00\n");
+    Printf(b_init, "before call parent\n");
+    printf("classHandler 01\n");
+    classHandlerImplBefore();
+    printf("classHandler 02\n");
     int ret=Language::classHandler(n);
+    printf("classHandler 03\n");
+    classHandlerImplAfter();
+    printf("classHandler 04\n");
+    Printf(b_init, "after call parent\n");
     Printf(b_init, "END   classHandler - node name='%s'.\n", Char(nodename));
     return ret;
 }
@@ -2652,19 +2839,24 @@ int includeDirective(Node *n) {
     pragmas_ = Pragmas();
     addinList_.setPragmas();
 
+    rp_header = NewString("");
+    Swig_register_filebyname("rp_header", rp_header);
+
     int ret=Language::includeDirective(n);
+    includeDirectiveAfter();
     Printf(b_init, "END   includeDirective - node name='%s'.\n", Char(nodename));
     return ret;
 }
 
 int pragmaDirective(Node *n) {
+printf("pragmaDirective 00\n");
     if (!ImportMode) {
         String *lang = Getattr(n, "lang");
 
         if (0 == Strcmp(lang, "reposit")) {
             String *name = Getattr(n, "name");
             String *value = Getattr(n, "value");
-            printf ("ABCDEF name=%s value=%s.\n", Char(name), Char(value));
+            printf("pragmaDirective 10 name=%s value=%s.\n", Char(name), Char(value));
 
             if (0 == Strcmp(name, "group")) {
                 pragmas_.setGroupName(NewString(value));
@@ -2673,7 +2865,7 @@ int pragmaDirective(Node *n) {
             } else if (0 == Strcmp(name, "groupFunctionWizard")) {
                 pragmas_.groupFunctionWizard_ = NewString(value);
             } else if (0 == Strcmp(name, "override_obj")) {
-                // For the user writing the config file, it is easier to assume automatic (default)
+                // For the user writing the config file, it is more intuitive to assume automatic (default)
                 // unless overridden with '%feature("rp:override_obj");' :
                 bool manual = 0 == Strcmp(value, "true");
                 // The source code for this SWIG module is cleaner if we think of it the opposite way:
@@ -2683,6 +2875,7 @@ int pragmaDirective(Node *n) {
             }
         }
     }
+printf("pragmaDirective 99\n");
     return Language::pragmaDirective(n);
 }
 
@@ -2885,6 +3078,33 @@ int constructorHandlerImpl(Node *n) {
     return Language::constructorHandler(n);
 }
 
+int classHandlerImplBefore() {
+    if (!pragmas_.groupName_)
+        return SWIG_OK;
+    rp_class = NewString("");
+    Swig_register_filebyname("rp_class", rp_class);
+    addinList_.setPragmas(pragmas_);
+    printf("classHandler dd 00\n");
+    addinList_.classHandlerImplBefore();
+    printf("classHandler dd 99\n");
+    return SWIG_OK;
+}
+
+int classHandlerImplAfter() {
+    if (!pragmas_.groupName_)
+        return SWIG_OK;
+    addinList_.setPragmas(pragmas_);
+    addinList_.classHandlerImplAfter();
+    return SWIG_OK;
+}
+
+int includeDirectiveAfter() {
+    if (!pragmas_.groupName_)
+        return SWIG_OK;
+    addinList_.includeDirectiveAfter();
+    return SWIG_OK;
+}
+
 void processParm(Parm *p) {
 
     String *name = Getattr(p,"name");
@@ -2987,13 +3207,13 @@ int functionWrapperImplMemb(Node *n) {
 
     p.n = n;
     p.name   = Getattr(n,"name");
-    Node *n1 = Getattr(n,"parentNode");
-    String   *cls   = Getattr(n1,"sym:name");
+    Node *n1 = Getattr(n, "parentNode");
+    p.cls = Getattr(n1, "sym:name");
     p.pname   = Getattr(n1,"name");
     p.parms  = Getattr(n,"parms");
-    p.addinClass = NewStringf("%s::%s", module, cls);
+    p.addinClass = NewStringf("%s::%s", module, p.cls);
 
-    String *temp0 = copyUpper(cls);
+    String *temp0 = copyUpper(p.cls);
     String *temp1 = copyUpper(p.name);
     p.funcName = NewStringf("%s%s%s", prefix, temp0, temp1);
 
@@ -3013,16 +3233,24 @@ int functionWrapperImplMemb(Node *n) {
     else
         p.alias = 0;
 
-    printf("cls=%s\n", Char(cls));
+    p.base = 0;
+    if (List *baseList = Getattr(n1, "baselist")) {
+        p.multipleBaseClasses = Len(baseList) > 1;
+        p.base = Getitem(baseList, 0);
+        printf("base = %s\n", Char(p.base));
+    } else {
+        printf("no bases\n");
+    }
+
+    printf("p.cls=%s\n", Char(p.cls));
     printf("p.name=%s\n", Char(p.name));
     printf("p.funcName=%s\n", Char(p.funcName));
     Printf(b_init, "@@@ MEMB Name=%s\n", Char(p.funcName));
 
-    String *className = Getattr(Getattr(p.n, "parentNode"), "name");
-    p.docStr = getDocString(Char(className), Char(p.name), "");
+    p.docStr = getDocString(Char(p.pname), Char(p.name), "");
 
     for (Parm *x = p.parms; x; x = nextSibling(x)) {
-        std::string docStr = getDocString(Char(className), Char(p.name), Char(Getattr(x, "name")));
+        std::string docStr = getDocString(Char(p.pname), Char(p.name), Char(Getattr(x, "name")));
         Setattr(x, "rp_docstr", Char(docStr.c_str()));
     }
 
@@ -3073,6 +3301,9 @@ int functionWrapperImplMemb(Node *n) {
 // For most purposes the modified nodes are required (vector<T>).
 // The backups of the original nodes may also be retrieved if necessary (T).
 void processLoopParameter(Node *n, String *functionName, ParmList *parms, String *loopParameterName) {
+
+    Setattr(n, "rp:original_parms", CopyParmList(Getattr(n, "parms")));
+
     for (Parm *p=parms; p; p=nextSibling(p)) {
         String *name = Getattr(p, "name");
         if (0==Strcmp(loopParameterName, name)) {
@@ -3120,6 +3351,7 @@ void functionWrapperImplAll(Node *n) {
     Printf(b_wrappers,"//module=%s\n", module);
     //Printf(b_wrappers,"//group_name=%s\n", group_name);
     printNode(n, b_wrappers);
+    Printf(b_wrappers,"//*************\n");
     printList(Getattr(n, "parms"), b_wrappers);
     Printf(b_wrappers,"//*************\n");
 }

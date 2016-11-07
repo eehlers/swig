@@ -4,6 +4,8 @@
 //*****************************************************************************
 
 #define %override %pragma(reposit) override_obj="true"
+// comment out the ctor implementation in the objectwrapper cpp file
+#define %override2(f) %feature("rp:override") f
 #define %group(x)  %pragma(reposit) group="x"
 #define %groupCaption(x)  %pragma(reposit) groupCaption="x"
 #define %groupFunctionWizard(x)  %pragma(reposit) groupFunctionWizard="x"
@@ -13,6 +15,10 @@
 #define %generateall(lang) %feature("rp:generate:lang")
 #define %alias(id, id2) %feature("rp:alias", "id2") id
 #define %rename2(id, id2) %feature("rp:rename2", "id2") id
+// do not generate class member functions in objectwrapper hpp file
+#define %noexport(class_name) %feature("rp:noexport") class_name
+// do not generate constructor in objectwrapper hpp file
+#define %noctor(class_name) %feature("rp:noctor") class_name
 
 //*****************************************************************************
 // rp_tm_xxx_* - typemaps shared by multiple addins
