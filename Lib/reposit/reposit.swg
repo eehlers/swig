@@ -1,13 +1,21 @@
 
+#pragma SWIG nowarn=401,501,502
+
 //*****************************************************************************
 // defines
 //*****************************************************************************
 
+#define %group(x)  %pragma(reposit) group="x"
+// do not generate the object wrapper hpp file
 #define %override %pragma(reposit) override_obj="true"
+// do not generate class constructor in objectwrapper hpp file
+#define %noctor(class_name) %feature("rp:noctor") class_name
+// do not generate class member functions in objectwrapper hpp file
+#define %noexport(class_name) %feature("rp:noexport") class_name
 // comment out the ctor implementation in the objectwrapper cpp file
 #define %override2(f) %feature("rp:override") f
-#define %group(x)  %pragma(reposit) group="x"
-#define %groupCaption(x)  %pragma(reposit) groupCaption="x"
+// xxx
+#define %explicit_class(class_name) %feature("rp:explicit_class") class_name
 #define %groupFunctionWizard(x)  %pragma(reposit) groupFunctionWizard="x"
 #define %loop(func, parm) %feature("rp:loopParameter", "parm") func
 #define %processor(cls, proc) %feature("rp:processorName", "proc") cls
@@ -15,10 +23,17 @@
 #define %generateall(lang) %feature("rp:generate:lang")
 #define %alias(id, id2) %feature("rp:alias", "id2") id
 #define %rename2(id, id2) %feature("rp:rename2", "id2") id
-// do not generate class member functions in objectwrapper hpp file
-#define %noexport(class_name) %feature("rp:noexport") class_name
-// do not generate constructor in objectwrapper hpp file
-#define %noctor(class_name) %feature("rp:noctor") class_name
+
+//*****************************************************************************
+// pragmas
+//*****************************************************************************
+
+%pragma(reposit) rp_obj_dir="../AddinObjects"
+%pragma(reposit) rp_obj_inc="AddinObjects"
+%pragma(reposit) rp_add_dir="../AddinCpp"
+%pragma(reposit) rp_add_inc="AddinCpp"
+%pragma(reposit) rp_xll_dir="../AddinXl"
+%pragma(reposit) rp_xll_inc="AddinXl"
 
 //*****************************************************************************
 // rp_tm_xxx_* - typemaps shared by multiple addins

@@ -2998,8 +2998,8 @@ int Language::functionWrapper(Node *n) {
   SwigType *type = Getattr(n, "type");
   ParmList *parms = Getattr(n, "parms");
 
-  Printf(stdout, "functionWrapper   : %s\n", SwigType_str(type, NewStringf("%s(%s)", name, ParmList_str_defaultargs(parms))));
-  Printf(stdout, "           action : %s\n", Getattr(n, "wrap:action"));
+  //Printf(stdout, "functionWrapper   : %s\n", SwigType_str(type, NewStringf("%s(%s)", name, ParmList_str_defaultargs(parms))));
+  //Printf(stdout, "           action : %s\n", Getattr(n, "wrap:action"));
   return SWIG_OK;
 }
 
