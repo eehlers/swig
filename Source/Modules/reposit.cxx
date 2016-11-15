@@ -505,10 +505,6 @@ struct Report {
         printLine();
 
     }
-
-    ~Report() {
-        print();
-    }
 };
 Report report;
 
@@ -2428,6 +2424,16 @@ virtual int top(Node *n) {
     File *f_test = initFile("debug.txt");
     Dump(b_debug, f_test);
     Delete(b_debug);
+
+    report.print();
+
+    List *x = Keys(errorList);
+    for (int i=0; i<Len(x); ++i) {
+        String *errorMessage = Getitem(x, i);
+        printf("%s", Char(errorMessage));
+    }
+    Delete(x);
+    Delete(errorList);//FIXME also delete each item individually
 
     printf("Done.\n");
     return SWIG_OK;
