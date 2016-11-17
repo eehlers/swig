@@ -660,9 +660,16 @@ ENUMERATED_CLASS_IMPL(N::T)
 %}
 %typemap(rp_tm_xll_cnvt) boost::shared_ptr<T_LIB> const & %{
         RP_GET_REFERENCE($1_name_obj, $1_name,
-            T_ADDIN,  T_LIB);
+            T_ADDIN, T_LIB);
+%}
+%typemap(rp_tm_xll_cnvt2) boost::shared_ptr<T_LIB> const & %{
+        std::string $1_name_cnv = reposit::convert<std::string>(
+            reposit::ConvertOper(*$1_name), "$1_name", "");
+        RP_GET_REFERENCE_DEFAULT($1_name_obj, $1_name_cnv,
+            T_ADDIN, T_LIB);
 %}
 %typemap(rp_tm_xll_argf) boost::shared_ptr<T_LIB> const & "$1_name_obj";
+%typemap(rp_tm_xll_argf2) boost::shared_ptr<T_LIB> const & "$1_name_obj";
 %typemap(rp_tm_xll_cdrt) boost::shared_ptr<T_LIB> const & "C";
 %typemap(rp_tm_xll_code) boost::shared_ptr<T_LIB> const & "C";
 %typemap(rp_tm_cfy_parm) boost::shared_ptr<T_LIB> const & "const char * $1_name";
