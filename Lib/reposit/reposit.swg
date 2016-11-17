@@ -79,6 +79,7 @@
 %typemap(rp_tm_vob_parm) bool "bool";
 %typemap(rp_tm_vob_parm) rp_tp_long "long";
 %typemap(rp_tm_vob_parm) double "double";
+%typemap(rp_tm_vob_parm) double& "double";
 %typemap(rp_tm_vob_parm) rp_tp_string "const std::string &";
 %typemap(rp_tm_vob_parm) rp_tp_any "const reposit::property_t&";
 %typemap(rp_tm_vob_parm) std::vector< std::vector<double> > const & "const std::vector< std::vector<double> >&";
@@ -91,6 +92,7 @@
 %typemap(rp_tm_vob_mbvr) bool "bool $1_name_";
 %typemap(rp_tm_vob_mbvr) rp_tp_long "long $1_name_";
 %typemap(rp_tm_vob_mbvr) double "double $1_name_";
+%typemap(rp_tm_vob_mbvr) double& "double $1_name_";
 %typemap(rp_tm_vob_mbvr) rp_tp_string "std::string $1_name_";
 %typemap(rp_tm_vob_mbvr) rp_tp_any "reposit::property_t $1_name_";
 %typemap(rp_tm_vob_mbvr) std::vector< std::vector<double> > const & "std::vector< std::vector<double> > $1_name_";
@@ -111,6 +113,7 @@
 
 %typemap(rp_tm_vob_cnvt) rp_tp_long "reposit::convert<long>(value)";
 %typemap(rp_tm_vob_cnvt) double "reposit::convert<double>(value)";
+%typemap(rp_tm_vob_cnvt) double& "reposit::convert<double>(value)";
 %typemap(rp_tm_vob_cnvt) rp_tp_string "reposit::convert<std::string>(value)";
 %typemap(rp_tm_vob_cnvt) rp_tp_any "value";
 %typemap(rp_tm_vob_cnvt) std::vector<std::vector<double> > & "reposit::matrix::convert<double>(value, nameUpper)";
@@ -137,6 +140,7 @@
         reposit::convert<double>(
             valueObject->getProperty("$1_name"));
 %}
+%typemap(rp_tm_scr_cnvt) double& = double;
 
 %typemap(rp_tm_scr_cnvt) rp_tp_string %{
     std::string $1_name =
@@ -221,6 +225,7 @@
         double $1_name_cnv = reposit::convert<double>(
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
+%typemap(rp_tm_xll_cnvt2) double& = double;
 
 %typemap(rp_tm_xll_cnvt2) std::string & %{
         std::string $1_name_cnv = reposit::convert<std::string>(
@@ -232,6 +237,7 @@
 %typemap(rp_tm_xll_argv) bool "*$1_name";
 %typemap(rp_tm_xll_argv) rp_tp_long "*$1_name";
 %typemap(rp_tm_xll_argv) double "*$1_name";
+%typemap(rp_tm_xll_argv) double & "*$1_name";
 %typemap(rp_tm_xll_argv) std::vector "$1_name_vec";
 %typemap(rp_tm_xll_argv) std::vector & "$1_name_vec";
 %typemap(rp_tm_xll_argv) SWIGTYPE "$1_name";
@@ -636,6 +642,13 @@ ENUMERATED_CLASS_IMPL(N::T)
         reposit::convert<std::string>(valueObject->getProperty("$1_name"));
     valueObject->processPrecedentID($1_name_str);
     RP_GET_REFERENCE($1_name, $1_name_str,
+        T_ADDIN,  T_LIB);
+%}
+%typemap(rp_tm_scr_cnvt2) boost::shared_ptr<T_LIB> const & %{
+    std::string $1_name_str =
+        reposit::convert<std::string>(valueObject->getProperty("$1_name"));
+    valueObject->processPrecedentID($1_name_str);
+    RP_GET_REFERENCE_DEFAULT($1_name, $1_name_str,
         T_ADDIN,  T_LIB);
 %}
 %typemap(rp_tm_cpp_parm) boost::shared_ptr<T_LIB> const & "const std::string&";
