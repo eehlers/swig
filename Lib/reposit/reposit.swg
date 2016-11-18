@@ -430,6 +430,7 @@
 %apply rp_tp_long { unsigned int };
 %apply rp_tp_long { std::size_t };
 %apply rp_tp_long { long };
+%apply rp_tp_long { long & };
 %apply rp_tp_string { char * };
 %apply rp_tp_string { std::string };
 %apply rp_tp_string { std::string & };
