@@ -295,20 +295,13 @@
         return ret;
 %}
 
-%typemap(rp_tm_xll_rtst) std::vector<double> %{
-        static OPER xRet;
-        reposit::vectorToOper(returnValue, xRet);
-        return &xRet;
-%}
-%typemap(rp_tm_xll_rtst) std::vector<double> & = std::vector<double>;
-
-%typemap(rp_tm_xll_rtst) std::vector<std::string> %{
-        static OPER xRet;
-        reposit::vectorToOper(returnValue, xRet);
-        return &xRet;
-%}
-
 %typemap(rp_tm_xll_rtst) std::vector<std::vector<double> > %{
+        static OPER xRet;
+        reposit::matrixToOper(returnValue, xRet);
+        return &xRet;
+%}
+
+%typemap(rp_tm_xll_rtst) std::vector<std::vector<reposit::property_t> > %{
         static OPER xRet;
         reposit::matrixToOper(returnValue, xRet);
         return &xRet;
@@ -345,6 +338,7 @@
 // rp_tm_xll_loop - arguments to boost::bind object for a looping function (F/M)
 
 %typemap(rp_tm_xll_loop) bool "*$1_name";
+%typemap(rp_tm_xll_loop) double "*$1_name";
 %typemap(rp_tm_xll_loop) std::vector "_1";
 %typemap(rp_tm_xll_loop) SWIGTYPE "$1_name";
 
@@ -408,6 +402,15 @@
             reposit::operToVector<T>(*$1_name, "$1_name");
 %}
 
+// rp_tm_xll_rtst - return statement (F/M)
+
+%typemap(rp_tm_xll_rtst) std::vector<T> %{
+        static OPER xRet;
+        reposit::vectorToOper(returnValue, xRet);
+        return &xRet;
+%}
+%typemap(rp_tm_xll_rtst) std::vector<T> & = std::vector<T>;
+
 %enddef
 
 %define RP_VECTOR_LONG(T...)
@@ -435,8 +438,10 @@
 RP_VECTOR(bool)
 RP_VECTOR(long)
 RP_VECTOR(double)
-RP_VECTOR(rp_tp_string)
+RP_VECTOR(std::string)
 
+// Use RP_VECTOR_LONG instead of RP_VECTOR for integer types other than long which should be treated like long.
+// RP_VECTOR_LONG includes some other steps to convert T to long which are not necessary when T is long.
 RP_VECTOR_LONG(unsigned int)
 
 //*****************************************************************************
