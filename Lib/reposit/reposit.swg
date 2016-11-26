@@ -383,11 +383,7 @@
    std::vector<T> $1_name =
         reposit::vector::convert<T>(valueObject->getProperty("$1_name"), "$1_name");
 %}
-
-%typemap(rp_tm_scr_cnvt) std::vector<T> & %{
-   std::vector<T> $1_name =
-        reposit::vector::convert<T>(valueObject->getProperty("$1_name"), "$1_name");
-%}
+%typemap(rp_tm_scr_cnvt) std::vector<T> & = std::vector<T>;
 
 // rp_tm_xll_cnvt - convert from Excel datatypes to the datatypes of the underlying Library
 
@@ -641,39 +637,62 @@ ENUMERATED_CLASS_IMPL(N::T)
         RP_GET_REFERENCE(xxx, objectID, T_ADDIN, T_LIB);
 %}
 %typemap(rp_tm_vob_parm) boost::shared_ptr<T_LIB> const & "const std::string &";
+%typemap(rp_tm_vob_parm) boost::shared_ptr<T_ADDIN> const & "const std::string &";
+%typemap(rp_tm_vob_parm) std::vector<boost::shared_ptr<T_ADDIN> > const & "const std::vector<std::string> &";
 %typemap(rp_tm_vob_mbvr) boost::shared_ptr<T_LIB> const & "std::string $1_name_";
+%typemap(rp_tm_vob_mbvr) boost::shared_ptr<T_ADDIN> const & "std::string $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector<boost::shared_ptr<T_ADDIN> > const & "std::vector<std::string> $1_name_";
 %typemap(rp_tm_vob_cnvt) boost::shared_ptr<T_LIB> const & "reposit::convert<std::string>(value)";
+%typemap(rp_tm_vob_cnvt) boost::shared_ptr<T_ADDIN> const & "reposit::convert<std::string>(value)";
+%typemap(rp_tm_vob_cnvt) std::vector<boost::shared_ptr<T_ADDIN> > const & "reposit::vector::convert<std::string>(value, nameUpper)";
+
 %typemap(rp_tm_scr_cnvt) boost::shared_ptr<T_LIB> const & %{
     std::string $1_name_str =
         reposit::convert<std::string>(valueObject->getProperty("$1_name"));
     valueObject->processPrecedentID($1_name_str);
     RP_GET_REFERENCE($1_name, $1_name_str,
-        T_ADDIN,  T_LIB);
+        T_ADDIN, T_LIB);
 %}
 %typemap(rp_tm_scr_cnvt2) boost::shared_ptr<T_LIB> const & %{
     std::string $1_name_str =
         reposit::convert<std::string>(valueObject->getProperty("$1_name"));
     valueObject->processPrecedentID($1_name_str);
     RP_GET_REFERENCE_DEFAULT($1_name, $1_name_str,
-        T_ADDIN,  T_LIB);
-%}
-%typemap(rp_tm_cpp_parm) boost::shared_ptr<T_LIB> const & "const std::string&";
-%typemap(rp_tm_cpp_args) boost::shared_ptr<T_LIB> const & "$1_name_get";
-%typemap(rp_tm_csh_parm) boost::shared_ptr<T_LIB> const & "const char *";
-%typemap(rp_tm_csh_args) boost::shared_ptr<T_LIB> const & "$1_name_get";
-%typemap(rp_tm_csh_clcp) boost::shared_ptr<T_LIB> const & "StringBuilder";
-%typemap(rp_tm_csh_cnvt) boost::shared_ptr<T_LIB> const & %{
-        RP_GET_REFERENCE($1_name_obj, $1_name,
-            T_ADDIN,  T_LIB);
-%}
-%typemap(rp_tm_csh_cnvt) std::vector<boost::shared_ptr<T_LIB> > const & %{
-        std::vector<std::string> $1_name_vec($1_name, $1_name + $1_name_length);
-        std::vector<boost::shared_ptr<T_LIB> > $1_name_vec2 =
-            reposit::getLibraryObjectVector<T_ADDIN, T_LIB>($1_name_vec);
+        T_ADDIN, T_LIB);
 %}
 
-%typemap(rp_tm_csh_args) boost::shared_ptr<T_LIB> const & "$1_name_obj";
+%typemap(rp_tm_scr_cnvt) std::vector<boost::shared_ptr<T_LIB> > & %{
+    std::vector<std::string> $1_name_vec =
+        reposit::vector::convert<std::string>(valueObject->getProperty("$1_name"), "$1_name");
+    for (std::vector<std::string>::const_iterator i = $1_name_vec.begin();
+            i != $1_name_vec.end(); ++i)
+        valueObject->processPrecedentID(*i);
+    std::vector<boost::shared_ptr<T_LIB> > $1_name =
+        reposit::getLibraryObjectVector<T_ADDIN, T_LIB>($1_name_vec);
+%}
+
+%typemap(rp_tm_scr_cnvt) std::vector<boost::shared_ptr<T_ADDIN> > & %{
+    std::vector<std::string> $1_name_vec =
+        reposit::vector::convert<std::string>(valueObject->getProperty("$1_name"), "$1_name");
+    for (std::vector<std::string>::const_iterator i = $1_name_vec.begin();
+            i != $1_name_vec.end(); ++i)
+        valueObject->processPrecedentID(*i);
+    std::vector<boost::shared_ptr<T_ADDIN> > $1_name =
+        reposit::getObjectVector<T_ADDIN>($1_name_vec);
+%}
+
+%typemap(rp_tm_cpp_parm) boost::shared_ptr<T_LIB> const & "const std::string&";
+%typemap(rp_tm_cpp_args) boost::shared_ptr<T_LIB> const & "$1_name_get";
+
+%typemap(rp_tm_xll_parm) T_LIB & "char*";
 %typemap(rp_tm_xll_parm) boost::shared_ptr<T_LIB> const & "char*";
+
+// FIXME this is currently implemented in QuantLibAddin, it should be here.
+//%typemap(rp_tm_xll_cnvt) T_LIB & %{
+//        boost::shared_ptr<T_LIB> $1_name_temp = reposit::GetObject<T_ADDIN, T_LIB>::f($1_name);
+//        const T_LIB &$1_name_obj = *($1_name_temp.get());
+//%}
+
 %typemap(rp_tm_xll_cnvt) boost::shared_ptr<T_ADDIN> const & %{
         RP_GET_OBJECT($1_name_obj, $1_name, T_ADDIN);
 %}
@@ -687,15 +706,31 @@ ENUMERATED_CLASS_IMPL(N::T)
         RP_GET_REFERENCE_DEFAULT($1_name_obj, $1_name_cnv,
             T_ADDIN, T_LIB);
 %}
+
+%typemap(rp_tm_xll_cnvt) std::vector<boost::shared_ptr<T_ADDIN> > & %{
+        std::vector<std::string> $1_name_vec =
+            reposit::operToVector<std::string>(*$1_name, "$1_name");
+        std::vector<boost::shared_ptr<T_ADDIN> > $1_name_vec2 =
+            reposit::getObjectVector<T_ADDIN>($1_name_vec);
+%}
+
+%typemap(rp_tm_xll_cnvt) std::vector<boost::shared_ptr<T_LIB> > & %{
+        std::vector<std::string> $1_name_vec =
+            reposit::operToVector<std::string>(*$1_name, "$1_name");
+        std::vector<boost::shared_ptr<T_LIB> > $1_name_vec2 =
+            reposit::getLibraryObjectVector<T_ADDIN, T_LIB>($1_name_vec);
+%}
+
+//%typemap(rp_tm_xll_argv) std::vector<boost::shared_ptr<T_ADDIN> > & "$1_name_vec";
+
+%typemap(rp_tm_xll_argf) T_LIB & "$1_name_obj";
 %typemap(rp_tm_xll_argf) boost::shared_ptr<T_LIB> const & "$1_name_obj";
 %typemap(rp_tm_xll_argf2) boost::shared_ptr<T_LIB> const & "$1_name_obj";
+%typemap(rp_tm_xll_argf) std::vector<boost::shared_ptr<T_ADDIN> > const & "$1_name_vec2";
+%typemap(rp_tm_xll_argf) std::vector<boost::shared_ptr<T_LIB> > const & "$1_name_vec2";
 %typemap(rp_tm_xll_cdrt) boost::shared_ptr<T_LIB> const & "C";
+%typemap(rp_tm_xll_code) T_LIB const & "C";
 %typemap(rp_tm_xll_code) boost::shared_ptr<T_LIB> const & "C";
-%typemap(rp_tm_cfy_parm) boost::shared_ptr<T_LIB> const & "const char * $1_name";
-%typemap(rp_tm_cfy_cnvt) boost::shared_ptr<T_LIB> const & %{
-        RP_GET_REFERENCE($1_name_get, $1_name, T_ADDIN, T_LIB);
-%}
-%typemap(rp_tm_cfy_args) boost::shared_ptr<T_LIB> const & "$1_name_get";
 
 %typemap(rp_tm_dox_rtdc) boost::shared_ptr<T_LIB> const & "string returnValue";
 %typemap(rp_tm_dox_mbvr) boost::shared_ptr<T_LIB> const &  "string $1_name";
