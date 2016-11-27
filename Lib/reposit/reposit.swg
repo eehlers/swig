@@ -658,18 +658,29 @@ ENUMERATED_CLASS_IMPL(N::T)
 %typemap(rp_tm_xxx_rp_get) T_LIB %{
         RP_GET_REFERENCE(xxx, objectID, T_ADDIN, T_LIB);
 %}
+%typemap(rp_tm_vob_parm) T_LIB const & "const std::string &";
 %typemap(rp_tm_vob_parm) boost::shared_ptr<T_LIB> const & "const std::string &";
 %typemap(rp_tm_vob_parm) boost::shared_ptr<T_ADDIN> const & "const std::string &";
 %typemap(rp_tm_vob_parm) std::vector<T_LIB> const & "const std::vector<std::string> &";
 %typemap(rp_tm_vob_parm) std::vector<boost::shared_ptr<T_ADDIN> > const & "const std::vector<std::string> &";
+%typemap(rp_tm_vob_mbvr) T_LIB const & "std::string $1_name_";
 %typemap(rp_tm_vob_mbvr) boost::shared_ptr<T_LIB> const & "std::string $1_name_";
 %typemap(rp_tm_vob_mbvr) boost::shared_ptr<T_ADDIN> const & "std::string $1_name_";
 %typemap(rp_tm_vob_mbvr) std::vector<T_LIB> const & "std::vector<std::string> $1_name_";
 %typemap(rp_tm_vob_mbvr) std::vector<boost::shared_ptr<T_ADDIN> > const & "std::vector<std::string> $1_name_";
+%typemap(rp_tm_vob_cnvt) T_LIB const & "reposit::convert<std::string>(value)";
 %typemap(rp_tm_vob_cnvt) boost::shared_ptr<T_LIB> const & "reposit::convert<std::string>(value)";
 %typemap(rp_tm_vob_cnvt) boost::shared_ptr<T_ADDIN> const & "reposit::convert<std::string>(value)";
 %typemap(rp_tm_vob_cnvt) std::vector<T_LIB> const & "reposit::vector::convert<std::string>(value, nameUpper)";
 %typemap(rp_tm_vob_cnvt) std::vector<boost::shared_ptr<T_ADDIN> > const & "reposit::vector::convert<std::string>(value, nameUpper)";
+
+%typemap(rp_tm_scr_cnvt) T_LIB const & %{
+    std::string $1_name_str =
+        reposit::convert<std::string>(valueObject->getProperty("$1_name"));
+    valueObject->processPrecedentID($1_name_str);
+    RP_GET_UNDERLYING($1_name, $1_name_str,
+        T_ADDIN, T_LIB);
+%}
 
 %typemap(rp_tm_scr_cnvt) boost::shared_ptr<T_LIB> const & %{
     std::string $1_name_str =
