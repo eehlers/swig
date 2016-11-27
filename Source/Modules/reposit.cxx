@@ -782,6 +782,7 @@ struct GroupLibraryObjects : public Group {
 
         if (checkAttribute(p, "feature:rp:explicit_class", "1")) {
             emitClassBegin(className, baseClass2);
+            b_lib_grp_hpp->activate();
             return;
         }
 
