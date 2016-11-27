@@ -660,12 +660,15 @@ ENUMERATED_CLASS_IMPL(N::T)
 %}
 %typemap(rp_tm_vob_parm) boost::shared_ptr<T_LIB> const & "const std::string &";
 %typemap(rp_tm_vob_parm) boost::shared_ptr<T_ADDIN> const & "const std::string &";
+%typemap(rp_tm_vob_parm) std::vector<T_LIB> const & "const std::vector<std::string> &";
 %typemap(rp_tm_vob_parm) std::vector<boost::shared_ptr<T_ADDIN> > const & "const std::vector<std::string> &";
 %typemap(rp_tm_vob_mbvr) boost::shared_ptr<T_LIB> const & "std::string $1_name_";
 %typemap(rp_tm_vob_mbvr) boost::shared_ptr<T_ADDIN> const & "std::string $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector<T_LIB> const & "std::vector<std::string> $1_name_";
 %typemap(rp_tm_vob_mbvr) std::vector<boost::shared_ptr<T_ADDIN> > const & "std::vector<std::string> $1_name_";
 %typemap(rp_tm_vob_cnvt) boost::shared_ptr<T_LIB> const & "reposit::convert<std::string>(value)";
 %typemap(rp_tm_vob_cnvt) boost::shared_ptr<T_ADDIN> const & "reposit::convert<std::string>(value)";
+%typemap(rp_tm_vob_cnvt) std::vector<T_LIB> const & "reposit::vector::convert<std::string>(value, nameUpper)";
 %typemap(rp_tm_vob_cnvt) std::vector<boost::shared_ptr<T_ADDIN> > const & "reposit::vector::convert<std::string>(value, nameUpper)";
 
 %typemap(rp_tm_scr_cnvt) boost::shared_ptr<T_LIB> const & %{
@@ -681,6 +684,22 @@ ENUMERATED_CLASS_IMPL(N::T)
     valueObject->processPrecedentID($1_name_str);
     RP_GET_REFERENCE_DEFAULT($1_name, $1_name_str,
         T_ADDIN, T_LIB);
+%}
+
+%typemap(rp_tm_scr_cnvt) std::vector<T_LIB> & %{
+    std::vector<std::string> $1_name_vec =
+        reposit::vector::convert<std::string>(valueObject->getProperty("$1_name"), "$1_name");
+    for (std::vector<std::string>::const_iterator i = $1_name_vec.begin();
+            i != $1_name_vec.end(); ++i)
+        valueObject->processPrecedentID(*i);
+    std::vector<boost::shared_ptr<T_LIB> > $1_name_temp =
+        reposit::getLibraryObjectVector<T_ADDIN, T_LIB>($1_name_vec);
+    // FIXME implement a variation of function getLibraryObjectVector() which includes the conversion below:
+    std::vector<T_LIB> $1_name($1_name_temp.size());
+    for (QuantLib::Size i=0; i<$1_name_temp.size(); ++i) {
+        boost::shared_ptr<T_LIB> $1_name_item = $1_name_temp[i];
+        $1_name[i] = *($1_name_item.get());
+    }
 %}
 
 %typemap(rp_tm_scr_cnvt) std::vector<boost::shared_ptr<T_LIB> > & %{
@@ -729,6 +748,19 @@ ENUMERATED_CLASS_IMPL(N::T)
             T_ADDIN, T_LIB);
 %}
 
+%typemap(rp_tm_xll_cnvt) std::vector<T_LIB> & %{
+        std::vector<std::string> $1_name_vec =
+            reposit::operToVector<std::string>(*$1_name, "$1_name");
+        std::vector<boost::shared_ptr<T_LIB> > $1_name_temp =
+            reposit::getLibraryObjectVector<T_ADDIN, T_LIB>($1_name_vec);
+        // FIXME implement a variation of function getLibraryObjectVector() which includes the conversion below:
+        std::vector<T_LIB> $1_name_vec2($1_name_temp.size());
+        for (QuantLib::Size i=0; i<$1_name_temp.size(); ++i) {
+            boost::shared_ptr<T_LIB> $1_name_item = $1_name_temp[i];
+            $1_name_vec2[i] = *($1_name_item.get());
+        }
+%}
+
 %typemap(rp_tm_xll_cnvt) std::vector<boost::shared_ptr<T_ADDIN> > & %{
         std::vector<std::string> $1_name_vec =
             reposit::operToVector<std::string>(*$1_name, "$1_name");
@@ -745,9 +777,10 @@ ENUMERATED_CLASS_IMPL(N::T)
 
 %typemap(rp_tm_xll_argf) T_LIB & "$1_name_obj";
 %typemap(rp_tm_xll_argf) boost::shared_ptr<T_LIB> const & "$1_name_obj";
-%typemap(rp_tm_xll_argf2) boost::shared_ptr<T_LIB> const & "$1_name_obj";
+%typemap(rp_tm_xll_argf) std::vector<T_LIB> const & "$1_name_vec2";
 %typemap(rp_tm_xll_argf) std::vector<boost::shared_ptr<T_ADDIN> > const & "$1_name_vec2";
 %typemap(rp_tm_xll_argf) std::vector<boost::shared_ptr<T_LIB> > const & "$1_name_vec2";
+%typemap(rp_tm_xll_argf2) boost::shared_ptr<T_LIB> const & "$1_name_obj";
 %typemap(rp_tm_xll_cdrt) boost::shared_ptr<T_LIB> const & "C";
 %typemap(rp_tm_xll_code) T_LIB const & "C";
 %typemap(rp_tm_xll_code) boost::shared_ptr<T_LIB> const & "C";
