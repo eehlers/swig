@@ -242,21 +242,30 @@
 %typemap(rp_tm_xll_argv) std::vector & "$1_name_vec";
 %typemap(rp_tm_xll_argv) SWIGTYPE "$1_name";
 
-%typemap(rp_tm_xll_argv2) std::vector const & "$1_name_vec";
+%typemap(rp_tm_xll_argv2) std::vector "$1_name_vec";
+%typemap(rp_tm_xll_argv2) std::vector & "$1_name_vec";
 %typemap(rp_tm_xll_argv2) SWIGTYPE "$1_name_cnv";
 
 // rp_tm_xll_argf - arguments to the underlying Library function (F/C/M)
+
+// NB We would like to do this:
+//%typemap(rp_tm_xll_argf) std::vector "$1_name_vec";
+// But the above needs to be overridden for some types.
+// Because of the way SWIG's type matching rules interact with typedefs and templates,
+// the above typemap cannot always be overridden as necessary.
+// Therefore we need explicit typemaps for rp_tm_xll_argf/rp_tm_xll_argf2
+// for every T in vector<T> and vector<T>&.
 
 %typemap(rp_tm_xll_argf) bool "*$1_name";
 %typemap(rp_tm_xll_argf) rp_tp_long "*$1_name";
 %typemap(rp_tm_xll_argf) double "*$1_name";
 %typemap(rp_tm_xll_argf) double & "*$1_name";
-%typemap(rp_tm_xll_argf) std::vector "$1_name_vec";
-%typemap(rp_tm_xll_argf) std::vector & "$1_name_vec";
+//%typemap(rp_tm_xll_argf) std::vector "$1_name_vec";
+//%typemap(rp_tm_xll_argf) std::vector & "$1_name_vec";
 %typemap(rp_tm_xll_argf) SWIGTYPE "$1_name";
 
-%typemap(rp_tm_xll_argf2) std::vector "$1_name_vec";
-%typemap(rp_tm_xll_argf2) std::vector & "$1_name_vec";
+//%typemap(rp_tm_xll_argf2) std::vector "$1_name_vec";
+//%typemap(rp_tm_xll_argf2) std::vector & "$1_name_vec";
 %typemap(rp_tm_xll_argf2) SWIGTYPE "$1_name_cnv";
 
 // rp_tm_xll_rtdc - declare variable to capture return value of Library function (F/M)
@@ -355,70 +364,6 @@
 %typemap(rp_tm_xll_lppm2) SWIGTYPE "$1_type";
 
 //*****************************************************************************
-// vectors
-//*****************************************************************************
-
-// use this macro for typemaps which do the same thing for every T in vector<T>.
-
-%define RP_VECTOR(T...)
-
-// rp_tm_vob_parm - Value Object constructor parameters (C)
-
-%typemap(rp_tm_vob_parm) std::vector<T> "const std::vector<T>&";
-%typemap(rp_tm_vob_parm) std::vector<T> & "const std::vector<T>&";
-
-// rp_tm_vob_mbvr - Value Object class member variables (C)
-
-%typemap(rp_tm_vob_mbvr) std::vector<T> "std::vector<T> $1_name_";
-%typemap(rp_tm_vob_mbvr) std::vector<T> & "std::vector<T> $1_name_";
-
-// rp_tm_vob_cnvt - in ValueObject::setSystemProperty, convert value from property_t to native type (C)
-
-%typemap(rp_tm_vob_cnvt) std::vector<T> "reposit::vector::convert<T>(value, nameUpper)";
-%typemap(rp_tm_vob_cnvt) std::vector<T> & "reposit::vector::convert<T>(value, nameUpper)";
-
-// rp_tm_scr_cnvt - convert types from the Value Object to the corresponding Library Object (C)
-
-%typemap(rp_tm_scr_cnvt) std::vector<T> %{
-   std::vector<T> $1_name =
-        reposit::vector::convert<T>(valueObject->getProperty("$1_name"), "$1_name");
-%}
-%typemap(rp_tm_scr_cnvt) std::vector<T> & = std::vector<T>;
-
-// rp_tm_xll_cnvt - convert from Excel datatypes to the datatypes of the underlying Library
-
-%typemap(rp_tm_xll_cnvt) std::vector<T> %{
-        std::vector<T> $1_name_vec =
-            reposit::operToVector<T>(*$1_name, "$1_name");
-%}
-%typemap(rp_tm_xll_cnvt) std::vector<T> & = std::vector<T>;
-
-%typemap(rp_tm_xll_cnvt2) std::vector<T> & %{
-        std::vector<T> $1_name_vec =
-            reposit::operToVector<T>(*$1_name, "$1_name");
-%}
-
-// rp_tm_xll_rtst - return statement (F/M)
-
-%typemap(rp_tm_xll_rtst) std::vector<T> %{
-        static OPER xRet;
-        reposit::vectorToOper(returnValue, xRet);
-        return &xRet;
-%}
-%typemap(rp_tm_xll_rtst) std::vector<T> & = std::vector<T>;
-
-%enddef
-
-%define RP_VECTOR_LONG(T...)
-%typemap(rp_tm_xll_cnvt) std::vector<T> & %{
-        std::vector<long> $1_name_vec2 =
-            reposit::operToVector<long>(*$1_name, "$1_name");
-        std::vector<T> $1_name_vec =
-            QuantLibAddin::convertVector<long, T>($1_name_vec2);
-%}
-%enddef
-
-//*****************************************************************************
 // %apply statements - map native types to reposit types
 //*****************************************************************************
 
@@ -431,6 +376,83 @@
 %apply rp_tp_string { std::string };
 %apply rp_tp_string { std::string & };
 %apply rp_tp_any { reposit::property_t & };
+
+//*****************************************************************************
+// vectors
+//*****************************************************************************
+
+// use this macro for typemaps which do the same thing for every T in vector<T>.
+
+%define RP_VECTOR_IMPL(T,VEC_T...)
+
+%typemap(rp_tm_xll_argf) VEC_T "$1_name_vec";
+%typemap(rp_tm_xll_argf2) VEC_T "$1_name_vec";
+
+// rp_tm_vob_parm - Value Object constructor parameters (C)
+
+%typemap(rp_tm_vob_parm) VEC_T "const std::vector<T>&";
+
+// rp_tm_vob_mbvr - Value Object class member variables (C)
+
+%typemap(rp_tm_vob_mbvr) VEC_T "std::vector<T> $1_name_";
+
+// rp_tm_vob_cnvt - in ValueObject::setSystemProperty, convert value from property_t to native type (C)
+
+%typemap(rp_tm_vob_cnvt) VEC_T "reposit::vector::convert<T>(value, nameUpper)";
+
+// rp_tm_scr_cnvt - convert types from the Value Object to the corresponding Library Object (C)
+
+%typemap(rp_tm_scr_cnvt) VEC_T %{
+   std::vector<T> $1_name =
+        reposit::vector::convert<T>(valueObject->getProperty("$1_name"), "$1_name");
+%}
+
+// rp_tm_xll_cnvt - convert from Excel datatypes to the datatypes of the underlying Library
+
+%typemap(rp_tm_xll_cnvt) VEC_T %{
+        std::vector<T> $1_name_vec =
+            reposit::operToVector<T>(*$1_name, "$1_name");
+%}
+
+%typemap(rp_tm_xll_cnvt2) VEC_T %{
+        std::vector<T> $1_name_vec =
+            reposit::operToVector<T>(*$1_name, "$1_name");
+%}
+
+// rp_tm_xll_rtst - return statement (F/M)
+
+%typemap(rp_tm_xll_rtst) VEC_T %{
+        static OPER xRet;
+        reposit::vectorToOper(returnValue, xRet);
+        return &xRet;
+%}
+
+%enddef
+
+%define RP_VECTOR(T...)
+RP_VECTOR_IMPL(T,std::vector<T>)
+RP_VECTOR_IMPL(T,std::vector<T>&)
+%enddef
+
+%define RP_VECTOR_LONG_IMPL(T,VEC_T...)
+%typemap(rp_tm_vob_parm) VEC_T "const std::vector<long>&";
+%typemap(rp_tm_vob_mbvr) VEC_T "std::vector<long> $1_name_";
+%typemap(rp_tm_vob_cnvt) VEC_T "reposit::vector::convert<long>(value, nameUpper)";
+%typemap(rp_tm_xll_cnvt) VEC_T %{
+        std::vector<long> $1_name_vec =
+            reposit::operToVector<long>(*$1_name, "$1_name");
+        std::vector<T> $1_name_vec2 =
+            QuantLibAddin::convertVector<long, T>($1_name_vec);
+%}
+%typemap(rp_tm_xll_argf) VEC_T "$1_name_vec2";
+%typemap(rp_tm_xll_argf2) VEC_T "$1_name_vec2";
+%enddef
+
+%define RP_VECTOR_LONG(T...)
+RP_VECTOR(T)
+RP_VECTOR_LONG_IMPL(T,std::vector<T>)
+RP_VECTOR_LONG_IMPL(T,std::vector<T>&)
+%enddef
 
 RP_VECTOR(bool)
 RP_VECTOR(long)
@@ -720,8 +742,6 @@ ENUMERATED_CLASS_IMPL(N::T)
         std::vector<boost::shared_ptr<T_LIB> > $1_name_vec2 =
             reposit::getLibraryObjectVector<T_ADDIN, T_LIB>($1_name_vec);
 %}
-
-//%typemap(rp_tm_xll_argv) std::vector<boost::shared_ptr<T_ADDIN> > & "$1_name_vec";
 
 %typemap(rp_tm_xll_argf) T_LIB & "$1_name_obj";
 %typemap(rp_tm_xll_argf) boost::shared_ptr<T_LIB> const & "$1_name_obj";
