@@ -199,7 +199,7 @@ void validateFunctionName(const String *functionName) {
         // This name does not clash with Excel, so return success.
         return;
     // If control arrives here it means that the string comprises 1, 2, or 3 letters, followed by
-    // numbers.  At this point the only way the string could not clash with Excel is if it
+    // 1-7 digits.  At this point the only way the string could not clash with Excel is if it
     // comprises exactly 3 letters and 7 numbers and is greater than the Excel max (XFD1048576).
     // So test for that case:
     if (3==a && 7==n) {
@@ -838,13 +838,13 @@ struct GroupLibraryObjects : public Group {
 
     // Returns true if the given member function has the const qualifier
     bool memberFunctionIsConst(Node *n) {
-        // Grab the first parameter of the member function, it's a reference to this.
+        // Grab the first parameter of the member function, it's a reference to "this".
         Parm *firstParameter  = Getattr(n, "parms");
         // Take a copy of the type since we're going to modify it.
         SwigType *t = Copy(Getattr(firstParameter, "type"));
         // Pop off the reference.
         SwigType_pop(t);
-        // Return true if the type of the member function (this) is const.
+        // Return true if the type of the member function ("this") is const.
         return SwigType_isconst(t);
     }
 
