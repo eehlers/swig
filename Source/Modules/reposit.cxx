@@ -550,14 +550,6 @@ struct Buffer {
 #endif
     }
 
-    //bool fileChanged(String *buf) {
-    //    FILE *f = Swig_open(path_);
-    //    if (!f)
-    //        return true;
-    //    String *s = Swig_read_file(f);
-    //    return (0!=Strcmp(s, buf));
-    //}
-
     void writeFile(String *buf, String *path) {
         File *f = initFile(path);
         Dump(buf, f);
@@ -599,25 +591,27 @@ struct Buffer {
         Dump(b2, buf);
         Dump(b3, buf);
 
+        String *backupPath = Copy(path_);
+        Append(backupPath, ".old");
+
         if (fileExists()) {
 
             String *oldBuf = 0;
             bool fileChanged = false;
-            FILE *f = Swig_open(path_);
-            if (f) {
+
+            if (FILE *f = Swig_open(path_)) {
                 oldBuf = Swig_read_file(f);
                 if (0!=Strcmp(oldBuf, buf))
                     fileChanged = true;
+                fclose(f);
             }
 
             if (fileChanged) {
 
-                String *backupPath = Copy(path_);
-                Append(backupPath, ".old");
-                FILE *f = Swig_open(backupPath);
-                if (!f)
+                if (FILE *f = Swig_open(backupPath))
+                    fclose(f);
+                else
                     writeFile(oldBuf, backupPath);
-                Delete(backupPath);
 
                 writeFile(buf, path_);
                 report.addFile(sectionName_, Char(path_), type_, Report::File::Updated);
@@ -632,6 +626,20 @@ struct Buffer {
             writeFile(buf, path_);
             report.addFile(sectionName_, Char(path_), type_, Report::File::Created);
         }
+
+        // If the *.old file is the same as the original then delete it.
+        bool deleteOldFile = false;
+        if (FILE *f = Swig_open(backupPath)) {
+            String *oldBuf = Swig_read_file(f);
+            if (0==Strcmp(oldBuf, buf))
+                deleteOldFile = true;
+            Delete(oldBuf);
+            fclose(f);
+        }
+        if (deleteOldFile)
+            std::remove(Char(backupPath));
+
+        Delete(backupPath);
         Delete(buf);
     }
 
