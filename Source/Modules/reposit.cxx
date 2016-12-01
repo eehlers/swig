@@ -788,12 +788,6 @@ struct GroupLibraryObjects : public Group {
             wrapClass = parentName;
         }
 
-        if (checkAttribute(p, "feature:rp:explicit_class", "1")) {
-            emitClassBegin(className, baseClass2);
-            b_lib_grp_hpp->activate();
-            return;
-        }
-
         // If the user has set the %noctor directive for the class (the parent node) then do nothing.
         if (checkAttribute(p, "feature:rp:noctor", "1"))
             return;
@@ -822,8 +816,8 @@ struct GroupLibraryObjects : public Group {
 
             if (stack.automatic_) {
                 Printf(b_lib_grp_cpp->b2,"\n");
-                if (checkAttribute(n, "feature:rp:override", "1"))
-                    Printf(b_lib_grp_cpp->b2,"/* manual override\n");
+                if (checkAttribute(n, "feature:rp:noimpl", "1"))
+                    Printf(b_lib_grp_cpp->b2,"/* noimpl\n");
                 Printf(b_lib_grp_cpp->b2,"%s::%s::%s(\n", stack.module_, className, className);
                 Printf(b_lib_grp_cpp->b2,"    const boost::shared_ptr<reposit::ValueObject>& properties,\n");
                 emitParmList(Getattr(n, "parms"), b_lib_grp_cpp->b2, 2, "rp_tm_default", "rp_tm_default", 3, ',', true, false, true);
@@ -833,8 +827,8 @@ struct GroupLibraryObjects : public Group {
                 emitParmList(Getattr(n, "parms"), b_lib_grp_cpp->b2, 0, "rp_tm_default", "rp_tm_default", 4);
                 Printf(b_lib_grp_cpp->b2,"    ));\n");
                 Printf(b_lib_grp_cpp->b2,"}\n");
-                if (checkAttribute(n, "feature:rp:override", "1"))
-                    Printf(b_lib_grp_cpp->b2,"manual override */\n");
+                if (checkAttribute(n, "feature:rp:noimpl", "1"))
+                    Printf(b_lib_grp_cpp->b2,"noimpl */\n");
                 Printf(b_lib_grp_cpp->b2,"\n");
                 b_lib_grp_cpp->activate();
             }
@@ -862,15 +856,11 @@ struct GroupLibraryObjects : public Group {
         Node *p = Getattr(n, "parentNode");
         String *className = Getattr(p, "sym:name");
 
-        // If the user has set the %noexport directive for the class (the parent node) then do nothing.
-        if (checkAttribute(p, "feature:rp:noexport", "1"))
-            return;
-
         ParmList *parms = Getattr(n, "parms");
         ParmList *parms2 = Getattr(parms, "nextSibling");
         String *parentName = Getattr(p, "name");
 
-        if (0==Strcmp(stack.namespace_, stack.module_)) {
+        if (0==Strcmp(stack.namespace_, stack.module_) || checkAttribute(n, "feature:rp:wrap", "1")) {
 
             String *baseClass = 0;
             if (Node *l=Getattr(p, "baselist"))
@@ -900,6 +890,7 @@ struct GroupLibraryObjects : public Group {
             if (memberFunctionIsConst(n))
                 Printf(b_lib_grp_hpp->b2, " const");
             Printf(b_lib_grp_hpp->b2, ";\n");
+            b_lib_grp_hpp->activate();
         }
 
         if (String *loopParameterName = Getattr(n, "feature:rp:loopParameter")) {
@@ -1583,7 +1574,11 @@ struct GroupExcelFunctions : public Group {
         Printf(b_xlf_grp_cpp->b1, "\n");
         emitParmList(loopParameterList, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", "rp_tm_xll_cnvt2", 2, 0, false);
         Printf(b_xlf_grp_cpp->b1, "\n");
-        emitTypeMap(b_xlf_grp_cpp->b1, memberType, "rp_tm_xxx_rp_get", 2);
+        if (checkAttribute(n, "feature:rp:wrap", "1")) {
+            emitTypeMap(b_xlf_grp_cpp->b1, memberType, "rp_tm_xxx_rp_wrp", 2);
+        } else {
+            emitTypeMap(b_xlf_grp_cpp->b1, memberType, "rp_tm_xxx_rp_get", 2);
+        }
         Printf(b_xlf_grp_cpp->b1, "\n");
         if (String *loopParameterName = Getattr(n, "feature:rp:loopParameter")) {
             emitLoopFunc(n);

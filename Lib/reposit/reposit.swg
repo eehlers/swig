@@ -10,12 +10,12 @@
 #define %override %pragma(reposit) override_obj="true"
 // do not generate class constructor in objectwrapper hpp file
 #define %noctor(class_name) %feature("rp:noctor") class_name
-// do not generate class member functions in objectwrapper hpp file
-#define %noexport(class_name) %feature("rp:noexport") class_name
-// comment out the ctor implementation in the objectwrapper cpp file
-#define %override2(f) %feature("rp:override") f
-// xxx
-#define %explicit_class(class_name) %feature("rp:explicit_class") class_name
+// wrap the function in the addin layer
+#define %wrap(f) %feature("rp:wrap") f
+// turn off wrap 
+#define %nowrap(f) %feature("rp:wrap", "0") f
+// comment out the function implementation in the objectwrapper cpp file
+#define %noimpl(f) %feature("rp:noimpl") f
 #define %groupFunctionWizard(x)  %pragma(reposit) groupFunctionWizard="x"
 #define %loop(func, parm) %feature("rp:loopParameter", "parm") func
 #define %processor(cls, proc) %feature("rp:processorName", "proc") cls
@@ -655,6 +655,9 @@ ENUMERATED_CLASS_IMPL(N::T)
 // repository objects
 %define OBJECT_WRAPPER(T_ADDIN,T_LIB...)
 
+%typemap(rp_tm_xxx_rp_wrp) T_LIB %{
+        RP_GET_OBJECT(xxx, objectID, T_ADDIN);
+%}
 %typemap(rp_tm_xxx_rp_get) T_LIB %{
         RP_GET_REFERENCE(xxx, objectID, T_ADDIN, T_LIB);
 %}
