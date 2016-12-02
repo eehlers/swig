@@ -5,10 +5,11 @@
 // defines
 //*****************************************************************************
 
+// set the caption for this group of functions (i.e. for the current SWIG interface file)
 #define %group(x)  %pragma(reposit) group="x"
 // do not generate the object wrapper hpp file
 #define %override %pragma(reposit) override_obj="true"
-// do not generate class constructor in objectwrapper hpp file
+// do not generate class constructor in the objectwrapper hpp file
 #define %noctor(class_name) %feature("rp:noctor") class_name
 // wrap the function in the addin layer
 #define %wrap(f) %feature("rp:wrap") f
@@ -16,13 +17,15 @@
 #define %nowrap(f) %feature("rp:wrap", "0") f
 // comment out the function implementation in the objectwrapper cpp file
 #define %noimpl(f) %feature("rp:noimpl") f
+// rename a class member function, overwriting the class name as well.
+#define %rename2(funcName, newName) %feature("rp:rename2", "newName") funcName
+
 #define %groupFunctionWizard(x)  %pragma(reposit) groupFunctionWizard="x"
 #define %loop(func, parm) %feature("rp:loopParameter", "parm") func
 #define %processor(cls, proc) %feature("rp:processorName", "proc") cls
 #define %generate(lang, id) %feature("rp:generate:lang") id
 #define %generateall(lang) %feature("rp:generate:lang")
 #define %alias(id, id2) %feature("rp:alias", "id2") id
-#define %rename2(id, id2) %feature("rp:rename2", "id2") id
 
 //*****************************************************************************
 // pragmas

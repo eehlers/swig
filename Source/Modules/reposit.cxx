@@ -895,7 +895,7 @@ struct GroupLibraryObjects : public Group {
 
         if (String *loopParameterName = Getattr(n, "feature:rp:loopParameter")) {
 
-            String *funcName2 = Getattr(n, "rp:funcName");
+            String *funcName2 = Getattr(n, "rp:funcRename");
             Node *loopFunctionNode = Getattr(n, "rp:loopFunctionNode");
             Node *memberType = Getattr(n, "rp:memberType");
             bool isconst = SwigType_isconst(Getattr(n, "decl"));
@@ -1519,7 +1519,7 @@ struct GroupExcelFunctions : public Group {
     void emitLoopFunc(Node *n) {
 
         String *name = Getattr(n, "name");
-        String *funcName = Getattr(n, "rp:funcName");
+        String *funcName = Getattr(n, "rp:funcRename");
         String *memberTypeName = Getattr(n, "rp:memberTypeName");
         String *loopParameterName = Getattr(n, "feature:rp:loopParameter");
         Parm *loopParameter = Getattr(n, "rp:loopParameterOrig");
@@ -2347,6 +2347,8 @@ virtual void main(int argc, char *argv[]) {
    /* Set typemap language (historical) */
    SWIG_typemap_lang("reposit");
 
+   allow_overloading();
+
    sectionList_.appendSection(new SectionLibraryObjects);
    sectionList_.appendSection(new SectionValueObjects);
    sectionList_.appendSection(new SectionSerializationCreate);
@@ -2574,6 +2576,14 @@ int functionWrapper(Node *n) {
     //l.printParms();
 
     if (!stack.active())
+        return Language::functionWrapper(n);
+
+    // Elsewhere we told SWIG to enable overloaded functions.
+    // In addition to functions that are overloaded in the C++ sense of the word.
+    // SWIG also generates a separate "overload" node, i.e. a separate copy of the function,
+    // for every parameter that has a default value.  We do not want these extra functions,
+    // those nodes have the property "defaultargs", ignore them.
+    if (Getattr(n, "defaultargs"))
         return Language::functionWrapper(n);
 
     if (Getattr(n, "rp:constructor")) {
