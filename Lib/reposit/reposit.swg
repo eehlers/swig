@@ -1,5 +1,5 @@
 
-#pragma SWIG nowarn=401,501,502
+#pragma SWIG nowarn=401//,501,502
 
 //*****************************************************************************
 // defines
@@ -151,6 +151,12 @@
             valueObject->getProperty("$1_name"));
 %}
 
+%typemap(rp_tm_scr_cnvt) std::vector<std::vector<double> > %{
+        std::vector<std::vector<double> > $1_name =
+            reposit::matrix::convert<double>(valueObject->getProperty("$1_name"), "$1_name");
+%}
+%typemap(rp_tm_scr_cnvt) std::vector<std::vector<double> >& = std::vector<std::vector<double> >;
+
 %typemap(rp_tm_scr_cnvt) SWIGTYPE %{
     $1_type $1_name =
         reposit::convert<$1_type>(
@@ -235,6 +241,11 @@
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
 
+%typemap(rp_tm_xll_cnvt) std::vector<std::vector<double> >& %{
+        std::vector<std::vector<double> > $1_name_vec =
+            reposit::fpToMatrix<double>(*$1_name);
+%}
+
 // rp_tm_xll_argv - arguments to the Value Object constructor (C)
 
 %typemap(rp_tm_xll_argv) bool "*$1_name";
@@ -265,6 +276,7 @@
 %typemap(rp_tm_xll_argf) double & "*$1_name";
 //%typemap(rp_tm_xll_argf) std::vector "$1_name_vec";
 //%typemap(rp_tm_xll_argf) std::vector & "$1_name_vec";
+%typemap(rp_tm_xll_argf) std::vector<std::vector<double> > & "$1_name_vec";
 %typemap(rp_tm_xll_argf) SWIGTYPE "$1_name";
 
 //%typemap(rp_tm_xll_argf2) std::vector "$1_name_vec";
@@ -341,8 +353,9 @@
 %typemap(rp_tm_xll_code) double & "E";
 %typemap(rp_tm_xll_code) rp_tp_string "C";
 %typemap(rp_tm_xll_code) rp_tp_any "P";
-%typemap(rp_tm_xll_code) std::vector "P";
-%typemap(rp_tm_xll_code) std::vector & "P";
+//%typemap(rp_tm_xll_code) std::vector "P";
+//%typemap(rp_tm_xll_code) std::vector & "P";
+%typemap(rp_tm_xll_code) std::vector<std::vector<double> >& "K";
 %typemap(rp_tm_xll_code) SWIGTYPE * "C";
 
 %typemap(rp_tm_xll_code2) SWIGTYPE "P";
@@ -388,9 +401,6 @@
 
 %define RP_VECTOR_IMPL(T,VEC_T...)
 
-%typemap(rp_tm_xll_argf) VEC_T "$1_name_vec";
-%typemap(rp_tm_xll_argf2) VEC_T "$1_name_vec";
-
 // rp_tm_vob_parm - Value Object constructor parameters (C)
 
 %typemap(rp_tm_vob_parm) VEC_T "const std::vector<T>&";
@@ -430,6 +440,10 @@
         return &xRet;
 %}
 
+%typemap(rp_tm_xll_argf) VEC_T "$1_name_vec";
+%typemap(rp_tm_xll_argf2) VEC_T "$1_name_vec";
+%typemap(rp_tm_xll_code) VEC_T "P";
+
 %enddef
 
 %define RP_VECTOR(T...)
@@ -449,6 +463,7 @@ RP_VECTOR_IMPL(T,std::vector<T>&)
 %}
 %typemap(rp_tm_xll_argf) VEC_T "$1_name_vec2";
 %typemap(rp_tm_xll_argf2) VEC_T "$1_name_vec2";
+
 %enddef
 
 %define RP_VECTOR_LONG(T...)
@@ -465,6 +480,7 @@ RP_VECTOR(std::string)
 // Use RP_VECTOR_LONG instead of RP_VECTOR for integer types other than long which should be treated like long.
 // RP_VECTOR_LONG includes some other steps to convert T to long which are not necessary when T is long.
 RP_VECTOR_LONG(unsigned int)
+RP_VECTOR_LONG(int)
 
 //*****************************************************************************
 // Macros - for certain kinds of types - repository objects, enumerated types
@@ -801,6 +817,9 @@ ENUMERATED_CLASS_IMPL(N::T)
 %typemap(rp_tm_xll_cdrt) boost::shared_ptr<T_LIB> & "C";
 %typemap(rp_tm_xll_code) T_LIB & "C";
 %typemap(rp_tm_xll_code) boost::shared_ptr<T_LIB> & "C";
+%typemap(rp_tm_xll_code) std::vector<T_LIB> & "P";
+%typemap(rp_tm_xll_code) std::vector<boost::shared_ptr<T_ADDIN> > & "P";
+%typemap(rp_tm_xll_code) std::vector<boost::shared_ptr<T_LIB> > & "P";
 
 %typemap(rp_tm_dox_rtdc) boost::shared_ptr<T_LIB> & "string returnValue";
 %typemap(rp_tm_dox_mbvr) boost::shared_ptr<T_LIB> &  "string $1_name";
