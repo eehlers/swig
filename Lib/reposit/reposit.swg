@@ -455,6 +455,12 @@ RP_VECTOR_IMPL(T,std::vector<T>&)
 %typemap(rp_tm_vob_parm) VEC_T "const std::vector<long>&";
 %typemap(rp_tm_vob_mbvr) VEC_T "std::vector<long> $1_name_";
 %typemap(rp_tm_vob_cnvt) VEC_T "reposit::vector::convert<long>(value, nameUpper)";
+%typemap(rp_tm_scr_cnvt) VEC_T %{
+   std::vector<long> $1_name_vec =
+        reposit::vector::convert<long>(valueObject->getProperty("$1_name"), "$1_name");
+    std::vector<T> $1_name =
+        QuantLibAddin::convertVector<long, T>($1_name_vec);
+%}
 %typemap(rp_tm_xll_cnvt) VEC_T %{
         std::vector<long> $1_name_vec =
             reposit::operToVector<long>(*$1_name, "$1_name");
@@ -685,16 +691,19 @@ ENUMERATED_CLASS_IMPL(N::T)
 %typemap(rp_tm_vob_parm) boost::shared_ptr<T_ADDIN> & "const std::string &";
 %typemap(rp_tm_vob_parm) std::vector<T_LIB> & "const std::vector<std::string> &";
 %typemap(rp_tm_vob_parm) std::vector<boost::shared_ptr<T_ADDIN> > & "const std::vector<std::string> &";
+%typemap(rp_tm_vob_parm) std::vector<boost::shared_ptr<T_LIB> > & "const std::vector<std::string> &";
 %typemap(rp_tm_vob_mbvr) T_LIB & "std::string $1_name_";
 %typemap(rp_tm_vob_mbvr) boost::shared_ptr<T_LIB> & "std::string $1_name_";
 %typemap(rp_tm_vob_mbvr) boost::shared_ptr<T_ADDIN> & "std::string $1_name_";
 %typemap(rp_tm_vob_mbvr) std::vector<T_LIB> & "std::vector<std::string> $1_name_";
 %typemap(rp_tm_vob_mbvr) std::vector<boost::shared_ptr<T_ADDIN> > & "std::vector<std::string> $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector<boost::shared_ptr<T_LIB> > & "std::vector<std::string> $1_name_";
 %typemap(rp_tm_vob_cnvt) T_LIB & "reposit::convert<std::string>(value)";
 %typemap(rp_tm_vob_cnvt) boost::shared_ptr<T_LIB> & "reposit::convert<std::string>(value)";
 %typemap(rp_tm_vob_cnvt) boost::shared_ptr<T_ADDIN> & "reposit::convert<std::string>(value)";
 %typemap(rp_tm_vob_cnvt) std::vector<T_LIB> & "reposit::vector::convert<std::string>(value, nameUpper)";
 %typemap(rp_tm_vob_cnvt) std::vector<boost::shared_ptr<T_ADDIN> > & "reposit::vector::convert<std::string>(value, nameUpper)";
+%typemap(rp_tm_vob_cnvt) std::vector<boost::shared_ptr<T_LIB> > & "reposit::vector::convert<std::string>(value, nameUpper)";
 
 %typemap(rp_tm_scr_cnvt) T_LIB & %{
     std::string $1_name_str =
