@@ -901,6 +901,16 @@ struct GroupLibraryObjects : public Group {
             bool isconst = SwigType_isconst(Getattr(n, "decl"));
             int i = paramListSize(parms);
 
+            String *s1 = 0;
+            String *s2 = 0;
+            if (checkAttribute(n, "feature:rp:wrap", "1")) {
+                s1 = getTypeMap(memberType, "rp_tm_lib_lp01");      // loop class - wrap function
+                s2 = getTypeMap(memberType, "rp_tm_lib_lp03");      // loop pointer - wrap function
+            } else {
+                s1 = getTypeMap(memberType, "rp_tm_lib_lp02");      // loop class - normal function
+                s2 = getTypeMap(memberType, "rp_tm_lib_lp04");      // loop pointer - normal function
+            }
+
             String *loopFunctionType = getTypeMap(n, "rp_tm_xll_lpfn");
             Printf(b_lib_loop_hpp->b0, "\n");
             Printf(b_lib_loop_hpp->b0, "    // %s\n", funcName2);
@@ -912,7 +922,8 @@ struct GroupLibraryObjects : public Group {
             else
                 Printf(b_lib_loop_hpp->b0, "                boost::_mfi::mf%d<\n", i);
             Printf(b_lib_loop_hpp->b0, "                    %s,\n", loopFunctionType);
-            Printf(b_lib_loop_hpp->b0, "                    %s,\n", parentName);
+            //Printf(b_lib_loop_hpp->b0, "                    %s,\n", parentName);                    // QuantLib::Interpolation -> QuantLibAddin::Interpolation
+            Printf(b_lib_loop_hpp->b0, "                    %s,\n", s1);
             bool first = true;
             for (Parm *p=parms; p; p=nextSibling(p)) {
                 if (Getattr(p, "hidden"))
@@ -927,7 +938,8 @@ struct GroupLibraryObjects : public Group {
             Printf(b_lib_loop_hpp->b0, ">,\n");
 
             Printf(b_lib_loop_hpp->b0, "                boost::_bi::list%d<\n", paramListSize(parms)+1);
-            Printf(b_lib_loop_hpp->b0, "                    boost::_bi::value<%s >,\n", getTypeMap(memberType, "rp_tm_lib_loop"));
+            //Printf(b_lib_loop_hpp->b0, "                    boost::_bi::value<%s >,\n", getTypeMap(memberType, "rp_tm_lib_loop"));      // boost::shared_ptr<QuantLib::Interpolation>
+            Printf(b_lib_loop_hpp->b0, "                    boost::_bi::value<%s >,\n", s2);
             first = true;
             for (Parm *p=parms; p; p=nextSibling(p)) {
                 if (Getattr(p, "hidden"))
@@ -941,13 +953,15 @@ struct GroupLibraryObjects : public Group {
                     Printf(b_lib_loop_hpp->b0, "                    boost::arg<1>");
                 } else {
                     Printf(b_lib_loop_hpp->b0, "                    boost::_bi::value<%s>", SwigType_str(SwigType_base(Getattr(p, "type")), 0));
+                    //Printf(b_lib_loop_hpp->b0, "                    boost::_bi::value<%s>", s1);
                 }
             }
             Printf(b_lib_loop_hpp->b0, " > >\n");
             Printf(b_lib_loop_hpp->b0, "                    %sBind;\n", funcName2);
             Printf(b_lib_loop_hpp->b0, "\n");
             Printf(b_lib_loop_hpp->b0, "    typedef     %s\n", loopFunctionType);
-            Printf(b_lib_loop_hpp->b0, "                (%s::* %sSignature)(\n", parentName, funcName2);
+            //Printf(b_lib_loop_hpp->b0, "                (%s::* %sSignature)(\n", parentName, funcName2);        // QuantLib::Interpolation -> QuantLibAddin::Interpolation
+            Printf(b_lib_loop_hpp->b0, "                (%s::* %sSignature)(\n", s1, funcName2);
             first = true;
             for (Parm *p=parms; p; p=nextSibling(p)) {
                 if (Getattr(p, "hidden"))
@@ -1516,11 +1530,19 @@ struct GroupExcelFunctions : public Group {
         groupContainsClass = true;
     }
 
-    void emitLoopFunc(Node *n) {
+    void emitLoopMemb(Node *n) {
 
         String *name = Getattr(n, "name");
         String *funcName = Getattr(n, "rp:funcRename");
-        String *memberTypeName = Getattr(n, "rp:memberTypeName");
+        //String *memberTypeName = Getattr(n, "rp:memberTypeName");
+        Node *memberType = Getattr(n, "rp:memberType");
+        String *memberTypeName = 0;
+        if (checkAttribute(n, "feature:rp:wrap", "1")) {
+            memberTypeName = getTypeMap(memberType, "rp_tm_lib_lp01");      // loop class - wrap function
+        } else {
+            memberTypeName = getTypeMap(memberType, "rp_tm_lib_lp02");      // loop class - normal function
+        }
+
         String *loopParameterName = Getattr(n, "feature:rp:loopParameter");
         Parm *loopParameter = Getattr(n, "rp:loopParameterOrig");
         String *loopParameterType = getTypeMap(loopParameter, "rp_tm_xll_lppm");
@@ -1529,7 +1551,7 @@ struct GroupExcelFunctions : public Group {
         //ParmList *parmList2 = Getattr(n, "rp:parms2");
         ParmList *loopParameterList = Getattr(n, "rp:loopParameterList");
 
-        Printf(b_xlf_grp_cpp->b1, "        // BEGIN function emitLoopFunc\n");
+        Printf(b_xlf_grp_cpp->b1, "        // BEGIN function emitLoopMemb\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
         Printf(b_xlf_grp_cpp->b1, "        static XLOPER returnValue;\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
@@ -1545,7 +1567,7 @@ struct GroupExcelFunctions : public Group {
         Printf(b_xlf_grp_cpp->b1, "\n");
         Printf(b_xlf_grp_cpp->b1, "        return &returnValue;\n");
         Printf(b_xlf_grp_cpp->b1, "\n");
-        Printf(b_xlf_grp_cpp->b1, "        // END   function emitLoopFunc\n");
+        Printf(b_xlf_grp_cpp->b1, "        // END   function emitLoopMemb\n");
     }
 
     void functionWrapperMemberImpl(Node *n, String *funcName) {
@@ -1581,7 +1603,7 @@ struct GroupExcelFunctions : public Group {
         }
         Printf(b_xlf_grp_cpp->b1, "\n");
         if (String *loopParameterName = Getattr(n, "feature:rp:loopParameter")) {
-            emitLoopFunc(n);
+            emitLoopMemb(n);
             groupContainsLoopFunction = true;
         } else {
             emitTypeMap(b_xlf_grp_cpp->b1, nodeForTypeMaps, "rp_tm_xll_rtdc", 2);
@@ -1612,7 +1634,7 @@ struct GroupExcelFunctions : public Group {
             functionWrapperMemberImpl(n, alias);
     }
 
-    void emitLoopFunc2(Node *n) {
+    void emitLoopFunc(Node *n) {
 
         String *name = Getattr(n, "name");
         String *funcName = Getattr(n, "rp:funcName");
@@ -1670,7 +1692,7 @@ struct GroupExcelFunctions : public Group {
         emitParmList(loopParameterList, b_xlf_grp_cpp->b1, 1, "rp_tm_xll_cnvt", "rp_tm_xll_cnvt2", 2, 0, false);
         Printf(b_xlf_grp_cpp->b1, "\n");
         if (String *loopParameterName = Getattr(n, "feature:rp:loopParameter")) {
-            emitLoopFunc2(n);
+            emitLoopFunc(n);
             groupContainsLoopFunction = true;
         } else {
             emitTypeMap(b_xlf_grp_cpp->b1, nodeForTypeMaps, "rp_tm_xll_rtdc", 2);
@@ -2299,7 +2321,7 @@ struct LogStack {
         for (int x=0; x<i; x++)
             Append(d, ".");
         Printf(f, "%sBEGIN %s() %s.\n", d, s, Getattr(n, "name"));
-        //printNode(n);
+        printNode(n);
         i++;
     }
 

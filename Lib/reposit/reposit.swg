@@ -67,7 +67,11 @@
 
 // rp_tm_lib_rtst - Return statement (F)
 
-%typemap(rp_tm_lib_loop) SWIGTYPE "$1_type";
+//%typemap(rp_tm_lib_loop) SWIGTYPE "$1_type";
+%typemap(rp_tm_lib_lp01) SWIGTYPE "ERROR";      // loop class - wrap function
+%typemap(rp_tm_lib_lp02) SWIGTYPE "$1_type";    // loop class - normal function
+%typemap(rp_tm_lib_lp03) SWIGTYPE "ERROR";      // loop pointer - wrap function
+%typemap(rp_tm_lib_lp04) SWIGTYPE "$1_type";    // loop pointer - normal function
 
 //*****************************************************************************
 // rp_tm_vob_* - typemaps for Value Objects
@@ -837,7 +841,19 @@ ENUMERATED_CLASS_IMPL(N::T)
 %typemap(rp_tm_dox_mbvr) std::vector<boost::shared_ptr<T_LIB> > & "vector<string> $1_name";
 %typemap(rp_tm_dox_mbvr) std::vector<boost::shared_ptr<T_ADDIN> > & "vector<string> $1_name";
 
-%typemap(rp_tm_lib_loop) T_LIB "boost::shared_ptr<T_LIB>";
-%typemap(rp_tm_lib_loop) T_ADDIN "boost::shared_ptr<T_ADDIN>";
+//%typemap(rp_tm_lib_loop) T_LIB "boost::shared_ptr<T_LIB>";
+//%typemap(rp_tm_lib_loop) T_ADDIN "boost::shared_ptr<T_ADDIN>";
+
+// library types
+%typemap(rp_tm_lib_lp01) T_LIB "T_ADDIN";                       // loop class - wrap function
+%typemap(rp_tm_lib_lp02) T_LIB "T_LIB";                         // loop class - normal function
+%typemap(rp_tm_lib_lp03) T_LIB "boost::shared_ptr<T_ADDIN>";    // loop pointer - wrap function
+%typemap(rp_tm_lib_lp04) T_LIB "boost::shared_ptr<T_LIB>";      // loop pointer - normal function
+
+// addin types - note that wrap functions are invalid in this context.
+%typemap(rp_tm_lib_lp01) T_ADDIN "ERROR";                       // loop class - wrap function
+%typemap(rp_tm_lib_lp02) T_ADDIN "T_ADDIN";                     // loop class - normal function
+%typemap(rp_tm_lib_lp03) T_ADDIN "ERROR";                       // loop pointer - wrap function
+%typemap(rp_tm_lib_lp04) T_ADDIN "boost::shared_ptr<T_ADDIN>";  // loop pointer - normal function
 
 %enddef
