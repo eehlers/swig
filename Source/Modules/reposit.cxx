@@ -753,10 +753,21 @@ struct GroupLibraryObjects : public Group {
         rp_class=0;
     }
 
-    void emitClassBegin(String *className, String *baseClassName) {
+    void emitClassBegin(String *ctorName, String *className, List *baseList) {
         Printf(b_lib_grp_hpp->b2, "\n");
-        Printf(b_lib_grp_hpp->b2, "    class %s : \n", className);
-        Printf(b_lib_grp_hpp->b2, "        public %s {\n", baseClassName);
+        Printf(b_lib_grp_hpp->b2, "    class %s : ", ctorName);
+        if (baseList) {
+            int len = Len(baseList);
+            for (int i=0; i<len; i++) {
+                Printf(b_lib_grp_hpp->b2, "public %s", Getitem(baseList, i));
+                if (i+1<len) {
+                    Printf(b_lib_grp_hpp->b2, ", ");
+                }
+            }
+        } else {
+            Printf(b_lib_grp_hpp->b2, "public reposit::LibraryObject<%s>", className);
+        }
+        Printf(b_lib_grp_hpp->b2, " {\n");
         Printf(b_lib_grp_hpp->b2, "    public:\n");
         needClassBegin = false;
         needClassEnd = true;
@@ -764,29 +775,10 @@ struct GroupLibraryObjects : public Group {
 
     void functionWrapperCtor(Node *n) {
 
-        String *className = Getattr(n, "name");
+        String *ctorName = Getattr(n, "name");
         Node *p = Getattr(n, "parentNode");
-
-        String *parentName = Getattr(p, "name");
-        String *baseClass = 0;
-        if (Node *l=Getattr(p, "baselist"))
-            baseClass = Getitem(l, 0);
-
-        String *baseClass2 = 0;
-        String *wrapClass = 0;
-
-        if (baseClass) {
-            //// Autogeneration of object wrapper code is not supported for multiple inheritance.
-            //REPOSIT_SWIG_REQUIRE(!stack.automatic_ || !p.multipleBaseClasses,
-            //    "Class '" << Char(p.name) << "' has multiple base classes.\n"
-            //    "Autogeneration of object wrapper code is not supported for multiple inheritance.\n"
-            //    "Use the %override directive to suppress autogeneration, and implement the code manually.");
-            baseClass2 = baseClass;
-            wrapClass = NewStringf("%s::%s", stack.namespace_, baseClass);
-        } else {
-            baseClass2 = NewStringf("reposit::LibraryObject<%s>", parentName);
-            wrapClass = parentName;
-        }
+        String *className = Getattr(p, "name");
+        List *baseList = Getattr(p, "baselist");
 
         // If the user has set the %noctor directive for the class (the parent node) then do nothing.
         if (checkAttribute(p, "feature:rp:noctor", "1"))
@@ -795,21 +787,21 @@ struct GroupLibraryObjects : public Group {
         if (Getattr(n, "default_constructor")) {
 
             Printf(b_lib_grp_hpp->b2, "    // BEGIN typemap rp_tm_lib_cls\n");
-            if (baseClass) {
-                Printf(b_lib_grp_hpp->b2, "    RP_OBJ_CLASS(%s, %s);\n", className, baseClass);
+            if (baseList) {
+                Printf(b_lib_grp_hpp->b2, "    RP_OBJ_CLASS(%s, %s);\n", ctorName, Getitem(baseList, 0));
             } else {
-                Printf(b_lib_grp_hpp->b2, "    RP_LIB_CLASS(%s, %s);\n", className, parentName);
+                Printf(b_lib_grp_hpp->b2, "    RP_LIB_CLASS(%s, %s);\n", ctorName, className);
             }
             Printf(b_lib_grp_hpp->b2, "    // END   typemap rp_tm_lib_cls\n");
 
         } else {
 
             if (needClassBegin)
-                emitClassBegin(className, baseClass2);
+                emitClassBegin(ctorName, className, baseList);
 
             Printf(b_lib_grp_hpp->b2, "\n");
             Printf(b_lib_grp_hpp->b2,"        //****CTOR*****\n");
-            Printf(b_lib_grp_hpp->b2,"        %s(\n", className);
+            Printf(b_lib_grp_hpp->b2,"        %s(\n", ctorName);
             Printf(b_lib_grp_hpp->b2,"            const boost::shared_ptr<reposit::ValueObject>& properties,\n");
             emitParmList(Getattr(n, "parms"), b_lib_grp_hpp->b2, 2, "rp_tm_default", "rp_tm_default", 3, ',', true, false, true);
             Printf(b_lib_grp_hpp->b2,"            bool permanent);\n");
@@ -818,12 +810,17 @@ struct GroupLibraryObjects : public Group {
                 Printf(b_lib_grp_cpp->b2,"\n");
                 if (checkAttribute(n, "feature:rp:noimpl", "1"))
                     Printf(b_lib_grp_cpp->b2,"/* noimpl\n");
-                Printf(b_lib_grp_cpp->b2,"%s::%s::%s(\n", stack.module_, className, className);
+                Printf(b_lib_grp_cpp->b2,"%s::%s::%s(\n", stack.module_, ctorName, ctorName);
                 Printf(b_lib_grp_cpp->b2,"    const boost::shared_ptr<reposit::ValueObject>& properties,\n");
                 emitParmList(Getattr(n, "parms"), b_lib_grp_cpp->b2, 2, "rp_tm_default", "rp_tm_default", 3, ',', true, false, true);
                 Printf(b_lib_grp_cpp->b2,"    bool permanent)\n");
-                Printf(b_lib_grp_cpp->b2,": %s(properties, permanent) {\n", baseClass2);
-                Printf(b_lib_grp_cpp->b2,"    libraryObject_ = boost::shared_ptr<%s>(new %s(\n", wrapClass, parentName);
+                if (baseList) {
+                    Printf(b_lib_grp_cpp->b2,": %s(properties, permanent) {\n", Getitem(baseList, 0));
+                    Printf(b_lib_grp_cpp->b2,"    libraryObject_ = boost::shared_ptr<%s::%s>(new %s(\n", stack.namespace_, Getitem(baseList, 0), className);
+                } else {
+                    Printf(b_lib_grp_cpp->b2,": reposit::LibraryObject<%s>(properties, permanent) {\n", className);
+                    Printf(b_lib_grp_cpp->b2,"    libraryObject_ = boost::shared_ptr<%s>(new %s(\n", className, className);
+                }
                 emitParmList(Getattr(n, "parms"), b_lib_grp_cpp->b2, 0, "rp_tm_default", "rp_tm_default", 4);
                 Printf(b_lib_grp_cpp->b2,"    ));\n");
                 Printf(b_lib_grp_cpp->b2,"}\n");
@@ -854,32 +851,16 @@ struct GroupLibraryObjects : public Group {
 
         String *funcName = Getattr(n, "name");
         Node *p = Getattr(n, "parentNode");
-        String *className = Getattr(p, "sym:name");
-
+        String *ctorName = Getattr(p, "sym:name");
+        String *className = Getattr(p, "name");
+        List *baseList = Getattr(p, "baselist");
         ParmList *parms = Getattr(n, "parms");
         ParmList *parms2 = Getattr(parms, "nextSibling");
-        String *parentName = Getattr(p, "name");
 
         if (0==Strcmp(stack.namespace_, stack.module_) || checkAttribute(n, "feature:rp:wrap", "1")) {
 
-            String *baseClass = 0;
-            if (Node *l=Getattr(p, "baselist"))
-                baseClass = Getitem(l, 0);
-
-            String *baseClass2 = 0;
-            if (baseClass) {
-                // Autogeneration of object wrapper code is not supported for multiple inheritance.
-                //REPOSIT_SWIG_REQUIRE(!stack.automatic_ || !p.multipleBaseClasses,
-                //    "Class '" << Char(p.name) << "' has multiple base classes.\n"
-                //    "Autogeneration of object wrapper code is not supported for multiple inheritance.\n"
-                //    "Use the %override directive to suppress autogeneration, and implement the code manually.");
-                baseClass2 = baseClass;
-            } else {
-                baseClass2 = NewStringf("reposit::LibraryObject<%s>", parentName);
-            }
-
             if (needClassBegin)
-                emitClassBegin(className, baseClass2);
+                emitClassBegin(ctorName, className, baseList);
 
             Printf(b_lib_grp_hpp->b2, "\n");
             Printf(b_lib_grp_hpp->b2,"        //****MEMBER*****\n");
@@ -922,7 +903,6 @@ struct GroupLibraryObjects : public Group {
             else
                 Printf(b_lib_loop_hpp->b0, "                boost::_mfi::mf%d<\n", i);
             Printf(b_lib_loop_hpp->b0, "                    %s,\n", loopFunctionType);
-            //Printf(b_lib_loop_hpp->b0, "                    %s,\n", parentName);                    // QuantLib::Interpolation -> QuantLibAddin::Interpolation
             Printf(b_lib_loop_hpp->b0, "                    %s,\n", s1);
             bool first = true;
             for (Parm *p=parms; p; p=nextSibling(p)) {
@@ -938,7 +918,6 @@ struct GroupLibraryObjects : public Group {
             Printf(b_lib_loop_hpp->b0, ">,\n");
 
             Printf(b_lib_loop_hpp->b0, "                boost::_bi::list%d<\n", paramListSize(parms)+1);
-            //Printf(b_lib_loop_hpp->b0, "                    boost::_bi::value<%s >,\n", getTypeMap(memberType, "rp_tm_lib_loop"));      // boost::shared_ptr<QuantLib::Interpolation>
             Printf(b_lib_loop_hpp->b0, "                    boost::_bi::value<%s >,\n", s2);
             first = true;
             for (Parm *p=parms; p; p=nextSibling(p)) {
@@ -953,14 +932,12 @@ struct GroupLibraryObjects : public Group {
                     Printf(b_lib_loop_hpp->b0, "                    boost::arg<1>");
                 } else {
                     Printf(b_lib_loop_hpp->b0, "                    boost::_bi::value<%s>", SwigType_str(SwigType_base(Getattr(p, "type")), 0));
-                    //Printf(b_lib_loop_hpp->b0, "                    boost::_bi::value<%s>", s1);
                 }
             }
             Printf(b_lib_loop_hpp->b0, " > >\n");
             Printf(b_lib_loop_hpp->b0, "                    %sBind;\n", funcName2);
             Printf(b_lib_loop_hpp->b0, "\n");
             Printf(b_lib_loop_hpp->b0, "    typedef     %s\n", loopFunctionType);
-            //Printf(b_lib_loop_hpp->b0, "                (%s::* %sSignature)(\n", parentName, funcName2);        // QuantLib::Interpolation -> QuantLibAddin::Interpolation
             Printf(b_lib_loop_hpp->b0, "                (%s::* %sSignature)(\n", s1, funcName2);
             first = true;
             for (Parm *p=parms; p; p=nextSibling(p)) {
