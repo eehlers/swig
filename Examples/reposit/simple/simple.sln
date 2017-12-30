@@ -1,26 +1,19 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleLib", "Library\SimpleLib.vcproj", "{99110FBD-D532-4984-AB3B-1C07515B3667}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleLib", "Library\SimpleLib.vcxproj", "{99110FBD-D532-4984-AB3B-1C07515B3667}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AddinXl", "AddinXl\AddinXl.vcproj", "{1F9FC421-8257-4EE7-85B1-8F0F67093852}"
-	ProjectSection(ProjectDependencies) = postProject
-		{72B5EDA8-E86D-4655-A759-159F8E377CA4} = {72B5EDA8-E86D-4655-A759-159F8E377CA4}
-		{99110FBD-D532-4984-AB3B-1C07515B3667} = {99110FBD-D532-4984-AB3B-1C07515B3667}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AddinXl", "AddinXl\AddinXl.vcxproj", "{1F9FC421-8257-4EE7-85B1-8F0F67093852}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AddinCpp", "AddinCpp\AddinCpp.vcproj", "{F9B4E49E-DDFD-4759-AC4D-38FC806A3A65}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AddinCpp", "AddinCpp\AddinCpp.vcxproj", "{F9B4E49E-DDFD-4759-AC4D-38FC806A3A65}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AddinObjects", "AddinObjects\AddinObjects.vcproj", "{72B5EDA8-E86D-4655-A759-159F8E377CA4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AddinObjects", "AddinObjects\AddinObjects.vcxproj", "{72B5EDA8-E86D-4655-A759-159F8E377CA4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MainSimpleLibAddin", "Main\MainSimpleLibAddin.vcproj", "{2CA85487-1FE7-4508-B6DF-6FAB6B83B4C0}"
-	ProjectSection(ProjectDependencies) = postProject
-		{F9B4E49E-DDFD-4759-AC4D-38FC806A3A65} = {F9B4E49E-DDFD-4759-AC4D-38FC806A3A65}
-		{72B5EDA8-E86D-4655-A759-159F8E377CA4} = {72B5EDA8-E86D-4655-A759-159F8E377CA4}
-		{99110FBD-D532-4984-AB3B-1C07515B3667} = {99110FBD-D532-4984-AB3B-1C07515B3667}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MainSimpleLibAddin", "Main\MainSimpleLibAddin.vcxproj", "{2CA85487-1FE7-4508-B6DF-6FAB6B83B4C0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "swigrun", "swig\swigrun_vc9.vcproj", "{88BE5568-6E55-41C5-A251-670FAFB44336}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "swigrun", "swig\swigrun.vcxproj", "{88BE5568-6E55-41C5-A251-670FAFB44336}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,5 +61,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AAAAF42D-7943-4906-A749-DC93623C700B}
 	EndGlobalSection
 EndGlobal

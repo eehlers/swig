@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="conversions">
+      <UniqueIdentifier>{9b118b05-5e67-4a5f-93fa-ecfb346f887e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="conversions\convert2.cpp">
+      <Filter>conversions</Filter>
+    </ClCompile>
+    <ClCompile Include="add_coercions.cpp" />
+    <ClCompile Include="add_conversions.cpp" />
+    <ClCompile Include="add_diamond_inheritance.cpp" />
+    <ClCompile Include="add_docstrings.cpp" />
+    <ClCompile Include="add_enumerated_classes.cpp" />
+    <ClCompile Include="add_enumerated_types.cpp" />
+    <ClCompile Include="add_functions.cpp" />
+    <ClCompile Include="add_inheritance.cpp" />
+    <ClCompile Include="add_multiple_inheritance.cpp" />
+    <ClCompile Include="add_objects.cpp" />
+    <ClCompile Include="add_overrides.cpp" />
+    <ClCompile Include="add_typedefs.cpp" />
+    <ClCompile Include="init.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="conversions\convert2.hpp">
+      <Filter>conversions</Filter>
+    </ClInclude>
+    <ClInclude Include="add_all.hpp" />
+    <ClInclude Include="add_coercions.hpp" />
+    <ClInclude Include="add_conversions.hpp" />
+    <ClInclude Include="add_diamond_inheritance.hpp" />
+    <ClInclude Include="add_docstrings.hpp" />
+    <ClInclude Include="add_enumerated_classes.hpp" />
+    <ClInclude Include="add_enumerated_types.hpp" />
+    <ClInclude Include="add_functions.hpp" />
+    <ClInclude Include="add_inheritance.hpp" />
+    <ClInclude Include="add_multiple_inheritance.hpp" />
+    <ClInclude Include="add_objects.hpp" />
+    <ClInclude Include="add_overrides.hpp" />
+    <ClInclude Include="add_typedefs.hpp" />
+    <ClInclude Include="init.hpp" />
+  </ItemGroup>
+</Project>
