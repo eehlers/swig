@@ -1,29 +1,56 @@
 
+#pragma SWIG nowarn=401//,501,502
+
 //*****************************************************************************
 // defines
 //*****************************************************************************
 
-#define %override %pragma(reposit) override_obj="true"
+// set the caption for this group of functions (i.e. for the current SWIG interface file)
 #define %group(x)  %pragma(reposit) group="x"
-#define %groupCaption(x)  %pragma(reposit) groupCaption="x"
+// do not generate the object wrapper hpp file
+#define %override %pragma(reposit) override_obj="true"
+// do not generate class constructor in the objectwrapper hpp file
+#define %noctor(class_name) %feature("rp:noctor") class_name
+// wrap the function in the addin layer
+#define %wrap(f) %feature("rp:wrap") f
+// turn off wrap 
+#define %nowrap(f) %feature("rp:wrap", "0") f
+// comment out the function implementation in the objectwrapper cpp file
+#define %noimpl(f) %feature("rp:noimpl") f
+// rename a class member function, overwriting the class name as well.
+#define %rename2(funcName, newName) %feature("rp:rename2", "newName") funcName
+
 #define %groupFunctionWizard(x)  %pragma(reposit) groupFunctionWizard="x"
 #define %loop(func, parm) %feature("rp:loopParameter", "parm") func
 #define %processor(cls, proc) %feature("rp:processorName", "proc") cls
 #define %generate(lang, id) %feature("rp:generate:lang") id
 #define %generateall(lang) %feature("rp:generate:lang")
 #define %alias(id, id2) %feature("rp:alias", "id2") id
-#define %rename2(id, id2) %feature("rp:rename2", "id2") id
+
+//*****************************************************************************
+// pragmas
+//*****************************************************************************
+
+%pragma(reposit) rp_obj_dir="../AddinObjects"
+%pragma(reposit) rp_obj_inc="AddinObjects"
+%pragma(reposit) rp_add_dir="../AddinCpp"
+%pragma(reposit) rp_add_inc="AddinCpp"
+%pragma(reposit) rp_xll_dir="../AddinXl"
+%pragma(reposit) rp_xll_inc="AddinXl"
 
 //*****************************************************************************
 // rp_tm_xxx_* - typemaps shared by multiple addins
 //*****************************************************************************
 
-// rp_tm_default - not a real typemap, implemented in code.  Always returns the type.
+// Not a real typemap, implemented in code.  Always returns the type.
+// rp_tm_default
 
 // rp_tm_xxx_rp_get:  Retrieve an object from the repository.
 %typemap(rp_tm_xxx_rp_get) SWIGTYPE %{
         RP_GET_OBJECT(xxx, objectID, $1_type);
 %}
+
+%typemap(rp_tm_xxx_rp_call) SWIGTYPE "xxx->";
 
 //*****************************************************************************
 // rp_tm_lib_* - typemaps for Library Objects
@@ -39,10 +66,12 @@
 // CPP
 
 // rp_tm_lib_rtst - Return statement (F)
-%typemap(rp_tm_lib_rtst) void "";
-%typemap(rp_tm_lib_rtst) SWIGTYPE "return ";
 
-%typemap(rp_tm_lib_loop) SWIGTYPE "$1_type";
+//%typemap(rp_tm_lib_loop) SWIGTYPE "$1_type";
+%typemap(rp_tm_lib_lp01) SWIGTYPE "ERROR";      // loop class - wrap function
+%typemap(rp_tm_lib_lp02) SWIGTYPE "$1_type";    // loop class - normal function
+%typemap(rp_tm_lib_lp03) SWIGTYPE "ERROR";      // loop pointer - wrap function
+%typemap(rp_tm_lib_lp04) SWIGTYPE "$1_type";    // loop pointer - normal function
 
 //*****************************************************************************
 // rp_tm_vob_* - typemaps for Value Objects
@@ -53,39 +82,27 @@
 // XPP
 
 // rp_tm_vob_parm - Value Object constructor parameters (C)
+
 %typemap(rp_tm_vob_parm) bool "bool";
-%typemap(rp_tm_vob_parm) unsigned int "long";
-%typemap(rp_tm_vob_parm) int "long";
-%typemap(rp_tm_vob_parm) long "long";
+%typemap(rp_tm_vob_parm) rp_tp_long "long";
 %typemap(rp_tm_vob_parm) double "double";
+%typemap(rp_tm_vob_parm) double& "double";
 %typemap(rp_tm_vob_parm) rp_tp_string "const std::string &";
 %typemap(rp_tm_vob_parm) rp_tp_any "const reposit::property_t&";
-%typemap(rp_tm_vob_parm) std::vector<unsigned int> const & "const std::vector<long>&";
-%typemap(rp_tm_vob_parm) std::vector<int> const & "const std::vector<long>&";
-// FIXME delete the 2 lines below?
-%typemap(rp_tm_vob_parm) std::vector<long> const & "const std::vector<long>&";
-%typemap(rp_tm_vob_parm) std::vector<double> const & "const std::vector<double>&";
-//%typemap(rp_tm_vob_parm) std::vector<std::string> const & "const std::vector<std::string>&";
-%typemap(rp_tm_vob_parm) std::vector< std::vector<double> > const & "const std::vector< std::vector<double> >&";
+%typemap(rp_tm_vob_parm) std::vector< std::vector<double> > & "const std::vector< std::vector<double> >&";
 %typemap(rp_tm_vob_parm) SWIGTYPE "$1_type";
 
 // HPP
 
 // rp_tm_vob_mbvr - Value Object class member variables (C)
+
 %typemap(rp_tm_vob_mbvr) bool "bool $1_name_";
-%typemap(rp_tm_vob_mbvr) unsigned int "long $1_name_";
-%typemap(rp_tm_vob_mbvr) int "long $1_name_";
-%typemap(rp_tm_vob_mbvr) long "long $1_name_";
+%typemap(rp_tm_vob_mbvr) rp_tp_long "long $1_name_";
 %typemap(rp_tm_vob_mbvr) double "double $1_name_";
+%typemap(rp_tm_vob_mbvr) double& "double $1_name_";
 %typemap(rp_tm_vob_mbvr) rp_tp_string "std::string $1_name_";
 %typemap(rp_tm_vob_mbvr) rp_tp_any "reposit::property_t $1_name_";
-%typemap(rp_tm_vob_mbvr) std::vector<bool> const & "std::vector<bool> $1_name_";
-%typemap(rp_tm_vob_mbvr) std::vector<unsigned int> const & "std::vector<long> $1_name_";
-%typemap(rp_tm_vob_mbvr) std::vector<int> const & "std::vector<long> $1_name_";
-%typemap(rp_tm_vob_mbvr) std::vector<long> const & "std::vector<long> $1_name_";
-%typemap(rp_tm_vob_mbvr) std::vector<double> const & "std::vector<double> $1_name_";
-%typemap(rp_tm_vob_mbvr) std::vector<std::string> const & "std::vector<std::string> $1_name_";
-%typemap(rp_tm_vob_mbvr) std::vector< std::vector<double> > const & "std::vector< std::vector<double> > $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector< std::vector<double> > & "std::vector< std::vector<double> > $1_name_";
 %typemap(rp_tm_vob_mbvr) SWIGTYPE "$1_type $1_name_";
 
 // rp_tm_vob_srmv - code to serialize a Value Object member variable (C)
@@ -100,20 +117,14 @@
 %typemap(rp_tm_vob_init) SWIGTYPE "$1_name_($1_name)";
 
 // rp_tm_vob_cnvt - in ValueObject::setSystemProperty, convert value from property_t to native type (C)
-%typemap(rp_tm_vob_cnvt) unsigned int "reposit::convert2<long>(value)";
-%typemap(rp_tm_vob_cnvt) int "reposit::convert2<long>(value)";
-%typemap(rp_tm_vob_cnvt) long "reposit::convert2<long>(value)";
-%typemap(rp_tm_vob_cnvt) double "reposit::convert2<double>(value)";
-%typemap(rp_tm_vob_cnvt) rp_tp_string "reposit::convert2<std::string>(value)";
+
+%typemap(rp_tm_vob_cnvt) rp_tp_long "reposit::convert<long>(value)";
+%typemap(rp_tm_vob_cnvt) double "reposit::convert<double>(value)";
+%typemap(rp_tm_vob_cnvt) double& "reposit::convert<double>(value)";
+%typemap(rp_tm_vob_cnvt) rp_tp_string "reposit::convert<std::string>(value)";
 %typemap(rp_tm_vob_cnvt) rp_tp_any "value";
-%typemap(rp_tm_vob_cnvt) std::vector<bool> const & "reposit::vector::convert2<bool>(value, nameUpper)";
-%typemap(rp_tm_vob_cnvt) std::vector<unsigned int> const & "reposit::vector::convert2<long>(value, nameUpper)";
-%typemap(rp_tm_vob_cnvt) std::vector<int> const & "reposit::vector::convert2<long>(value, nameUpper)";
-%typemap(rp_tm_vob_cnvt) std::vector<long> const & "reposit::vector::convert2<long>(value, nameUpper)";
-%typemap(rp_tm_vob_cnvt) std::vector<double> const & "reposit::vector::convert2<double>(value, nameUpper)";
-%typemap(rp_tm_vob_cnvt) std::vector<std::string> const & "reposit::vector::convert2<std::string>(value, nameUpper)";
-%typemap(rp_tm_vob_cnvt) std::vector<std::vector<double> > const & "reposit::matrix::convert2<double>(value, nameUpper)";
-%typemap(rp_tm_vob_cnvt) SWIGTYPE "reposit::convert2<$1_type>(value)";
+%typemap(rp_tm_vob_cnvt) std::vector<std::vector<double> > & "reposit::matrix::convert<double>(value, nameUpper)";
+%typemap(rp_tm_vob_cnvt) SWIGTYPE "reposit::convert<$1_type>(value)";
 
 //*****************************************************************************
 // rp_tm_scr_* - typemaps for Serialization - Create
@@ -125,54 +136,34 @@
 
 // rp_tm_scr_cnvt - convert types from the Value Object to the corresponding Library Object (C)
 
-%typemap(rp_tm_scr_cnvt) unsigned int %{
+%typemap(rp_tm_scr_cnvt) rp_tp_long %{
     long $1_name =
-        reposit::convert2<long>(
-            valueObject->getProperty("$1_name"));
-%}
-
-%typemap(rp_tm_scr_cnvt) int %{
-    long $1_name =
-        reposit::convert2<long>(
-            valueObject->getProperty("$1_name"));
-%}
-
-%typemap(rp_tm_scr_cnvt) long %{
-    long $1_name =
-        reposit::convert2<long>(
+        reposit::convert<long>(
             valueObject->getProperty("$1_name"));
 %}
 
 %typemap(rp_tm_scr_cnvt) double %{
     double $1_name =
-        reposit::convert2<double>(
+        reposit::convert<double>(
             valueObject->getProperty("$1_name"));
 %}
+%typemap(rp_tm_scr_cnvt) double& = double;
 
-%typemap(rp_tm_scr_cnvt) std::string const & %{
+%typemap(rp_tm_scr_cnvt) rp_tp_string %{
     std::string $1_name =
-        reposit::convert2<std::string>(
+        reposit::convert<std::string>(
             valueObject->getProperty("$1_name"));
 %}
 
-%typemap(rp_tm_scr_cnvt) const std::vector<bool>& %{
-   std::vector<bool> $1_name =
-        reposit::vector::convert2<bool>(valueObject->getProperty("$1_name"), "$1_name");
+%typemap(rp_tm_scr_cnvt) std::vector<std::vector<double> > %{
+        std::vector<std::vector<double> > $1_name =
+            reposit::matrix::convert<double>(valueObject->getProperty("$1_name"), "$1_name");
 %}
-
-%typemap(rp_tm_scr_cnvt) const std::vector<std::string>& %{
-   std::vector<std::string> $1_name =
-        reposit::vector::convert2<std::string>(valueObject->getProperty("$1_name"), "$1_name");
-%}
-
-%typemap(rp_tm_scr_cnvt) const std::vector<std::vector<double> >& %{
-    std::vector<std::vector<double> > $1_name =
-        reposit::matrix::convert2<double>(valueObject->getProperty("$1_name"), "$1_name");
-%}
+%typemap(rp_tm_scr_cnvt) std::vector<std::vector<double> >& = std::vector<std::vector<double> >;
 
 %typemap(rp_tm_scr_cnvt) SWIGTYPE %{
     $1_type $1_name =
-        reposit::convert2<$1_type>(
+        reposit::convert<$1_type>(
             valueObject->getProperty("$1_name"));
 %}
 
@@ -185,157 +176,20 @@
 // XPP
 
 // rp_tm_cpp_rttp - Function return type (F)
-%typemap(rp_tm_cpp_rttp) void "bool";
-%typemap(rp_tm_cpp_rttp) double "double";
-%typemap(rp_tm_cpp_rttp) SWIGTYPE "$1_type";
 
 // rp_tm_cpp_parm - Function input parameter (F/C/M)
-%typemap(rp_tm_cpp_parm) double "double";
-%typemap(rp_tm_cpp_parm) double const & "const double &";
-%typemap(rp_tm_cpp_parm) rp_tp_string "const std::string&";
-%typemap(rp_tm_cpp_parm) rp_tp_cnv "const reposit::property_t&";
-%typemap(rp_tm_cpp_parm) rp_tp_crc "const reposit::property_t&";
-%typemap(rp_tm_cpp_parm) SWIGTYPE "$1_type";
-%typemap(rp_tm_cpp_parm2) SWIGTYPE "const reposit::property_t&";
 
 // rp_tm_cpp_rtmb - return type of a member function (M)
-%typemap(rp_tm_cpp_rtmb) void "bool";
-%typemap(rp_tm_cpp_rtmb) double "double";
-%typemap(rp_tm_cpp_rtmb) SWIGTYPE "$1_type";
 
 // CPP
 
 // rp_tm_cpp_cnvt - Convert inputs from C++ Addin api types into underlying Library types (F/C/M)
-%typemap(rp_tm_cpp_cnvt) rp_tp_cnv %{
-    $1_type $1_name_cnv =
-        reposit::convert2<$1_type, reposit::property_t>($1_name);
-%}
-
-%typemap(rp_tm_cpp_cnvt) rp_tp_crc %{
-    $1_type $1_name_crc = reposit::CoerceImpl<
-        reposit::property_t,
-        $1_type>()($1_name);
-%}
-
-%typemap(rp_tm_cpp_cnvt2) SWIGTYPE %{
-    $1_type $1_name_cnv =
-        reposit::convert2<$1_type>(
-            $1_name, "$1_name", $rp_value);
-%}
 
 // rp_tm_cpp_rtdc - declare variable to capture return value of Library function (F/M)
-%typemap(rp_tm_cpp_rtdc) void "";
-%typemap(rp_tm_cpp_rtdc) double "double returnValue =";
-%typemap(rp_tm_cpp_rtdc) SWIGTYPE "return";
 
 // rp_tm_cpp_rtst - return statement (F/M)
-%typemap(rp_tm_cpp_rtst) void "return true;";
-%typemap(rp_tm_cpp_rtst) double "return returnValue;";
-%typemap(rp_tm_cpp_rtst) SWIGTYPE "";
 
 // rp_tm_cpp_args - arguments to the underlying Library function (F/C/M)
-%typemap(rp_tm_cpp_args) rp_tp_cnv "$1_name_cnv";
-%typemap(rp_tm_cpp_args) rp_tp_crc "$1_name_crc";
-%typemap(rp_tm_cpp_args) SWIGTYPE "$1_name";
-%typemap(rp_tm_cpp_args2) SWIGTYPE "$1_name_cnv";
-
-//*****************************************************************************
-// rp_tm_csh_* - typemaps for the C# Addin
-//*****************************************************************************
-
-// GROUP
-
-// CPP
-
-// rp_tm_csh_rttp - Function return type (F)
-%typemap(rp_tm_csh_rttp) void "void";
-%typemap(rp_tm_csh_rttp) double "double";
-%typemap(rp_tm_csh_rttp) rp_tp_string "char *";
-%typemap(rp_tm_csh_rttp) std::vector<double> "double *";
-
-// rp_tm_csh_parm - Function input parameter (F/C/M)
-%typemap(rp_tm_csh_parm) bool "bool";
-%typemap(rp_tm_csh_parm) long "long";
-%typemap(rp_tm_csh_parm) double "double";
-%typemap(rp_tm_csh_parm) rp_tp_string "const char *";
-%typemap(rp_tm_csh_parm) reposit::property_t const & "long";
-%typemap(rp_tm_csh_parm) std::vector const & "long $1_name_length, char const* const*";
-
-// rp_tm_csh_rtmb - return type of a member function (M)
-//%typemap(rp_tm_csh_rtmb) void "void";
-//%typemap(rp_tm_csh_rtmb) SWIGTYPE "$1_type";
-
-%typemap(rp_tm_csh_cnvt) rp_tp_cnv %{
-    $1_type $1_name_cnv =
-        reposit::convert2<$1_type, reposit::property_t>($1_name);
-%}
-
-%typemap(rp_tm_csh_cnvt) rp_tp_crc %{
-        $1_type $1_name_crc = reposit::CoerceImpl<
-            reposit::property_t,
-            $1_type>()($1_name);
-%}
-
-// rp_tm_csh_rtdc - declare variable to capture return value of Library function (F/M)
-%typemap(rp_tm_csh_rtdc) void "";
-%typemap(rp_tm_csh_rtdc) double "double returnValue =";
-%typemap(rp_tm_csh_rtdc) rp_tp_string "std::string returnValue =";
-%typemap(rp_tm_csh_rtdc) SWIGTYPE "$1_type returnValue =";
-
-// rp_tm_csh_argfv - arguments to the ValueObject constructor
-%typemap(rp_tm_csh_argfv) SWIGTYPE "$1_name";
-%typemap(rp_tm_csh_argfv) std::vector const & "$1_name_vec";
-
-// rp_tm_csh_args - arguments to the underlying Library function (F/C/M)
-%typemap(rp_tm_csh_args) SWIGTYPE "$1_name";
-%typemap(rp_tm_csh_args) std::vector const & "$1_name_vec2";
-
-// rp_tm_csh_rtst - return statement (F/M)
-%typemap(rp_tm_csh_rtst) rp_tp_string %{
-        ULONG size = returnValue.length() + sizeof(char);
-        char *ret = (char*)::CoTaskMemAlloc(size);
-        strcpy(ret, returnValue.c_str());
-        return ret;
-%}
-%typemap(rp_tm_csh_rtst) double "return returnValue;";
-%typemap(rp_tm_csh_rtst) SWIGTYPE "";
-
-%typemap(rp_tm_csh_rtst) std::vector<double> %{
-        double *ret = new double[returnValue.size()+1];
-        ret[0]=returnValue.size();
-        for (unsigned int i=0;i<returnValue.size();i++)
-            ret[i+1]=returnValue[i];
-        return ret;
-%}
-
-// CS
-
-// rp_tm_csh_rtcp
-%typemap(rp_tm_csh_rtcp) rp_tp_string "[return: MarshalAs(UnmanagedType.LPStr)]";
-%typemap(rp_tm_csh_rtcp) SWIGTYPE "";
-
-//rp_tm_csh_clcp - declare the type in the Export.cs file
-%typemap(rp_tm_csh_clcp) bool "bool";
-%typemap(rp_tm_csh_clcp) long "int";
-%typemap(rp_tm_csh_clcp) double "double";
-%typemap(rp_tm_csh_clcp) rp_tp_string "StringBuilder";
-%typemap(rp_tm_csh_clcp) reposit::property_t const & "int";
-%typemap(rp_tm_csh_clcp) std::vector const & "int $1_name_length, [MarshalAs(UnmanagedType.LPArray, ArraySubType=UnmanagedType.LPStr)] string[]";
-
-//rp_tm_csh_rscp
-%typemap(rp_tm_csh_rscp) void "void";
-%typemap(rp_tm_csh_rscp) long "int";
-%typemap(rp_tm_csh_rscp) double "double";
-%typemap(rp_tm_csh_rscp) rp_tp_string "string";
-%typemap(rp_tm_csh_rscp) std::vector<double> "IntPtr";
-
-//rp_tm_csh_rtex - value to be returned in the event of an exception
-%typemap(rp_tm_csh_rtex) void "return;";
-%typemap(rp_tm_csh_rtex) SWIGTYPE "return 0;";
-
-// rp_tm_csh_loop - arguments to boost::bind object for a looping function (F/M)
-%typemap(rp_tm_csh_loop) std::vector "_1";
-%typemap(rp_tm_csh_loop) SWIGTYPE "$1_name";
 
 //*****************************************************************************
 // rp_tm_xll_* - typemaps for the Excel Addin
@@ -346,213 +200,132 @@
 // CPP
 
 // rp_tm_xll_rtft - function return type (F/M)
+
 %typemap(rp_tm_xll_rtft) void "bool*";
 %typemap(rp_tm_xll_rtft) bool "bool*";
-%typemap(rp_tm_xll_rtft) unsigned int "long*";
-%typemap(rp_tm_xll_rtft) int "long*";
-%typemap(rp_tm_xll_rtft) long "long*";
+%typemap(rp_tm_xll_rtft) rp_tp_long "long*";
 %typemap(rp_tm_xll_rtft) double "double*";
 %typemap(rp_tm_xll_rtft) rp_tp_string "char*";
 %typemap(rp_tm_xll_rtft) std::vector "OPER*";
 %typemap(rp_tm_xll_rtft) std::vector & "OPER*";
 
 // rp_tm_xll_parm - function parameters (F/C/M)
+
+// rp_tm_xll_parm - function parameters (F/C/M)
 %typemap(rp_tm_xll_parm) bool "bool*";
-%typemap(rp_tm_xll_parm) unsigned int "long*";
-%typemap(rp_tm_xll_parm) int "long*";
-%typemap(rp_tm_xll_parm) long "long*";
+%typemap(rp_tm_xll_parm) rp_tp_long "long*";
 %typemap(rp_tm_xll_parm) double "double*";
-%typemap(rp_tm_xll_parm) double const & "double*";
+%typemap(rp_tm_xll_parm) double & "double*";
 %typemap(rp_tm_xll_parm) rp_tp_string "char*";
-%typemap(rp_tm_xll_parm) rp_tp_string * "char*";
-%typemap(rp_tm_xll_parm) rp_tp_string & "char*";
-%typemap(rp_tm_xll_parm) std::vector<std::vector<double> > const & "FP*";
+%typemap(rp_tm_xll_parm) std::vector<std::vector<double> > & "FP*";
 %typemap(rp_tm_xll_parm) SWIGTYPE "OPER*";
 
 %typemap(rp_tm_xll_parm2) SWIGTYPE "OPER*";
 
 // rp_tm_xll_cnvt - convert from Excel datatypes to the datatypes of the underlying Library
-%typemap(rp_tm_xll_cnvt) rp_tp_cnv %{
-        $1_type $1_name_cnv = reposit::convert2<$1_type, reposit::ConvertOper>(
-            reposit::ConvertOper(*$1_name));
-%}
-
-%typemap(rp_tm_xll_cnvt) rp_tp_crc %{
-        $1_type $1_name_crc = reposit::CoerceImpl<
-            reposit::ConvertOper, $1_type>()
-            (reposit::ConvertOper(*$1_name));
-%}
-
-%typemap(rp_tm_xll_cnvt) std::vector<bool> %{
-        std::vector<bool> $1_name_vec =
-            reposit::operToVector<bool>(*$1_name, "$1_name");
-%}
-
-%typemap(rp_tm_xll_cnvt) std::vector<bool> const & %{
-        std::vector<bool> $1_name_vec =
-            reposit::operToVector<bool>(*$1_name, "$1_name");
-%}
-
-%typemap(rp_tm_xll_cnvt) std::vector<long> const & %{
-        std::vector<long> $1_name_vec =
-            reposit::operToVector<long>(*$1_name, "$1_name");
-%}
-
-%typemap(rp_tm_xll_cnvt) std::vector<double> const & %{
-        std::vector<double> $1_name_vec =
-            reposit::operToVector<double>(*$1_name, "$1_name");
-%}
-
-%typemap(rp_tm_xll_cnvt) std::vector<std::string> const & %{
-        std::vector<std::string> $1_name_vec =
-            reposit::operToVector<std::string>(*$1_name, "$1_name");
-%}
-
-%typemap(rp_tm_xll_cnvt) std::vector<std::vector<double> > const & %{
-        std::vector<std::vector<double> > $1_name_vec =
-            reposit::fpToMatrix<double>(*$1_name);
-%}
-
-%typemap(rp_tm_xll_cnvt) std::vector<std::string> %{
-        std::vector< std::string > $1_name_vec =
-            reposit::operToVector< std::string >(*$1_name, "$1_name");
-%}
 
 %typemap(rp_tm_xll_cnvt2) bool %{
-        bool $1_name_cnv = reposit::convert2<bool>(
+        bool $1_name_cnv = reposit::convert<bool>(
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
 
-%typemap(rp_tm_xll_cnvt2) unsigned int %{
-        long $1_name_cnv = reposit::convert2<$1_type>(
-            reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
-%}
-
-%typemap(rp_tm_xll_cnvt2) int %{
-        long $1_name_cnv = reposit::convert2<$1_type>(
-            reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
-%}
-
-%typemap(rp_tm_xll_cnvt2) long %{
-        long $1_name_cnv = reposit::convert2<$1_type>(
-            reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
-%}
-
-// FIXME use a more general way to treat size_t as long
-%typemap(rp_tm_xll_cnvt2) std::size_t const %{
-        long $1_name_cnv = reposit::convert2<long>(
+%typemap(rp_tm_xll_cnvt2) rp_tp_long %{
+        long $1_name_cnv = reposit::convert<long>(
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
 
 %typemap(rp_tm_xll_cnvt2) double %{
-        double $1_name_cnv = reposit::convert2<$1_type>(
+        double $1_name_cnv = reposit::convert<double>(
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
+%typemap(rp_tm_xll_cnvt2) double& = double;
 
 %typemap(rp_tm_xll_cnvt2) std::string & %{
-        std::string $1_name_cnv = reposit::convert2<std::string>(
+        std::string $1_name_cnv = reposit::convert<std::string>(
             reposit::ConvertOper(*$1_name), "$1_name", $rp_value);
 %}
 
-%typemap(rp_tm_xll_cnvt2) std::vector<bool> %{
-        std::vector<bool> $1_name_vec =
-            reposit::operToVector<bool>(*$1_name, "$1_name");
+%typemap(rp_tm_xll_cnvt) std::vector<std::vector<double> >& %{
+        std::vector<std::vector<double> > $1_name_vec =
+            reposit::fpToMatrix<double>(*$1_name);
 %}
 
-%typemap(rp_tm_xll_cnvt2) std::vector<bool> const & %{
-        std::vector<bool> $1_name_vec =
-            reposit::operToVector<bool>(*$1_name, "$1_name");
-%}
+// rp_tm_xll_argv - arguments to the Value Object constructor (C)
 
-%typemap(rp_tm_xll_cnvt2) std::vector<double> const & %{
-        std::vector<double> $1_name_vec =
-            reposit::operToVector<double>(*$1_name, "$1_name");
-%}
+%typemap(rp_tm_xll_argv) bool "*$1_name";
+%typemap(rp_tm_xll_argv) rp_tp_long "*$1_name";
+%typemap(rp_tm_xll_argv) double "*$1_name";
+%typemap(rp_tm_xll_argv) double & "*$1_name";
+%typemap(rp_tm_xll_argv) std::vector "$1_name_vec";
+%typemap(rp_tm_xll_argv) std::vector & "$1_name_vec";
+%typemap(rp_tm_xll_argv) SWIGTYPE "$1_name";
 
-// rp_tm_xll_argfv - arguments to the Value Object constructor (C)
-%typemap(rp_tm_xll_argfv) bool "*$1_name";
-%typemap(rp_tm_xll_argfv) unsigned int "*$1_name";
-%typemap(rp_tm_xll_argfv) int "*$1_name";
-%typemap(rp_tm_xll_argfv) long "*$1_name";
-%typemap(rp_tm_xll_argfv) double "*$1_name";
-%typemap(rp_tm_xll_argfv) std::vector const & "$1_name_vec";
-%typemap(rp_tm_xll_argfv) SWIGTYPE "$1_name";
-
-%typemap(rp_tm_xll_argfv2) std::vector const & "$1_name_vec";
-%typemap(rp_tm_xll_argfv2) SWIGTYPE "$1_name_cnv";
+%typemap(rp_tm_xll_argv2) std::vector "$1_name_vec";
+%typemap(rp_tm_xll_argv2) std::vector & "$1_name_vec";
+%typemap(rp_tm_xll_argv2) SWIGTYPE "$1_name_cnv";
 
 // rp_tm_xll_argf - arguments to the underlying Library function (F/C/M)
+
+// NB We would like to do this:
+//%typemap(rp_tm_xll_argf) std::vector "$1_name_vec";
+// But the above needs to be overridden for some types.
+// Because of the way SWIG's type matching rules interact with typedefs and templates,
+// the above typemap cannot always be overridden as necessary.
+// Therefore we need explicit typemaps for rp_tm_xll_argf/rp_tm_xll_argf2
+// for every T in vector<T> and vector<T>&.
+
 %typemap(rp_tm_xll_argf) bool "*$1_name";
-%typemap(rp_tm_xll_argf) unsigned int "*$1_name";
-%typemap(rp_tm_xll_argf) int "*$1_name";
-%typemap(rp_tm_xll_argf) long "*$1_name";
+%typemap(rp_tm_xll_argf) rp_tp_long "*$1_name";
 %typemap(rp_tm_xll_argf) double "*$1_name";
-%typemap(rp_tm_xll_argf) double const & "*$1_name";
-%typemap(rp_tm_xll_argf) rp_tp_cnv "$1_name_cnv";
-%typemap(rp_tm_xll_argf) rp_tp_crc "$1_name_crc";
-%typemap(rp_tm_xll_argf) std::vector<bool> "$1_name_vec";
-%typemap(rp_tm_xll_argf) std::vector<bool> const & "$1_name_vec";
-%typemap(rp_tm_xll_argf) std::vector<long> "$1_name_vec";
-%typemap(rp_tm_xll_argf) std::vector<long> const & "$1_name_vec";
-%typemap(rp_tm_xll_argf) std::vector<double> "$1_name_vec";
-%typemap(rp_tm_xll_argf) std::vector<double> const & "$1_name_vec";
-%typemap(rp_tm_xll_argf) std::vector<std::string> const & "$1_name_vec";
-%typemap(rp_tm_xll_argf) std::vector<std::vector<double> > const & "$1_name_vec";
+%typemap(rp_tm_xll_argf) double & "*$1_name";
+//%typemap(rp_tm_xll_argf) std::vector "$1_name_vec";
+//%typemap(rp_tm_xll_argf) std::vector & "$1_name_vec";
+%typemap(rp_tm_xll_argf) std::vector<std::vector<double> > & "$1_name_vec";
 %typemap(rp_tm_xll_argf) SWIGTYPE "$1_name";
 
-%typemap(rp_tm_xll_argf2) std::vector<bool> const & "$1_name_vec";
-%typemap(rp_tm_xll_argf2) std::vector<double> const & "$1_name_vec";
+//%typemap(rp_tm_xll_argf2) std::vector "$1_name_vec";
+//%typemap(rp_tm_xll_argf2) std::vector & "$1_name_vec";
 %typemap(rp_tm_xll_argf2) SWIGTYPE "$1_name_cnv";
 
 // rp_tm_xll_rtdc - declare variable to capture return value of Library function (F/M)
+
 %typemap(rp_tm_xll_rtdc) void "";
 %typemap(rp_tm_xll_rtdc) SWIGTYPE "$1_type returnValue =";
 
 // rp_tm_xll_rtst - return statement (F/M)
-%typemap(rp_tm_xll_rtst) SWIGTYPE %{
-        static $1_type ret;
-        ret = returnValue;
-        return &ret;
-%}
 
 %typemap(rp_tm_xll_rtst) void %{
         static bool ret = true;
         return &ret;
 %}
+// FIXME replace the 3 below with SWIGTYPE
+%typemap(rp_tm_xll_rtst) bool %{
+        static bool ret;
+        ret = returnValue;
+        return &ret;
+%}
 
-%typemap(rp_tm_xll_rtst) std::string %{
+%typemap(rp_tm_xll_rtst) rp_tp_long %{
+        static long ret;
+        ret = returnValue;
+        return &ret;
+%}
+
+%typemap(rp_tm_xll_rtst) double %{
+        static double ret;
+        ret = returnValue;
+        return &ret;
+%}
+
+%typemap(rp_tm_xll_rtst) rp_tp_string %{
         static char ret[XL_MAX_STR_LEN];
         reposit::stringToChar(returnValue, ret);
         return ret;
 %}
 
-%typemap(rp_tm_xll_rtst) std::string & %{
-        static char ret[XL_MAX_STR_LEN];
-        reposit::stringToChar(returnValue, ret);
-        return ret;
-%}
-
-%typemap(rp_tm_xll_rtst) std::vector<double> %{
+%typemap(rp_tm_xll_rtst) std::vector<std::vector<double> > %{
         static OPER xRet;
-        reposit::vectorToOper(returnValue, xRet);
-        return &xRet;
-%}
-
-%typemap(rp_tm_xll_rtst) std::vector<double> & %{
-        static OPER xRet;
-        reposit::vectorToOper(returnValue, xRet);
-        return &xRet;
-%}
-
-%typemap(rp_tm_xll_rtst) std::vector<long> & %{
-        static OPER xRet;
-        reposit::vectorToOper(returnValue, xRet);
-        return &xRet;
-%}
-
-%typemap(rp_tm_xll_rtst) std::vector<std::string> %{
-        static OPER xRet;
-        reposit::vectorToOper(returnValue, xRet);
+        reposit::matrixToOper(returnValue, xRet);
         return &xRet;
 %}
 
@@ -563,173 +336,161 @@
 %}
 
 // rp_tm_xll_cdrt - code to register the return type with Excel
+
 %typemap(rp_tm_xll_cdrt) void "L";
 %typemap(rp_tm_xll_cdrt) bool "L";
-%typemap(rp_tm_xll_cdrt) unsigned int "N";
-%typemap(rp_tm_xll_cdrt) int "N";
-%typemap(rp_tm_xll_cdrt) long "N";
+%typemap(rp_tm_xll_cdrt) rp_tp_long "N";
 %typemap(rp_tm_xll_cdrt) double "E";
-%typemap(rp_tm_xll_cdrt) double const & "E";
+%typemap(rp_tm_xll_cdrt) double & "E";
 %typemap(rp_tm_xll_cdrt) rp_tp_string "C";
-%typemap(rp_tm_xll_cdrt) rp_tp_string * "C";
-%typemap(rp_tm_xll_cdrt) rp_tp_string & "C";
-%typemap(rp_tm_xll_cdrt) rp_tp_string const & "C";
-%typemap(rp_tm_xll_cdrt) rp_tp_cnv "P";
-%typemap(rp_tm_xll_cdrt) rp_tp_crc "P";
 %typemap(rp_tm_xll_cdrt) rp_tp_any "P";
 %typemap(rp_tm_xll_cdrt) std::vector "P";
-%typemap(rp_tm_xll_cdrt) std::vector const & "P";
+%typemap(rp_tm_xll_cdrt) std::vector & "P";
 %typemap(rp_tm_xll_cdrt) SWIGTYPE * "C";
 
 // rp_tm_xll_code - code to register the parameter with Excel
+
 %typemap(rp_tm_xll_code) void "L";
 %typemap(rp_tm_xll_code) bool "L";
-%typemap(rp_tm_xll_code) unsigned int "N";
-%typemap(rp_tm_xll_code) int "N";
-%typemap(rp_tm_xll_code) long "N";
+%typemap(rp_tm_xll_code) rp_tp_long "N";
 %typemap(rp_tm_xll_code) double "E";
-%typemap(rp_tm_xll_code) double const & "E";
+%typemap(rp_tm_xll_code) double & "E";
 %typemap(rp_tm_xll_code) rp_tp_string "C";
-%typemap(rp_tm_xll_code) rp_tp_string * "C";
-%typemap(rp_tm_xll_code) rp_tp_string & "C";
-%typemap(rp_tm_xll_code) rp_tp_string const & "C";
-%typemap(rp_tm_xll_code) rp_tp_cnv "P";
-%typemap(rp_tm_xll_code) rp_tp_crc "P";
 %typemap(rp_tm_xll_code) rp_tp_any "P";
-%typemap(rp_tm_xll_code) std::vector "P";
-%typemap(rp_tm_xll_code) std::vector const & "P";
+//%typemap(rp_tm_xll_code) std::vector "P";
+//%typemap(rp_tm_xll_code) std::vector & "P";
+%typemap(rp_tm_xll_code) std::vector<std::vector<double> >& "K";
 %typemap(rp_tm_xll_code) SWIGTYPE * "C";
 
 %typemap(rp_tm_xll_code2) SWIGTYPE "P";
 
 // rp_tm_xll_loop - arguments to boost::bind object for a looping function (F/M)
+
 %typemap(rp_tm_xll_loop) bool "*$1_name";
+%typemap(rp_tm_xll_loop) double "*$1_name";
 %typemap(rp_tm_xll_loop) std::vector "_1";
 %typemap(rp_tm_xll_loop) SWIGTYPE "$1_name";
 
+//%typemap(rp_tm_xll_loop2) bool "*$1_name";
 %typemap(rp_tm_xll_loop2) SWIGTYPE "$1_name_cnv";
 
-// Datatype of the loop function for call to boost::bind
+// rp_tm_xll_lpfn - datatype of the loop function for call to boost::bind
+
 %typemap(rp_tm_xll_lpfn) SWIGTYPE "$1_type";
 
-// Datatype of the loop parameter for call to boost::bind
+// rp_tm_xll_lppm - datatype of the loop parameter for call to boost::bind
+%typemap(rp_tm_xll_lppm) rp_tp_long "long";
 %typemap(rp_tm_xll_lppm) SWIGTYPE "$1_basetype";
 %typemap(rp_tm_xll_lppm2) SWIGTYPE "$1_type";
-
-//*****************************************************************************
-// rp_tm_cfy_* - typemaps for the =countify Addin
-//*****************************************************************************
-
-// GROUP
-
-// CPP
-
-// rp_tm_cfy_rtfn - Function return type (F)
-%typemap(rp_tm_cfy_rtfn) void "bool";
-%typemap(rp_tm_cfy_rtfn) std::string "const char *";
-%typemap(rp_tm_cfy_rtfn) SWIGTYPE "$1_type";
-
-// rp_tm_cfy_rtmb - return value of a member function (M)
-%typemap(rp_tm_cfy_rtmb) void "bool";
-%typemap(rp_tm_cfy_rtmb) double "double";
-%typemap(rp_tm_cfy_rtmb) SWIGTYPE "$1_type";
-
-// rp_tm_cfy_parm - function parameters (F/C/M)
-%typemap(rp_tm_cfy_parm) double "double $1_name";
-%typemap(rp_tm_cfy_parm) rp_tp_string "const char * $1_name";
-// This is a temporary hack for trigger parameters, which are not supported by =countify.
-// Declare the value as a dummy bool.  Later we will suppress it altogether.
-%typemap(rp_tm_cfy_parm)  reposit::property_t const & "bool $1_name";
-%typemap(rp_tm_cfy_parm) SWIGTYPE "$1_type $1_name";
-
-// rp_tm_cfy_cnvt - convert input values from =countify datatypes into datatypes of the underlying Library (F/C/M)
-
-// rp_tm_cfy_rtdf - declare variable to capture return value of Library function (F)
-%typemap(rp_tm_cfy_rtdf) std::string %{
-        static std::string ret;
-        ret =
-%}
-%typemap(rp_tm_cfy_rtdf) long %{
-        long returnValue =
-%}
-
-// rp_tm_cfy_rtdm - declare variable to capture return value of Library member function (M)
-%typemap(rp_tm_cfy_rtdm) void "";
-%typemap(rp_tm_cfy_rtdm) double "double returnValue =";
-
-// rp_tm_cfy_args - arguments to pass to underlying Library function
-%typemap(rp_tm_cfy_args) SWIGTYPE "$1_name";
-
-// rp_tm_cfy_rtsf - return statement of a Library function (F)
-%typemap(rp_tm_cfy_rtsf) void "return true;";
-%typemap(rp_tm_cfy_rtsf) long "return returnValue;";
-%typemap(rp_tm_cfy_rtsf) std::string "return ret.c_str();";
-
-// rp_tm_cfy_rtsm - return statement of a Library member function (M)
-%typemap(rp_tm_cfy_rtsm) double "return returnValue;";
-%typemap(rp_tm_cfy_rtsm) void "return true;";
-
-// rp_tm_cfy_rtex - return statement in the event of an exception
-%typemap(rp_tm_cfy_rtex) SWIGTYPE "return 0;";
-
-// TXT
-
-// rp_tm_cfy_mngo - generate the json to register functions with the mongo database
-// This is a temporary hack for trigger parameters, which are not supported by =countify.
-// Declare the value as a summy bool.  Later we will suppress it altogether.
-%typemap(rp_tm_cfy_mngo) void "BOOL";
-%typemap(rp_tm_cfy_mngo) bool "BOOL";
-%typemap(rp_tm_cfy_mngo) long "INT64";
-%typemap(rp_tm_cfy_mngo) double "REAL64";
-%typemap(rp_tm_cfy_mngo) reposit::property_t const & "BOOL";
-%typemap(rp_tm_cfy_mngo) SWIGTYPE "CSTR";
-
-//*****************************************************************************
-// rp_tm_dox_* - typemaps for the Doxygen Addin
-//*****************************************************************************
-
-// rp_tm_dox_rtdc - Return type
-%typemap(rp_tm_dox_rtdc) void "void returnValue";
-%typemap(rp_tm_dox_rtdc) bool "bool returnValue";
-%typemap(rp_tm_dox_rtdc) long "long returnValue";
-%typemap(rp_tm_dox_rtdc) double "double returnValue";
-%typemap(rp_tm_dox_rtdc) rp_tp_string "string returnValue";
-// The return type of a looping function is automatically converted to a vector.
-// If the function is declared with a return type of void then it ends up with a return type of vector<void>.
-// This is a summy typemap to handle that case (turn it back into a void).
-%typemap(rp_tm_dox_rtdc) std::vector<void> "void returnValue";
-%typemap(rp_tm_dox_rtdc) std::vector<bool> "vector<bool> returnValue";
-%typemap(rp_tm_dox_rtdc) std::vector<std::string> "vector<string> returnValue";
-%typemap(rp_tm_dox_rtdc) std::vector< std::vector< reposit::property_t > > "vector<vector<any> > returnValue";
-
-// rp_tm_dox_mbvr - Member variable
-%typemap(rp_tm_dox_mbvr) bool "bool $1_name";
-%typemap(rp_tm_dox_mbvr) long "long $1_name";
-%typemap(rp_tm_dox_mbvr) double "double $1_name";
-%typemap(rp_tm_dox_mbvr) double const & "double $1_name";
-%typemap(rp_tm_dox_mbvr) rp_tp_string "string $1_name";
-%typemap(rp_tm_dox_mbvr) rp_tp_cnv "string $1_name";
-%typemap(rp_tm_dox_mbvr) rp_tp_crc "string $1_name";
-%typemap(rp_tm_dox_mbvr) rp_tp_any "any $1_name";
-%typemap(rp_tm_dox_mbvr) std::vector<std::string> "vector<string> $1_name";
-%typemap(rp_tm_dox_mbvr) std::vector<bool> const & "vector<bool> $1_name";
-//%typemap(rp_tm_dox_mbvr) std::vector<long> const & "vector<long> $1_name";
-%typemap(rp_tm_dox_mbvr) std::vector<double> const & "vector<double> $1_name";
-
-%typemap(rp_tm_dox_mbv2) SWIGTYPE "\\param $1_name $rp_docstr";
 
 //*****************************************************************************
 // %apply statements - map native types to reposit types
 //*****************************************************************************
 
-%apply long { std::size_t };
-
+%apply rp_tp_long { int };
+%apply rp_tp_long { unsigned int };
+%apply rp_tp_long { std::size_t };
+%apply rp_tp_long { long };
+%apply rp_tp_long { long & };
 %apply rp_tp_string { char * };
 %apply rp_tp_string { std::string };
 %apply rp_tp_string { std::string & };
-%apply rp_tp_string { std::string const & };
+%apply rp_tp_any { reposit::property_t & };
 
-%apply rp_tp_any { const reposit::property_t& };
+//*****************************************************************************
+// vectors
+//*****************************************************************************
+
+// use this macro for typemaps which do the same thing for every T in vector<T>.
+
+%define RP_VECTOR_IMPL(T,VEC_T...)
+
+// rp_tm_vob_parm - Value Object constructor parameters (C)
+
+%typemap(rp_tm_vob_parm) VEC_T "const std::vector<T>&";
+
+// rp_tm_vob_mbvr - Value Object class member variables (C)
+
+%typemap(rp_tm_vob_mbvr) VEC_T "std::vector<T> $1_name_";
+
+// rp_tm_vob_cnvt - in ValueObject::setSystemProperty, convert value from property_t to native type (C)
+
+%typemap(rp_tm_vob_cnvt) VEC_T "reposit::vector::convert<T>(value, nameUpper)";
+
+// rp_tm_scr_cnvt - convert types from the Value Object to the corresponding Library Object (C)
+
+%typemap(rp_tm_scr_cnvt) VEC_T %{
+   std::vector<T> $1_name =
+        reposit::vector::convert<T>(valueObject->getProperty("$1_name"), "$1_name");
+%}
+
+// rp_tm_xll_cnvt - convert from Excel datatypes to the datatypes of the underlying Library
+
+%typemap(rp_tm_xll_cnvt) VEC_T %{
+        std::vector<T> $1_name_vec =
+            reposit::operToVector<T>(*$1_name, "$1_name");
+%}
+
+%typemap(rp_tm_xll_cnvt2) VEC_T %{
+        std::vector<T> $1_name_vec =
+            reposit::operToVector<T>(*$1_name, "$1_name");
+%}
+
+// rp_tm_xll_rtst - return statement (F/M)
+
+%typemap(rp_tm_xll_rtst) VEC_T %{
+        static OPER xRet;
+        reposit::vectorToOper(returnValue, xRet);
+        return &xRet;
+%}
+
+%typemap(rp_tm_xll_argf) VEC_T "$1_name_vec";
+%typemap(rp_tm_xll_argf2) VEC_T "$1_name_vec";
+%typemap(rp_tm_xll_code) VEC_T "P";
+
+%enddef
+
+%define RP_VECTOR(T...)
+RP_VECTOR_IMPL(T,std::vector<T>)
+RP_VECTOR_IMPL(T,std::vector<T>&)
+%enddef
+
+%define RP_VECTOR_LONG_IMPL(T,VEC_T...)
+%typemap(rp_tm_vob_parm) VEC_T "const std::vector<long>&";
+%typemap(rp_tm_vob_mbvr) VEC_T "std::vector<long> $1_name_";
+%typemap(rp_tm_vob_cnvt) VEC_T "reposit::vector::convert<long>(value, nameUpper)";
+%typemap(rp_tm_scr_cnvt) VEC_T %{
+   std::vector<long> $1_name_vec =
+        reposit::vector::convert<long>(valueObject->getProperty("$1_name"), "$1_name");
+    std::vector<T> $1_name =
+        QuantLibAddin::convertVector<long, T>($1_name_vec);
+%}
+%typemap(rp_tm_xll_cnvt) VEC_T %{
+        std::vector<long> $1_name_vec =
+            reposit::operToVector<long>(*$1_name, "$1_name");
+        std::vector<T> $1_name_vec2 =
+            QuantLibAddin::convertVector<long, T>($1_name_vec);
+%}
+%typemap(rp_tm_xll_argf) VEC_T "$1_name_vec2";
+%typemap(rp_tm_xll_argf2) VEC_T "$1_name_vec2";
+
+%enddef
+
+%define RP_VECTOR_LONG(T...)
+RP_VECTOR(T)
+RP_VECTOR_LONG_IMPL(T,std::vector<T>)
+RP_VECTOR_LONG_IMPL(T,std::vector<T>&)
+%enddef
+
+RP_VECTOR(bool)
+RP_VECTOR(long)
+RP_VECTOR(double)
+RP_VECTOR(std::string)
+
+// Use RP_VECTOR_LONG instead of RP_VECTOR for integer types other than long which should be treated like long.
+// RP_VECTOR_LONG includes some other steps to convert T to long which are not necessary when T is long.
+RP_VECTOR_LONG(unsigned int)
+RP_VECTOR_LONG(int)
 
 //*****************************************************************************
 // Macros - for certain kinds of types - repository objects, enumerated types
@@ -738,48 +499,48 @@
 //*****************************************************************************
 
 // enumerated types
-%define ENUMERATED_TYPE(T...)
-// T
+%define ENUMERATED_TYPE_IMPL2(T...)
+
 %typemap(rp_tm_xxx_rp_get) T %{
-        T xxx =
-            reposit::Create<T>()(objectID);
+        $1_basetype xxx =
+            reposit::Create<$1_basetype>()(objectID);
 %}
 %typemap(rp_tm_xll_loop) T "$1_name_enm";
 %typemap(rp_tm_xll_loop2) T "$1_name_enm";
 %typemap(rp_tm_csh_loop) T "$1_name_enm";
 %typemap(rp_tm_vob_parm) T "const std::string &";
 %typemap(rp_tm_vob_mbvr) T "std::string $1_name_";
-%typemap(rp_tm_vob_cnvt) T "reposit::convert2<std::string>(value)";
+%typemap(rp_tm_vob_cnvt) T "reposit::convert<std::string>(value)";
 %typemap(rp_tm_scr_cnvt) T %{
     std::string $1_name_str =
-        reposit::convert2<std::string>(valueObject->getProperty("$1_name"));
-    T $1_name =
-        reposit::Create<T>()($1_name_str);
+        reposit::convert<std::string>(valueObject->getProperty("$1_name"));
+    $1_basetype $1_name =
+        reposit::Create<$1_basetype>()($1_name_str);
 %}
 %typemap(rp_tm_cpp_parm) T "const std::string&";
 %typemap(rp_tm_cpp_cnvt) T %{
-    T $1_name_enm =
-        reposit::Create<T>()($1_name);
+    $1_basetype $1_name_enm =
+        reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_cpp_args) T "$1_name_enm";
 %typemap(rp_tm_csh_parm) T "const char *";
 %typemap(rp_tm_csh_cnvt) T %{
-        T $1_name_enm =
-            reposit::Create<T>()($1_name);
+        $1_basetype $1_name_enm =
+            reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_csh_args) T "$1_name_enm";
 %typemap(rp_tm_csh_clcp) T "StringBuilder";
 %typemap(rp_tm_xll_rtft) T "char*";
 %typemap(rp_tm_xll_parm) T "char*";
 %typemap(rp_tm_xll_cnvt) T %{
-        T $1_name_enm =
-            reposit::Create<T>()($1_name);
+        $1_basetype $1_name_enm =
+            reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_xll_cnvt2) T %{
-        std::string $1_name_str = reposit::convert2<std::string>(
+        std::string $1_name_str = reposit::convert<std::string>(
             reposit::ConvertOper(*$1_name), "$1_name", "$rp_value");
-        T $1_name_enm =
-            reposit::Create<T>()($1_name_str);
+        $1_basetype $1_name_enm =
+            reposit::Create<$1_basetype>()($1_name_str);
 %}
 %typemap(rp_tm_xll_argf) T "$1_name_enm";
 %typemap(rp_tm_xll_argf2) T "$1_name_enm";
@@ -788,12 +549,12 @@
 
 %typemap(rp_tm_cfy_parm) T "const char * $1_name";
 %typemap(rp_tm_cfy_cnvt) T %{
-        T $1_name_enum =
-            reposit::Create<T>()($1_name);
+        $1_basetype $1_name_enum =
+            reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_cfy_args) T "$1_name_enum";
-%typemap(rp_tm_xll_argfv) T "$1_name";
-%typemap(rp_tm_xll_argfv2) T "$1_name_str";
+%typemap(rp_tm_xll_argv) T "$1_name";
+%typemap(rp_tm_xll_argv2) T "$1_name_str";
 
 %typemap(rp_tm_xll_rtst) T %{
         std::ostringstream os;
@@ -806,108 +567,63 @@
 %typemap(rp_tm_dox_rtdc) T "string returnValue";
 %typemap(rp_tm_dox_mbvr) T "string $1_name";
 
-// T &
-%typemap(rp_tm_xxx_rp_get) T & %{
-        T xxx =
-            reposit::Create<T>()(objectID);
-%}
-%typemap(rp_tm_xll_loop) T & "$1_name_enm";
-%typemap(rp_tm_xll_loop2) T & "$1_name_enm";
-%typemap(rp_tm_csh_loop) T & "$1_name_enm";
-%typemap(rp_tm_vob_parm) T & "const std::string &";
-%typemap(rp_tm_vob_mbvr) T & "std::string $1_name_";
-%typemap(rp_tm_vob_cnvt) T & "reposit::convert2<std::string>(value)";
-%typemap(rp_tm_scr_cnvt) T & %{
-    std::string $1_name_str =
-        reposit::convert2<std::string>(valueObject->getProperty("$1_name"));
-    T $1_name =
-        reposit::Create<T>()($1_name_str);
-%}
-%typemap(rp_tm_cpp_parm) T & "const std::string&";
-%typemap(rp_tm_cpp_cnvt) T & %{
-    T $1_name_enm =
-        reposit::Create<T>()($1_name);
-%}
-%typemap(rp_tm_cpp_args) T & "$1_name_enm";
-%typemap(rp_tm_csh_parm) T & "const char *";
-%typemap(rp_tm_csh_cnvt) T & %{
-        T $1_name_enm =
-            reposit::Create<T>()($1_name);
-%}
-%typemap(rp_tm_csh_args) T & "$1_name_enm";
-%typemap(rp_tm_csh_clcp) T & "StringBuilder";
-%typemap(rp_tm_xll_rtft) T & "char*";
-%typemap(rp_tm_xll_parm) T & "char*";
-%typemap(rp_tm_xll_cnvt) T & %{
-        T $1_name_enm =
-            reposit::Create<T>()($1_name);
-%}
-%typemap(rp_tm_xll_cnvt2) T & %{
-        std::string $1_name_str = reposit::convert2<std::string>(
-            reposit::ConvertOper(*$1_name), "$1_name", "$rp_value");
-        T $1_name_enm =
-            reposit::Create<T>()($1_name_str);
-%}
-%typemap(rp_tm_xll_argf) T & "$1_name_enm";
-%typemap(rp_tm_xll_argf2) T & "$1_name_enm";
-%typemap(rp_tm_xll_cdrt) T & "C";
-%typemap(rp_tm_xll_code) T & "C";
-%typemap(rp_tm_cfy_parm) T & "const char * $1_name";
-%typemap(rp_tm_cfy_cnvt) T & %{
-        T $1_name_enum =
-            reposit::Create<T>()($1_name);
-%}
-%typemap(rp_tm_cfy_args) T & "$1_name_enum";
-%typemap(rp_tm_xll_argfv) T & "$1_name";
-%typemap(rp_tm_xll_argfv2) T & "$1_name_str";
+%enddef
 
-%typemap(rp_tm_xll_rtst) T & %{
-        std::ostringstream os;
-        os << returnValue;
-        static char ret[XL_MAX_STR_LEN];
-        reposit::stringToChar(os.str(), ret);
-        return ret;
-%}
+%define ENUMERATED_TYPE_IMPL(T...)
+ENUMERATED_TYPE_IMPL2(T)
+ENUMERATED_TYPE_IMPL2(T&)
+%enddef
 
-%typemap(rp_tm_dox_rtdc) T & "string returnValue";
-%typemap(rp_tm_dox_mbvr) T & "string $1_name";
-%typemap(rp_tm_dox_rtd2) SWIGTYPE "ZZZ returnValue";
+%define ENUMERATED_TYPE(N,T...)
+namespace N {
+    enum T;
+}
+ENUMERATED_TYPE_IMPL(N::T)
+%enddef
 
+%define ENUMERATED_TYPE_STRUCT(N,S,T...)
+namespace N {
+    struct S {
+        enum T;
+    };
+}
+ENUMERATED_TYPE_IMPL(N::S::T)
 %enddef
 
 // enumerated class
-%define ENUMERATED_CLASS(T...)
-// T
+%define ENUMERATED_CLASS_IMPL2(T,T_NAME...)
+
 %typemap(rp_tm_xxx_rp_get) T %{
-        T xxx =
-            reposit::Create<T>()(objectID);
+        $1_basetype xxx =
+            reposit::Create<$1_basetype>()(objectID);
 %}
+%typemap(rp_tm_xxx_rp_call) T "xxx.";
 %typemap(rp_tm_xll_loop) T "$1_name_enm";
 %typemap(rp_tm_xll_loop2) T "$1_name_enm";
 %typemap(rp_tm_vob_parm) T "const std::string &";
 %typemap(rp_tm_vob_mbvr) T "std::string $1_name_";
-%typemap(rp_tm_vob_cnvt) T "reposit::convert2<std::string>(value)";
+%typemap(rp_tm_vob_cnvt) T "reposit::convert<std::string>(value)";
 %typemap(rp_tm_scr_cnvt) T %{
     std::string $1_name_str =
-        reposit::convert2<std::string>(valueObject->getProperty("$1_name"));
-    T $1_name =
-        reposit::Create<T>()($1_name_str);
+        reposit::convert<std::string>(valueObject->getProperty("$1_name"));
+    $1_basetype $1_name =
+        reposit::Create<$1_basetype>()($1_name_str);
 %}
 %typemap(rp_tm_cpp_parm) T "const std::string&";
 %typemap(rp_tm_cpp_cnvt) T %{
-    T $1_name_enm =
-        reposit::Create<T >()($1_name);
+    $1_basetype $1_name_enm =
+        reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_cpp_args) T "$1_name_enm";
 
 %typemap(rp_tm_csh_parm) T "const char *";
 %typemap(rp_tm_csh_cnvt) T %{
-            T $1_name_enm =
-                reposit::Create<T >()($1_name);
+            $1_basetype $1_name_enm =
+                reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_csh_cnvt) T %{
-        T $1_name_enm =
-            reposit::Create<T >()($1_name);
+        $1_basetype $1_name_enm =
+            reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_csh_args) T "$1_name_enm";
 %typemap(rp_tm_csh_clcp) T "StringBuilder";
@@ -916,14 +632,14 @@
 %typemap(rp_tm_xll_rtft) T "char*";
 %typemap(rp_tm_xll_parm) T "char*";
 %typemap(rp_tm_xll_cnvt) T %{
-        T $1_name_enm =
-            reposit::Create<T>()($1_name);
+        $1_basetype $1_name_enm =
+            reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_xll_cnvt2) T %{
-        std::string $1_name_str = reposit::convert2<std::string>(
+        std::string $1_name_str = reposit::convert<std::string>(
             reposit::ConvertOper(*$1_name), "$1_name", "$rp_value");
-        T $1_name_enm =
-            reposit::Create<T>()($1_name_str);
+        $1_basetype $1_name_enm =
+            reposit::Create<$1_basetype>()($1_name_str);
 %}
 %typemap(rp_tm_xll_argf) T "$1_name_enm";
 %typemap(rp_tm_xll_argf2) T "$1_name_enm";
@@ -932,12 +648,12 @@
 
 %typemap(rp_tm_cfy_parm) T "const char * $1_name";
 %typemap(rp_tm_cfy_cnvt) T %{
-    T $1_name_enm =
-        reposit::Create<T >()($1_name);
+    $1_basetype $1_name_enm =
+        reposit::Create<$1_basetype>()($1_name);
 %}
 %typemap(rp_tm_cfy_args) T "$1_name_enm";
-%typemap(rp_tm_xll_argfv) T "$1_name";
-%typemap(rp_tm_xll_argfv2) T "$1_name_str";
+%typemap(rp_tm_xll_argv) T "$1_name";
+%typemap(rp_tm_xll_argv2) T "$1_name_str";
 
 %typemap(rp_tm_xll_rtst) T %{
         std::ostringstream os;
@@ -949,151 +665,195 @@
 
 %typemap(rp_tm_dox_rtdc) T "string returnValue";
 %typemap(rp_tm_dox_mbvr) T "string $1_name";
-%typemap(rp_tm_dox_rtd2) SWIGTYPE "ID of Enumeration of class T";
+//%typemap(rp_tm_dox_rtd2) SWIGTYPE "ID of Enumeration of class T_NAME";
 
-// T &
-%typemap(rp_tm_xxx_rp_get) T & %{
-        T xxx =
-            reposit::Create<T>()(objectID);
-%}
-%typemap(rp_tm_xll_loop) T & "$1_name_enm";
-%typemap(rp_tm_xll_loop2) T & "$1_name_enm";
-%typemap(rp_tm_vob_parm) T & "const std::string &";
-%typemap(rp_tm_vob_mbvr) T & "std::string $1_name_";
-%typemap(rp_tm_vob_cnvt) T & "reposit::convert2<std::string>(value)";
-%typemap(rp_tm_scr_cnvt) T & %{
-    std::string $1_name_str =
-        reposit::convert2<std::string>(valueObject->getProperty("$1_name"));
-    T $1_name =
-        reposit::Create<T>()($1_name_str);
-%}
-%typemap(rp_tm_cpp_parm) T & "const std::string&";
-%typemap(rp_tm_cpp_cnvt) T & %{
-    T $1_name_enm =
-        reposit::Create<T >()($1_name);
-%}
-%typemap(rp_tm_cpp_args) T & "$1_name_enm";
+%enddef
 
-%typemap(rp_tm_csh_parm) T & "const char *";
-%typemap(rp_tm_csh_cnvt) T & %{
-            T $1_name_enm =
-                reposit::Create<T >()($1_name);
-%}
-%typemap(rp_tm_csh_cnvt) T & %{
-        T $1_name_enm =
-            reposit::Create<T >()($1_name);
-%}
-%typemap(rp_tm_csh_args) T & "$1_name_enm";
-%typemap(rp_tm_csh_clcp) T & "StringBuilder";
-%typemap(rp_tm_csh_rttp) T & "char *";
-%typemap(rp_tm_csh_rscp) T & "string";
-%typemap(rp_tm_csh_rtst) T & %{
-        std::ostringstream os;
-        os << returnValue;
-        ULONG size = os.str().length() + sizeof(char);
-        char *ret = (char*)::CoTaskMemAlloc(size);
-        strcpy(ret, os.str().c_str());
-        return ret;
-%}
+%define ENUMERATED_CLASS_IMPL(T...)
+ENUMERATED_CLASS_IMPL2(T, T)
+ENUMERATED_CLASS_IMPL2(T&, T)
+%enddef
 
-%typemap(rp_tm_xll_rtft) T & "char*";
-%typemap(rp_tm_xll_parm) T & "char*";
-%typemap(rp_tm_xll_cnvt) T & %{
-        T $1_name_enm =
-            reposit::Create<T>()($1_name);
-%}
-%typemap(rp_tm_xll_cnvt2) T & %{
-        std::string $1_name_str = reposit::convert2<std::string>(
-            reposit::ConvertOper(*$1_name), "$1_name", "$rp_value");
-        T $1_name_enm =
-            reposit::Create<T>()($1_name_str);
-%}
-%typemap(rp_tm_xll_argf) T & "$1_name_enm";
-%typemap(rp_tm_xll_argf2) T & "$1_name_enm";
-%typemap(rp_tm_xll_cdrt) T & "C";
-%typemap(rp_tm_xll_code) T & "C";
-
-%typemap(rp_tm_xll_rtst) T & %{
-        std::ostringstream os;
-        os << returnValue;
-        static char ret[XL_MAX_STR_LEN];
-        reposit::stringToChar(os.str(), ret);
-        return ret;
-%}
-
-%typemap(rp_tm_cfy_parm) T & "const char * $1_name";
-%typemap(rp_tm_cfy_cnvt) T & %{
-    T $1_name_enm =
-        reposit::Create<T >()($1_name);
-%}
-%typemap(rp_tm_cfy_args) T & "$1_name_enm";
-%typemap(rp_tm_xll_argfv) T & "$1_name";
-%typemap(rp_tm_xll_argfv2) T & "$1_name_str";
-
-%typemap(rp_tm_dox_rtdc) T & "string returnValue";
-%typemap(rp_tm_dox_mbvr) T & "string $1_name";
-%typemap(rp_tm_dox_rtd2) SWIGTYPE "ID of Enumeration of class T";
-
+%define ENUMERATED_CLASS(N,T...)
+namespace N {
+    class T;
+}
+ENUMERATED_CLASS_IMPL(N::T)
 %enddef
 
 // repository objects
 %define OBJECT_WRAPPER(T_ADDIN,T_LIB...)
 
+%typemap(rp_tm_xxx_rp_wrp) T_LIB %{
+        RP_GET_OBJECT(xxx, objectID, T_ADDIN);
+%}
 %typemap(rp_tm_xxx_rp_get) T_LIB %{
         RP_GET_REFERENCE(xxx, objectID, T_ADDIN, T_LIB);
 %}
-%typemap(rp_tm_vob_parm) boost::shared_ptr<T_LIB> const & "const std::string &";
-%typemap(rp_tm_vob_mbvr) boost::shared_ptr<T_LIB> const & "std::string $1_name_";
-%typemap(rp_tm_vob_cnvt) boost::shared_ptr<T_LIB> const & "reposit::convert2<std::string>(value)";
-%typemap(rp_tm_scr_cnvt) boost::shared_ptr<T_LIB> const & %{
+%typemap(rp_tm_vob_parm) T_LIB & "const std::string &";
+%typemap(rp_tm_vob_parm) boost::shared_ptr<T_LIB> & "const std::string &";
+%typemap(rp_tm_vob_parm) boost::shared_ptr<T_ADDIN> & "const std::string &";
+%typemap(rp_tm_vob_parm) std::vector<T_LIB> & "const std::vector<std::string> &";
+%typemap(rp_tm_vob_parm) std::vector<boost::shared_ptr<T_ADDIN> > & "const std::vector<std::string> &";
+%typemap(rp_tm_vob_parm) std::vector<boost::shared_ptr<T_LIB> > & "const std::vector<std::string> &";
+%typemap(rp_tm_vob_mbvr) T_LIB & "std::string $1_name_";
+%typemap(rp_tm_vob_mbvr) boost::shared_ptr<T_LIB> & "std::string $1_name_";
+%typemap(rp_tm_vob_mbvr) boost::shared_ptr<T_ADDIN> & "std::string $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector<T_LIB> & "std::vector<std::string> $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector<boost::shared_ptr<T_ADDIN> > & "std::vector<std::string> $1_name_";
+%typemap(rp_tm_vob_mbvr) std::vector<boost::shared_ptr<T_LIB> > & "std::vector<std::string> $1_name_";
+%typemap(rp_tm_vob_cnvt) T_LIB & "reposit::convert<std::string>(value)";
+%typemap(rp_tm_vob_cnvt) boost::shared_ptr<T_LIB> & "reposit::convert<std::string>(value)";
+%typemap(rp_tm_vob_cnvt) boost::shared_ptr<T_ADDIN> & "reposit::convert<std::string>(value)";
+%typemap(rp_tm_vob_cnvt) std::vector<T_LIB> & "reposit::vector::convert<std::string>(value, nameUpper)";
+%typemap(rp_tm_vob_cnvt) std::vector<boost::shared_ptr<T_ADDIN> > & "reposit::vector::convert<std::string>(value, nameUpper)";
+%typemap(rp_tm_vob_cnvt) std::vector<boost::shared_ptr<T_LIB> > & "reposit::vector::convert<std::string>(value, nameUpper)";
+
+%typemap(rp_tm_scr_cnvt) T_LIB & %{
     std::string $1_name_str =
-        reposit::convert2<std::string>(valueObject->getProperty("$1_name"));
+        reposit::convert<std::string>(valueObject->getProperty("$1_name"));
+    valueObject->processPrecedentID($1_name_str);
+    RP_GET_UNDERLYING($1_name, $1_name_str,
+        T_ADDIN, T_LIB);
+%}
+
+%typemap(rp_tm_scr_cnvt) boost::shared_ptr<T_LIB> & %{
+    std::string $1_name_str =
+        reposit::convert<std::string>(valueObject->getProperty("$1_name"));
     valueObject->processPrecedentID($1_name_str);
     RP_GET_REFERENCE($1_name, $1_name_str,
-        T_ADDIN ,  T_LIB );
+        T_ADDIN, T_LIB);
 %}
-%typemap(rp_tm_cpp_parm) boost::shared_ptr<T_LIB> const & "const std::string&";
-%typemap(rp_tm_cpp_args) boost::shared_ptr<T_LIB> const & "$1_name_get";
-%typemap(rp_tm_csh_parm) boost::shared_ptr<T_LIB> const & "const char *";
-%typemap(rp_tm_csh_args) boost::shared_ptr<T_LIB> const & "$1_name_get";
-%typemap(rp_tm_csh_clcp) boost::shared_ptr<T_LIB> const & "StringBuilder";
-%typemap(rp_tm_csh_cnvt) boost::shared_ptr<T_LIB> const & %{
+%typemap(rp_tm_scr_cnvt2) boost::shared_ptr<T_LIB> & %{
+    std::string $1_name_str =
+        reposit::convert<std::string>(valueObject->getProperty("$1_name"));
+    valueObject->processPrecedentID($1_name_str);
+    RP_GET_REFERENCE_DEFAULT($1_name, $1_name_str,
+        T_ADDIN, T_LIB);
+%}
+
+%typemap(rp_tm_scr_cnvt) std::vector<T_LIB> & %{
+    std::vector<std::string> $1_name_vec =
+        reposit::vector::convert<std::string>(valueObject->getProperty("$1_name"), "$1_name");
+    for (std::vector<std::string>::const_iterator i = $1_name_vec.begin();
+            i != $1_name_vec.end(); ++i)
+        valueObject->processPrecedentID(*i);
+    std::vector<boost::shared_ptr<T_LIB> > $1_name_temp =
+        reposit::getLibraryObjectVector<T_ADDIN, T_LIB>($1_name_vec);
+    // FIXME implement a variation of function getLibraryObjectVector() which includes the conversion below:
+    std::vector<T_LIB> $1_name($1_name_temp.size());
+    for (QuantLib::Size i=0; i<$1_name_temp.size(); ++i) {
+        boost::shared_ptr<T_LIB> $1_name_item = $1_name_temp[i];
+        $1_name[i] = *($1_name_item.get());
+    }
+%}
+
+%typemap(rp_tm_scr_cnvt) std::vector<boost::shared_ptr<T_LIB> > & %{
+    std::vector<std::string> $1_name_vec =
+        reposit::vector::convert<std::string>(valueObject->getProperty("$1_name"), "$1_name");
+    for (std::vector<std::string>::const_iterator i = $1_name_vec.begin();
+            i != $1_name_vec.end(); ++i)
+        valueObject->processPrecedentID(*i);
+    std::vector<boost::shared_ptr<T_LIB> > $1_name =
+        reposit::getLibraryObjectVector<T_ADDIN, T_LIB>($1_name_vec);
+%}
+
+%typemap(rp_tm_scr_cnvt) std::vector<boost::shared_ptr<T_ADDIN> > & %{
+    std::vector<std::string> $1_name_vec =
+        reposit::vector::convert<std::string>(valueObject->getProperty("$1_name"), "$1_name");
+    for (std::vector<std::string>::const_iterator i = $1_name_vec.begin();
+            i != $1_name_vec.end(); ++i)
+        valueObject->processPrecedentID(*i);
+    std::vector<boost::shared_ptr<T_ADDIN> > $1_name =
+        reposit::getObjectVector<T_ADDIN>($1_name_vec);
+%}
+
+%typemap(rp_tm_cpp_parm) boost::shared_ptr<T_LIB> & "const std::string&";
+%typemap(rp_tm_cpp_args) boost::shared_ptr<T_LIB> & "$1_name_get";
+
+%typemap(rp_tm_xll_parm) T_LIB & "char*";
+%typemap(rp_tm_xll_parm) boost::shared_ptr<T_LIB> & "char*";
+
+// FIXME this is currently implemented in QuantLibAddin, it should be here.
+//%typemap(rp_tm_xll_cnvt) T_LIB & %{
+//        boost::shared_ptr<T_LIB> $1_name_temp = reposit::GetObject<T_ADDIN, T_LIB>::f($1_name);
+//        const T_LIB &$1_name_obj = *($1_name_temp.get());
+//%}
+
+%typemap(rp_tm_xll_cnvt) boost::shared_ptr<T_ADDIN> & %{
+        RP_GET_OBJECT($1_name_obj, $1_name, T_ADDIN);
+%}
+%typemap(rp_tm_xll_cnvt) boost::shared_ptr<T_LIB> & %{
         RP_GET_REFERENCE($1_name_obj, $1_name,
-            T_ADDIN ,  T_LIB );
+            T_ADDIN, T_LIB);
 %}
-%typemap(rp_tm_csh_cnvt) std::vector<boost::shared_ptr<T_LIB> > const & %{
-        std::vector<std::string> $1_name_vec($1_name, $1_name + $1_name_length);
+%typemap(rp_tm_xll_cnvt2) boost::shared_ptr<T_LIB> & %{
+        std::string $1_name_cnv = reposit::convert<std::string>(
+            reposit::ConvertOper(*$1_name), "$1_name", "");
+        RP_GET_REFERENCE_DEFAULT($1_name_obj, $1_name_cnv,
+            T_ADDIN, T_LIB);
+%}
+
+%typemap(rp_tm_xll_cnvt) std::vector<T_LIB> & %{
+        std::vector<std::string> $1_name_vec =
+            reposit::operToVector<std::string>(*$1_name, "$1_name");
+        std::vector<boost::shared_ptr<T_LIB> > $1_name_temp =
+            reposit::getLibraryObjectVector<T_ADDIN, T_LIB>($1_name_vec);
+        // FIXME implement a variation of function getLibraryObjectVector() which includes the conversion below:
+        std::vector<T_LIB> $1_name_vec2($1_name_temp.size());
+        for (QuantLib::Size i=0; i<$1_name_temp.size(); ++i) {
+            boost::shared_ptr<T_LIB> $1_name_item = $1_name_temp[i];
+            $1_name_vec2[i] = *($1_name_item.get());
+        }
+%}
+
+%typemap(rp_tm_xll_cnvt) std::vector<boost::shared_ptr<T_ADDIN> > & %{
+        std::vector<std::string> $1_name_vec =
+            reposit::operToVector<std::string>(*$1_name, "$1_name");
+        std::vector<boost::shared_ptr<T_ADDIN> > $1_name_vec2 =
+            reposit::getObjectVector<T_ADDIN>($1_name_vec);
+%}
+
+%typemap(rp_tm_xll_cnvt) std::vector<boost::shared_ptr<T_LIB> > & %{
+        std::vector<std::string> $1_name_vec =
+            reposit::operToVector<std::string>(*$1_name, "$1_name");
         std::vector<boost::shared_ptr<T_LIB> > $1_name_vec2 =
             reposit::getLibraryObjectVector<T_ADDIN, T_LIB>($1_name_vec);
 %}
 
-%typemap(rp_tm_csh_args) boost::shared_ptr<T_LIB> const & "$1_name_obj";
-%typemap(rp_tm_xll_parm) boost::shared_ptr<T_LIB> const & "char*";
-%typemap(rp_tm_xll_cnvt) boost::shared_ptr<T_ADDIN> const & %{
-        RP_GET_OBJECT($1_name_obj, $1_name, T_ADDIN);
-%}
-%typemap(rp_tm_xll_cnvt) boost::shared_ptr<T_LIB> const & %{
-        RP_GET_REFERENCE($1_name_obj, $1_name,
-            T_ADDIN ,  T_LIB );
-%}
-%typemap(rp_tm_xll_argf) boost::shared_ptr<T_LIB> const & "$1_name_obj";
-%typemap(rp_tm_xll_cdrt) boost::shared_ptr<T_LIB> const & "C";
-%typemap(rp_tm_xll_code) boost::shared_ptr<T_LIB> const & "C";
-%typemap(rp_tm_cfy_parm) boost::shared_ptr<T_LIB> const & "const char * $1_name";
-%typemap(rp_tm_cfy_cnvt) boost::shared_ptr<T_LIB> const & %{
-        RP_GET_REFERENCE($1_name_get, $1_name, T_ADDIN, T_LIB);
-%}
-%typemap(rp_tm_cfy_args) boost::shared_ptr<T_LIB> const & "$1_name_get";
+%typemap(rp_tm_xll_argf) T_LIB & "$1_name_obj";
+%typemap(rp_tm_xll_argf) boost::shared_ptr<T_LIB> & "$1_name_obj";
+%typemap(rp_tm_xll_argf) std::vector<T_LIB> & "$1_name_vec2";
+%typemap(rp_tm_xll_argf) std::vector<boost::shared_ptr<T_ADDIN> > & "$1_name_vec2";
+%typemap(rp_tm_xll_argf) std::vector<boost::shared_ptr<T_LIB> > & "$1_name_vec2";
+%typemap(rp_tm_xll_argf2) boost::shared_ptr<T_LIB> & "$1_name_obj";
+%typemap(rp_tm_xll_cdrt) boost::shared_ptr<T_LIB> & "C";
+%typemap(rp_tm_xll_code) T_LIB & "C";
+%typemap(rp_tm_xll_code) boost::shared_ptr<T_LIB> & "C";
+%typemap(rp_tm_xll_code) std::vector<T_LIB> & "P";
+%typemap(rp_tm_xll_code) std::vector<boost::shared_ptr<T_ADDIN> > & "P";
+%typemap(rp_tm_xll_code) std::vector<boost::shared_ptr<T_LIB> > & "P";
 
-%typemap(rp_tm_dox_rtdc) boost::shared_ptr<T_LIB> const & "string returnValue";
-%typemap(rp_tm_dox_mbvr) boost::shared_ptr<T_LIB> const &  "string $1_name";
-%typemap(rp_tm_dox_mbvr) boost::shared_ptr<T_ADDIN> const &  "string $1_name";
+%typemap(rp_tm_dox_rtdc) boost::shared_ptr<T_LIB> & "string returnValue";
+%typemap(rp_tm_dox_mbvr) boost::shared_ptr<T_LIB> &  "string $1_name";
+%typemap(rp_tm_dox_mbvr) boost::shared_ptr<T_ADDIN> &  "string $1_name";
 
-%typemap(rp_tm_dox_mbvr) std::vector<boost::shared_ptr<T_LIB> > const & "vector<string> $1_name";
-%typemap(rp_tm_dox_mbvr) std::vector<boost::shared_ptr<T_ADDIN> > const & "vector<string> $1_name";
+%typemap(rp_tm_dox_mbvr) std::vector<boost::shared_ptr<T_LIB> > & "vector<string> $1_name";
+%typemap(rp_tm_dox_mbvr) std::vector<boost::shared_ptr<T_ADDIN> > & "vector<string> $1_name";
 
-%typemap(rp_tm_lib_loop) T_LIB "boost::shared_ptr<T_LIB>";
-%typemap(rp_tm_lib_loop) T_ADDIN "boost::shared_ptr<T_ADDIN>";
+//%typemap(rp_tm_lib_loop) T_LIB "boost::shared_ptr<T_LIB>";
+//%typemap(rp_tm_lib_loop) T_ADDIN "boost::shared_ptr<T_ADDIN>";
+
+// library types
+%typemap(rp_tm_lib_lp01) T_LIB "T_ADDIN";                       // loop class - wrap function
+%typemap(rp_tm_lib_lp02) T_LIB "T_LIB";                         // loop class - normal function
+%typemap(rp_tm_lib_lp03) T_LIB "boost::shared_ptr<T_ADDIN>";    // loop pointer - wrap function
+%typemap(rp_tm_lib_lp04) T_LIB "boost::shared_ptr<T_LIB>";      // loop pointer - normal function
+
+// addin types - note that wrap functions are invalid in this context.
+%typemap(rp_tm_lib_lp01) T_ADDIN "ERROR";                       // loop class - wrap function
+%typemap(rp_tm_lib_lp02) T_ADDIN "T_ADDIN";                     // loop class - normal function
+%typemap(rp_tm_lib_lp03) T_ADDIN "ERROR";                       // loop pointer - wrap function
+%typemap(rp_tm_lib_lp04) T_ADDIN "boost::shared_ptr<T_ADDIN>";  // loop pointer - normal function
 
 %enddef
-

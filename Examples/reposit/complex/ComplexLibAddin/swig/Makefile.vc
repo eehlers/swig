@@ -1,6 +1,6 @@
 
 SWIG_ROOT_DIR=..\..\..\..\..
-SWIG_EXE=$(SWIG_ROOT_DIR)\build\vc90\Win32\Release\swig.exe
+SWIG_EXE=$(SWIG_ROOT_DIR)\build\vc141\Win32\Release\swig.exe
 SWIG_SWG=$(SWIG_ROOT_DIR)\Lib\reposit\reposit.swg
 SWIG_INC=$(SWIG_ROOT_DIR)\Lib
 REPOSIT_INC=$(SWIG_ROOT_DIR)\Lib\reposit

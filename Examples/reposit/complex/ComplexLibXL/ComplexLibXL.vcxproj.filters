@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="conversions">
+      <UniqueIdentifier>{48ee2fb0-0539-4a31-a995-26f3ee502873}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions">
+      <UniqueIdentifier>{a807952d-9d73-4d0e-b595-e4bca38bab06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="register">
+      <UniqueIdentifier>{f4b2708a-bac9-459f-a2a6-9ae0e2743e22}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="clxl\conversions\convert2.cpp">
+      <Filter>conversions</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\functions\function_coercions.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\functions\function_conversions.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\functions\function_diamond_inheritance.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\functions\function_docstrings.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\functions\function_enumerated_classes.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\functions\function_enumerated_types.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\functions\function_functions.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\functions\function_inheritance.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\functions\function_multiple_inheritance.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\functions\function_objects.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\functions\function_overrides.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\functions\function_typedefs.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\register\register_all.cpp">
+      <Filter>register</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\register\register_coercions.cpp">
+      <Filter>register</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\register\register_conversions.cpp">
+      <Filter>register</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\register\register_diamond_inheritance.cpp">
+      <Filter>register</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\register\register_docstrings.cpp">
+      <Filter>register</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\register\register_enumerated_classes.cpp">
+      <Filter>register</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\register\register_enumerated_types.cpp">
+      <Filter>register</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\register\register_functions.cpp">
+      <Filter>register</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\register\register_inheritance.cpp">
+      <Filter>register</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\register\register_multiple_inheritance.cpp">
+      <Filter>register</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\register\register_objects.cpp">
+      <Filter>register</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\register\register_overrides.cpp">
+      <Filter>register</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\register\register_typedefs.cpp">
+      <Filter>register</Filter>
+    </ClCompile>
+    <ClCompile Include="clxl\addin.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="clxl\conversions\convert2.hpp">
+      <Filter>conversions</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

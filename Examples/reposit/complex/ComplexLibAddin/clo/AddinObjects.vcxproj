@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{72B5EDA8-E86D-4655-A759-159F8E377CA4}</ProjectGuid>
+    <RootNamespace>AddinObjects</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <Import Project="..\..\..\..\..\swig.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\..\boost_current.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\..\boost_current.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>15.0.27130.2010</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..;..\..\ComplexLib;..\..\..\..\..\..\reposit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..;..\..\ComplexLib;..\..\..\..\..\..\reposit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="conversions\convert2.cpp" />
+    <ClCompile Include="enumerations\constructors\classes.cpp" />
+    <ClCompile Include="enumerations\register\register_classes.cpp" />
+    <ClCompile Include="enumerations\register\register_types.cpp" />
+    <ClCompile Include="init.cpp" />
+    <ClCompile Include="objmanual_overrides.cpp" />
+    <ClCompile Include="serialization\create\create_diamond_inheritance.cpp" />
+    <ClCompile Include="serialization\create\create_docstrings.cpp" />
+    <ClCompile Include="serialization\create\create_inheritance.cpp" />
+    <ClCompile Include="serialization\create\create_multiple_inheritance.cpp" />
+    <ClCompile Include="serialization\create\create_objects.cpp" />
+    <ClCompile Include="serialization\create\create_overrides.cpp" />
+    <ClCompile Include="serialization\register\serialization_diamond_inheritance.cpp" />
+    <ClCompile Include="serialization\register\serialization_docstrings.cpp" />
+    <ClCompile Include="serialization\register\serialization_inheritance.cpp" />
+    <ClCompile Include="serialization\register\serialization_multiple_inheritance.cpp" />
+    <ClCompile Include="serialization\register\serialization_objects.cpp" />
+    <ClCompile Include="serialization\register\serialization_overrides.cpp" />
+    <ClCompile Include="serialization\register_creators.cpp" />
+    <ClCompile Include="serialization\serializationfactory.cpp" />
+    <ClCompile Include="valueobjects\vo_diamond_inheritance.cpp" />
+    <ClCompile Include="valueobjects\vo_docstrings.cpp" />
+    <ClCompile Include="valueobjects\vo_inheritance.cpp" />
+    <ClCompile Include="valueobjects\vo_multiple_inheritance.cpp" />
+    <ClCompile Include="valueobjects\vo_objects.cpp" />
+    <ClCompile Include="valueobjects\vo_overrides.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="coercions\all.hpp" />
+    <ClInclude Include="coercions\coerce_grade.hpp" />
+    <ClInclude Include="conversions\cnv_tmpl.hpp" />
+    <ClInclude Include="conversions\convert2.hpp" />
+    <ClInclude Include="enumerations\constructors\classes.hpp" />
+    <ClInclude Include="enumerations\factories\all.hpp" />
+    <ClInclude Include="enumerations\factories\timezone.hpp" />
+    <ClInclude Include="enumerations\register\register_classes.hpp" />
+    <ClInclude Include="enumerations\register\register_types.hpp" />
+    <ClInclude Include="init.hpp" />
+    <ClInclude Include="objmanual_diamond_inheritance.hpp" />
+    <ClInclude Include="objmanual_overrides.hpp" />
+    <ClInclude Include="obj_all.hpp" />
+    <ClInclude Include="obj_docstrings.hpp" />
+    <ClInclude Include="obj_inheritance.hpp" />
+    <ClInclude Include="obj_multiple_inheritance.hpp" />
+    <ClInclude Include="obj_objects.hpp" />
+    <ClInclude Include="serialization\create\create_all.hpp" />
+    <ClInclude Include="serialization\create\create_diamond_inheritance.hpp" />
+    <ClInclude Include="serialization\create\create_docstrings.hpp" />
+    <ClInclude Include="serialization\create\create_inheritance.hpp" />
+    <ClInclude Include="serialization\create\create_multiple_inheritance.hpp" />
+    <ClInclude Include="serialization\create\create_objects.hpp" />
+    <ClInclude Include="serialization\create\create_overrides.hpp" />
+    <ClInclude Include="serialization\register\serialization_all.hpp" />
+    <ClInclude Include="serialization\register\serialization_diamond_inheritance.hpp" />
+    <ClInclude Include="serialization\register\serialization_docstrings.hpp" />
+    <ClInclude Include="serialization\register\serialization_inheritance.hpp" />
+    <ClInclude Include="serialization\register\serialization_multiple_inheritance.hpp" />
+    <ClInclude Include="serialization\register\serialization_objects.hpp" />
+    <ClInclude Include="serialization\register\serialization_overrides.hpp" />
+    <ClInclude Include="serialization\register\serialization_register.hpp" />
+    <ClInclude Include="serialization\serializationfactory.hpp" />
+    <ClInclude Include="valueobjects\vo_diamond_inheritance.hpp" />
+    <ClInclude Include="valueobjects\vo_docstrings.hpp" />
+    <ClInclude Include="valueobjects\vo_inheritance.hpp" />
+    <ClInclude Include="valueobjects\vo_multiple_inheritance.hpp" />
+    <ClInclude Include="valueobjects\vo_objects.hpp" />
+    <ClInclude Include="valueobjects\vo_overrides.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\ComplexLib\ComplexLib.vcxproj">
+      <Project>{99110fbd-d532-4984-ab3b-1c07515b3667}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\swig\swigrun.vcxproj">
+      <Project>{88be5568-6e55-41c5-a251-670fafb44336}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

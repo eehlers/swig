@@ -1,0 +1,274 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="CParse">
+      <UniqueIdentifier>{95bb6394-b4cc-4f66-b633-946ca788a787}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DOH">
+      <UniqueIdentifier>{46c26749-08c2-421d-8437-2b766ed43ed0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include">
+      <UniqueIdentifier>{2f4d0113-ba86-47b7-89e9-9a143536dac8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Modules">
+      <UniqueIdentifier>{c051d1a3-340d-4750-885a-b0ac8bf42a7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Preprocessor">
+      <UniqueIdentifier>{db469c26-846c-457a-8f0e-88a5d5d0e7c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Swig">
+      <UniqueIdentifier>{7598cf81-80e1-4fc8-866c-433d94ec9ae9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\CParse\cparse.h">
+      <Filter>CParse</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DOH\doh.h">
+      <Filter>DOH</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\DOH\dohint.h">
+      <Filter>DOH</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Include\swigwarn.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Modules\swigmod.h">
+      <Filter>Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Preprocessor\preprocessor.h">
+      <Filter>Preprocessor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Swig\swig.h">
+      <Filter>Swig</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Swig\swigconfig_win.h">
+      <Filter>Swig</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Swig\swigfile.h">
+      <Filter>Swig</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Swig\swigopt.h">
+      <Filter>Swig</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Swig\swigparm.h">
+      <Filter>Swig</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Swig\swigscan.h">
+      <Filter>Swig</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Swig\swigtree.h">
+      <Filter>Swig</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Swig\swigwrap.h">
+      <Filter>Swig</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\CParse\cscanner_win.c">
+      <Filter>CParse</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CParse\parser_win.c">
+      <Filter>CParse</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CParse\templ.c">
+      <Filter>CParse</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\CParse\util.c">
+      <Filter>CParse</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DOH\base.c">
+      <Filter>DOH</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DOH\file.c">
+      <Filter>DOH</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DOH\fio.c">
+      <Filter>DOH</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DOH\hash.c">
+      <Filter>DOH</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DOH\list.c">
+      <Filter>DOH</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DOH\memory.c">
+      <Filter>DOH</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DOH\string.c">
+      <Filter>DOH</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\DOH\void.c">
+      <Filter>DOH</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\allegrocl.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\allocate.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\browser.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\cffi.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\chicken.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\clisp.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\contract.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\csharp.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\d.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\directors.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\emit.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\go.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\guile.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\java.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\lang.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\lua.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\main.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\modula3.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\module.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\mzscheme.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\ocaml.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\octave.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\overload.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\perl5.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\php.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\pike.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\python.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\r.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\ruby.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\s-exp.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\swigmain.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\tcl8.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\typepass.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\uffi.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\utils.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\xml.cxx">
+      <Filter>Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Preprocessor\cpp.c">
+      <Filter>Preprocessor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Preprocessor\expr.c">
+      <Filter>Preprocessor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\cwrap.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\deprecate.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\error.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\fragment.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\getopt.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\include.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\misc.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\naming.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\parms.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\scanner.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\stype.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\symbol.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\tree.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\typemap.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\typeobj.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\typesys.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Swig\wrapfunc.c">
+      <Filter>Swig</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\reposit.cxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Lib\reposit\reposit.swg" />
+  </ItemGroup>
+</Project>

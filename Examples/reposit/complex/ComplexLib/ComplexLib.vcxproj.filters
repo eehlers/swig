@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="cl">
+      <UniqueIdentifier>{e4a6d8dc-c0c5-4771-a6a7-297a28c858e7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="cl\coercions.cpp">
+      <Filter>cl</Filter>
+    </ClCompile>
+    <ClCompile Include="cl\conversions.cpp">
+      <Filter>cl</Filter>
+    </ClCompile>
+    <ClCompile Include="cl\diamond_inheritance.cpp">
+      <Filter>cl</Filter>
+    </ClCompile>
+    <ClCompile Include="cl\docstrings.cpp">
+      <Filter>cl</Filter>
+    </ClCompile>
+    <ClCompile Include="cl\echo.cpp">
+      <Filter>cl</Filter>
+    </ClCompile>
+    <ClCompile Include="cl\enumerated_classes.cpp">
+      <Filter>cl</Filter>
+    </ClCompile>
+    <ClCompile Include="cl\enumerated_types.cpp">
+      <Filter>cl</Filter>
+    </ClCompile>
+    <ClCompile Include="cl\functions.cpp">
+      <Filter>cl</Filter>
+    </ClCompile>
+    <ClCompile Include="cl\multiple_inheritance.cpp">
+      <Filter>cl</Filter>
+    </ClCompile>
+    <ClCompile Include="cl\noparm.cpp">
+      <Filter>cl</Filter>
+    </ClCompile>
+    <ClCompile Include="cl\objects.cpp">
+      <Filter>cl</Filter>
+    </ClCompile>
+    <ClCompile Include="cl\typedefs.cpp">
+      <Filter>cl</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cl\coercions.hpp">
+      <Filter>cl</Filter>
+    </ClInclude>
+    <ClInclude Include="cl\complexlib.hpp">
+      <Filter>cl</Filter>
+    </ClInclude>
+    <ClInclude Include="cl\conversions.hpp">
+      <Filter>cl</Filter>
+    </ClInclude>
+    <ClInclude Include="cl\diamond_inheritance.hpp">
+      <Filter>cl</Filter>
+    </ClInclude>
+    <ClInclude Include="cl\docstrings.hpp">
+      <Filter>cl</Filter>
+    </ClInclude>
+    <ClInclude Include="cl\echo.hpp">
+      <Filter>cl</Filter>
+    </ClInclude>
+    <ClInclude Include="cl\enumerated_classes.hpp">
+      <Filter>cl</Filter>
+    </ClInclude>
+    <ClInclude Include="cl\enumerated_types.hpp">
+      <Filter>cl</Filter>
+    </ClInclude>
+    <ClInclude Include="cl\functions.hpp">
+      <Filter>cl</Filter>
+    </ClInclude>
+    <ClInclude Include="cl\inheritance.hpp">
+      <Filter>cl</Filter>
+    </ClInclude>
+    <ClInclude Include="cl\multiple_inheritance.hpp">
+      <Filter>cl</Filter>
+    </ClInclude>
+    <ClInclude Include="cl\noparm.hpp">
+      <Filter>cl</Filter>
+    </ClInclude>
+    <ClInclude Include="cl\objects.hpp">
+      <Filter>cl</Filter>
+    </ClInclude>
+    <ClInclude Include="cl\overrides.hpp">
+      <Filter>cl</Filter>
+    </ClInclude>
+    <ClInclude Include="cl\typedefs.hpp">
+      <Filter>cl</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

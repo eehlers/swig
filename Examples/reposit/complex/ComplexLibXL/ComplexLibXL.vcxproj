@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>AddinXl</ProjectName>
+    <ProjectGuid>{1F9FC421-8257-4EE7-85B1-8F0F67093852}</ProjectGuid>
+    <RootNamespace>AddinXl</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <Import Project="..\..\..\..\swig.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\boost_current.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\boost_current.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>15.0.27130.2010</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>.;..\ComplexLib;..\ComplexLibAddin;..\..\..\..\..\reposit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;ADDINXL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>reposit-xllib-$(swCompilerTag)-mt-gd-1_8_0.lib;xlsdk-$(swCompilerTag)-mt-gd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName).xll</OutputFile>
+      <AdditionalLibraryDirectories>..\..\..\..\..\reposit\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>.;..\ComplexLib;..\ComplexLibAddin;..\..\..\..\..\reposit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;ADDINXL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>reposit-xllib-$(swCompilerTag)-mt-1_8_0.lib;xlsdk-$(swCompilerTag)-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(ProjectName).xll</OutputFile>
+      <AdditionalLibraryDirectories>..\..\..\..\..\reposit\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="clxl\addin.cpp" />
+    <ClCompile Include="clxl\conversions\convert2.cpp" />
+    <ClCompile Include="clxl\functions\function_coercions.cpp" />
+    <ClCompile Include="clxl\functions\function_conversions.cpp" />
+    <ClCompile Include="clxl\functions\function_diamond_inheritance.cpp" />
+    <ClCompile Include="clxl\functions\function_docstrings.cpp" />
+    <ClCompile Include="clxl\functions\function_enumerated_classes.cpp" />
+    <ClCompile Include="clxl\functions\function_enumerated_types.cpp" />
+    <ClCompile Include="clxl\functions\function_functions.cpp" />
+    <ClCompile Include="clxl\functions\function_inheritance.cpp" />
+    <ClCompile Include="clxl\functions\function_multiple_inheritance.cpp" />
+    <ClCompile Include="clxl\functions\function_objects.cpp" />
+    <ClCompile Include="clxl\functions\function_overrides.cpp" />
+    <ClCompile Include="clxl\functions\function_typedefs.cpp" />
+    <ClCompile Include="clxl\register\register_all.cpp" />
+    <ClCompile Include="clxl\register\register_coercions.cpp" />
+    <ClCompile Include="clxl\register\register_conversions.cpp" />
+    <ClCompile Include="clxl\register\register_diamond_inheritance.cpp" />
+    <ClCompile Include="clxl\register\register_docstrings.cpp" />
+    <ClCompile Include="clxl\register\register_enumerated_classes.cpp" />
+    <ClCompile Include="clxl\register\register_enumerated_types.cpp" />
+    <ClCompile Include="clxl\register\register_functions.cpp" />
+    <ClCompile Include="clxl\register\register_inheritance.cpp" />
+    <ClCompile Include="clxl\register\register_multiple_inheritance.cpp" />
+    <ClCompile Include="clxl\register\register_objects.cpp" />
+    <ClCompile Include="clxl\register\register_overrides.cpp" />
+    <ClCompile Include="clxl\register\register_typedefs.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="clxl\conversions\convert2.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ComplexLibAddin\clo\AddinObjects.vcxproj">
+      <Project>{72b5eda8-e86d-4655-a759-159f8e377ca4}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
