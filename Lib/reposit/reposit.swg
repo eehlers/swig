@@ -491,6 +491,7 @@ RP_VECTOR(std::string)
 // RP_VECTOR_LONG includes some other steps to convert T to long which are not necessary when T is long.
 RP_VECTOR_LONG(unsigned int)
 RP_VECTOR_LONG(int)
+RP_VECTOR_LONG(std::size_t)
 
 //*****************************************************************************
 // Macros - for certain kinds of types - repository objects, enumerated types
